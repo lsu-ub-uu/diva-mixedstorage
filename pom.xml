@@ -33,7 +33,8 @@
 
 	<properties>
 		<logger.version>2.0.0</logger.version>
-		<storage.version>3.5.0</storage.version>
+		<storage.version>3.6.0</storage.version>
+		<gatekeeper.version>3.5-SNAPSHOT</gatekeeper.version>
 		<searchstorage.version>3.3.0</searchstorage.version>
 		<basicstorage.version>3.13-SNAPSHOT</basicstorage.version>
 		<sqldatabase.version>2.3.1</sqldatabase.version>
@@ -53,6 +54,12 @@
 			<artifactId>logger</artifactId>
 			<version>${logger.version}</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>gatekeeper</artifactId>
+			<version>${gatekeeper.version}</version>
+<!-- 			<scope>provided</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
