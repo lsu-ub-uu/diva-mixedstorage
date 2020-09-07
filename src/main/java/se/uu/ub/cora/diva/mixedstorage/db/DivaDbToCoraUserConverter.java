@@ -38,7 +38,7 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 					"Error converting user to Cora user: Map does not contain value for id", null);
 
 		}
-		DataGroup user = createBasicDataGroupWithRecordInfo(dbRow);
+		DataGroup user = createBasicActiveUserWithRecordInfo(dbRow);
 		if (!valueIsEmpty("first_name")) {
 			DataAtomic firstName = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(
 					"userFirstname", (String) dbRow.get("first_name"));
@@ -53,11 +53,13 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 		return user;
 	}
 
-	private DataGroup createBasicDataGroupWithRecordInfo(Map<String, Object> dbRow) {
+	private DataGroup createBasicActiveUserWithRecordInfo(Map<String, Object> dbRow) {
 		DataGroup user = DataGroupProvider.getDataGroupUsingNameInData("user");
 		user.addAttributeByIdWithValue("type", CORA_USER);
 		DataGroup recordInfo = createRecordInfo(dbRow);
 		user.addChild(recordInfo);
+		user.addChild(
+				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("activeStatus", "active"));
 		return user;
 	}
 
@@ -100,8 +102,8 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 	}
 
 	private void createAndAddCreatedInfo(DataGroup recordInfo) {
-		DataGroup createdBy = createLinkUsingNameInDataRecordTypeAndRecordId("createdBy",
-				CORA_USER, "coraUser:4412982402853626");
+		DataGroup createdBy = createLinkUsingNameInDataRecordTypeAndRecordId("createdBy", CORA_USER,
+				"coraUser:4412982402853626");
 		recordInfo.addChild(createdBy);
 		addPredefinedTimestampToDataGroupUsingNameInData(recordInfo, "tsCreated");
 	}
@@ -114,8 +116,8 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 
 	private void createAndAddUpdatedInfo(DataGroup recordInfo) {
 		DataGroup updated = DataGroupProvider.getDataGroupUsingNameInData("updated");
-		DataGroup updatedBy = createLinkUsingNameInDataRecordTypeAndRecordId("updatedBy",
-				CORA_USER, "coraUser:4412982402853626");
+		DataGroup updatedBy = createLinkUsingNameInDataRecordTypeAndRecordId("updatedBy", CORA_USER,
+				"coraUser:4412982402853626");
 		updated.addChild(updatedBy);
 		addPredefinedTimestampToDataGroupUsingNameInData(updated, "tsUpdated");
 		updated.setRepeatId("0");

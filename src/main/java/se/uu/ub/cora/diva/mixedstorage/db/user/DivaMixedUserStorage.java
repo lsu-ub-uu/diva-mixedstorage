@@ -60,8 +60,8 @@ public class DivaMixedUserStorage implements UserStorage {
 
 		Map<String, Object> conditions = createConditions(idFromLogin);
 
-		Map<String, Object> readRow = recordReader.readOneRowFromDbUsingTableAndConditions("user",
-				conditions);
+		Map<String, Object> readRow = recordReader
+				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
 		return userConverter.fromMap(readRow);
 	}
 

@@ -166,6 +166,14 @@ public class DivaDbToCoraUserConverterTest {
 	}
 
 	@Test
+	public void testReturnsDataGroupWithActiveUser() {
+		DataGroup user = converter.fromMap(rowFromDb);
+		assertEquals(user.getNameInData(), "user");
+		assertEquals(user.getAttribute("type").getValue(), "coraUser");
+		assertEquals(user.getFirstAtomicValueWithNameInData("activeStatus"), "active");
+	}
+
+	@Test
 	public void testMinimalContentDoesNotContainNonMandatoryValues() {
 		DataGroup user = converter.fromMap(rowFromDb);
 		assertEquals(user.getNameInData(), "user");
@@ -197,15 +205,15 @@ public class DivaDbToCoraUserConverterTest {
 		assertEquals(user.getNameInData(), "user");
 
 		// assertCorrectValuesForNameWasFactored();
-		DataAtomicSpy factoredDataAtomicForName = getFactoredDataAtomicByNumber(3);
+		DataAtomicSpy factoredDataAtomicForName = getFactoredDataAtomicByNumber(4);
 		assertEquals(factoredDataAtomicForName.nameInData, "userFirstname");
-		DataAtomicSpy factoredDataAtomicForLastName = getFactoredDataAtomicByNumber(4);
+		DataAtomicSpy factoredDataAtomicForLastName = getFactoredDataAtomicByNumber(5);
 		assertEquals(factoredDataAtomicForLastName.nameInData, "userLastname");
 
 		assertSame(user.getFirstDataAtomicWithNameInData("userFirstname"),
-				getFactoredDataAtomicByNumber(3));
-		assertEquals(user.getFirstDataAtomicWithNameInData("userLastname"),
 				getFactoredDataAtomicByNumber(4));
+		assertEquals(user.getFirstDataAtomicWithNameInData("userLastname"),
+				getFactoredDataAtomicByNumber(5));
 	}
 
 	// private void assertCorrectValuesForNameWasFactored() {

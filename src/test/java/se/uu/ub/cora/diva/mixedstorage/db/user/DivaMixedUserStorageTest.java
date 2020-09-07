@@ -50,8 +50,8 @@ public class DivaMixedUserStorageTest {
 		recordReader = new RecordReaderSpy();
 		guestUserStorage = new UserStorageSpy();
 		userConverter = new DivaDbToCoraConverterSpy();
-		userStorage = DivaMixedUserStorage.usingGuestUserStorageRecordReaderAndUserConverter(guestUserStorage, recordReader,
-				userConverter);
+		userStorage = DivaMixedUserStorage.usingGuestUserStorageRecordReaderAndUserConverter(
+				guestUserStorage, recordReader, userConverter);
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class DivaMixedUserStorageTest {
 		String userId = "userId@user.uu.se";
 		userStorage.getUserByIdFromLogin(userId);
 
-		assertEquals(recordReader.usedTableName, "user");
+		assertEquals(recordReader.usedTableName, "public.user");
 		Map<String, Object> usedConditions = recordReader.usedConditions;
 		assertEquals(usedConditions.get("user_id"), "userId");
 		assertEquals(usedConditions.get("domain"), "uu");
