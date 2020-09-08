@@ -31,8 +31,6 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
-import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUserReader;
 
 public class DivaDbUserReaderTest {
 
@@ -40,7 +38,6 @@ public class DivaDbUserReaderTest {
 	private DivaDbToCoraConverterFactorySpy converterFactory;
 	private RecordReaderFactorySpy recordReaderFactory;
 	private DataGroupFactory dataGroupFactory;
-	private DivaDbFactorySpy divaDbFactorySpy;
 	private DivaDbUserReader divaDbUserReader;
 
 	@BeforeMethod
@@ -49,12 +46,8 @@ public class DivaDbUserReaderTest {
 		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 		converterFactory = new DivaDbToCoraConverterFactorySpy();
 		recordReaderFactory = new RecordReaderFactorySpy();
-		divaDbFactorySpy = new DivaDbFactorySpy();
 
 		divaDbUserReader = new DivaDbUserReader(recordReaderFactory, converterFactory);
-		// divaDbUserReader = DivaDbOrganisationReader
-		// .usingRecordReaderFactoryAndConverterFactory(recordReaderFactory, converterFactory,
-		// divaDbFactorySpy);
 	}
 
 	@Test
@@ -100,90 +93,5 @@ public class DivaDbUserReaderTest {
 		DivaDbToCoraConverterSpy userConverter = converterFactory.factoredConverters.get(0);
 		assertEquals(convertedUser, userConverter.convertedDbDataGroup);
 	}
-
-	// @Test
-	// public void testMultipleRowDbReaderIsFactoredCorrectlyForParent() throws Exception {
-	// divaDbUserReader.read(TABLE_NAME, "567");
-	// MultipleRowDbToDataReader multipleDbToDataReader = divaDbFactorySpy.listOfFactoredMultiples
-	// .get(0);
-	// assertNotNull(multipleDbToDataReader);
-	// String usedType = divaDbFactorySpy.usedTypes.get(0);
-	// assertEquals(usedType, "divaOrganisationParent");
-	// }
-	//
-	// @Test
-	// public void testParentMultipleRowDbReaderIsCalledCorrectly() throws Exception {
-	// divaDbUserReader.read(TABLE_NAME, "567");
-	// MultipleRowDbToDataReaderSpy multipleDbToDataReader =
-	// divaDbFactorySpy.listOfFactoredMultiples
-	// .get(0);
-	// assertEquals(multipleDbToDataReader.usedType, "divaOrganisationParent");
-	// assertEquals(multipleDbToDataReader.usedId, "567");
-	// }
-	//
-	// @Test
-	// public void testNoParentAreAddedToOrganisation() {
-	// divaDbFactorySpy.returnEmptyResult = true;
-	// DataGroup organisation = divaDbUserReader.read(TABLE_NAME, "567");
-	//
-	// assertFalse(organisation.containsChildWithNameInData("divaOrganisationParentChildFromSpy"));
-	// }
-	//
-	// @Test
-	// public void testConvertedParentAreAddedToOrganisation() throws Exception {
-	// DataGroup organisation = divaDbUserReader.read(TABLE_NAME, "567");
-	//
-	// MultipleRowDbToDataReaderSpy multipleDbToDataReader =
-	// divaDbFactorySpy.listOfFactoredMultiples
-	// .get(0);
-	// List<DataGroup> returnedListFromSpy = multipleDbToDataReader.returnedList;
-	// List<DataGroup> parentChildren = organisation
-	// .getAllGroupsWithNameInData("divaOrganisationParentChildFromSpy");
-	// assertSame(parentChildren.get(0), returnedListFromSpy.get(0));
-	// assertSame(parentChildren.get(1), returnedListFromSpy.get(1));
-	// }
-	//
-	// @Test
-	// public void testMultipleRowDbReaderIsFactoredCorrectlyForPredecessor() throws Exception {
-	// divaDbUserReader.read(TABLE_NAME, "567");
-	// MultipleRowDbToDataReader multipleDbToDataReader = divaDbFactorySpy.listOfFactoredMultiples
-	// .get(1);
-	// assertNotNull(multipleDbToDataReader);
-	// String usedType = divaDbFactorySpy.usedTypes.get(1);
-	// assertEquals(usedType, "divaOrganisationPredecessor");
-	// }
-	//
-	// @Test
-	// public void testPredecessorMultipleRowDbReaderIsCalledCorrectly() throws Exception {
-	// divaDbUserReader.read(TABLE_NAME, "567");
-	// MultipleRowDbToDataReaderSpy multipleDbToDataReader =
-	// divaDbFactorySpy.listOfFactoredMultiples
-	// .get(1);
-	// assertEquals(multipleDbToDataReader.usedType, "divaOrganisationPredecessor");
-	// assertEquals(multipleDbToDataReader.usedId, "567");
-	// }
-	//
-	// @Test
-	// public void testNoPredecessorAreAddedToOrganisation() {
-	// divaDbFactorySpy.returnEmptyResult = true;
-	// DataGroup organisation = divaDbUserReader.read(TABLE_NAME, "567");
-	//
-	// assertFalse(organisation
-	// .containsChildWithNameInData("divaOrganisationPredecessorChildFromSpy"));
-	// }
-	//
-	// @Test
-	// public void testConvertedPredecessorAreAddedToOrganisation() throws Exception {
-	// DataGroup organisation = divaDbUserReader.read(TABLE_NAME, "567");
-	//
-	// MultipleRowDbToDataReaderSpy multipleDbToDataReader =
-	// divaDbFactorySpy.listOfFactoredMultiples
-	// .get(1);
-	// List<DataGroup> returnedListFromSpy = multipleDbToDataReader.returnedList;
-	// List<DataGroup> predecessorChildren = organisation
-	// .getAllGroupsWithNameInData("divaOrganisationPredecessorChildFromSpy");
-	// assertSame(predecessorChildren.get(0), returnedListFromSpy.get(0));
-	// assertSame(predecessorChildren.get(1), returnedListFromSpy.get(1));
-	// }
 
 }

@@ -33,24 +33,18 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 	@Override
 	public DataGroup fromMap(Map<String, Object> dbRow) {
 		this.dbRow = dbRow;
+		throwErrorIfNoId();
+		DataGroup user = createBasicActiveUserWithRecordInfo(dbRow);
+		possiblyAddFirstName(dbRow, user);
+		possiblyAddLastname(dbRow, user);
+		return user;
+	}
+
+	private void throwErrorIfNoId() {
 		if (valueIsEmpty("db_id")) {
 			throw ConversionException.withMessageAndException(
 					"Error converting user to Cora user: Map does not contain value for id", null);
-
 		}
-		DataGroup user = createBasicActiveUserWithRecordInfo(dbRow);
-		if (!valueIsEmpty("first_name")) {
-			DataAtomic firstName = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(
-					"userFirstname", (String) dbRow.get("first_name"));
-			user.addChild(firstName);
-		}
-		if (!valueIsEmpty("last_name")) {
-
-			DataAtomic lastName = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(
-					"userLastname", (String) dbRow.get("last_name"));
-			user.addChild(lastName);
-		}
-		return user;
 	}
 
 	private DataGroup createBasicActiveUserWithRecordInfo(Map<String, Object> dbRow) {
@@ -61,11 +55,6 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 		user.addChild(
 				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("activeStatus", "active"));
 		return user;
-	}
-
-	private boolean valueIsEmpty(String key) {
-		Object valueForKey = dbRow.get(key);
-		return valueForKey == null || "".equals(valueForKey);
 	}
 
 	private DataGroup createRecordInfo(Map<String, Object> map) {
@@ -128,6 +117,27 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 			String linkedRecordType, String linkedRecordId) {
 		return DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId(nameInData,
 				linkedRecordType, linkedRecordId);
+	}
+
+	private void possiblyAddFirstName(Map<String, Object> dbRow, DataGroup user) {
+		if (!valueIsEmpty("first_name")) {
+			DataAtomic firstName = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(
+					"userFirstname", (String) dbRow.get("first_name"));
+			user.addChild(firstName);
+		}
+	}
+
+	private boolean valueIsEmpty(String key) {
+		Object valueForKey = dbRow.get(key);
+		return valueForKey == null || "".equals(valueForKey);
+	}
+
+	private void possiblyAddLastname(Map<String, Object> dbRow, DataGroup user) {
+		if (!valueIsEmpty("last_name")) {
+			DataAtomic lastName = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(
+					"userLastname", (String) dbRow.get("last_name"));
+			user.addChild(lastName);
+		}
 	}
 
 }

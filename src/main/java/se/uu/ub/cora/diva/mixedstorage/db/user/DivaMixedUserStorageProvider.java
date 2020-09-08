@@ -68,18 +68,18 @@ public class DivaMixedUserStorageProvider implements UserStorageProvider {
 				guestUserStorage, recordReader, converter);
 	}
 
-	private RecordReader createRecordReader() {
-		ContextConnectionProviderImp connectionProvider = createConnectionProvider();
-		DataReader dataReader = DataReaderImp.usingSqlConnectionProvider(connectionProvider);
-		return RecordReaderImp.usingDataReader(dataReader);
-	}
-
 	private UserStorage createGuestUserStorage() {
 		Iterable<GuestUserStorageProvider> guestUserStorageProviders = ServiceLoader
 				.load(GuestUserStorageProvider.class);
 		guestUserStorageStarter.startUsingInitInfoAndGuestUserStorageProviders(initInfo,
 				guestUserStorageProviders);
 		return guestUserStorageStarter.getGuestUserStorage();
+	}
+
+	private RecordReader createRecordReader() {
+		ContextConnectionProviderImp connectionProvider = createConnectionProvider();
+		DataReader dataReader = DataReaderImp.usingSqlConnectionProvider(connectionProvider);
+		return RecordReaderImp.usingDataReader(dataReader);
 	}
 
 	private ContextConnectionProviderImp createConnectionProvider() {

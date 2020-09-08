@@ -57,12 +57,8 @@ public class DivaMixedUserStorage implements UserStorage {
 	@Override
 	public DataGroup getUserByIdFromLogin(String idFromLogin) {
 		logAndThrowExceptionIfUnexpectedFormatOf(idFromLogin);
-
 		Map<String, Object> conditions = createConditions(idFromLogin);
-
-		Map<String, Object> readRow = recordReader
-				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
-		return userConverter.fromMap(readRow);
+		return readAndConvertRow(conditions);
 	}
 
 	private void logAndThrowExceptionIfUnexpectedFormatOf(String idFromLogin) {
@@ -79,11 +75,25 @@ public class DivaMixedUserStorage implements UserStorage {
 
 	private Map<String, Object> createConditions(String idFromLogin) {
 		Map<String, Object> conditions = new HashMap<>();
+		addUserId(idFromLogin, conditions);
+		addDomain(idFromLogin, conditions);
+		return conditions;
+	}
+
+	private void addUserId(String idFromLogin, Map<String, Object> conditions) {
 		String userId = getUserIdFromIdFromLogin(idFromLogin);
 		conditions.put("user_id", userId);
+	}
+
+	private void addDomain(String idFromLogin, Map<String, Object> conditions) {
 		String userDomain = getDomainFromLogin(idFromLogin);
 		conditions.put("domain", userDomain);
-		return conditions;
+	}
+
+	private DataGroup readAndConvertRow(Map<String, Object> conditions) {
+		Map<String, Object> readRow = recordReader
+				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
+		return userConverter.fromMap(readRow);
 	}
 
 	private String getUserIdFromIdFromLogin(String idFromLogin) {

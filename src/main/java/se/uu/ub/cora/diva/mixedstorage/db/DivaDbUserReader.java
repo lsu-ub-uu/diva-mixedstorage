@@ -39,11 +39,21 @@ public class DivaDbUserReader implements DivaDbReader {
 	@Override
 	public DataGroup read(String type, String id) {
 		RecordReader reader = readerFactory.factor();
+		DivaDbToCoraConverter dbToCoraConverter = converterFactory.factor(type);
+		Map<String, Object> conditions = createConditions(id);
+		return readAndConvertRow(type, reader, dbToCoraConverter, conditions);
+	}
+
+	private Map<String, Object> createConditions(String id) {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("db_id", id);
+		return conditions;
+	}
+
+	private DataGroup readAndConvertRow(String type, RecordReader reader,
+			DivaDbToCoraConverter dbToCoraConverter, Map<String, Object> conditions) {
 		Map<String, Object> readRow = reader.readOneRowFromDbUsingTableAndConditions(type,
 				conditions);
-		DivaDbToCoraConverter dbToCoraConverter = converterFactory.factor(type);
 		return dbToCoraConverter.fromMap(readRow);
 	}
 
