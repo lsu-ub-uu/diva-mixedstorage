@@ -22,23 +22,23 @@
 	<parent>
 		<groupId>se.uu.ub.cora</groupId>
 		<artifactId>cora-parent</artifactId>
-		<version>1.0.2</version>
+		<version>1.1.1</version>
 	</parent>
 
 	<artifactId>divamixedstorage</artifactId>
-	<version>3.14-SNAPSHOT</version>
+	<version>3.15-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Diva Mixed Storage</name>
 
 	<properties>
-		<logger.version>2.0.0</logger.version>
+		<logger.version>2.1.0</logger.version>
 		<storage.version>3.6.0</storage.version>
-		<gatekeeper.version>3.5-SNAPSHOT</gatekeeper.version>
-		<searchstorage.version>3.3.0</searchstorage.version>
+<!-- 		<gatekeeper.version>3.5-SNAPSHOT</gatekeeper.version> -->
+		<searchstorage.version>3.4.0</searchstorage.version>
 		<basicstorage.version>3.13-SNAPSHOT</basicstorage.version>
-		<sqldatabase.version>2.3.1</sqldatabase.version>
-		<httphandler.version>2.0.0</httphandler.version>
+		<sqldatabase.version>2.4.0</sqldatabase.version>
+		<httphandler.version>2.1.0</httphandler.version>
 	</properties>
 
 	<scm>
@@ -55,12 +55,12 @@
 			<version>${logger.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>gatekeeper</artifactId>
-			<version>${gatekeeper.version}</version>
-<!-- 			<scope>provided</scope> -->
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>se.uu.ub.cora</groupId> -->
+<!-- 			<artifactId>gatekeeper</artifactId> -->
+<!-- 			<version>${gatekeeper.version}</version> -->
+<!-- <!-- 			<scope>provided</scope> --> -->
+<!-- 		</dependency> -->
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>storage</artifactId>

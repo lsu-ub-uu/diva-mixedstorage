@@ -22,8 +22,6 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraException;
-
 public class FedoraExceptionTest {
 	@Test
 	public void testInit() {
@@ -35,8 +33,7 @@ public class FedoraExceptionTest {
 	@Test
 	public void testWithMessageAndException() throws Exception {
 		Exception e = new Exception("some message");
-		FedoraException exception = FedoraException
-				.withMessageAndException("second message", e);
+		FedoraException exception = FedoraException.withMessageAndException("second message", e);
 		assertEquals(exception.getMessage(), "second message");
 		assertEquals(exception.getCause().getMessage(), "some message");
 

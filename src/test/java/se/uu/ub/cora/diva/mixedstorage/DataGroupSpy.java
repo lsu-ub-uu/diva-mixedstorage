@@ -248,6 +248,16 @@ public class DataGroupSpy implements DataGroup {
 	}
 
 	@Override
+<<<<<<< HEAD
+=======
+	public List<DataElement> getAllChildrenWithNameInDataAndAttributes(String nameInData,
+			DataAttribute... childAttributes) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+>>>>>>> refs/remotes/origin/master
 	public boolean removeAllChildrenWithNameInDataAndAttributes(String childNameInData,
 			DataAttribute... childAttributes) {
 		// TODO Auto-generated method stub
