@@ -60,7 +60,7 @@ public class DivaDbUserReaderTest {
 	public void testReadUserTableRequestedFromReader() throws Exception {
 		divaDbUserReader.read(TABLE_NAME, "567");
 		RecordReaderSpy recordReader = recordReaderFactory.factored;
-		assertEquals(recordReader.usedTableNames.get(0), TABLE_NAME);
+		assertEquals(recordReader.usedTableNames.get(0), "public.user");
 	}
 
 	@Test

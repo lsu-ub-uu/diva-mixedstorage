@@ -125,6 +125,41 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
+	public void readUserGoesToDivaDBToCoraStorage() throws Exception {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+
+		RecordStorageSpyData data = new RecordStorageSpyData();
+		data.type = "user";
+		data.id = "someUserId";
+		data.answer = divaMixedRecordStorage.read(data.type, data.id);
+
+		data.calledMethod = "read";
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+
+		assertExpectedDataSameAsInStorageSpy(divaDbToCoraStorage, data);
+	}
+
+	@Test
+	public void readUserGUESTGoesToBasicStorage() throws Exception {
+		DivaDbToCoraStorageNotFoundSpy divaDbToCoraStorageSpy = new DivaDbToCoraStorageNotFoundSpy();
+		divaMixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
+				basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorageSpy);
+
+		RecordStorageSpyData expectedData = new RecordStorageSpyData();
+		expectedData.type = "user";
+		expectedData.id = "coraUser:5368656924943436";
+		expectedData.answer = divaMixedRecordStorage.read(expectedData.type, expectedData.id);
+
+		expectedData.calledMethod = "read";
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertTrue(divaDbToCoraStorageSpy.readWasCalled);
+		assertExpectedDataSameAsInStorageSpy(basicStorage, expectedData);
+	}
+
+	@Test
 	public void readListGoesToBasicStorage() throws Exception {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
@@ -310,6 +345,23 @@ public class DivaMixedRecordStorageTest {
 		expectedData.calledMethod = "readAbstractList";
 		assertExpectedDataSameAsInStorageSpy(basicStorage, expectedData);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+	}
+
+	@Test
+	public void readAbstractListForUserGoesToDivaDBToCoraStorage() throws Exception {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+
+		RecordStorageSpyData expectedData = new RecordStorageSpyData();
+		expectedData.type = "user";
+		expectedData.filter = new DataGroupSpy("filter");
+		expectedData.answer = divaMixedRecordStorage.readAbstractList(expectedData.type,
+				expectedData.filter).listOfDataGroups;
+
+		expectedData.calledMethod = "readAbstractList";
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertExpectedDataSameAsInStorageSpy(divaDbToCoraStorage, expectedData);
 	}
 
 	@Test

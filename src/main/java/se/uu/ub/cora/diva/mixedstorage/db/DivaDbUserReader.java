@@ -41,7 +41,7 @@ public class DivaDbUserReader implements DivaDbReader {
 		RecordReader reader = readerFactory.factor();
 		DivaDbToCoraConverter dbToCoraConverter = converterFactory.factor(type);
 		Map<String, Object> conditions = createConditions(id);
-		return readAndConvertRow(type, reader, dbToCoraConverter, conditions);
+		return readAndConvertRow(reader, dbToCoraConverter, conditions);
 	}
 
 	private Map<String, Object> createConditions(String id) {
@@ -50,10 +50,12 @@ public class DivaDbUserReader implements DivaDbReader {
 		return conditions;
 	}
 
-	private DataGroup readAndConvertRow(String type, RecordReader reader,
-			DivaDbToCoraConverter dbToCoraConverter, Map<String, Object> conditions) {
-		Map<String, Object> readRow = reader.readOneRowFromDbUsingTableAndConditions(type,
-				conditions);
+	private DataGroup readAndConvertRow(RecordReader reader, DivaDbToCoraConverter dbToCoraConverter,
+			Map<String, Object> conditions) {
+		String tableNameInDatabase = "public.user";
+
+		Map<String, Object> readRow = reader
+				.readOneRowFromDbUsingTableAndConditions(tableNameInDatabase, conditions);
 		return dbToCoraConverter.fromMap(readRow);
 	}
 

@@ -22,6 +22,7 @@ import java.util.Collection;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.searchstorage.SearchStorage;
+import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
@@ -38,8 +39,8 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		return new DivaMixedRecordStorage(basicStorage, divaFedoraStorage, divaDbStorage);
 	}
 
-	private DivaMixedRecordStorage(RecordStorage basicStorage,
-			RecordStorage divaFedoraStorage, RecordStorage divaDbStorage) {
+	private DivaMixedRecordStorage(RecordStorage basicStorage, RecordStorage divaFedoraStorage,
+			RecordStorage divaDbStorage) {
 		this.basicStorage = basicStorage;
 		this.divaFedoraStorage = divaFedoraStorage;
 		this.divaDbStorage = divaDbStorage;
@@ -52,6 +53,18 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		}
 		if (ORGANISATION.equals(type)) {
 			return divaDbStorage.read(type, id);
+		}
+		if ("user".equals(type)) {
+			return handleUser(type, id);
+		}
+		return basicStorage.read(type, id);
+	}
+
+	private DataGroup handleUser(String type, String id) {
+		try {
+			return divaDbStorage.read(type, id);
+		} catch (RecordNotFoundException e) {
+			// do nothing, we keep looking in basicstorage
 		}
 		return basicStorage.read(type, id);
 	}
@@ -97,6 +110,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public StorageReadResult readAbstractList(String type, DataGroup filter) {
+		if ("user".equals(type)) {
+			return divaDbStorage.readAbstractList(type, filter);
+		}
 		return basicStorage.readAbstractList(type, filter);
 	}
 
@@ -119,8 +135,8 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
 		if (ORGANISATION.equals(type)) {
-			return divaDbStorage
-					.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
+			return divaDbStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type,
+					id);
 		}
 		return basicStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -84,6 +84,21 @@ public class DivaDbRecordStorageTest {
 	@Test
 	public void testOrganisationFromDivaDbToCoraIsReturnedFromRead() throws Exception {
 		DataGroup readOrganisation = divaRecordStorage.read(ORGANISATION_TYPE, "someId");
+		DivaDbSpy factored = divaDbFactorySpy.factored;
+		assertEquals(readOrganisation, factored.dataGroup);
+	}
+
+	@Test
+	public void testReadUserMakeCorrectCalls() throws Exception {
+		divaRecordStorage.read("user", "53");
+		DivaDbSpy factored = divaDbFactorySpy.factored;
+		assertEquals(factored.type, "user");
+		assertEquals(factored.id, "53");
+	}
+
+	@Test
+	public void testUserFromDivaDbToCoraIsReturnedFromRead() throws Exception {
+		DataGroup readOrganisation = divaRecordStorage.read("user", "53");
 		DivaDbSpy factored = divaDbFactorySpy.factored;
 		assertEquals(readOrganisation, factored.dataGroup);
 	}
@@ -269,6 +284,12 @@ public class DivaDbRecordStorageTest {
 			+ "readAbstractList is not implemented")
 	public void readAbstractListThrowsNotImplementedException() throws Exception {
 		divaRecordStorage.readAbstractList(null, null);
+	}
+
+	@Test
+	public void testReadAbstractListForUserFactorDbReader() throws Exception {
+		divaRecordStorage.readAbstractList("user", new DataGroupSpy("filter"));
+		assertTrue(recordReaderFactorySpy.factorWasCalled);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
