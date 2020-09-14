@@ -290,6 +290,35 @@ public class DivaDbRecordStorageTest {
 	public void testReadAbstractListForUserFactorDbReader() throws Exception {
 		divaRecordStorage.readAbstractList("user", new DataGroupSpy("filter"));
 		assertTrue(recordReaderFactorySpy.factorWasCalled);
+		RecordReaderSpy factored = recordReaderFactorySpy.factored;
+		assertEquals(factored.usedTableName, "user");
+	}
+
+	@Test
+	public void testReadAbstractListForUserReturnsCorrectData() throws Exception {
+		recordReaderFactorySpy.noOfRecordsToReturn = 3;
+		StorageReadResult result = divaRecordStorage.readAbstractList("user",
+				new DataGroupSpy("filter"));
+
+		RecordReaderSpy factoredReader = recordReaderFactorySpy.factored;
+		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 0);
+		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 1);
+		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 2);
+
+	}
+
+	private void assertDataSentFromDbToConverterToResultUsingIndex(RecordReaderSpy factoredReader,
+			StorageReadResult result, int index) {
+		List<Map<String, Object>> returnedList = factoredReader.returnedList;
+		DivaDbToCoraConverterSpy converter = converterFactorySpy.factoredConverters.get(index);
+
+		Map<String, Object> rowFromDb = returnedList.get(index);
+		Map<String, Object> rowSentToConverter = converter.mapToConvert;
+		assertEquals(rowFromDb, rowSentToConverter);
+
+		DataGroup dataGroupInReturnedResult = result.listOfDataGroups.get(index);
+		DataGroup dataGroupReturnedFromConverter = converter.convertedDbDataGroup;
+		assertSame(dataGroupInReturnedResult, dataGroupReturnedFromConverter);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

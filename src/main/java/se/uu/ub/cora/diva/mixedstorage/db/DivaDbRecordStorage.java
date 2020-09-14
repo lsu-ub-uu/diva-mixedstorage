@@ -168,11 +168,31 @@ public class DivaDbRecordStorage implements RecordStorage {
 	@Override
 	public StorageReadResult readAbstractList(String type, DataGroup filter) {
 		if ("user".equals(type)) {
-			readAllFromDb(type);
-			return null;
+			return readAndConvertUsers(type);
 		} else {
 			throw NotImplementedException.withMessage("readAbstractList is not implemented");
 		}
+	}
+
+	private StorageReadResult readAndConvertUsers(String type) {
+		List<Map<String, Object>> readAllFromDb = readAllFromDb(type);
+		List<DataGroup> userDataGroups = convertDbResultToDataGroups(type, readAllFromDb);
+		return createStorageReadResult(userDataGroups);
+	}
+
+	private List<DataGroup> convertDbResultToDataGroups(String type,
+			List<Map<String, Object>> readAllFromDb) {
+		List<DataGroup> userDataGroups = new ArrayList<>();
+		for (Map<String, Object> rowFromDb : readAllFromDb) {
+			DataGroup userDataGroup = convertRowToDataGroup(type, rowFromDb);
+			userDataGroups.add(userDataGroup);
+		}
+		return userDataGroups;
+	}
+
+	private DataGroup convertRowToDataGroup(String type, Map<String, Object> rowFromDb) {
+		DivaDbToCoraConverter converter = converterFactory.factor(type);
+		return converter.fromMap(rowFromDb);
 	}
 
 	@Override
