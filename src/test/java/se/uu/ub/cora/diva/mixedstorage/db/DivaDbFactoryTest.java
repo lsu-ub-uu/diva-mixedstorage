@@ -78,14 +78,6 @@ public class DivaDbFactoryTest {
 		DivaDbReader divaDbToCoraUser = divaDbToCoraFactoryImp.factor("user");
 		assertTrue(divaDbToCoraUser instanceof DivaDbUserReader);
 	}
-	//
-	// @Test
-	// public void testFactorUserGetDbFactory() {
-	// DivaDbUserReader factored = (DivaDbUserReader) divaDbToCoraFactoryImp.factor("user");
-	// DivaDbFactoryImp dbFactory = (DivaDbFactoryImp) factored.getDbFactory();
-	// assertSame(dbFactory.getConverterFactory(), converterFactory);
-	// assertSame(dbFactory.getReaderFactory(), readerFactory);
-	// }
 
 	@Test
 	public void testFactoryUserSentInFactoriesAreSentToImplementation() {
@@ -93,6 +85,10 @@ public class DivaDbFactoryTest {
 				.factor("user");
 		assertSame(divaDbToCoraUser.getRecordReaderFactory(), readerFactory);
 		assertSame(divaDbToCoraUser.getConverterFactory(), converterFactory);
+		DivaDbFactoryImp divaDbFactory = (DivaDbFactoryImp) divaDbToCoraUser.getDivaDbFactory();
+		// assertTrue( instanceof DivaDbFactoryImp);
+		assertSame(divaDbFactory.getConverterFactory(), converterFactory);
+		assertSame(divaDbFactory.getReaderFactory(), readerFactory);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

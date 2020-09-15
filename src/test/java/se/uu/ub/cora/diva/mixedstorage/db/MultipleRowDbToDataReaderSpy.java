@@ -29,14 +29,14 @@ import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader
 
 public class MultipleRowDbToDataReaderSpy implements MultipleRowDbToDataReader {
 
-	public String usedType;
+	// public String usedType;
 	public String usedId;
 	public List<DataGroup> returnedList = new ArrayList<>();
 	public boolean returnEmptyResult = false;
 
 	@Override
 	public List<DataGroup> read(String type, String id) {
-		usedType = type;
+		// usedType = type;
 		usedId = id;
 		if (returnEmptyResult) {
 			return Collections.emptyList();
@@ -47,8 +47,7 @@ public class MultipleRowDbToDataReaderSpy implements MultipleRowDbToDataReader {
 	}
 
 	@Override
-	public List<DataGroup> read(String type, String id, String tableName,
-			Map<String, Object> conditions) {
+	public List<DataGroup> read(String tableName, Map<String, Object> conditions) {
 		// TODO Auto-generated method stub
 		return null;
 

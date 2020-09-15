@@ -19,9 +19,11 @@
 package se.uu.ub.cora.diva.mixedstorage.db;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
@@ -31,7 +33,13 @@ public class DivaDbUserReader implements DivaDbReader {
 	private DivaDbToCoraConverterFactory converterFactory;
 	private DivaDbFactory divaDbFactory;
 
-	public DivaDbUserReader(RecordReaderFactory readerFactory,
+	public static DivaDbUserReader usingReaderFactoryConverterFactoryAndDivaDbFactory(
+			RecordReaderFactory readerFactory, DivaDbToCoraConverterFactory converterFactory,
+			DivaDbFactory divaDbFactory) {
+		return new DivaDbUserReader(readerFactory, converterFactory, divaDbFactory);
+	}
+
+	private DivaDbUserReader(RecordReaderFactory readerFactory,
 			DivaDbToCoraConverterFactory converterFactory, DivaDbFactory divaDbFactory) {
 		this.readerFactory = readerFactory;
 		this.converterFactory = converterFactory;
@@ -42,16 +50,19 @@ public class DivaDbUserReader implements DivaDbReader {
 	public DataGroup read(String type, String id) {
 		RecordReader reader = readerFactory.factor();
 		DivaDbToCoraConverter dbToCoraConverter = converterFactory.factor(type);
-		divaDbFactory.factorMultipleReader("groupsforuser");
 		Map<String, Object> conditions = createConditions(id);
 		DataGroup userDataGroup = readAndConvertRow(reader, dbToCoraConverter, conditions);
-		// TODO: use factory
-		// List<DataGroup> userGroups = groupReader.read("", id);
-		// for (DataGroup group : userGroups) {
-		// userDataGroup.addChild(group);
-		// }
-		// addRoles(readAndConvertRow);
+
+		readAndAddRoles(id, userDataGroup);
 		return userDataGroup;
+	}
+
+	private void readAndAddRoles(String id, DataGroup userDataGroup) {
+		MultipleRowDbToDataReader groupReader = divaDbFactory.factorMultipleReader("groupsforuser");
+		List<DataGroup> userGroups = groupReader.read("", id);
+		for (DataGroup group : userGroups) {
+			userDataGroup.addChild(group);
+		}
 	}
 
 	private Map<String, Object> createConditions(String id) {
@@ -70,11 +81,18 @@ public class DivaDbUserReader implements DivaDbReader {
 	}
 
 	public RecordReaderFactory getRecordReaderFactory() {
+		// needed for test
 		return readerFactory;
 	}
 
 	public DivaDbToCoraConverterFactory getConverterFactory() {
+		// needed for test
 		return converterFactory;
+	}
+
+	public DivaDbFactory getDivaDbFactory() {
+		// needed for test
+		return divaDbFactory;
 	}
 
 }

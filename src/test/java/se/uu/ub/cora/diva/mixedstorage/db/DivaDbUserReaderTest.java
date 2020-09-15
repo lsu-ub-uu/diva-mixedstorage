@@ -22,6 +22,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
@@ -48,8 +49,8 @@ public class DivaDbUserReaderTest {
 		converterFactory = new DivaDbToCoraConverterFactorySpy();
 		recordReaderFactory = new RecordReaderFactorySpy();
 		divaDbFactory = new DivaDbFactorySpy();
-		divaDbUserReader = new DivaDbUserReader(recordReaderFactory, converterFactory,
-				divaDbFactory);
+		divaDbUserReader = DivaDbUserReader.usingReaderFactoryConverterFactoryAndDivaDbFactory(
+				recordReaderFactory, converterFactory, divaDbFactory);
 	}
 
 	@Test
@@ -101,6 +102,19 @@ public class DivaDbUserReaderTest {
 		DataGroup convertedUser = divaDbUserReader.read(TABLE_NAME, "567");
 		// assertTrue(divaDbFactory.factorWasCalled);
 		assertEquals(divaDbFactory.usedTypes.get(0), "groupsforuser");
+		MultipleRowDbToDataReaderSpy factoredMultipleReader = divaDbFactory.factoredMultiple;
+
+		assertEquals(factoredMultipleReader.usedId, "567");
+
+		List<DataGroup> returnedList = factoredMultipleReader.returnedList;
+		for (DataGroup groupDataGroup : returnedList) {
+			assertTrue(isChildInConvertedUser(groupDataGroup, convertedUser));
+		}
+
+	}
+
+	private boolean isChildInConvertedUser(DataGroup groupDataGroup, DataGroup convertedUser) {
+		return convertedUser.getChildren().contains(groupDataGroup);
 	}
 
 }

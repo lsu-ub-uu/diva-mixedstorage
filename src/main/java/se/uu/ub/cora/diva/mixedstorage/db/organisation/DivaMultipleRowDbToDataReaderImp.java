@@ -65,8 +65,7 @@ public abstract class DivaMultipleRowDbToDataReaderImp {
 
 	protected abstract Map<String, Object> getConditions(String id);
 
-	public List<DataGroup> read(String type, String id, String tableName,
-			Map<String, Object> conditions) {
+	public List<DataGroup> read(String tableName, Map<String, Object> conditions) {
 		RecordReader recordReader = recordReaderFactory.factor();
 		List<Map<String, Object>> listOfTableRows = recordReader
 				.readFromTableUsingConditions(tableName, conditions);
@@ -75,7 +74,7 @@ public abstract class DivaMultipleRowDbToDataReaderImp {
 	}
 
 	public List<DataGroup> read(String type, String id) {
-		return read(type, id, getTableName(), getConditions(id));
+		return read(getTableName(), getConditions(id));
 	}
 
 }

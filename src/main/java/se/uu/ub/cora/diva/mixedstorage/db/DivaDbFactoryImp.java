@@ -44,7 +44,9 @@ public class DivaDbFactoryImp implements DivaDbFactory {
 					readerFactory, converterFactory, divaDbFactory);
 		}
 		if ("user".equals(type)) {
-			return new DivaDbUserReader(readerFactory, converterFactory);
+			DivaDbFactory divaDbFactory = new DivaDbFactoryImp(readerFactory, converterFactory);
+			return DivaDbUserReader.usingReaderFactoryConverterFactoryAndDivaDbFactory(readerFactory, converterFactory,
+					divaDbFactory);
 		}
 		throw NotImplementedException.withMessage("No implementation found for: " + type);
 	}

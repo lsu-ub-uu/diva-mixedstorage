@@ -27,6 +27,6 @@ public interface MultipleRowDbToDataReader {
 
 	List<DataGroup> read(String type, String id);
 
-	List<DataGroup> read(String type, String id, String tableName, Map<String, Object> conditions);
+	List<DataGroup> read(String tableName, Map<String, Object> conditions);
 
 }

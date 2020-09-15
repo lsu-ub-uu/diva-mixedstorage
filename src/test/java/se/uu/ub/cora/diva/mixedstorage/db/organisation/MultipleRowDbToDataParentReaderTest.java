@@ -126,7 +126,7 @@ public class MultipleRowDbToDataParentReaderTest {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("organisation_id", "567");
 
-		List<DataGroup> result = parentReader.read(TABLE_NAME, "567", TABLE_NAME, conditions);
+		List<DataGroup> result = parentReader.read(TABLE_NAME, conditions);
 
 		assertTrue(recordReaderFactory.factorWasCalled);
 
