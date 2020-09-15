@@ -19,11 +19,14 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import java.util.List;
+import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 
 public interface MultipleRowDbToDataReader {
 
 	List<DataGroup> read(String type, String id);
+
+	List<DataGroup> read(String type, String id, String tableName, Map<String, Object> conditions);
 
 }

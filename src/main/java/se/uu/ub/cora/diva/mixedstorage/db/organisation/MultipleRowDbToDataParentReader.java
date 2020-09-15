@@ -19,12 +19,9 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
-import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public class MultipleRowDbToDataParentReader extends DivaMultipleRowDbToDataReaderImp
@@ -37,16 +34,10 @@ public class MultipleRowDbToDataParentReader extends DivaMultipleRowDbToDataRead
 	}
 
 	@Override
-	public List<DataGroup> read(String type, String id) {
-		RecordReader recordReader = recordReaderFactory.factor();
-		List<Map<String, Object>> parents = readParents(id, recordReader);
-		return convertToDataGroups(parents);
-	}
-
-	private List<Map<String, Object>> readParents(String id, RecordReader recordReader) {
+	protected Map<String, Object> getConditions(String id) {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("organisation_id", id);
-		return recordReader.readFromTableUsingConditions(getTableName(), conditions);
+		return conditions;
 	}
 
 	@Override

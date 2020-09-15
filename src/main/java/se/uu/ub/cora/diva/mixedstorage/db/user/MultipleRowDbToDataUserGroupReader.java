@@ -16,33 +16,34 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaMultipleRowDbToDataReaderImp;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
-public class MultipleRowDbToDataPredecessorReader extends DivaMultipleRowDbToDataReaderImp
+public class MultipleRowDbToDataUserGroupReader extends DivaMultipleRowDbToDataReaderImp
 		implements MultipleRowDbToDataReader {
 
-	public MultipleRowDbToDataPredecessorReader(RecordReaderFactory recordReaderFactory,
+	public MultipleRowDbToDataUserGroupReader(RecordReaderFactory readerFactory,
 			DivaDbToCoraConverterFactory converterFactory) {
-		this.recordReaderFactory = recordReaderFactory;
+		this.recordReaderFactory = readerFactory;
 		this.converterFactory = converterFactory;
 	}
 
 	@Override
 	protected String getTableName() {
-		return "divaOrganisationPredecessor";
+		return "groupsforuser";
 	}
 
 	@Override
 	protected Map<String, Object> getConditions(String id) {
 		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("organisation_id", Integer.valueOf(id));
+		conditions.put("db_id", Integer.valueOf(id));
 		return conditions;
 	}
-
 }

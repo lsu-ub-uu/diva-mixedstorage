@@ -25,6 +25,7 @@ import java.util.Map;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
+import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public abstract class DivaMultipleRowDbToDataReaderImp {
@@ -60,6 +61,21 @@ public abstract class DivaMultipleRowDbToDataReaderImp {
 	public DivaDbToCoraConverterFactory getConverterFactory() {
 		// needed for test
 		return converterFactory;
+	}
+
+	protected abstract Map<String, Object> getConditions(String id);
+
+	public List<DataGroup> read(String type, String id, String tableName,
+			Map<String, Object> conditions) {
+		RecordReader recordReader = recordReaderFactory.factor();
+		List<Map<String, Object>> listOfTableRows = recordReader
+				.readFromTableUsingConditions(tableName, conditions);
+
+		return convertToDataGroups(listOfTableRows);
+	}
+
+	public List<DataGroup> read(String type, String id) {
+		return read(type, id, getTableName(), getConditions(id));
 	}
 
 }

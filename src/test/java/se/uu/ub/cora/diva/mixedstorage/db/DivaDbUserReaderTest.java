@@ -39,6 +39,7 @@ public class DivaDbUserReaderTest {
 	private RecordReaderFactorySpy recordReaderFactory;
 	private DataGroupFactory dataGroupFactory;
 	private DivaDbUserReader divaDbUserReader;
+	private DivaDbFactorySpy divaDbFactory;
 
 	@BeforeMethod
 	public void BeforeMethod() {
@@ -46,8 +47,9 @@ public class DivaDbUserReaderTest {
 		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 		converterFactory = new DivaDbToCoraConverterFactorySpy();
 		recordReaderFactory = new RecordReaderFactorySpy();
-
-		divaDbUserReader = new DivaDbUserReader(recordReaderFactory, converterFactory);
+		divaDbFactory = new DivaDbFactorySpy();
+		divaDbUserReader = new DivaDbUserReader(recordReaderFactory, converterFactory,
+				divaDbFactory);
 	}
 
 	@Test
@@ -92,6 +94,13 @@ public class DivaDbUserReaderTest {
 		DataGroup convertedUser = divaDbUserReader.read(TABLE_NAME, "567");
 		DivaDbToCoraConverterSpy userConverter = converterFactory.factoredConverters.get(0);
 		assertEquals(convertedUser, userConverter.convertedDbDataGroup);
+	}
+
+	@Test
+	public void testUserRoles() {
+		DataGroup convertedUser = divaDbUserReader.read(TABLE_NAME, "567");
+		// assertTrue(divaDbFactory.factorWasCalled);
+		assertEquals(divaDbFactory.usedTypes.get(0), "groupsforuser");
 	}
 
 }

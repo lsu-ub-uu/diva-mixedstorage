@@ -29,19 +29,29 @@ public class DivaDbUserReader implements DivaDbReader {
 
 	private RecordReaderFactory readerFactory;
 	private DivaDbToCoraConverterFactory converterFactory;
+	private DivaDbFactory divaDbFactory;
 
 	public DivaDbUserReader(RecordReaderFactory readerFactory,
-			DivaDbToCoraConverterFactory converterFactory) {
+			DivaDbToCoraConverterFactory converterFactory, DivaDbFactory divaDbFactory) {
 		this.readerFactory = readerFactory;
 		this.converterFactory = converterFactory;
+		this.divaDbFactory = divaDbFactory;
 	}
 
 	@Override
 	public DataGroup read(String type, String id) {
 		RecordReader reader = readerFactory.factor();
 		DivaDbToCoraConverter dbToCoraConverter = converterFactory.factor(type);
+		divaDbFactory.factorMultipleReader("groupsforuser");
 		Map<String, Object> conditions = createConditions(id);
-		return readAndConvertRow(reader, dbToCoraConverter, conditions);
+		DataGroup userDataGroup = readAndConvertRow(reader, dbToCoraConverter, conditions);
+		// TODO: use factory
+		// List<DataGroup> userGroups = groupReader.read("", id);
+		// for (DataGroup group : userGroups) {
+		// userDataGroup.addChild(group);
+		// }
+		// addRoles(readAndConvertRow);
+		return userDataGroup;
 	}
 
 	private Map<String, Object> createConditions(String id) {
@@ -50,8 +60,8 @@ public class DivaDbUserReader implements DivaDbReader {
 		return conditions;
 	}
 
-	private DataGroup readAndConvertRow(RecordReader reader, DivaDbToCoraConverter dbToCoraConverter,
-			Map<String, Object> conditions) {
+	private DataGroup readAndConvertRow(RecordReader reader,
+			DivaDbToCoraConverter dbToCoraConverter, Map<String, Object> conditions) {
 		String tableNameInDatabase = "public.user";
 
 		Map<String, Object> readRow = reader
