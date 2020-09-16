@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
@@ -31,22 +32,27 @@ import se.uu.ub.cora.sqldatabase.RecordReader;
 
 public class DivaMixedUserStorage implements UserStorage {
 
-	public static DivaMixedUserStorage usingGuestUserStorageRecordReaderAndUserConverter(
+	private static final String DB_ID = "db_id";
+
+	public static DivaMixedUserStorage usingGuestUserStorageRecordReaderAndUserConverterAndLinkCreator(
 			UserStorage guestUserStorage, RecordReader recordReader,
-			DivaDbToCoraConverter userConverter) {
-		return new DivaMixedUserStorage(guestUserStorage, recordReader, userConverter);
+			DivaDbToCoraConverter userConverter, DataGroupLinkCreator dataGroupLinkCreator) {
+		return new DivaMixedUserStorage(guestUserStorage, recordReader, userConverter,
+				dataGroupLinkCreator);
 	}
 
 	private UserStorage guestUserStorage;
 	private RecordReader recordReader;
 	private Logger log = LoggerProvider.getLoggerForClass(DivaMixedUserStorage.class);
 	private DivaDbToCoraConverter userConverter;
+	private DataGroupLinkCreator dataGroupLinkCreator;
 
 	private DivaMixedUserStorage(UserStorage guestUserStorage, RecordReader recordReader,
-			DivaDbToCoraConverter userConverter) {
+			DivaDbToCoraConverter userConverter, DataGroupLinkCreator dataGroupLinkCreator) {
 		this.guestUserStorage = guestUserStorage;
 		this.recordReader = recordReader;
 		this.userConverter = userConverter;
+		this.dataGroupLinkCreator = dataGroupLinkCreator;
 	}
 
 	@Override
@@ -93,7 +99,25 @@ public class DivaMixedUserStorage implements UserStorage {
 	private DataGroup readAndConvertRow(Map<String, Object> conditions) {
 		Map<String, Object> readRow = recordReader
 				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
+		List<Map<String, Object>> groupsFromDb = recordReader.readFromTableUsingConditions(
+				"public.groupsForUser", calculateUserForGroupsConditions(readRow));
+		// TODO:
+		// filtrera bort alla grupper olika än domainAdmin och Systemadmin
+		// anropa DataGroupLinkCreator
+		// lägga till dataGroup till user DataGroup
+		for (Map<String, Object> group : groupsFromDb) {
+			if (group.get("group_type").equals("domainAdmin")) {
+				dataGroupLinkCreator
+						.createRoleLinkForDomainAdminUsingDomain((String) group.get("domain"));
+			}
+		}
 		return userConverter.fromMap(readRow);
+	}
+
+	private Map<String, Object> calculateUserForGroupsConditions(Map<String, Object> readRow) {
+		Map<String, Object> groupConditions = new HashMap<>();
+		groupConditions.put(DB_ID, readRow.get(DB_ID));
+		return groupConditions;
 	}
 
 	private String getUserIdFromIdFromLogin(String idFromLogin) {

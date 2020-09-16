@@ -23,11 +23,9 @@ import java.util.Map;
 
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaMultipleRowDbToDataReaderImp;
-import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
-public class MultipleRowDbToDataUserGroupReader extends DivaMultipleRowDbToDataReaderImp
-		implements MultipleRowDbToDataReader {
+public class MultipleRowDbToDataUserGroupReader extends DivaMultipleRowDbToDataReaderImp {
 
 	public MultipleRowDbToDataUserGroupReader(RecordReaderFactory readerFactory,
 			DivaDbToCoraConverterFactory converterFactory) {

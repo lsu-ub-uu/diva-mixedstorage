@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
 
@@ -45,23 +46,29 @@ public class RecordReaderSpy implements RecordReader {
 	public List<Map<String, Object>> successorsToReturn = new ArrayList<>();
 	public List<Map<String, Object>> parentsToReturn = new ArrayList<>();
 
+	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public Map<String, Object> responseToReadOneRowFromDbUsingTableAndConditions = null;
+	public Map<String, Object> responseToReadFromTableUsingConditions;
+
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName) {
+		MCR.addCall("tableName", tableName);
 		usedTableName = tableName;
 		usedTableNames.add(usedTableName);
-		// returnedList = new ArrayList<>();
 		for (int i = 0; i < noOfRecordsToReturn; i++) {
 			Map<String, Object> map = new HashMap<>();
 			map.put("someKey" + i, "someValue" + i);
 			returnedList.add(map);
 		}
 		returnedListCollection.add(returnedList);
+		MCR.addReturned(returnedList);
 		return returnedList;
 	}
 
 	@Override
 	public Map<String, Object> readOneRowFromDbUsingTableAndConditions(String tableName,
 			Map<String, Object> conditions) {
+		MCR.addCall("tableName", tableName, "conditions", conditions);
 		usedTableName = tableName;
 		usedTableNames.add(usedTableName);
 		usedConditions = conditions;
@@ -71,27 +78,33 @@ public class RecordReaderSpy implements RecordReader {
 			throw SqlStorageException.withMessage("Error from spy");
 		}
 		Map<String, Object> map = new HashMap<>();
-		map.put("someKey", "someValue");
-		if (conditions.containsKey("id")) {
-			if (conditions.get("id").equals("someIdWithClosedDate")) {
-				Date date = Date.valueOf("2018-12-31");
-				map.put("closed_date", date);
-			} else if (conditions.get("id").equals("someIdWithEmptyClosedDate")) {
-				map.put("closed_date", "");
+		if (responseToReadOneRowFromDbUsingTableAndConditions == null) {
+			map.put("someKey", "someValue");
+			if (conditions.containsKey("id")) {
+				if (conditions.get("id").equals("someIdWithClosedDate")) {
+					Date date = Date.valueOf("2018-12-31");
+					map.put("closed_date", date);
+				} else if (conditions.get("id").equals("someIdWithEmptyClosedDate")) {
+					map.put("closed_date", "");
+				}
+			} else if ("organisation_type".equals(tableName)) {
+				map.put("organisation_type_id", 34);
+				map.put("organisation_type_code", "unit");
 			}
-		} else if ("organisation_type".equals(tableName)) {
-			map.put("organisation_type_id", 34);
-			map.put("organisation_type_code", "unit");
+		} else {
+			map = responseToReadOneRowFromDbUsingTableAndConditions;
 		}
 		oneRowRead = map;
 		returnedList.add(map);
 		returnedListCollection.add(returnedList);
+		MCR.addReturned(map);
 		return map;
 	}
 
 	@Override
 	public List<Map<String, Object>> readFromTableUsingConditions(String tableName,
 			Map<String, Object> conditions) {
+		MCR.addCall("tableName", tableName, "conditions", conditions);
 		usedTableName = tableName;
 		usedTableNames.add(usedTableName);
 		usedConditions = conditions;
@@ -103,10 +116,6 @@ public class RecordReaderSpy implements RecordReader {
 		successorsToReturn = createListToReturn(numOfSuccessorsToReturn);
 		parentsToReturn = createListToReturn(numOfParentsToReturn);
 
-		// List<Map<String, String>> listToReturn = new ArrayList<>();
-		// listToReturn.addAll(predecessorsToReturn);
-		// listToReturn.addAll(successorsToReturn);
-
 		if ("divaOrganisationParent".equals(tableName)) {
 			returnedListCollection.add(parentsToReturn);
 			return parentsToReturn;
@@ -117,6 +126,8 @@ public class RecordReaderSpy implements RecordReader {
 			return predecessorsToReturn;
 		}
 		returnedListCollection.add(successorsToReturn);
+
+		MCR.addReturned(successorsToReturn);
 		return successorsToReturn;
 	}
 
@@ -133,7 +144,8 @@ public class RecordReaderSpy implements RecordReader {
 
 	@Override
 	public Map<String, Object> readNextValueFromSequence(String sequenceName) {
-		// TODO Auto-generated method stub
+		MCR.addCall("sequenceName", sequenceName);
+		MCR.addReturned(null);
 		return null;
 	}
 

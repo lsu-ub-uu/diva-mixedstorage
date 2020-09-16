@@ -28,7 +28,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
-public abstract class DivaMultipleRowDbToDataReaderImp {
+public abstract class DivaMultipleRowDbToDataReaderImp implements MultipleRowDbToDataReader {
 
 	protected DivaDbToCoraConverterFactory converterFactory;
 	protected RecordReaderFactory recordReaderFactory;
@@ -65,6 +65,7 @@ public abstract class DivaMultipleRowDbToDataReaderImp {
 
 	protected abstract Map<String, Object> getConditions(String id);
 
+	@Override
 	public List<DataGroup> read(String tableName, Map<String, Object> conditions) {
 		RecordReader recordReader = recordReaderFactory.factor();
 		List<Map<String, Object>> listOfTableRows = recordReader
@@ -73,6 +74,7 @@ public abstract class DivaMultipleRowDbToDataReaderImp {
 		return convertToDataGroups(listOfTableRows);
 	}
 
+	@Override
 	public List<DataGroup> read(String type, String id) {
 		return read(getTableName(), getConditions(id));
 	}
