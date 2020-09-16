@@ -38,6 +38,7 @@ public class DivaDbToCoraUserGroupConverter implements DivaDbToCoraConverter {
 		}
 
 		DataGroup dataGroup = DataGroupProvider.getDataGroupUsingNameInData("userRole");
+		dataGroup.setRepeatId("0");
 
 		DataGroup userRoleLink = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId(
 				"userRole", "permissionRole", "divaDomainAdminRole");
