@@ -1,5 +1,9 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+DataGroup userRoleOuter = DataGroupProvider.getDataGroupUsingNameInData("userRole");
+DataGroup innerUserRole = DataGroupProvider
+.getDataGroupAsLinkUsingNameInDataTypeAndId("userRole", "permissionRole",
+"divaDomainAdminRole");
+userRoleOuter.addChild(innerUserRole); * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -24,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
 
@@ -46,13 +49,11 @@ public class RecordReaderSpy implements RecordReader {
 	public List<Map<String, Object>> successorsToReturn = new ArrayList<>();
 	public List<Map<String, Object>> parentsToReturn = new ArrayList<>();
 
-	public MethodCallRecorder MCR = new MethodCallRecorder();
 	public Map<String, Object> responseToReadOneRowFromDbUsingTableAndConditions = null;
 	public Map<String, Object> responseToReadFromTableUsingConditions;
 
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName) {
-		MCR.addCall("tableName", tableName);
 		usedTableName = tableName;
 		usedTableNames.add(usedTableName);
 		for (int i = 0; i < noOfRecordsToReturn; i++) {
@@ -61,14 +62,12 @@ public class RecordReaderSpy implements RecordReader {
 			returnedList.add(map);
 		}
 		returnedListCollection.add(returnedList);
-		MCR.addReturned(returnedList);
 		return returnedList;
 	}
 
 	@Override
 	public Map<String, Object> readOneRowFromDbUsingTableAndConditions(String tableName,
 			Map<String, Object> conditions) {
-		MCR.addCall("tableName", tableName, "conditions", conditions);
 		usedTableName = tableName;
 		usedTableNames.add(usedTableName);
 		usedConditions = conditions;
@@ -97,14 +96,12 @@ public class RecordReaderSpy implements RecordReader {
 		oneRowRead = map;
 		returnedList.add(map);
 		returnedListCollection.add(returnedList);
-		MCR.addReturned(map);
 		return map;
 	}
 
 	@Override
 	public List<Map<String, Object>> readFromTableUsingConditions(String tableName,
 			Map<String, Object> conditions) {
-		MCR.addCall("tableName", tableName, "conditions", conditions);
 		usedTableName = tableName;
 		usedTableNames.add(usedTableName);
 		usedConditions = conditions;
@@ -127,7 +124,6 @@ public class RecordReaderSpy implements RecordReader {
 		}
 		returnedListCollection.add(successorsToReturn);
 
-		MCR.addReturned(successorsToReturn);
 		return successorsToReturn;
 	}
 
@@ -144,8 +140,6 @@ public class RecordReaderSpy implements RecordReader {
 
 	@Override
 	public Map<String, Object> readNextValueFromSequence(String sequenceName) {
-		MCR.addCall("sequenceName", sequenceName);
-		MCR.addReturned(null);
 		return null;
 	}
 

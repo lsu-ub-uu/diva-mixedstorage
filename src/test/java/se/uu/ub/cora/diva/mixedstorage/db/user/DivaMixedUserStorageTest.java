@@ -43,7 +43,7 @@ public class DivaMixedUserStorageTest {
 	private LoggerFactorySpy loggerFactorySpy;
 	private String testedClassName = "DivaMixedUserStorage";
 	private DivaDbToCoraConverterSpy userConverter;
-	private DataGroupLinkCreatorSpy dataGroupLinkCreator;
+	private DataGroupRoleReferenceCreatorSpy dataGroupLinkCreator;
 
 	@BeforeMethod
 	public void setUp() {
@@ -52,9 +52,9 @@ public class DivaMixedUserStorageTest {
 		recordReader = new RecordReaderUserSpy();
 		guestUserStorage = new UserStorageSpy();
 		userConverter = new DivaDbToCoraConverterSpy();
-		dataGroupLinkCreator = new DataGroupLinkCreatorSpy();
+		dataGroupLinkCreator = new DataGroupRoleReferenceCreatorSpy();
 		userStorage = DivaMixedUserStorage
-				.usingGuestUserStorageRecordReaderAndUserConverterAndLinkCreator(guestUserStorage,
+				.usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(guestUserStorage,
 						recordReader, userConverter, dataGroupLinkCreator);
 	}
 
@@ -128,7 +128,7 @@ public class DivaMixedUserStorageTest {
 
 		recordReader.MCR.assertMethodWasCalled("readFromTableUsingConditions");
 		recordReader.MCR.assertParameter("readFromTableUsingConditions", 0, "tableName",
-				"public.groupsForUser");
+				"public.groupsforuser");
 
 		Map<String, Object> returnedUserDbData = (Map<String, Object>) recordReader.MCR
 				.getReturnValue("readOneRowFromDbUsingTableAndConditions", 0);
@@ -195,7 +195,7 @@ public class DivaMixedUserStorageTest {
 		userStorage.getUserByIdFromLogin(userId);
 
 		MethodCallRecorder linkCreatorMCR = dataGroupLinkCreator.MCR;
-		linkCreatorMCR.assertParameter("createRoleLinkForDomainAdminUsingDomain", 0, "domain",
+		linkCreatorMCR.assertParameter("createRoleReferenceForDomainAdminUsingDomain", 0, "domain",
 				"uu");
 	}
 
@@ -209,7 +209,7 @@ public class DivaMixedUserStorageTest {
 		userStorage.getUserByIdFromLogin(userId);
 
 		MethodCallRecorder linkCreatorMCR = dataGroupLinkCreator.MCR;
-		linkCreatorMCR.assertParameter("createRoleLinkForDomainAdminUsingDomain", 0, "domain",
+		linkCreatorMCR.assertParameter("createRoleReferenceForDomainAdminUsingDomain", 0, "domain",
 				"kth");
 	}
 

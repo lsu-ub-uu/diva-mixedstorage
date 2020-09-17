@@ -16,16 +16,17 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 
-/**
- * DataGroupLinkCreator
- */
-public interface DataGroupLinkCreator {
+public class DataGroupRoleReferenceCreatorSpy implements DataGroupRoleReferenceCreator {
+	public MethodCallRecorder MCR = new MethodCallRecorder();
 
-	DataGroup createRoleLinkForDomainAdminUsingDomain(String domain);
-
+	@Override
+	public DataGroup createRoleReferenceForDomainAdminUsingDomain(String domain) {
+		MCR.addCall("domain", domain);
+		return null;
+	}
 }

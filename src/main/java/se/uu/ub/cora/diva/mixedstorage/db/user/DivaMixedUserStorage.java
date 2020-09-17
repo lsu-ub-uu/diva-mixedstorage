@@ -34,25 +34,27 @@ public class DivaMixedUserStorage implements UserStorage {
 
 	private static final String DB_ID = "db_id";
 
-	public static DivaMixedUserStorage usingGuestUserStorageRecordReaderAndUserConverterAndLinkCreator(
+	public static DivaMixedUserStorage usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(
 			UserStorage guestUserStorage, RecordReader recordReader,
-			DivaDbToCoraConverter userConverter, DataGroupLinkCreator dataGroupLinkCreator) {
+			DivaDbToCoraConverter userConverter,
+			DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator) {
 		return new DivaMixedUserStorage(guestUserStorage, recordReader, userConverter,
-				dataGroupLinkCreator);
+				dataGroupRoleReferenceCreator);
 	}
 
 	private UserStorage guestUserStorage;
 	private RecordReader recordReader;
 	private Logger log = LoggerProvider.getLoggerForClass(DivaMixedUserStorage.class);
 	private DivaDbToCoraConverter userConverter;
-	private DataGroupLinkCreator dataGroupLinkCreator;
+	private DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator;
 
 	private DivaMixedUserStorage(UserStorage guestUserStorage, RecordReader recordReader,
-			DivaDbToCoraConverter userConverter, DataGroupLinkCreator dataGroupLinkCreator) {
+			DivaDbToCoraConverter userConverter,
+			DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator) {
 		this.guestUserStorage = guestUserStorage;
 		this.recordReader = recordReader;
 		this.userConverter = userConverter;
-		this.dataGroupLinkCreator = dataGroupLinkCreator;
+		this.dataGroupRoleReferenceCreator = dataGroupRoleReferenceCreator;
 	}
 
 	@Override
@@ -97,21 +99,25 @@ public class DivaMixedUserStorage implements UserStorage {
 	}
 
 	private DataGroup readAndConvertRow(Map<String, Object> conditions) {
-		Map<String, Object> readRow = recordReader
+		Map<String, Object> userDataFromDb = recordReader
 				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
-		List<Map<String, Object>> groupsFromDb = recordReader.readFromTableUsingConditions(
-				"public.groupsForUser", calculateUserForGroupsConditions(readRow));
+		Map<String, Object> conditionsForGroupsForUser = calculateUserForGroupsConditions(
+				userDataFromDb);
+		List<Map<String, Object>> groupsDataFromDb = recordReader
+				.readFromTableUsingConditions("public.groupsforuser", conditionsForGroupsForUser);
 		// TODO:
 		// filtrera bort alla grupper olika än domainAdmin och Systemadmin
 		// anropa DataGroupLinkCreator
 		// lägga till dataGroup till user DataGroup
-		for (Map<String, Object> group : groupsFromDb) {
+		for (Map<String, Object> group : groupsDataFromDb) {
 			if (group.get("group_type").equals("domainAdmin")) {
-				dataGroupLinkCreator
-						.createRoleLinkForDomainAdminUsingDomain((String) group.get("domain"));
+				dataGroupRoleReferenceCreator
+						.createRoleReferenceForDomainAdminUsingDomain((String) group.get("domain"));
+
 			}
 		}
-		return userConverter.fromMap(readRow);
+		DataGroup userDataGroup = userConverter.fromMap(userDataFromDb);
+		return userDataGroup;
 	}
 
 	private Map<String, Object> calculateUserForGroupsConditions(Map<String, Object> readRow) {
@@ -134,18 +140,24 @@ public class DivaMixedUserStorage implements UserStorage {
 		return loginDomainNameParts[secondLevelDomainPosition];
 	}
 
-	public UserStorage getUserStorageForGuest() {
+	UserStorage getUserStorageForGuest() {
 		// needed for test
 		return guestUserStorage;
 	}
 
-	public RecordReader getRecordReader() {
+	RecordReader getRecordReader() {
 		// needed for test
 		return recordReader;
 	}
 
-	public DivaDbToCoraConverter getDbToCoraUserConverter() {
+	DivaDbToCoraConverter getDbToCoraUserConverter() {
+		// needed for test
 		return userConverter;
+	}
+
+	public DataGroupRoleReferenceCreator getDataGroupRoleReferenceCreator() {
+		// needed for test
+		return dataGroupRoleReferenceCreator;
 	}
 
 }
