@@ -19,15 +19,19 @@
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterSpy;
@@ -43,7 +47,7 @@ public class DivaMixedUserStorageTest {
 	private LoggerFactorySpy loggerFactorySpy;
 	private String testedClassName = "DivaMixedUserStorage";
 	private DivaDbToCoraConverterSpy userConverter;
-	private DataGroupRoleReferenceCreatorSpy dataGroupLinkCreator;
+	private DataGroupRoleReferenceCreatorSpy dataGroupRoleReferenceCreator;
 
 	@BeforeMethod
 	public void setUp() {
@@ -52,10 +56,11 @@ public class DivaMixedUserStorageTest {
 		recordReader = new RecordReaderUserSpy();
 		guestUserStorage = new UserStorageSpy();
 		userConverter = new DivaDbToCoraConverterSpy();
-		dataGroupLinkCreator = new DataGroupRoleReferenceCreatorSpy();
+		dataGroupRoleReferenceCreator = new DataGroupRoleReferenceCreatorSpy();
 		userStorage = DivaMixedUserStorage
-				.usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(guestUserStorage,
-						recordReader, userConverter, dataGroupLinkCreator);
+				.usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(
+						guestUserStorage, recordReader, userConverter,
+						dataGroupRoleReferenceCreator);
 	}
 
 	@Test
@@ -164,17 +169,19 @@ public class DivaMixedUserStorageTest {
 	}
 
 	@Test
-	public void testDataGroupLinkCreatorNOTCalledForNoReturnedGroupsForUser() throws Exception {
+	public void testdataGroupRoleReferenceCreatorNOTCalledForNoReturnedGroupsForUser()
+			throws Exception {
 		setResponseForReadOneRowInRecordReaderSpy("342");
 
 		String userId = "userId@user.uu.se";
 		userStorage.getUserByIdFromLogin(userId);
 
-		dataGroupLinkCreator.MCR.assertMethodNotCalled("createRoleLinkForDomainAdminUsingDomain");
+		dataGroupRoleReferenceCreator.MCR
+				.assertMethodNotCalled("createRoleLinkForDomainAdminUsingDomain");
 	}
 
 	@Test
-	public void testDataGroupLinkCreatorNOTCalledForUnimplementedReturnedGroupsForUser()
+	public void testdataGroupRoleReferenceCreatorNOTCalledForUnimplementedReturnedGroupsForUser()
 			throws Exception {
 		setResponseForReadOneRowInRecordReaderSpy("342");
 		addResponseForReadFromTableUsingConditonsReaderSpy("someGroupNotToAdd", "uu");
@@ -182,11 +189,14 @@ public class DivaMixedUserStorageTest {
 		String userId = "userId@user.uu.se";
 		userStorage.getUserByIdFromLogin(userId);
 
-		dataGroupLinkCreator.MCR.assertMethodNotCalled("createRoleLinkForDomainAdminUsingDomain");
+		dataGroupRoleReferenceCreator.MCR
+				.assertMethodNotCalled("createRoleLinkForDomainAdminUsingDomain");
+		dataGroupRoleReferenceCreator.MCR
+				.assertMethodNotCalled("createRoleReferenceForSystemAdmin");
 	}
 
 	@Test
-	public void testDataGroupLinkCreatorCalledForReturnedGroupsForUserContainingDomainAdminUU()
+	public void testdataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingDomainAdminUU()
 			throws Exception {
 		setResponseForReadOneRowInRecordReaderSpy("342");
 		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
@@ -194,13 +204,14 @@ public class DivaMixedUserStorageTest {
 		String userId = "userId@user.uu.se";
 		userStorage.getUserByIdFromLogin(userId);
 
-		MethodCallRecorder linkCreatorMCR = dataGroupLinkCreator.MCR;
-		linkCreatorMCR.assertParameter("createRoleReferenceForDomainAdminUsingDomain", 0, "domain",
-				"uu");
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		roleReferenceMCR.assertParameter("createRoleReferenceForDomainAdminUsingDomain", 0,
+				"domain", "uu");
+		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForSystemAdmin");
 	}
 
 	@Test
-	public void testDataGroupLinkCreatorCalledForReturnedGroupsForUserContainingDomainAdminKTH()
+	public void testdataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingDomainAdminKTH()
 			throws Exception {
 		setResponseForReadOneRowInRecordReaderSpy("342");
 		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
@@ -208,9 +219,10 @@ public class DivaMixedUserStorageTest {
 		String userId = "userId@user.uu.se";
 		userStorage.getUserByIdFromLogin(userId);
 
-		MethodCallRecorder linkCreatorMCR = dataGroupLinkCreator.MCR;
-		linkCreatorMCR.assertParameter("createRoleReferenceForDomainAdminUsingDomain", 0, "domain",
-				"kth");
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		roleReferenceMCR.assertParameter("createRoleReferenceForDomainAdminUsingDomain", 0,
+				"domain", "kth");
+		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForSystemAdmin");
 	}
 
 	private void addResponseForReadFromTableUsingConditonsReaderSpy(String groupType,
@@ -219,5 +231,176 @@ public class DivaMixedUserStorageTest {
 		row1.put("group_type", groupType);
 		row1.put("domain", domain);
 		recordReader.responseToReadFromTableUsingConditions.add(row1);
+	}
+
+	@Test
+	public void testDataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingSystemAdmin()
+			throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "diva");
+
+		String userId = "userId@user.uu.se";
+		userStorage.getUserByIdFromLogin(userId);
+
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		roleReferenceMCR.assertMethodWasCalled("createRoleReferenceForSystemAdmin");
+		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForDomainAdmin");
+	}
+
+	@Test
+	public void testDataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingSeveralSystemAdmin()
+			throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "diva");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "other");
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
+
+		String userId = "userId@user.uu.se";
+		userStorage.getUserByIdFromLogin(userId);
+
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		roleReferenceMCR.assertNumberOfCallsToMethod("createRoleReferenceForSystemAdmin", 1);
+		roleReferenceMCR.assertMethodWasCalled("createRoleReferenceForDomainAdminUsingDomain");
+	}
+
+	@Test
+	public void testCreateUserRoleChildHasNotBeenCalledIfRolesNotExist() throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("someGroupNotToAdd", "uu");
+
+		String userId = "userId@user.uu.se";
+		userStorage.getUserByIdFromLogin(userId);
+
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		roleReferenceMCR.assertMethodNotCalled("createUserRoleChild");
+	}
+
+	@Test
+	public void testCreateUserRoleChildHasBeenCalledIfDomainAdminExist() throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
+
+		String userId = "userId@user.uu.se";
+		userStorage.getUserByIdFromLogin(userId);
+
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		roleReferenceMCR.assertMethodWasCalled("createUserRoleChild");
+	}
+
+	@Test
+	public void testCreateUserRoleChildHasBeenCalledIfSystemAdminExist() throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
+
+		String userId = "userId@user.uu.se";
+		userStorage.getUserByIdFromLogin(userId);
+
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		roleReferenceMCR.assertMethodWasCalled("createUserRoleChild");
+	}
+
+	@Test
+	public void testCreateUserRoleChildCalledOnlyOnce() throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
+
+		String userId = "userId@user.uu.se";
+		userStorage.getUserByIdFromLogin(userId);
+
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		roleReferenceMCR.assertNumberOfCallsToMethod("createUserRoleChild", 1);
+	}
+
+	@Test
+	public void testCreateUserIsCalledWithDomainAdminDataGroup() throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
+
+		String userId = "userId@user.uu.se";
+		userStorage.getUserByIdFromLogin(userId);
+
+		List<DataGroup> rolesList = (List<DataGroup>) dataGroupRoleReferenceCreator.MCR
+				.getValueForMethodNameAndCallNumberAndParameterName("createUserRoleChild", 0,
+						"rolesList");
+
+		assertNotNull(rolesList);
+		DataGroup domainAdminDataGroup = rolesList.get(0);
+		assertEquals(domainAdminDataGroup.getNameInData(), "userDomainAdminRole");
+
+	}
+
+	@Test
+	public void testCreateUserIsCalledWithSystemAdminDataGroup() throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
+
+		String userId = "userId@user.uu.se";
+		userStorage.getUserByIdFromLogin(userId);
+
+		List<DataGroup> rolesList = (List<DataGroup>) dataGroupRoleReferenceCreator.MCR
+				.getValueForMethodNameAndCallNumberAndParameterName("createUserRoleChild", 0,
+						"rolesList");
+
+		assertNotNull(rolesList);
+		DataGroup domainAdminDataGroup = rolesList.get(0);
+		assertEquals(domainAdminDataGroup.getNameInData(), "userSystemAdminRole");
+
+	}
+
+	@Test
+	public void testCreateUserIsCalledWithSeveralDataGroups() throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
+
+		String userId = "userId@user.uu.se";
+		userStorage.getUserByIdFromLogin(userId);
+
+		List<DataGroup> rolesList = (List<DataGroup>) dataGroupRoleReferenceCreator.MCR
+				.getValueForMethodNameAndCallNumberAndParameterName("createUserRoleChild", 0,
+						"rolesList");
+
+		assertNotNull(rolesList);
+		DataGroup dataGroup0 = rolesList.get(0);
+		assertEquals(dataGroup0.getNameInData(), "userSystemAdminRole");
+		DataGroup dataGroup1 = rolesList.get(1);
+		assertEquals(dataGroup1.getNameInData(), "userDomainAdminRole");
+		DataGroup dataGroup2 = rolesList.get(2);
+		assertEquals(dataGroup2.getNameInData(), "userDomainAdminRole");
+	}
+
+	@Test
+	public void testRolesAreNotAddedAsChildForUnimplementedReturnedGroupsForUser()
+			throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("unimplementedGroup", "uu");
+
+		String userId = "userId@user.uu.se";
+		DataGroup returnedUser = userStorage.getUserByIdFromLogin(userId);
+
+		List<DataElement> allChildrenWithNameInData = returnedUser
+				.getAllChildrenWithNameInData("userRole");
+		assertNull(allChildrenWithNameInData);
+	}
+
+	@Test
+	public void testRolesAreAddedAsChildForDomainAdmin() throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("342");
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
+
+		String userId = "userId@user.uu.se";
+		DataGroup returnedUser = userStorage.getUserByIdFromLogin(userId);
+
+		Object returnValue = dataGroupRoleReferenceCreator.MCR.getReturnValue("createUserRoleChild",
+				0);
+
+		assertTrue(returnValue instanceof DataGroup);
+		List<DataElement> allChildrenWithNameInData = returnedUser
+				.getAllChildrenWithNameInData("userRole");
+
+		assertEquals(allChildrenWithNameInData.size(), 1);
 	}
 }

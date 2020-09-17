@@ -18,7 +18,10 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
+import java.util.List;
+
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 
 public class DataGroupRoleReferenceCreatorSpy implements DataGroupRoleReferenceCreator {
@@ -27,6 +30,27 @@ public class DataGroupRoleReferenceCreatorSpy implements DataGroupRoleReferenceC
 	@Override
 	public DataGroup createRoleReferenceForDomainAdminUsingDomain(String domain) {
 		MCR.addCall("domain", domain);
-		return null;
+
+		DataGroupSpy dataGroupSpy = new DataGroupSpy("userDomainAdminRole");
+		MCR.addReturned(dataGroupSpy);
+		return dataGroupSpy;
+	}
+
+	@Override
+	public DataGroup createRoleReferenceForSystemAdmin() {
+		MCR.addCall();
+
+		DataGroupSpy dataGroupSpy = new DataGroupSpy("userSystemAdminRole");
+		MCR.addReturned(dataGroupSpy);
+		return dataGroupSpy;
+	}
+
+	@Override
+	public DataGroup createUserRoleChild(List<DataGroup> rolesList) {
+		MCR.addCall("rolesList", rolesList);
+
+		DataGroupSpy dataGroupSpy = new DataGroupSpy("userRole");
+		MCR.addReturned(dataGroupSpy);
+		return dataGroupSpy;
 	}
 }

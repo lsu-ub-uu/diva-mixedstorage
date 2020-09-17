@@ -18,6 +18,7 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,15 +110,32 @@ public class DivaMixedUserStorage implements UserStorage {
 		// filtrera bort alla grupper olika än domainAdmin och Systemadmin
 		// anropa DataGroupLinkCreator
 		// lägga till dataGroup till user DataGroup
+		boolean systemAdminFound = false;
+		List<DataGroup> rolesList = new ArrayList<>();
 		for (Map<String, Object> group : groupsDataFromDb) {
 			if (group.get("group_type").equals("domainAdmin")) {
-				dataGroupRoleReferenceCreator
+				DataGroup domainAdmin = dataGroupRoleReferenceCreator
 						.createRoleReferenceForDomainAdminUsingDomain((String) group.get("domain"));
-
+				rolesList.add(domainAdmin);
+			} else if (!systemAdminFound && group.get("group_type").equals("systemAdmin")) {
+				// Frågor:
+				// Hur många systemAdmin grupper kan man ha?
+				DataGroup systemAdmin = dataGroupRoleReferenceCreator
+						.createRoleReferenceForSystemAdmin();
+				rolesList.add(systemAdmin);
+				systemAdminFound = true;
 			}
 		}
-		DataGroup userDataGroup = userConverter.fromMap(userDataFromDb);
-		return userDataGroup;
+
+		DataGroup user = userConverter.fromMap(userDataFromDb);
+		if (!rolesList.isEmpty()) {
+			DataGroup createUserRoleChild = dataGroupRoleReferenceCreator
+					.createUserRoleChild(rolesList);
+			user.addChild(createUserRoleChild);
+		}
+
+		// Rename variable ?
+		return user;
 	}
 
 	private Map<String, Object> calculateUserForGroupsConditions(Map<String, Object> readRow) {

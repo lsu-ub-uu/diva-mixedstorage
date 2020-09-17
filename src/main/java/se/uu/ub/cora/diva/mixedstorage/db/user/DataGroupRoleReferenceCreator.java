@@ -19,6 +19,8 @@
 
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
+import java.util.List;
+
 import se.uu.ub.cora.data.DataGroup;
 
 /**
@@ -27,5 +29,9 @@ import se.uu.ub.cora.data.DataGroup;
 public interface DataGroupRoleReferenceCreator {
 
 	DataGroup createRoleReferenceForDomainAdminUsingDomain(String domain);
+
+	DataGroup createRoleReferenceForSystemAdmin();
+
+	DataGroup createUserRoleChild(List<DataGroup> rolesList);
 
 }
