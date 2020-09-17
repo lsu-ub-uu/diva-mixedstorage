@@ -392,14 +392,14 @@ public class DivaMixedUserStorageTest {
 		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
 
 		String userId = "userId@user.uu.se";
-		DataGroup returnedUser = userStorage.getUserByIdFromLogin(userId);
+		DataGroup user = userStorage.getUserByIdFromLogin(userId);
 
 		Object returnValue = dataGroupRoleReferenceCreator.MCR.getReturnValue("createUserRoleChild",
 				0);
 
 		assertTrue(returnValue instanceof DataGroup);
-		List<DataElement> allChildrenWithNameInData = returnedUser
-				.getAllChildrenWithNameInData("userRole");
+
+		List<DataElement> allChildrenWithNameInData = user.getAllChildrenWithNameInData("userRole");
 
 		assertEquals(allChildrenWithNameInData.size(), 1);
 	}
