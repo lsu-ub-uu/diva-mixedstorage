@@ -19,6 +19,8 @@
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +69,7 @@ public class DivaMixedUserStorage implements UserStorage {
 	public DataGroup getUserByIdFromLogin(String idFromLogin) {
 		logAndThrowExceptionIfUnexpectedFormatOf(idFromLogin);
 		Map<String, Object> conditions = createConditions(idFromLogin);
-		return readAndConvertRow(conditions);
+		return readAndConvertUser(conditions);
 	}
 
 	private void logAndThrowExceptionIfUnexpectedFormatOf(String idFromLogin) {
@@ -99,43 +101,83 @@ public class DivaMixedUserStorage implements UserStorage {
 		conditions.put("domain", userDomain);
 	}
 
-	private DataGroup readAndConvertRow(Map<String, Object> conditions) {
-		Map<String, Object> userDataFromDb = recordReader
+	private DataGroup readAndConvertUser(Map<String, Object> conditions) {
+		Map<String, Object> userRowFromDb = recordReader
 				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
+		DataGroup user = userConverter.fromMap(userRowFromDb);
+		possiblyReadAndAddRoles(userRowFromDb, user);
+
+		return user;
+	}
+
+	private void possiblyReadAndAddRoles(Map<String, Object> userRowFromDb, DataGroup user) {
+		List<DataGroup> rolesList = readAndConvertClassicGroupsToCoraRoles(userRowFromDb);
+		possiblyAddRoles(rolesList, user);
+	}
+
+	private List<DataGroup> readAndConvertClassicGroupsToCoraRoles(
+			Map<String, Object> userRowFromDb) {
+		List<Map<String, Object>> groupRowsFromDb = readGroupsFromDb(userRowFromDb);
+		return convertClassicGroupsToCoraRoles(groupRowsFromDb);
+	}
+
+	private List<Map<String, Object>> readGroupsFromDb(Map<String, Object> userDataFromDb) {
 		Map<String, Object> conditionsForGroupsForUser = calculateUserForGroupsConditions(
 				userDataFromDb);
-		List<Map<String, Object>> groupsDataFromDb = recordReader
-				.readFromTableUsingConditions("public.groupsforuser", conditionsForGroupsForUser);
-		// TODO:
-		// filtrera bort alla grupper olika än domainAdmin och Systemadmin
-		// anropa DataGroupLinkCreator
-		// lägga till dataGroup till user DataGroup
-		boolean systemAdminFound = false;
-		List<DataGroup> rolesList = new ArrayList<>();
-		for (Map<String, Object> group : groupsDataFromDb) {
-			if (group.get("group_type").equals("domainAdmin")) {
-				DataGroup domainAdmin = dataGroupRoleReferenceCreator
-						.createRoleReferenceForDomainAdminUsingDomain((String) group.get("domain"));
-				rolesList.add(domainAdmin);
-			} else if (!systemAdminFound && group.get("group_type").equals("systemAdmin")) {
-				// Frågor:
-				// Hur många systemAdmin grupper kan man ha?
-				DataGroup systemAdmin = dataGroupRoleReferenceCreator
-						.createRoleReferenceForSystemAdmin();
-				rolesList.add(systemAdmin);
-				systemAdminFound = true;
+		return recordReader.readFromTableUsingConditions("public.groupsforuser",
+				conditionsForGroupsForUser);
+	}
+
+	private List<DataGroup> convertClassicGroupsToCoraRoles(
+			List<Map<String, Object>> groupRowsFromDb) {
+
+		List<String> domains = new ArrayList<>();
+		for (Map<String, Object> group : groupRowsFromDb) {
+			if (groupTypeIsSystemAdmin(group)) {
+				return createSystemAdminRole();
+			} else if (groupTypeIsDomainAdminRole(group)) {
+				domains.add((String) group.get("domain"));
 			}
 		}
+		return getDomainAdminRolesOrEmptyList(domains);
+	}
 
-		DataGroup user = userConverter.fromMap(userDataFromDb);
-		if (!rolesList.isEmpty()) {
+	private List<DataGroup> getDomainAdminRolesOrEmptyList(List<String> domains) {
+		if (domainAdminRoleFound(domains)) {
+			DataGroup domainAdmin = dataGroupRoleReferenceCreator
+					.createRoleReferenceForDomainAdminUsingDomain(domains);
+			return Arrays.asList(domainAdmin);
+		}
+		return Collections.emptyList();
+	}
+
+	private boolean groupTypeIsSystemAdmin(Map<String, Object> group) {
+		return "systemAdmin".equals(group.get("group_type"));
+	}
+
+	private List<DataGroup> createSystemAdminRole() {
+		DataGroup systemAdmin = dataGroupRoleReferenceCreator.createRoleReferenceForSystemAdmin();
+		return Arrays.asList(systemAdmin);
+	}
+
+	private boolean groupTypeIsDomainAdminRole(Map<String, Object> group) {
+		return "domainAdmin".equals(group.get("group_type"));
+	}
+
+	private boolean domainAdminRoleFound(List<String> domains) {
+		return !domains.isEmpty();
+	}
+
+	private void possiblyAddRoles(List<DataGroup> rolesList, DataGroup user) {
+		if (matchingCoraRolesFound(rolesList)) {
 			DataGroup createUserRoleChild = dataGroupRoleReferenceCreator
 					.createUserRoleChild(rolesList);
 			user.addChild(createUserRoleChild);
 		}
+	}
 
-		// Rename variable ?
-		return user;
+	private boolean matchingCoraRolesFound(List<DataGroup> rolesList) {
+		return !rolesList.isEmpty();
 	}
 
 	private Map<String, Object> calculateUserForGroupsConditions(Map<String, Object> readRow) {
@@ -173,7 +215,7 @@ public class DivaMixedUserStorage implements UserStorage {
 		return userConverter;
 	}
 
-	public DataGroupRoleReferenceCreator getDataGroupRoleReferenceCreator() {
+	DataGroupRoleReferenceCreator getDataGroupRoleReferenceCreator() {
 		// needed for test
 		return dataGroupRoleReferenceCreator;
 	}

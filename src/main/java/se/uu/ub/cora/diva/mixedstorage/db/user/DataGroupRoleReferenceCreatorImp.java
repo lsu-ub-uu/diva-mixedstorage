@@ -16,22 +16,33 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.DataGroupProvider;
 
-/**
- * DataGroupLinkCreator
- */
-public interface DataGroupRoleReferenceCreator {
+public class DataGroupRoleReferenceCreatorImp implements DataGroupRoleReferenceCreator {
 
-	DataGroup createRoleReferenceForDomainAdminUsingDomain(List<String> domain);
+	@Override
+	public DataGroup createRoleReferenceForDomainAdminUsingDomain(List<String> domain) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-	DataGroup createRoleReferenceForSystemAdmin();
+	@Override
+	public DataGroup createRoleReferenceForSystemAdmin() {
+		// TODO Auto-generated method stub
+		DataGroup role = DataGroupProvider.getDataGroupUsingNameInData("userRole");
+		DataGroup child = DataGroupProvider.getDataGroupUsingNameInData("userRole");
+		role.addChild(child);
+		return role;
+	}
 
-	DataGroup createUserRoleChild(List<DataGroup> rolesList);
-
+	@Override
+	public DataGroup createUserRoleChild(List<DataGroup> rolesList) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
