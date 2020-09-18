@@ -172,7 +172,7 @@ public class DivaMixedUserStorage implements UserStorage {
 		if (matchingCoraRolesFound(roleList)) {
 
 			// TODO: datagrupperna är ju redan skapade, ska de inte bara addas till user?
-			// vad ska createUserRoleChild göra?
+			// vad ska createUserRoleChild göra?createRoleReferenceForDomainAdminUsingDomain
 			// borde det inte vara:
 			// int repeatId = 0;
 			// for(DataGroup role : roleList){

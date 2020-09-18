@@ -20,6 +20,8 @@ package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import java.util.List;
 
+import se.uu.ub.cora.data.DataAtomic;
+import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 
@@ -39,7 +41,14 @@ public class DataGroupRoleReferenceCreatorImp implements DataGroupRoleReferenceC
 					"rule", "collectPermissionTerm", "domainPermissionTerm");
 			rulePart.addChild(ruleGroup);
 
-			// DataAtomicProvider.factorUsingNameInDataAndValueAndRepeatId("value", "", "");
+			int repeatId = 0;
+			for (String domain : domains) {
+				DataAtomic domainValue = DataAtomicProvider
+						.getDataAtomicUsingNameInDataAndValueAndRepeatId("value",
+								"domain." + domain, String.valueOf(repeatId));
+				repeatId++;
+				rulePart.addChild(domainValue);
+			}
 
 			role.addChild(rulePart);
 		}

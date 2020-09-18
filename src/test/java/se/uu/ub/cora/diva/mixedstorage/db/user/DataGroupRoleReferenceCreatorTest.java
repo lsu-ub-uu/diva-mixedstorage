@@ -33,6 +33,7 @@ import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicFactorySpy;
+import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 
@@ -59,9 +60,8 @@ public class DataGroupRoleReferenceCreatorTest {
 
 		List<DataGroupSpy> createdDataGroups = dataGroupFactory.factoredDataGroups;
 		DataGroupSpy createdTopLevelgGroup = createdDataGroups.get(0);
-		DataGroupSpy firstCreatedChild = createdDataGroups.get(1);
-
-		assertTrue(systemAdminRole.getChildren().contains(firstCreatedChild));
+		DataGroupSpy innerUserRoleGroup = createdDataGroups.get(1);
+		assertTrue(systemAdminRole.getChildren().contains(innerUserRoleGroup));
 		assertSame(createdTopLevelgGroup, systemAdminRole);
 		assertSame(dataGroupFactory.factoredDataGroups.get(0), systemAdminRole);
 	}
@@ -84,41 +84,10 @@ public class DataGroupRoleReferenceCreatorTest {
 		List<DataGroupSpy> createdDataGroups = dataGroupFactory.factoredDataGroups;
 		assertEquals(createdDataGroups.size(), 2);
 		DataGroupSpy createdTopLevelgGroup = createdDataGroups.get(0);
-		DataGroupSpy firstCreatedChild = createdDataGroups.get(1);
-
-		assertTrue(domainAdminRole.getChildren().contains(firstCreatedChild));
+		DataGroupSpy innerUserRoleGroup = createdDataGroups.get(1);
+		assertTrue(domainAdminRole.getChildren().contains(innerUserRoleGroup));
 		assertSame(createdTopLevelgGroup, domainAdminRole);
 	}
-
-	// {
-	// "name": "permissionTermRulePart",
-	// "children": [
-	// {
-	// "name": "rule",
-	// "children": [
-	// {
-	// "name": "linkedRecordType",
-	// "value": "collectPermissionTerm"
-	// },
-	// {
-	// "name": "linkedRecordId",
-	// "value": "domainPermissionTerm"
-	// }
-	// ]
-	// },
-	// {
-	// "name": "value",
-	// "value": "domain.uu",
-	// "repeatId": "0"
-	// },
-	// {
-	// "name": "value",
-	// "value": "domain.liu",
-	// "repeatId": "1"
-	// }
-	// ],
-	// "repeatId": "0"
-	// }
 
 	@Test
 	public void testDomainAdminRoleWithDomains() {
@@ -130,27 +99,55 @@ public class DataGroupRoleReferenceCreatorTest {
 		DataGroup domainAdminRole = refCreator
 				.createRoleReferenceForDomainAdminUsingDomain(domains);
 
-		assertTopGroupWithRoleLinkIsCreated("divaDomainAdminRole");
-
-		assertEquals(dataGroupFactory.usedNameInDatas.get(2), "permissionTermRulePart");
-		assertEquals(dataGroupFactory.usedNameInDatas.get(3), "rule");
-
 		List<DataGroupSpy> createdDataGroups = dataGroupFactory.factoredDataGroups;
-		DataGroupSpy createdTopLevelgGroup = createdDataGroups.get(0);
-		DataGroupSpy innerUserRoleGroup = createdDataGroups.get(1);
+
+		assertTopLevelGroupIsCreatedCorrectlyAndContainsCorrectChildren(domainAdminRole,
+				createdDataGroups);
+
+		assertInnerUserRoleIsCreatedCorrectly();
+		assertTermRulePartIsCreatedCorrectlyAndContainsCorrectChildren(createdDataGroups);
+		assertRuleGroupIsCreatedCorrectly();
+	}
+
+	private void assertTopLevelGroupIsCreatedCorrectlyAndContainsCorrectChildren(
+			DataGroup domainAdminRole, List<DataGroupSpy> createdDataGroups) {
+		assertEquals(dataGroupFactory.usedNameInDatas.get(0), "userRole");
+		DataGroupSpy createdTopLevelGroup = createdDataGroups.get(0);
+		assertSame(createdTopLevelGroup, domainAdminRole);
+		assertTrue(domainAdminRole.getChildren().contains(createdDataGroups.get(1)));
+		assertTrue(domainAdminRole.getChildren().contains(createdDataGroups.get(2)));
+	}
+
+	private void assertInnerUserRoleIsCreatedCorrectly() {
+		assertEquals(dataGroupFactory.usedNameInDatas.get(1), "userRole");
+		assertEquals(dataGroupFactory.usedRecordTypes.get(0), "permissionRole");
+		assertEquals(dataGroupFactory.usedRecordIds.get(0), "divaDomainAdminRole");
+	}
+
+	private void assertTermRulePartIsCreatedCorrectlyAndContainsCorrectChildren(
+			List<DataGroupSpy> createdDataGroups) {
+		assertEquals(dataGroupFactory.usedNameInDatas.get(2), "permissionTermRulePart");
+
+		assertEquals(dataGroupFactory.usedNameInDatas.get(3), "rule");
 		DataGroupSpy termRulePartGroup = createdDataGroups.get(2);
-		DataGroupSpy ruleGroup = createdDataGroups.get(3);
+		assertTrue(termRulePartGroup.getChildren().contains(createdDataGroups.get(3)));
+		assertAtomicValueIsFactoredCorrectlyAndAddedToRulePart(termRulePartGroup, 0, "domain.uu");
+		assertAtomicValueIsFactoredCorrectlyAndAddedToRulePart(termRulePartGroup, 1, "domain.liu");
+	}
 
-		assertTrue(domainAdminRole.getChildren().contains(innerUserRoleGroup));
-		assertTrue(domainAdminRole.getChildren().contains(termRulePartGroup));
-		assertTrue(termRulePartGroup.getChildren().contains(ruleGroup));
+	private void assertAtomicValueIsFactoredCorrectlyAndAddedToRulePart(
+			DataGroupSpy termRulePartGroup, int index, String domain) {
+		assertEquals(dataAtomicFactory.usedNameInDatas.get(index), "value");
+		assertEquals(dataAtomicFactory.usedValues.get(index), domain);
+		assertEquals(dataAtomicFactory.usedRepeatIds.get(index), String.valueOf(index));
 
+		DataAtomicSpy valueForDomainUU = dataAtomicFactory.factoredDataAtomics.get(index);
+		assertTrue(termRulePartGroup.children.contains(valueForDomainUU));
+	}
+
+	private void assertRuleGroupIsCreatedCorrectly() {
 		assertEquals(dataGroupFactory.usedRecordTypes.get(1), "collectPermissionTerm");
 		assertEquals(dataGroupFactory.usedRecordIds.get(1), "domainPermissionTerm");
-
-		assertEquals(dataAtomicFactory.usedNameInDatas.get(0), "value");
-
-		assertSame(createdTopLevelgGroup, domainAdminRole);
 	}
 
 }
