@@ -29,6 +29,8 @@ public class DataGroupFactorySpy implements DataGroupFactory {
 	public DataGroupSpy factoredDataGroup;
 	public List<DataGroupSpy> factoredDataGroups = new ArrayList<>();
 	public List<String> usedNameInDatas = new ArrayList<>();
+	public List<String> usedRecordTypes = new ArrayList<>();
+	public List<String> usedRecordIds = new ArrayList<>();
 
 	@Override
 	public DataGroup factorUsingNameInData(String nameInData) {
@@ -42,6 +44,8 @@ public class DataGroupFactorySpy implements DataGroupFactory {
 	public DataGroup factorAsLinkWithNameInDataTypeAndId(String nameInData, String recordType,
 			String recordId) {
 		usedNameInDatas.add(nameInData);
+		usedRecordTypes.add(recordType);
+		usedRecordIds.add(recordId);
 		factoredDataGroup = new DataGroupSpy(nameInData, recordType, recordId);
 		factoredDataGroups.add(factoredDataGroup);
 		return factoredDataGroup;

@@ -26,16 +26,31 @@ import se.uu.ub.cora.data.DataGroupProvider;
 public class DataGroupRoleReferenceCreatorImp implements DataGroupRoleReferenceCreator {
 
 	@Override
-	public DataGroup createRoleReferenceForDomainAdminUsingDomain(List<String> domain) {
-		// TODO Auto-generated method stub
-		return null;
+	public DataGroup createRoleReferenceForDomainAdminUsingDomain(List<String> domains) {
+		DataGroup role = DataGroupProvider.getDataGroupUsingNameInData("userRole");
+		DataGroup child = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId("userRole",
+				"permissionRole", "divaDomainAdminRole");
+		role.addChild(child);
+		if (!domains.isEmpty()) {
+			DataGroup rulePart = DataGroupProvider
+					.getDataGroupUsingNameInData("permissionTermRulePart");
+
+			DataGroup ruleGroup = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId(
+					"rule", "collectPermissionTerm", "domainPermissionTerm");
+			rulePart.addChild(ruleGroup);
+
+			// DataAtomicProvider.factorUsingNameInDataAndValueAndRepeatId("value", "", "");
+
+			role.addChild(rulePart);
+		}
+		return role;
 	}
 
 	@Override
 	public DataGroup createRoleReferenceForSystemAdmin() {
-		// TODO Auto-generated method stub
 		DataGroup role = DataGroupProvider.getDataGroupUsingNameInData("userRole");
-		DataGroup child = DataGroupProvider.getDataGroupUsingNameInData("userRole");
+		DataGroup child = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId("userRole",
+				"permissionRole", "divaSystemAdminRole");
 		role.addChild(child);
 		return role;
 	}

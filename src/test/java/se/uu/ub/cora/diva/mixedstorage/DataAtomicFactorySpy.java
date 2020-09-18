@@ -28,6 +28,9 @@ public class DataAtomicFactorySpy implements DataAtomicFactory {
 
 	public DataAtomicSpy factoredDataAtomic;
 	public List<DataAtomicSpy> factoredDataAtomics = new ArrayList<>();
+	public List<String> usedNameInDatas = new ArrayList<>();
+	public List<String> usedValues = new ArrayList<>();
+	public List<String> usedRepeatIds = new ArrayList<>();
 
 	@Override
 	public DataAtomic factorUsingNameInDataAndValue(String nameInData, String value) {
@@ -39,7 +42,12 @@ public class DataAtomicFactorySpy implements DataAtomicFactory {
 	@Override
 	public DataAtomic factorUsingNameInDataAndValueAndRepeatId(String nameInData, String value,
 			String repeatId) {
-		return null;
+		usedNameInDatas.add(nameInData);
+		usedValues.add(value);
+		usedRepeatIds.add(repeatId);
+		factoredDataAtomic = new DataAtomicSpy(nameInData, value);
+		factoredDataAtomics.add(factoredDataAtomic);
+		return factoredDataAtomic;
 	}
 
 }

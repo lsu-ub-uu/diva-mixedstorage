@@ -105,12 +105,12 @@ public class DivaMixedUserStorage implements UserStorage {
 		Map<String, Object> userRowFromDb = recordReader
 				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
 		DataGroup user = userConverter.fromMap(userRowFromDb);
-		possiblyReadAndAddRoles(userRowFromDb, user);
+		readAndPossiblyAddRoles(userRowFromDb, user);
 
 		return user;
 	}
 
-	private void possiblyReadAndAddRoles(Map<String, Object> userRowFromDb, DataGroup user) {
+	private void readAndPossiblyAddRoles(Map<String, Object> userRowFromDb, DataGroup user) {
 		List<DataGroup> rolesList = readAndConvertClassicGroupsToCoraRoles(userRowFromDb);
 		possiblyAddRoles(rolesList, user);
 	}
@@ -168,10 +168,21 @@ public class DivaMixedUserStorage implements UserStorage {
 		return !domains.isEmpty();
 	}
 
-	private void possiblyAddRoles(List<DataGroup> rolesList, DataGroup user) {
-		if (matchingCoraRolesFound(rolesList)) {
+	private void possiblyAddRoles(List<DataGroup> roleList, DataGroup user) {
+		if (matchingCoraRolesFound(roleList)) {
+
+			// TODO: datagrupperna är ju redan skapade, ska de inte bara addas till user?
+			// vad ska createUserRoleChild göra?
+			// borde det inte vara:
+			// int repeatId = 0;
+			// for(DataGroup role : roleList){
+			// role.setRepeatId(String.valueOf(repeatId));
+			// user.addChild(role);
+			// repeatId++;
+
+			// }
 			DataGroup createUserRoleChild = dataGroupRoleReferenceCreator
-					.createUserRoleChild(rolesList);
+					.createUserRoleChild(roleList);
 			user.addChild(createUserRoleChild);
 		}
 	}
