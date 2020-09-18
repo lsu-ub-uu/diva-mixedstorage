@@ -109,7 +109,7 @@ public class DivaMixedUserStorageProviderTest {
 		assertSame(guestUserStorageInUserStorage, guestUserStorageFromStarter);
 		assertTrue(userStorage.getDbToCoraUserConverter() instanceof DivaDbToCoraUserConverter);
 		assertTrue(userStorage
-				.getDataGroupRoleReferenceCreator() instanceof DataGroupRoleReferenceCreator);
+				.getDataGroupRoleReferenceCreator() instanceof DataGroupRoleReferenceCreatorImp);
 
 		RecordReaderImp recordReader = (RecordReaderImp) userStorage.getRecordReader();
 		DataReaderImp dataReader = (DataReaderImp) recordReader.getDataReader();

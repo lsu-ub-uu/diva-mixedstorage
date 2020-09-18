@@ -25,32 +25,23 @@ import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 
 public class DataGroupRoleReferenceCreatorSpy implements DataGroupRoleReferenceCreator {
-	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public MethodCallRecorder methodCallRecorder = new MethodCallRecorder();
 
 	@Override
 	public DataGroup createRoleReferenceForDomainAdminUsingDomain(List<String> domains) {
-		MCR.addCall("domains", domains);
+		methodCallRecorder.addCall("domains", domains);
 
-		DataGroupSpy dataGroupSpy = new DataGroupSpy("userDomainAdminRole");
-		MCR.addReturned(dataGroupSpy);
+		DataGroupSpy dataGroupSpy = new DataGroupSpy("userRole");
+		methodCallRecorder.addReturned(dataGroupSpy);
 		return dataGroupSpy;
 	}
 
 	@Override
 	public DataGroup createRoleReferenceForSystemAdmin() {
-		MCR.addCall();
-
-		DataGroupSpy dataGroupSpy = new DataGroupSpy("userSystemAdminRole");
-		MCR.addReturned(dataGroupSpy);
-		return dataGroupSpy;
-	}
-
-	@Override
-	public DataGroup createUserRoleChild(List<DataGroup> rolesList) {
-		MCR.addCall("rolesList", rolesList);
+		methodCallRecorder.addCall();
 
 		DataGroupSpy dataGroupSpy = new DataGroupSpy("userRole");
-		MCR.addReturned(dataGroupSpy);
+		methodCallRecorder.addReturned(dataGroupSpy);
 		return dataGroupSpy;
 	}
 }

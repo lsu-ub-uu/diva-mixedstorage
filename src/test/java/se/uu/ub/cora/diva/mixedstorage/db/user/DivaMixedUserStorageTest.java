@@ -19,7 +19,6 @@
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
@@ -33,6 +32,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterSpy;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
@@ -175,7 +175,7 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
-		dataGroupRoleReferenceCreator.MCR
+		dataGroupRoleReferenceCreator.methodCallRecorder
 				.assertMethodNotCalled("createRoleLinkForDomainAdminUsingDomain");
 	}
 
@@ -186,9 +186,9 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
-		dataGroupRoleReferenceCreator.MCR
+		dataGroupRoleReferenceCreator.methodCallRecorder
 				.assertMethodNotCalled("createRoleLinkForDomainAdminUsingDomain");
-		dataGroupRoleReferenceCreator.MCR
+		dataGroupRoleReferenceCreator.methodCallRecorder
 				.assertMethodNotCalled("createRoleReferenceForSystemAdmin");
 	}
 
@@ -199,7 +199,7 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
-		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 
 		@SuppressWarnings("unchecked")
 		List<String> domainList = (List<String>) roleReferenceMCR
@@ -219,7 +219,7 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
-		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 
 		List<String> domainList = (List<String>) roleReferenceMCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
@@ -238,7 +238,7 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
-		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 		@SuppressWarnings("unchecked")
 		List<String> domainList = (List<String>) roleReferenceMCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
@@ -263,7 +263,7 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
-		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 		roleReferenceMCR.assertMethodWasCalled("createRoleReferenceForSystemAdmin");
 		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForDomainAdmin");
 	}
@@ -277,7 +277,7 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
-		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 		roleReferenceMCR.assertNumberOfCallsToMethod("createRoleReferenceForSystemAdmin", 1);
 		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForDomainAdminUsingDomain");
 	}
@@ -288,73 +288,8 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
-		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
+		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 		roleReferenceMCR.assertMethodNotCalled("createUserRoleChild");
-	}
-
-	@Test
-	public void testCreateUserRoleChildHasBeenCalledIfDomainAdminExist() throws Exception {
-		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
-
-		userStorage.getUserByIdFromLogin(userId);
-
-		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
-		roleReferenceMCR.assertMethodWasCalled("createUserRoleChild");
-	}
-
-	@Test
-	public void testCreateUserRoleChildHasBeenCalledIfSystemAdminExist() throws Exception {
-		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
-
-		userStorage.getUserByIdFromLogin(userId);
-
-		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
-		roleReferenceMCR.assertMethodWasCalled("createUserRoleChild");
-	}
-
-	@Test
-	public void testCreateUserRoleChildCalledOnlyOnce() throws Exception {
-		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
-		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
-
-		userStorage.getUserByIdFromLogin(userId);
-
-		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.MCR;
-		roleReferenceMCR.assertNumberOfCallsToMethod("createUserRoleChild", 1);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testCreateUserIsCalledWithDomainAdminDataGroup() throws Exception {
-		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
-
-		userStorage.getUserByIdFromLogin(userId);
-
-		List<DataGroup> rolesList = (List<DataGroup>) dataGroupRoleReferenceCreator.MCR
-				.getValueForMethodNameAndCallNumberAndParameterName("createUserRoleChild", 0,
-						"rolesList");
-
-		assertNotNull(rolesList);
-		DataGroup domainAdminDataGroup = rolesList.get(0);
-		assertEquals(domainAdminDataGroup.getNameInData(), "userDomainAdminRole");
-
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testCreateUserIsCalledWithSystemAdminDataGroup() throws Exception {
-		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
-
-		userStorage.getUserByIdFromLogin(userId);
-
-		List<DataGroup> rolesList = (List<DataGroup>) dataGroupRoleReferenceCreator.MCR
-				.getValueForMethodNameAndCallNumberAndParameterName("createUserRoleChild", 0,
-						"rolesList");
-
-		assertNotNull(rolesList);
-		DataGroup domainAdminDataGroup = rolesList.get(0);
-		assertEquals(domainAdminDataGroup.getNameInData(), "userSystemAdminRole");
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -365,21 +300,18 @@ public class DivaMixedUserStorageTest {
 		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
 		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
 
-		userStorage.getUserByIdFromLogin(userId);
+		DataGroup userGroup = userStorage.getUserByIdFromLogin(userId);
 
-		List<DataGroup> rolesList = (List<DataGroup>) dataGroupRoleReferenceCreator.MCR
-				.getValueForMethodNameAndCallNumberAndParameterName("createUserRoleChild", 0,
-						"rolesList");
-
-		DataGroup returnedUserRole = (DataGroup) dataGroupRoleReferenceCreator.MCR
+		DataGroupSpy returnedUserRole = (DataGroupSpy) dataGroupRoleReferenceCreator.methodCallRecorder
 				.getReturnValue("createRoleReferenceForSystemAdmin", 0);
 
-		assertEquals(rolesList.size(), 1);
-		assertSame(rolesList.get(0), returnedUserRole);
+		assertTrue(userGroup.getChildren().contains(returnedUserRole));
 
-		dataGroupRoleReferenceCreator.MCR
+		assertEquals(returnedUserRole.getRepeatId(), "0");
+
+		dataGroupRoleReferenceCreator.methodCallRecorder
 				.assertMethodNotCalled("createRoleReferenceForDomainAdminUsingDomain");
-		dataGroupRoleReferenceCreator.MCR
+		dataGroupRoleReferenceCreator.methodCallRecorder
 				.assertNumberOfCallsToMethod("createRoleReferenceForSystemAdmin", 1);
 	}
 
@@ -399,16 +331,18 @@ public class DivaMixedUserStorageTest {
 	public void testRolesAreAddedAsChildForDomainAdmin() throws Exception {
 		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
 
-		DataGroup user = userStorage.getUserByIdFromLogin(userId);
+		DataGroup userGroup = userStorage.getUserByIdFromLogin(userId);
 
-		Object userRole = dataGroupRoleReferenceCreator.MCR.getReturnValue("createUserRoleChild",
-				0);
+		DataGroupSpy returnedUserRole = (DataGroupSpy) dataGroupRoleReferenceCreator.methodCallRecorder
+				.getReturnValue("createRoleReferenceForDomainAdminUsingDomain", 0);
 
-		assertTrue(userRole instanceof DataGroup);
+		assertTrue(userGroup.getChildren().contains(returnedUserRole));
 
-		List<DataGroup> userRoleGroups = user.getAllGroupsWithNameInData("userRole");
+		assertEquals(returnedUserRole.getRepeatId(), "0");
+
+		List<DataGroup> userRoleGroups = userGroup.getAllGroupsWithNameInData("userRole");
 
 		assertEquals(userRoleGroups.size(), 1);
-		assertSame(userRole, userRoleGroups.get(0));
+		assertSame(returnedUserRole, userRoleGroups.get(0));
 	}
 }

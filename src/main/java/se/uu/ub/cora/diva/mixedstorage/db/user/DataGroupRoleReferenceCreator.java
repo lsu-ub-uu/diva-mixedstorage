@@ -32,6 +32,4 @@ public interface DataGroupRoleReferenceCreator {
 
 	DataGroup createRoleReferenceForSystemAdmin();
 
-	DataGroup createUserRoleChild(List<DataGroup> rolesList);
-
 }

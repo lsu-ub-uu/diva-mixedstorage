@@ -63,7 +63,7 @@ public class DivaMixedUserStorageProvider implements UserStorageProvider {
 		UserStorage guestUserStorage = createGuestUserStorage();
 		RecordReader recordReader = createRecordReader();
 		DivaDbToCoraConverter converter = new DivaDbToCoraUserConverter();
-		DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator = null;
+		DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator = new DataGroupRoleReferenceCreatorImp();
 
 		userStorage = DivaMixedUserStorage
 				.usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(

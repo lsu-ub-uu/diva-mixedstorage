@@ -82,10 +82,4 @@ public class DataGroupRoleReferenceCreatorImp implements DataGroupRoleReferenceC
 		role.addChild(child);
 		return role;
 	}
-
-	@Override
-	public DataGroup createUserRoleChild(List<DataGroup> rolesList) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
