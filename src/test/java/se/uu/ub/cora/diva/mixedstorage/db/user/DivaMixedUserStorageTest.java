@@ -82,7 +82,6 @@ public class DivaMixedUserStorageTest {
 		assertSame(userById, guestUserStorage.returnedUser);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetUserByIdFromLoginTestTableNameAndConditions() {
 		userStorage.getUserByIdFromLogin(userId);
@@ -90,9 +89,7 @@ public class DivaMixedUserStorageTest {
 		recordReader.MCR.assertMethodWasCalled("readOneRowFromDbUsingTableAndConditions");
 		recordReader.MCR.assertParameter("readOneRowFromDbUsingTableAndConditions", 0, "tableName",
 				"public.user");
-		// assertEquals(recordReader.usedTableName, "public.user");
-		// Map<String, Object> usedConditions = recordReader.usedConditions;
-		Map<String, Object> usedConditions = (Map<String, Object>) recordReader.MCR
+		Map<?, ?> usedConditions = (Map<?, ?>) recordReader.MCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
 						"readOneRowFromDbUsingTableAndConditions", 0, "conditions");
 		assertEquals(usedConditions.get("user_id"), "userId");
@@ -126,7 +123,6 @@ public class DivaMixedUserStorageTest {
 				"Unrecognized format of userIdFromLogin: userId@somedomainorg");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testReadGroupUsersView() throws Exception {
 		setResponseForReadOneRowInRecordReaderSpy("917");
@@ -137,10 +133,10 @@ public class DivaMixedUserStorageTest {
 		recordReader.MCR.assertParameter("readFromTableUsingConditions", 0, "tableName",
 				"public.groupsforuser");
 
-		Map<String, Object> returnedUserDbData = (Map<String, Object>) recordReader.MCR
+		Map<?, ?> returnedUserDbData = (Map<?, ?>) recordReader.MCR
 				.getReturnValue("readOneRowFromDbUsingTableAndConditions", 0);
 
-		Map<String, Object> conditionsForGroupsForUser = (Map<String, Object>) recordReader.MCR
+		Map<?, ?> conditionsForGroupsForUser = (Map<?, ?>) recordReader.MCR
 				.getValueForMethodNameAndCallNumberAndParameterName("readFromTableUsingConditions",
 						0, "conditions");
 
@@ -153,16 +149,15 @@ public class DivaMixedUserStorageTest {
 		recordReader.responseToReadOneRowFromDbUsingTableAndConditions = response;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testReadGroupUsersViewUsesDbIdFromUserDbCall() throws Exception {
 
 		userStorage.getUserByIdFromLogin(userId);
 
-		Map<String, Object> returnedUserDbData = (Map<String, Object>) recordReader.MCR
+		Map<?, ?> returnedUserDbData = (Map<?, ?>) recordReader.MCR
 				.getReturnValue("readOneRowFromDbUsingTableAndConditions", 0);
 
-		Map<String, Object> conditionsForGroupsForUser = (Map<String, Object>) recordReader.MCR
+		Map<?, ?> conditionsForGroupsForUser = (Map<?, ?>) recordReader.MCR
 				.getValueForMethodNameAndCallNumberAndParameterName("readFromTableUsingConditions",
 						0, "conditions");
 
@@ -201,8 +196,7 @@ public class DivaMixedUserStorageTest {
 
 		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 
-		@SuppressWarnings("unchecked")
-		List<String> domainList = (List<String>) roleReferenceMCR
+		List<?> domainList = (List<?>) roleReferenceMCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
 						"createRoleReferenceForDomainAdminUsingDomain", 0, "domains");
 
@@ -210,7 +204,6 @@ public class DivaMixedUserStorageTest {
 		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForSystemAdmin");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testdataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingSeveralDomainAdmin()
 			throws Exception {
@@ -221,7 +214,7 @@ public class DivaMixedUserStorageTest {
 
 		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 
-		List<String> domainList = (List<String>) roleReferenceMCR
+		List<?> domainList = (List<?>) roleReferenceMCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
 						"createRoleReferenceForDomainAdminUsingDomain", 0, "domains");
 
@@ -239,8 +232,7 @@ public class DivaMixedUserStorageTest {
 		userStorage.getUserByIdFromLogin(userId);
 
 		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
-		@SuppressWarnings("unchecked")
-		List<String> domainList = (List<String>) roleReferenceMCR
+		List<?> domainList = (List<?>) roleReferenceMCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
 						"createRoleReferenceForDomainAdminUsingDomain", 0, "domains");
 
@@ -292,7 +284,6 @@ public class DivaMixedUserStorageTest {
 		roleReferenceMCR.assertMethodNotCalled("createUserRoleChild");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testCreateUserIsCalledWithSeveralDataGroupsAndSystemAdminExists() throws Exception {
 		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
