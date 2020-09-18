@@ -33,26 +33,45 @@ public class DataGroupRoleReferenceCreatorImp implements DataGroupRoleReferenceC
 		DataGroup child = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId("userRole",
 				"permissionRole", "divaDomainAdminRole");
 		role.addChild(child);
-		if (!domains.isEmpty()) {
-			DataGroup rulePart = DataGroupProvider
-					.getDataGroupUsingNameInData("permissionTermRulePart");
-
-			DataGroup ruleGroup = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId(
-					"rule", "collectPermissionTerm", "domainPermissionTerm");
-			rulePart.addChild(ruleGroup);
-
-			int repeatId = 0;
-			for (String domain : domains) {
-				DataAtomic domainValue = DataAtomicProvider
-						.getDataAtomicUsingNameInDataAndValueAndRepeatId("value",
-								"domain." + domain, String.valueOf(repeatId));
-				repeatId++;
-				rulePart.addChild(domainValue);
-			}
-
-			role.addChild(rulePart);
+		if (domainsExist(domains)) {
+			addPermissionRulePart(domains, role);
 		}
 		return role;
+	}
+
+	private boolean domainsExist(List<String> domains) {
+		return !domains.isEmpty();
+	}
+
+	private void addPermissionRulePart(List<String> domains, DataGroup role) {
+		DataGroup rulePart = DataGroupProvider
+				.getDataGroupUsingNameInData("permissionTermRulePart");
+
+		DataGroup ruleGroup = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId("rule",
+				"collectPermissionTerm", "domainPermissionTerm");
+		rulePart.addChild(ruleGroup);
+
+		addValuePartsForDomains(domains, rulePart);
+
+		role.addChild(rulePart);
+	}
+
+	private void addValuePartsForDomains(List<String> domains, DataGroup rulePart) {
+		int repeatId = 0;
+		for (String domain : domains) {
+			createAndAddValuePartForDomain(rulePart, domain, repeatId);
+			repeatId++;
+		}
+	}
+
+	private void createAndAddValuePartForDomain(DataGroup rulePart, String domain, int repeatId) {
+		DataAtomic domainValue = createValuePartForDomain(repeatId, domain);
+		rulePart.addChild(domainValue);
+	}
+
+	private DataAtomic createValuePartForDomain(int repeatId, String domain) {
+		return DataAtomicProvider.getDataAtomicUsingNameInDataAndValueAndRepeatId("value",
+				"domain." + domain, String.valueOf(repeatId));
 	}
 
 	@Override
