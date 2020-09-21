@@ -198,7 +198,7 @@ public class DivaMixedUserStorageTest {
 
 		List<?> domainList = (List<?>) roleReferenceMCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
-						"createRoleReferenceForDomainAdminUsingDomain", 0, "domains");
+						"createRoleReferenceForDomainAdminUsingDomains", 0, "domains");
 
 		assertEquals(domainList.get(0), "uu");
 		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForSystemAdmin");
@@ -216,7 +216,7 @@ public class DivaMixedUserStorageTest {
 
 		List<?> domainList = (List<?>) roleReferenceMCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
-						"createRoleReferenceForDomainAdminUsingDomain", 0, "domains");
+						"createRoleReferenceForDomainAdminUsingDomains", 0, "domains");
 
 		assertEquals(domainList.size(), 2);
 		assertEquals(domainList.get(0), "uu");
@@ -234,7 +234,7 @@ public class DivaMixedUserStorageTest {
 		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 		List<?> domainList = (List<?>) roleReferenceMCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
-						"createRoleReferenceForDomainAdminUsingDomain", 0, "domains");
+						"createRoleReferenceForDomainAdminUsingDomains", 0, "domains");
 
 		assertEquals(domainList.get(0), "kth");
 		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForSystemAdmin");
@@ -263,9 +263,9 @@ public class DivaMixedUserStorageTest {
 	@Test
 	public void testDataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingSeveralSystemAdmin()
 			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
 		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "diva");
 		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "other");
-		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
 
 		userStorage.getUserByIdFromLogin(userId);
 
@@ -325,7 +325,7 @@ public class DivaMixedUserStorageTest {
 		DataGroup userGroup = userStorage.getUserByIdFromLogin(userId);
 
 		DataGroupSpy returnedUserRole = (DataGroupSpy) dataGroupRoleReferenceCreator.methodCallRecorder
-				.getReturnValue("createRoleReferenceForDomainAdminUsingDomain", 0);
+				.getReturnValue("createRoleReferenceForDomainAdminUsingDomains", 0);
 
 		assertTrue(userGroup.getChildren().contains(returnedUserRole));
 

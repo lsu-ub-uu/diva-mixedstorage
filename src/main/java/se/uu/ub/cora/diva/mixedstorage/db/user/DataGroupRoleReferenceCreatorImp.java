@@ -28,7 +28,7 @@ import se.uu.ub.cora.data.DataGroupProvider;
 public class DataGroupRoleReferenceCreatorImp implements DataGroupRoleReferenceCreator {
 
 	@Override
-	public DataGroup createRoleReferenceForDomainAdminUsingDomain(List<String> domains) {
+	public DataGroup createRoleReferenceForDomainAdminUsingDomains(List<String> domains) {
 		DataGroup role = DataGroupProvider.getDataGroupUsingNameInData("userRole");
 		DataGroup child = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId("userRole",
 				"permissionRole", "divaDomainAdminRole");

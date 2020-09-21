@@ -28,7 +28,7 @@ public class DataGroupRoleReferenceCreatorSpy implements DataGroupRoleReferenceC
 	public MethodCallRecorder methodCallRecorder = new MethodCallRecorder();
 
 	@Override
-	public DataGroup createRoleReferenceForDomainAdminUsingDomain(List<String> domains) {
+	public DataGroup createRoleReferenceForDomainAdminUsingDomains(List<String> domains) {
 		methodCallRecorder.addCall("domains", domains);
 
 		DataGroupSpy dataGroupSpy = new DataGroupSpy("userRole");

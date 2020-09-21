@@ -77,7 +77,7 @@ public class DataGroupRoleReferenceCreatorTest {
 	public void testDomainAdminRoleNoDomains() {
 		DataGroupRoleReferenceCreator refCreator = new DataGroupRoleReferenceCreatorImp();
 		DataGroup domainAdminRole = refCreator
-				.createRoleReferenceForDomainAdminUsingDomain(Collections.emptyList());
+				.createRoleReferenceForDomainAdminUsingDomains(Collections.emptyList());
 
 		assertTopGroupWithRoleLinkIsCreated("divaDomainAdminRole");
 
@@ -97,7 +97,7 @@ public class DataGroupRoleReferenceCreatorTest {
 
 		DataGroupRoleReferenceCreator refCreator = new DataGroupRoleReferenceCreatorImp();
 		DataGroup domainAdminRole = refCreator
-				.createRoleReferenceForDomainAdminUsingDomain(domains);
+				.createRoleReferenceForDomainAdminUsingDomains(domains);
 
 		List<DataGroupSpy> createdDataGroups = dataGroupFactory.factoredDataGroups;
 
