@@ -20,6 +20,7 @@ package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -32,9 +33,13 @@ import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.storage.RecordStorage;
+import se.uu.ub.cora.storage.StorageReadResult;
 
-public class DivaMixedUserStorage implements UserStorage {
+public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
+	private static final String DOMAIN = "domain";
+	private static final String USER_ID = "user_id";
 	private static final String DOMAIN_ADMIN = "domainAdmin";
 	private static final String SYSTEM_ADMIN = "systemAdmin";
 	private static final String DB_ID = "db_id";
@@ -68,6 +73,10 @@ public class DivaMixedUserStorage implements UserStorage {
 
 	@Override
 	public DataGroup getUserByIdFromLogin(String idFromLogin) {
+		return readUserByUserId(idFromLogin);
+	}
+
+	private DataGroup readUserByUserId(String idFromLogin) {
 		logAndThrowExceptionIfUnexpectedFormatOf(idFromLogin);
 		Map<String, Object> conditions = createConditions(idFromLogin);
 		return readAndConvertUser(conditions);
@@ -94,12 +103,12 @@ public class DivaMixedUserStorage implements UserStorage {
 
 	private void addUserId(String idFromLogin, Map<String, Object> conditions) {
 		String userId = getUserIdFromIdFromLogin(idFromLogin);
-		conditions.put("user_id", userId);
+		conditions.put(USER_ID, userId);
 	}
 
 	private void addDomain(String idFromLogin, Map<String, Object> conditions) {
 		String userDomain = getDomainFromLogin(idFromLogin);
-		conditions.put("domain", userDomain);
+		conditions.put(DOMAIN, userDomain);
 	}
 
 	private DataGroup readAndConvertUser(Map<String, Object> conditions) {
@@ -178,7 +187,7 @@ public class DivaMixedUserStorage implements UserStorage {
 		List<String> domains = new ArrayList<>();
 		for (Map<String, Object> group : groupRowsFromDb) {
 			if (groupTypeIsDomainAdminRole(group)) {
-				domains.add((String) group.get("domain"));
+				domains.add((String) group.get(DOMAIN));
 			}
 		}
 		return domains;
@@ -227,6 +236,81 @@ public class DivaMixedUserStorage implements UserStorage {
 		return loginDomainNameParts[secondLevelDomainPosition];
 	}
 
+	@Override
+	public DataGroup read(String type, String id) {
+		Map<String, Object> conditions = createConditionsForId(id);
+		return readAndConvertUser(conditions);
+	}
+
+	private Map<String, Object> createConditionsForId(String id) {
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put(DB_ID, id);
+		return conditions;
+	}
+
+	@Override
+	public void create(String type, String id, DataGroup record, DataGroup collectedTerms,
+			DataGroup linkList, String dataDivider) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteByTypeAndId(String type, String id) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public boolean linksExistForRecord(String type, String id) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
+			DataGroup linkList, String dataDivider) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public StorageReadResult readList(String type, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public StorageReadResult readAbstractList(String type, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DataGroup readLinkList(String type, String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Collection<DataGroup> generateLinkCollectionPointingToRecord(String type, String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean recordsExistForRecordType(String type) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
+			String id) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	UserStorage getUserStorageForGuest() {
 		// needed for test
 		return guestUserStorage;
@@ -246,5 +330,4 @@ public class DivaMixedUserStorage implements UserStorage {
 		// needed for test
 		return dataGroupRoleReferenceCreator;
 	}
-
 }

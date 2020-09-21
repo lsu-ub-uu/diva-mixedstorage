@@ -37,7 +37,9 @@ import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterSpy;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
+import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaMixedUserStorageTest {
 
@@ -49,6 +51,7 @@ public class DivaMixedUserStorageTest {
 	private DivaDbToCoraConverterSpy userConverter;
 	private DataGroupRoleReferenceCreatorSpy dataGroupRoleReferenceCreator;
 	private String userId;
+	private RecordStorage recordStorage;
 
 	@BeforeMethod
 	public void setUp() {
@@ -64,6 +67,8 @@ public class DivaMixedUserStorageTest {
 						dataGroupRoleReferenceCreator);
 		userId = "userId@user.uu.se";
 		setResponseForReadOneRowInRecordReaderSpy("342");
+		UserStorage userStorage2 = userStorage;
+		recordStorage = userStorage;
 	}
 
 	@Test
@@ -97,14 +102,39 @@ public class DivaMixedUserStorageTest {
 	}
 
 	@Test
+	public void testReadTestTableNameAndConditions() {
+		recordStorage.read("", "14");
+
+		recordReader.MCR.assertMethodWasCalled("readOneRowFromDbUsingTableAndConditions");
+		recordReader.MCR.assertParameter("readOneRowFromDbUsingTableAndConditions", 0, "tableName",
+				"public.user");
+		Map<?, ?> usedConditions = (Map<?, ?>) recordReader.MCR
+				.getValueForMethodNameAndCallNumberAndParameterName(
+						"readOneRowFromDbUsingTableAndConditions", 0, "conditions");
+		assertEquals(usedConditions.get("db_id"), "14");
+		assertEquals(usedConditions.size(), 1);
+	}
+
+	@Test
 	public void testGetUserByIdFromLoginTestReturnedDataGroup() {
 		DataGroup user = userStorage.getUserByIdFromLogin(userId);
 
+		assertAnswerFromRecordReaderUsedInConverter(user);
+	}
+
+	private void assertAnswerFromRecordReaderUsedInConverter(DataGroup user) {
 		Object responseFromDB = recordReader.MCR
 				.getReturnValue("readOneRowFromDbUsingTableAndConditions", 0);
 
 		assertEquals(userConverter.mapToConvert, responseFromDB);
 		assertSame(user, userConverter.convertedDbDataGroup);
+	}
+
+	@Test
+	public void testReadTestReturnedDataGroup() {
+		DataGroup user = recordStorage.read("", "14");
+
+		assertAnswerFromRecordReaderUsedInConverter(user);
 	}
 
 	@Test(expectedExceptions = DbException.class, expectedExceptionsMessageRegExp = ""
@@ -129,6 +159,10 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
+		assertSecondCallToDbToReadViewGroupsForUserAndUsesDbIdFromFirstCall();
+	}
+
+	private void assertSecondCallToDbToReadViewGroupsForUserAndUsesDbIdFromFirstCall() {
 		recordReader.MCR.assertMethodWasCalled("readFromTableUsingConditions");
 		recordReader.MCR.assertParameter("readFromTableUsingConditions", 0, "tableName",
 				"public.groupsforuser");
@@ -150,19 +184,28 @@ public class DivaMixedUserStorageTest {
 	}
 
 	@Test
-	public void testReadGroupUsersViewUsesDbIdFromUserDbCall() throws Exception {
+	public void testReadRecordGroupUsersView() throws Exception {
+		setResponseForReadOneRowInRecordReaderSpy("917");
 
-		userStorage.getUserByIdFromLogin(userId);
+		recordStorage.read("", "14");
 
-		Map<?, ?> returnedUserDbData = (Map<?, ?>) recordReader.MCR
-				.getReturnValue("readOneRowFromDbUsingTableAndConditions", 0);
-
-		Map<?, ?> conditionsForGroupsForUser = (Map<?, ?>) recordReader.MCR
-				.getValueForMethodNameAndCallNumberAndParameterName("readFromTableUsingConditions",
-						0, "conditions");
-
-		assertEquals(conditionsForGroupsForUser.get("db_id"), returnedUserDbData.get("db_id"));
+		assertSecondCallToDbToReadViewGroupsForUserAndUsesDbIdFromFirstCall();
 	}
+
+	// @Test
+	// public void testReadGroupUsersViewUsesDbIdFromUserDbCall() throws Exception {
+	//
+	// userStorage.getUserByIdFromLogin(userId);
+	//
+	// Map<?, ?> returnedUserDbData = (Map<?, ?>) recordReader.MCR
+	// .getReturnValue("readOneRowFromDbUsingTableAndConditions", 0);
+	//
+	// Map<?, ?> conditionsForGroupsForUser = (Map<?, ?>) recordReader.MCR
+	// .getValueForMethodNameAndCallNumberAndParameterName("readFromTableUsingConditions",
+	// 0, "conditions");
+	//
+	// assertEquals(conditionsForGroupsForUser.get("db_id"), returnedUserDbData.get("db_id"));
+	// }
 
 	@Test
 	public void testdataGroupRoleReferenceCreatorNOTCalledForNoReturnedGroupsForUser()
@@ -175,16 +218,40 @@ public class DivaMixedUserStorageTest {
 	}
 
 	@Test
+	public void testdataGroupRoleReferenceCreatorNOTCalledForNoReturnedGroupsForUserReadingRecord()
+			throws Exception {
+
+		recordStorage.read("", "14");
+
+		dataGroupRoleReferenceCreator.methodCallRecorder
+				.assertMethodNotCalled("createRoleLinkForDomainAdminUsingDomain");
+	}
+
+	@Test
 	public void testdataGroupRoleReferenceCreatorNOTCalledForUnimplementedReturnedGroupsForUser()
 			throws Exception {
 		addResponseForReadFromTableUsingConditonsReaderSpy("someGroupNotToAdd", "uu");
 
 		userStorage.getUserByIdFromLogin(userId);
 
+		assertRoleReferenceCreatorNOTCalled();
+	}
+
+	private void assertRoleReferenceCreatorNOTCalled() {
 		dataGroupRoleReferenceCreator.methodCallRecorder
 				.assertMethodNotCalled("createRoleLinkForDomainAdminUsingDomain");
 		dataGroupRoleReferenceCreator.methodCallRecorder
 				.assertMethodNotCalled("createRoleReferenceForSystemAdmin");
+	}
+
+	@Test
+	public void testdataGroupRoleReferenceCreatorNOTCalledForUnimplementedReturnedGroupsForUserReadingRecord()
+			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("someGroupNotToAdd", "uu");
+
+		recordStorage.read("", "14");
+
+		assertRoleReferenceCreatorNOTCalled();
 	}
 
 	@Test
@@ -194,6 +261,10 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
+		assertRoleReferenceCreatorCalledCorrectlyForDomainUU();
+	}
+
+	private void assertRoleReferenceCreatorCalledCorrectlyForDomainUU() {
 		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 
 		List<?> domainList = (List<?>) roleReferenceMCR
@@ -205,6 +276,16 @@ public class DivaMixedUserStorageTest {
 	}
 
 	@Test
+	public void testdataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingDomainAdminUUReadingRecord()
+			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
+
+		recordStorage.read("", "14");
+
+		assertRoleReferenceCreatorCalledCorrectlyForDomainUU();
+	}
+
+	@Test
 	public void testdataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingSeveralDomainAdmin()
 			throws Exception {
 		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
@@ -212,6 +293,10 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
+		assertRoleReferenceCreatorCalledCorrectlyForTwoDomains();
+	}
+
+	private void assertRoleReferenceCreatorCalledCorrectlyForTwoDomains() {
 		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 
 		List<?> domainList = (List<?>) roleReferenceMCR
@@ -225,12 +310,27 @@ public class DivaMixedUserStorageTest {
 	}
 
 	@Test
+	public void testdataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingSeveralDomainAdminReadingRecord()
+			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
+
+		recordStorage.read("", "14");
+
+		assertRoleReferenceCreatorCalledCorrectlyForTwoDomains();
+	}
+
+	@Test
 	public void testdataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingDomainAdminKTH()
 			throws Exception {
 		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
 
 		userStorage.getUserByIdFromLogin(userId);
 
+		assertRoleReferenceCreatorCalledForKTHAndNotSystemAdmin();
+	}
+
+	private void assertRoleReferenceCreatorCalledForKTHAndNotSystemAdmin() {
 		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 		List<?> domainList = (List<?>) roleReferenceMCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
@@ -238,6 +338,16 @@ public class DivaMixedUserStorageTest {
 
 		assertEquals(domainList.get(0), "kth");
 		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForSystemAdmin");
+	}
+
+	@Test
+	public void testdataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingDomainAdminKTHReadingRecord()
+			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
+
+		recordStorage.read("", "14");
+
+		assertRoleReferenceCreatorCalledForKTHAndNotSystemAdmin();
 	}
 
 	private void addResponseForReadFromTableUsingConditonsReaderSpy(String groupType,
@@ -255,9 +365,23 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
+		assertRoleReferenceCreatorCalledForSystemAdminAndNOTDiVA();
+	}
+
+	private void assertRoleReferenceCreatorCalledForSystemAdminAndNOTDiVA() {
 		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 		roleReferenceMCR.assertMethodWasCalled("createRoleReferenceForSystemAdmin");
 		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForDomainAdmin");
+	}
+
+	@Test
+	public void testDataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingSystemAdminReadingRecord()
+			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "diva");
+
+		recordStorage.read("", "14");
+
+		assertRoleReferenceCreatorCalledForSystemAdminAndNOTDiVA();
 	}
 
 	@Test
@@ -269,9 +393,25 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
+		assertRoleReferenceCreatorCalledOnlyOnceForSystemAdmin();
+	}
+
+	private void assertRoleReferenceCreatorCalledOnlyOnceForSystemAdmin() {
 		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 		roleReferenceMCR.assertNumberOfCallsToMethod("createRoleReferenceForSystemAdmin", 1);
 		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForDomainAdminUsingDomain");
+	}
+
+	@Test
+	public void testDataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingSeveralSystemAdminReadingRecord()
+			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "diva");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "other");
+
+		recordStorage.read("", "14");
+
+		assertRoleReferenceCreatorCalledOnlyOnceForSystemAdmin();
 	}
 
 	@Test
@@ -280,8 +420,22 @@ public class DivaMixedUserStorageTest {
 
 		userStorage.getUserByIdFromLogin(userId);
 
+		assertCreateUserRoleChildNOTCalled();
+	}
+
+	private void assertCreateUserRoleChildNOTCalled() {
 		MethodCallRecorder roleReferenceMCR = dataGroupRoleReferenceCreator.methodCallRecorder;
 		roleReferenceMCR.assertMethodNotCalled("createUserRoleChild");
+	}
+
+	@Test
+	public void testCreateUserRoleChildHasNotBeenCalledIfRolesNotExistReadingRecord()
+			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("someGroupNotToAdd", "uu");
+
+		recordStorage.read("", "14");
+
+		assertCreateUserRoleChildNOTCalled();
 	}
 
 	@Test
@@ -293,6 +447,10 @@ public class DivaMixedUserStorageTest {
 
 		DataGroup userGroup = userStorage.getUserByIdFromLogin(userId);
 
+		assertOnlyCreateRoleReferenceForSystemAdminCalled(userGroup);
+	}
+
+	private void assertOnlyCreateRoleReferenceForSystemAdminCalled(DataGroup userGroup) {
 		DataGroupSpy returnedUserRole = (DataGroupSpy) dataGroupRoleReferenceCreator.methodCallRecorder
 				.getReturnValue("createRoleReferenceForSystemAdmin", 0);
 
@@ -307,15 +465,42 @@ public class DivaMixedUserStorageTest {
 	}
 
 	@Test
+	public void testCreateUserIsCalledWithSeveralDataGroupsAndSystemAdminExistsReadingRecord()
+			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
+		addResponseForReadFromTableUsingConditonsReaderSpy("systemAdmin", "uu");
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "kth");
+
+		DataGroup userGroup = recordStorage.read("", "14");
+
+		assertOnlyCreateRoleReferenceForSystemAdminCalled(userGroup);
+	}
+
+	@Test
 	public void testRolesAreNotAddedAsChildForUnimplementedReturnedGroupsForUser()
 			throws Exception {
 		addResponseForReadFromTableUsingConditonsReaderSpy("unimplementedGroup", "uu");
 
 		DataGroup returnedUser = userStorage.getUserByIdFromLogin(userId);
 
+		assertNoUserRoleGroupInDataGroup(returnedUser);
+	}
+
+	private void assertNoUserRoleGroupInDataGroup(DataGroup returnedUser) {
 		List<DataElement> allChildrenWithNameInData = returnedUser
 				.getAllChildrenWithNameInData("userRole");
 		assertNull(allChildrenWithNameInData);
+	}
+
+	@Test
+	public void testRolesAreNotAddedAsChildForUnimplementedReturnedGroupsForUserReadingRecord()
+			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("unimplementedGroup", "uu");
+
+		DataGroup returnedUser = recordStorage.read("", "14");
+
+		assertNoUserRoleGroupInDataGroup(returnedUser);
 	}
 
 	@Test
@@ -324,6 +509,10 @@ public class DivaMixedUserStorageTest {
 
 		DataGroup userGroup = userStorage.getUserByIdFromLogin(userId);
 
+		assertRolesAreAddedAsChildForDomainAdmin(userGroup);
+	}
+
+	private void assertRolesAreAddedAsChildForDomainAdmin(DataGroup userGroup) {
 		DataGroupSpy returnedUserRole = (DataGroupSpy) dataGroupRoleReferenceCreator.methodCallRecorder
 				.getReturnValue("createRoleReferenceForDomainAdminUsingDomains", 0);
 
@@ -335,5 +524,14 @@ public class DivaMixedUserStorageTest {
 
 		assertEquals(userRoleGroups.size(), 1);
 		assertSame(returnedUserRole, userRoleGroups.get(0));
+	}
+
+	@Test
+	public void testRolesAreAddedAsChildForDomainAdminReadingRecord() throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
+
+		DataGroup userGroup = recordStorage.read("", "14");
+
+		assertRolesAreAddedAsChildForDomainAdmin(userGroup);
 	}
 }
