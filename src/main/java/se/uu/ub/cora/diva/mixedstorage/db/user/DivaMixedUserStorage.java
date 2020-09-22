@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
 import se.uu.ub.cora.gatekeeper.user.UserStorage;
@@ -251,64 +252,58 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	@Override
 	public void create(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		// TODO Auto-generated method stub
-
+		throw NotImplementedException.withMessage("create is not implemented for user");
 	}
 
 	@Override
 	public void deleteByTypeAndId(String type, String id) {
-		// TODO Auto-generated method stub
-
+		throw NotImplementedException.withMessage("deleteByTypeAndId is not implemented for user");
 	}
 
 	@Override
 	public boolean linksExistForRecord(String type, String id) {
-		// TODO Auto-generated method stub
-		return false;
+		throw NotImplementedException
+				.withMessage("linksExistForRecord is not implemented for user");
 	}
 
 	@Override
 	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		// TODO Auto-generated method stub
-
+		throw NotImplementedException.withMessage("update is not implemented for user");
 	}
 
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
-		// TODO Auto-generated method stub
-		return null;
+		throw NotImplementedException.withMessage("readList is not implemented for user");
 	}
 
 	@Override
 	public StorageReadResult readAbstractList(String type, DataGroup filter) {
-		// TODO Auto-generated method stub
-		return null;
+		throw NotImplementedException.withMessage("readAbstractList is not implemented for user");
 	}
 
 	@Override
 	public DataGroup readLinkList(String type, String id) {
-		// TODO Auto-generated method stub
-		return null;
+		throw NotImplementedException.withMessage("readLinkList is not implemented for user");
 	}
 
 	@Override
 	public Collection<DataGroup> generateLinkCollectionPointingToRecord(String type, String id) {
-		// TODO Auto-generated method stub
-		return null;
+		throw NotImplementedException
+				.withMessage("generateLinkCollectionPointingToRecord is not implemented for user");
 	}
 
 	@Override
 	public boolean recordsExistForRecordType(String type) {
-		// TODO Auto-generated method stub
-		return false;
+		throw NotImplementedException
+				.withMessage("recordsExistForRecordType is not implemented for user");
 	}
 
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
-		// TODO Auto-generated method stub
-		return false;
+		throw NotImplementedException.withMessage(
+				"recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented for user");
 	}
 
 	UserStorage getUserStorageForGuest() {

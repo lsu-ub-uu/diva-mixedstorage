@@ -33,11 +33,11 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
+import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterSpy;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
-import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.RecordStorage;
 
@@ -67,7 +67,6 @@ public class DivaMixedUserStorageTest {
 						dataGroupRoleReferenceCreator);
 		userId = "userId@user.uu.se";
 		setResponseForReadOneRowInRecordReaderSpy("342");
-		UserStorage userStorage2 = userStorage;
 		recordStorage = userStorage;
 	}
 
@@ -533,5 +532,66 @@ public class DivaMixedUserStorageTest {
 		DataGroup userGroup = recordStorage.read("", "14");
 
 		assertRolesAreAddedAsChildForDomainAdmin(userGroup);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "create is not implemented for user")
+	public void createNotImplementedForUser() throws Exception {
+		recordStorage.create(null, null, null, null, null, null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "deleteByTypeAndId is not implemented for user")
+	public void deleteByTypeAndIdNotImplementedForUser() throws Exception {
+		recordStorage.deleteByTypeAndId(null, null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "linksExistForRecord is not implemented for user")
+	public void linksExistForRecordNotImplementedForUser() throws Exception {
+		recordStorage.linksExistForRecord(null, null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "update is not implemented for user")
+	public void updateNotImplementedForUser() throws Exception {
+		recordStorage.update(null, null, null, null, null, null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "readList is not implemented for user")
+	public void readListNotImplementedForUser() throws Exception {
+		recordStorage.readList(null, null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "readAbstractList is not implemented for user")
+	public void readAbstractListNotImplementedForUser() throws Exception {
+		recordStorage.readAbstractList(null, null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "readLinkList is not implemented for user")
+	public void readLinkListNotImplementedForUser() throws Exception {
+		recordStorage.readLinkList(null, null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "generateLinkCollectionPointingToRecord is not implemented for user")
+	public void generateLinkCollectionPointingToRecordNotImplementedForUser() throws Exception {
+		recordStorage.generateLinkCollectionPointingToRecord(null, null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "recordsExistForRecordType is not implemented for user")
+	public void recordsExistForRecordTypeNotImplementedForUser() throws Exception {
+		recordStorage.recordsExistForRecordType(null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented for user")
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdNotImplementedForUser()
+			throws Exception {
+		recordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(null, null);
 	}
 }
