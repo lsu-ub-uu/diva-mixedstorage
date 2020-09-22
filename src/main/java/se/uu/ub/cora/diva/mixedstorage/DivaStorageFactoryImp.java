@@ -47,12 +47,12 @@ public class DivaStorageFactoryImp implements DivaStorageFactory {
 	@Override
 	public RecordStorage factorForRecordType(String recordType) {
 		if (recordType.equals("user")) {
-			return factorUserStorage();
+			return factorRecordUserStorage();
 		}
 		throw NotImplementedException.withMessage("No storage implemented for: " + recordType);
 	}
 
-	private RecordStorage factorUserStorage() {
+	private RecordStorage factorRecordUserStorage() {
 		DivaDbToCoraConverter userConverter = new DivaDbToCoraUserConverter();
 		DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator = new DataGroupRoleReferenceCreatorImp();
 		RecordReader recordReader = recordReaderFactory.factor();

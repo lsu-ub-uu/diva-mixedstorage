@@ -34,9 +34,12 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
 import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactory;
 import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraRecordStorage;
+import se.uu.ub.cora.gatekeeper.user.UserStorage;
+import se.uu.ub.cora.gatekeeper.user.UserStorageProvider;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.Logger;
@@ -56,6 +59,7 @@ public class DivaMixedRecordStorageProvider
 
 	private Logger log = LoggerProvider.getLoggerForClass(DivaMixedRecordStorageProvider.class);
 	private Map<String, String> initInfo;
+	private UserStorageProvider userStorageProvider = new DivaMixedUserStorageProvider();
 
 	@Override
 	public int getOrderToSelectImplementionsBy() {
@@ -88,9 +92,10 @@ public class DivaMixedRecordStorageProvider
 		DivaFedoraRecordStorage fedoraStorage = createFedoraStorage();
 		RecordReaderFactoryImp recordReaderFactory = createRecordReaderFactory();
 		DivaDbRecordStorage dbStorage = createDbStorage(recordReaderFactory);
+		UserStorage userStorage = getUserStorage();
 
 		DivaStorageFactory divaStorageFactory = DivaStorageFactoryImp
-				.usingGuestUserStorageAndRecordReader(null, recordReaderFactory);
+				.usingGuestUserStorageAndRecordReader(userStorage, recordReaderFactory);
 
 		RecordStorage mixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
 				basicStorage, fedoraStorage, dbStorage, divaStorageFactory);
@@ -204,6 +209,11 @@ public class DivaMixedRecordStorageProvider
 		}
 	}
 
+	private UserStorage getUserStorage() {
+		userStorageProvider.startUsingInitInfo(initInfo);
+		return userStorageProvider.getUserStorage();
+	}
+
 	@Override
 	public MetadataStorage getMetadataStorage() {
 		DivaMixedRecordStorage mixedStorage = (DivaMixedRecordStorage) RecordStorageInstance
@@ -214,6 +224,14 @@ public class DivaMixedRecordStorageProvider
 	@Override
 	public RecordStorage getRecordStorage() {
 		return RecordStorageInstance.getInstance();
+	}
+
+	void setUserStorageProvider(UserStorageProvider userStorageProvider) {
+		this.userStorageProvider = userStorageProvider;
+	}
+
+	UserStorageProvider getUserStorageProvider() {
+		return userStorageProvider;
 	}
 
 }

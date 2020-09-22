@@ -240,11 +240,11 @@ public class DivaMixedUserStorageTest {
 	}
 
 	@Test
-	public void testdataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingDomainAdminUU()
-			throws Exception {
+	public void testdataGroupRoleReferenceCreatorOnlyCalledForDomainAdminGroup() throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("someGroupNotToAdd", "kth");
 		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
 
-		userStorage.getUserByIdFromLogin(userId);
+		recordStorage.read("", "14");
 
 		assertRoleReferenceCreatorCalledCorrectlyForDomainUU();
 	}
@@ -256,8 +256,21 @@ public class DivaMixedUserStorageTest {
 				.getValueForMethodNameAndCallNumberAndParameterName(
 						"createRoleReferenceForDomainAdminUsingDomains", 0, "domains");
 
+		assertEquals(domainList.size(), 1);
 		assertEquals(domainList.get(0), "uu");
+		roleReferenceMCR
+				.assertNumberOfCallsToMethod("createRoleReferenceForDomainAdminUsingDomains", 1);
 		roleReferenceMCR.assertMethodNotCalled("createRoleReferenceForSystemAdmin");
+	}
+
+	@Test
+	public void testdataGroupRoleReferenceCreatorCalledForReturnedGroupsForUserContainingDomainAdminUU()
+			throws Exception {
+		addResponseForReadFromTableUsingConditonsReaderSpy("domainAdmin", "uu");
+
+		userStorage.getUserByIdFromLogin(userId);
+
+		assertRoleReferenceCreatorCalledCorrectlyForDomainUU();
 	}
 
 	@Test
