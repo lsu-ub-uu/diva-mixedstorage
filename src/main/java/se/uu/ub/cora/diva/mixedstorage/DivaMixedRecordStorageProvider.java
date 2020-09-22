@@ -73,7 +73,7 @@ public class DivaMixedRecordStorageProvider
 
 	private void startRecordStorage() {
 		if (noRunningRecordStorageExists()) {
-			startNewRecordStorageOnDiskInstance();
+			startNewMixedRecordStorageInstance();
 		} else {
 			useExistingRecordStorage();
 		}
@@ -83,14 +83,17 @@ public class DivaMixedRecordStorageProvider
 		return RecordStorageInstance.getInstance() == null;
 	}
 
-	private void startNewRecordStorageOnDiskInstance() {
+	private void startNewMixedRecordStorageInstance() {
 		RecordStorage basicStorage = createBasicStorage();
 		DivaFedoraRecordStorage fedoraStorage = createFedoraStorage();
+		RecordReaderFactoryImp recordReaderFactory = createRecordReaderFactory();
+		DivaDbRecordStorage dbStorage = createDbStorage(recordReaderFactory);
 
-		DivaDbRecordStorage dbStorage = createDbStorage();
+		DivaStorageFactory divaStorageFactory = DivaStorageFactoryImp
+				.usingGuestUserStorageAndRecordReader(null, recordReaderFactory);
 
-		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
-				.usingBasicAndFedoraAndDbStorage(basicStorage, fedoraStorage, dbStorage);
+		RecordStorage mixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
+				basicStorage, fedoraStorage, dbStorage, divaStorageFactory);
 		setStaticInstance(mixedRecordStorage);
 	}
 
@@ -121,8 +124,7 @@ public class DivaMixedRecordStorageProvider
 						fedoraPassword);
 	}
 
-	private DivaDbRecordStorage createDbStorage() {
-		RecordReaderFactoryImp recordReaderFactory = createRecordReaderFactory();
+	private DivaDbRecordStorage createDbStorage(RecordReaderFactoryImp recordReaderFactory) {
 
 		DivaDbToCoraConverterFactoryImp divaDbToCoraConverterFactory = new DivaDbToCoraConverterFactoryImp();
 		DivaDbFactoryImp divaDbToCoraFactory = new DivaDbFactoryImp(recordReaderFactory,

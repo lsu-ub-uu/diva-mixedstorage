@@ -39,6 +39,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterSpy;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaMixedUserStorageTest {
@@ -190,21 +191,6 @@ public class DivaMixedUserStorageTest {
 
 		assertSecondCallToDbToReadViewGroupsForUserAndUsesDbIdFromFirstCall();
 	}
-
-	// @Test
-	// public void testReadGroupUsersViewUsesDbIdFromUserDbCall() throws Exception {
-	//
-	// userStorage.getUserByIdFromLogin(userId);
-	//
-	// Map<?, ?> returnedUserDbData = (Map<?, ?>) recordReader.MCR
-	// .getReturnValue("readOneRowFromDbUsingTableAndConditions", 0);
-	//
-	// Map<?, ?> conditionsForGroupsForUser = (Map<?, ?>) recordReader.MCR
-	// .getValueForMethodNameAndCallNumberAndParameterName("readFromTableUsingConditions",
-	// 0, "conditions");
-	//
-	// assertEquals(conditionsForGroupsForUser.get("db_id"), returnedUserDbData.get("db_id"));
-	// }
 
 	@Test
 	public void testdataGroupRoleReferenceCreatorNOTCalledForNoReturnedGroupsForUser()
@@ -532,6 +518,26 @@ public class DivaMixedUserStorageTest {
 		DataGroup userGroup = recordStorage.read("", "14");
 
 		assertRolesAreAddedAsChildForDomainAdmin(userGroup);
+	}
+
+	@Test
+	public void testReadingThroughRecordStorageMustUserNotFoundThrowException() throws Exception {
+		recordReader.throwException = true;
+		try {
+			recordStorage.read("", "14");
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Record not found for type: user and id: 14");
+			assertSame(e.getCause(),
+					recordReader.MCR.getReturnValue("readOneRowFromDbUsingTableAndConditions", 0));
+		}
+	}
+
+	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
+			+ "Record not found for type: user and id: 15")
+	public void testReadingThroughRecordStorageMustUserNotFoundThrowExceptionOtherId()
+			throws Exception {
+		recordReader.throwException = true;
+		recordStorage.read("", "15");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

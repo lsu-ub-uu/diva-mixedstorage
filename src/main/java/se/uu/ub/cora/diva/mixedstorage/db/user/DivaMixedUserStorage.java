@@ -34,6 +34,8 @@ import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.SqlStorageException;
+import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
@@ -240,7 +242,12 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	@Override
 	public DataGroup read(String type, String id) {
 		Map<String, Object> conditions = createConditionsForId(id);
-		return readAndConvertUser(conditions);
+		try {
+			return readAndConvertUser(conditions);
+		} catch (SqlStorageException sqle) {
+			throw new RecordNotFoundException("Record not found for type: user and id: " + id,
+					sqle);
+		}
 	}
 
 	private Map<String, Object> createConditionsForId(String id) {
@@ -306,22 +313,22 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 				"recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented for user");
 	}
 
-	UserStorage getUserStorageForGuest() {
+	public UserStorage getUserStorageForGuest() {
 		// needed for test
 		return guestUserStorage;
 	}
 
-	RecordReader getRecordReader() {
+	public RecordReader getRecordReader() {
 		// needed for test
 		return recordReader;
 	}
 
-	DivaDbToCoraConverter getDbToCoraUserConverter() {
+	public DivaDbToCoraConverter getDbToCoraUserConverter() {
 		// needed for test
 		return userConverter;
 	}
 
-	DataGroupRoleReferenceCreator getDataGroupRoleReferenceCreator() {
+	public DataGroupRoleReferenceCreator getDataGroupRoleReferenceCreator() {
 		// needed for test
 		return dataGroupRoleReferenceCreator;
 	}

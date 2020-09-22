@@ -33,21 +33,29 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private RecordStorage basicStorage;
 	private RecordStorage divaFedoraStorage;
 	private RecordStorage divaDbStorage;
+	private DivaStorageFactory storageFactory;
 
 	public static RecordStorage usingBasicAndFedoraAndDbStorage(RecordStorage basicStorage,
-			RecordStorage divaFedoraStorage, RecordStorage divaDbStorage) {
-		return new DivaMixedRecordStorage(basicStorage, divaFedoraStorage, divaDbStorage);
+			RecordStorage divaFedoraStorage, RecordStorage divaDbStorage,
+			DivaStorageFactory storageFactory) {
+		return new DivaMixedRecordStorage(basicStorage, divaFedoraStorage, divaDbStorage,
+				storageFactory);
 	}
 
 	private DivaMixedRecordStorage(RecordStorage basicStorage, RecordStorage divaFedoraStorage,
-			RecordStorage divaDbStorage) {
+			RecordStorage divaDbStorage, DivaStorageFactory storageFactory) {
 		this.basicStorage = basicStorage;
 		this.divaFedoraStorage = divaFedoraStorage;
 		this.divaDbStorage = divaDbStorage;
+		this.storageFactory = storageFactory;
 	}
 
 	@Override
 	public DataGroup read(String type, String id) {
+
+		// RecordStorage rs = divaStorageFactory.factor(type);
+		// return rs.read(type, id);
+
 		if (PERSON.equals(type)) {
 			return divaFedoraStorage.read(type, id);
 		}
@@ -62,7 +70,8 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	private DataGroup handleUser(String type, String id) {
 		try {
-			return divaDbStorage.read(type, id);
+			RecordStorage userRecordStorage = storageFactory.factorForRecordType(type);
+			return userRecordStorage.read(type, id);
 		} catch (RecordNotFoundException e) {
 			// do nothing, we keep looking in basicstorage
 		}
@@ -164,5 +173,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	@Override
 	public DataGroup getCollectIndexTerm(String collectIndexTermId) {
 		return ((SearchStorage) basicStorage).getCollectIndexTerm(collectIndexTermId);
+	}
+
+	public DivaStorageFactory getStorageFactory() {
+		return storageFactory;
 	}
 }

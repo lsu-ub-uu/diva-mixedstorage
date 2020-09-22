@@ -25,11 +25,13 @@ import java.util.Map;
 
 import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.SqlStorageException;
 
 public class RecordReaderUserSpy implements RecordReader {
 	public MethodCallRecorder MCR = new MethodCallRecorder();
 	public Map<String, Object> responseToReadOneRowFromDbUsingTableAndConditions = new HashMap<>();
 	public List<Map<String, Object>> responseToReadFromTableUsingConditions = new ArrayList<>();
+	public boolean throwException = false;
 
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName) {
@@ -41,6 +43,13 @@ public class RecordReaderUserSpy implements RecordReader {
 	public List<Map<String, Object>> readFromTableUsingConditions(String tableName,
 			Map<String, Object> conditions) {
 		MCR.addCall("tableName", tableName, "conditions", conditions);
+		if (throwException) {
+			SqlStorageException exception = SqlStorageException.withMessageAndException(
+					"Exception from RecordReaderUserSpy", new RuntimeException());
+			MCR.addReturned(exception);
+			throw exception;
+		}
+
 		MCR.addReturned(responseToReadFromTableUsingConditions);
 		return responseToReadFromTableUsingConditions;
 	}
@@ -49,6 +58,12 @@ public class RecordReaderUserSpy implements RecordReader {
 	public Map<String, Object> readOneRowFromDbUsingTableAndConditions(String tableName,
 			Map<String, Object> conditions) {
 		MCR.addCall("tableName", tableName, "conditions", conditions);
+		if (throwException) {
+			SqlStorageException exception = SqlStorageException.withMessageAndException(
+					"Exception from RecordReaderUserSpy", new RuntimeException());
+			MCR.addReturned(exception);
+			throw exception;
+		}
 		MCR.addReturned(responseToReadOneRowFromDbUsingTableAndConditions);
 		return responseToReadOneRowFromDbUsingTableAndConditions;
 	}
