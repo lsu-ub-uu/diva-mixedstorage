@@ -111,8 +111,14 @@ public class DivaMixedUserStorageTest {
 		Map<?, ?> usedConditions = (Map<?, ?>) recordReader.MCR
 				.getValueForMethodNameAndCallNumberAndParameterName(
 						"readOneRowFromDbUsingTableAndConditions", 0, "conditions");
-		assertEquals(usedConditions.get("db_id"), "14");
+		assertEquals(usedConditions.get("db_id"), 14);
 		assertEquals(usedConditions.size(), 1);
+	}
+
+	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
+			+ "Can not convert id to integer for id: user:14")
+	public void testIdIsNotANumberThrowsARecordNotFoundException() throws Exception {
+		recordStorage.read("", "user:14");
 	}
 
 	@Test

@@ -241,7 +241,12 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	@Override
 	public DataGroup read(String type, String id) {
-		Map<String, Object> conditions = createConditionsForId(id);
+		Map<String, Object> conditions = null;
+		try {
+			conditions = createConditionsForId(id);
+		} catch (NumberFormatException e) {
+			throw new RecordNotFoundException("Can not convert id to integer for id: " + id, e);
+		}
 		try {
 			return readAndConvertUser(conditions);
 		} catch (SqlStorageException sqle) {
@@ -252,7 +257,7 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	private Map<String, Object> createConditionsForId(String id) {
 		Map<String, Object> conditions = new HashMap<>();
-		conditions.put(DB_ID, id);
+		conditions.put(DB_ID, Integer.parseInt(id));
 		return conditions;
 	}
 
