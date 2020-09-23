@@ -317,15 +317,15 @@ public class DivaMixedRecordStorageProviderTest {
 				"Found http://diva-cora-fedora:8088/fedora/ as fedoraURL");
 		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 4),
 				"Found java:/comp/env/jdbc/postgres as databaseLookupName");
+		// assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 5),
+		// "Found java:/comp/env/jdbc/postgres as databaseLookupName");
+		// assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 6),
+		// "Found java:/comp/env/jdbc/postgres as databaseLookupName");
+		// assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 7),
+		// "Found java:/comp/env/jdbc/postgres as databaseLookupName");
 		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 5),
-				"Found java:/comp/env/jdbc/postgres as databaseLookupName");
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 6),
-				"Found java:/comp/env/jdbc/postgres as databaseLookupName");
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 7),
-				"Found java:/comp/env/jdbc/postgres as databaseLookupName");
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 8),
 				"DivaMixedRecordStorageProvider started DivaMixedRecordStorage");
-		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 9);
+		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 6);
 	}
 
 	@Test
