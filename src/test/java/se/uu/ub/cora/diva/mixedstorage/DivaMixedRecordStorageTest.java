@@ -24,11 +24,14 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collection;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.storage.RecordStorage;
+import se.uu.ub.cora.storage.StorageReadResult;
 
 public class DivaMixedRecordStorageTest {
 	private RecordStorageSpy basicStorage;
@@ -249,6 +252,46 @@ public class DivaMixedRecordStorageTest {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 		assertExpectedDataSameAsInStorageSpy(divaDbToCoraStorage, data);
+	}
+
+	// TODO: fortsätt här
+	@Test
+	public void readUserListGoesToDbToCoraStorageANDToBasicStorage() throws Exception {
+		divaDbToCoraStorage = new RecordStorageSpy("db");
+		divaMixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
+				basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorage, storageFactory);
+
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+
+		String type = "coraUser";
+		DataGroupSpy filter = new DataGroupSpy("filter");
+		StorageReadResult answer = divaMixedRecordStorage.readList(type, filter);
+
+		RecordStorageSpyData dataSentToBasicStorage = basicStorage.data;
+		assertEquals(dataSentToBasicStorage.type, type);
+		assertEquals(dataSentToBasicStorage.calledMethod, "readList");
+		assertSame(dataSentToBasicStorage.filter, filter);
+
+		RecordStorageSpyData dataSentToDbStorage = divaDbToCoraStorage.data;
+		assertEquals(dataSentToDbStorage.type, type);
+		assertEquals(dataSentToDbStorage.calledMethod, "readList");
+		assertSame(dataSentToDbStorage.filter, filter);
+
+		assertReturnedListContainsResultsFromBothStorage(answer, dataSentToBasicStorage,
+				dataSentToDbStorage);
+
+		assertEquals(answer.totalNumberOfMatches, 3);
+
+	}
+
+	private void assertReturnedListContainsResultsFromBothStorage(StorageReadResult answer,
+			RecordStorageSpyData dataSentToBasicStorage, RecordStorageSpyData dataSentToDbStorage) {
+		Collection<?> listOfDataGroupsReturnedFromBasicstorage = (Collection<?>) dataSentToBasicStorage.answer;
+		assertTrue(answer.listOfDataGroups.containsAll(listOfDataGroupsReturnedFromBasicstorage));
+		Collection<?> listOfDataGroupsReturnedFromDatabase = (Collection<?>) dataSentToDbStorage.answer;
+		assertTrue(answer.listOfDataGroups.containsAll(listOfDataGroupsReturnedFromDatabase));
 	}
 
 	@Test

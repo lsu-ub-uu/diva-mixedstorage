@@ -110,7 +110,24 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (ORGANISATION.equals(type)) {
 			return divaDbStorage.readList(type, filter);
 		}
+		if ("coraUser".equals(type)) {
+			return readListOfUsersFromDbAndBasicStorage(type, filter);
+		}
 		return basicStorage.readList(type, filter);
+	}
+
+	private StorageReadResult readListOfUsersFromDbAndBasicStorage(String type, DataGroup filter) {
+		StorageReadResult resultFromDataBase = divaDbStorage.readList(type, filter);
+		StorageReadResult resultFromBasicStorage = basicStorage.readList(type, filter);
+
+		addResultFromDbToBasicStorageResult(resultFromDataBase, resultFromBasicStorage);
+		return resultFromBasicStorage;
+	}
+
+	private void addResultFromDbToBasicStorageResult(StorageReadResult resultFromDataBase,
+			StorageReadResult resultFromBasicStorage) {
+		resultFromBasicStorage.listOfDataGroups.addAll(resultFromDataBase.listOfDataGroups);
+		resultFromBasicStorage.totalNumberOfMatches += resultFromDataBase.totalNumberOfMatches;
 	}
 
 	@Override
