@@ -291,7 +291,7 @@ public class DivaDbRecordStorageTest {
 		divaRecordStorage.readAbstractList("user", new DataGroupSpy("filter"));
 		assertTrue(recordReaderFactorySpy.factorWasCalled);
 		RecordReaderSpy factored = recordReaderFactorySpy.factored;
-		assertEquals(factored.usedTableName, "user");
+		assertEquals(factored.usedTableName, "public.user");
 	}
 
 	@Test

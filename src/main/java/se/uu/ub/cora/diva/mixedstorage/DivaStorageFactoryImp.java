@@ -46,7 +46,7 @@ public class DivaStorageFactoryImp implements DivaStorageFactory {
 
 	@Override
 	public RecordStorage factorForRecordType(String recordType) {
-		if (recordType.equals("user")) {
+		if ("user".equals(recordType) || "coraUser".equals(recordType)) {
 			return factorRecordUserStorage();
 		}
 		throw NotImplementedException.withMessage("No storage implemented for: " + recordType);

@@ -175,7 +175,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	}
 
 	private StorageReadResult readAndConvertUsers(String type) {
-		List<Map<String, Object>> readAllFromDb = readAllFromDb(type);
+		List<Map<String, Object>> readAllFromDb = readAllFromDb("public.user");
 		List<DataGroup> userDataGroups = convertDbResultToDataGroups(type, readAllFromDb);
 		return createStorageReadResult(userDataGroups);
 	}

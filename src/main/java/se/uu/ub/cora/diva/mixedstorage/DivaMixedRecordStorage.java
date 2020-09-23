@@ -52,17 +52,13 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public DataGroup read(String type, String id) {
-
-		// RecordStorage rs = divaStorageFactory.factor(type);
-		// return rs.read(type, id);
-
 		if (PERSON.equals(type)) {
 			return divaFedoraStorage.read(type, id);
 		}
 		if (ORGANISATION.equals(type)) {
 			return divaDbStorage.read(type, id);
 		}
-		if ("user".equals(type)) {
+		if ("user".equals(type) || "coraUser".equals(type)) {
 			return handleUser(type, id);
 		}
 		return basicStorage.read(type, id);

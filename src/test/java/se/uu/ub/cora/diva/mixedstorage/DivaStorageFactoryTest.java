@@ -66,6 +66,21 @@ public class DivaStorageFactoryTest {
 		assertTrue(factoredStorage instanceof DivaMixedUserStorage);
 	}
 
+	@Test
+	public void testFactorDivaMixedUserStorageForCoraUser() {
+		DivaMixedUserStorage factoredStorage = (DivaMixedUserStorage) factory
+				.factorForRecordType("coraUser");
+		assertTrue(factoredStorage
+				.getDataGroupRoleReferenceCreator() instanceof DataGroupRoleReferenceCreatorImp);
+		assertTrue(factoredStorage.getDbToCoraUserConverter() instanceof DivaDbToCoraUserConverter);
+
+		assertSame(factoredStorage.getUserStorageForGuest(), guestUserStorage);
+
+		assertNotNull(factoredStorage.getRecordReader());
+		assertSame(factoredStorage.getRecordReader(), recordReaderFactory.factored);
+		assertTrue(factoredStorage instanceof DivaMixedUserStorage);
+	}
+
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "No storage implemented for: someType")
 	public void testNotImplemented() {
