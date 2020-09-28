@@ -73,22 +73,10 @@ public class DivaDbFactoryTest {
 		assertSame(divaDbToCoraOrganisation.getConverterFactory(), converterFactory);
 	}
 
-	@Test
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "No implementation found for: user")
 	public void testFactorUser() {
-		DivaDbReader divaDbToCoraUser = divaDbToCoraFactoryImp.factor("user");
-		assertTrue(divaDbToCoraUser instanceof DivaDbUserReader);
-	}
-
-	@Test
-	public void testFactoryUserSentInFactoriesAreSentToImplementation() {
-		DivaDbUserReader divaDbToCoraUser = (DivaDbUserReader) divaDbToCoraFactoryImp
-				.factor("user");
-		assertSame(divaDbToCoraUser.getRecordReaderFactory(), readerFactory);
-		assertSame(divaDbToCoraUser.getConverterFactory(), converterFactory);
-		DivaDbFactoryImp divaDbFactory = (DivaDbFactoryImp) divaDbToCoraUser.getDivaDbFactory();
-		// assertTrue( instanceof DivaDbFactoryImp);
-		assertSame(divaDbFactory.getConverterFactory(), converterFactory);
-		assertSame(divaDbFactory.getReaderFactory(), readerFactory);
+		divaDbToCoraFactoryImp.factor("user");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
