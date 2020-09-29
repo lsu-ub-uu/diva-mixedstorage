@@ -34,6 +34,8 @@ import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.DataRecordLinkFactory;
+import se.uu.ub.cora.data.DataRecordLinkProvider;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
@@ -43,6 +45,7 @@ public class DivaDbToCoraOrganisationSuccessorConverterTest {
 	private Map<String, Object> rowFromDb;
 	private DataGroupFactory dataGroupFactory;
 	private DataAtomicFactory dataAtomicFactory;
+	private DataRecordLinkFactory dataRecordLinkFactory;
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -50,6 +53,8 @@ public class DivaDbToCoraOrganisationSuccessorConverterTest {
 		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 		dataAtomicFactory = new DataAtomicFactorySpy();
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactory);
+		dataRecordLinkFactory = new DataRecordLinkFactorySpy();
+		DataRecordLinkProvider.setDataRecordLinkFactory(dataRecordLinkFactory);
 		rowFromDb = new HashMap<>();
 		rowFromDb.put("organisation_id", "someOrgId");
 		rowFromDb.put("organisation_predecessor_id", "somePredecessorId");
