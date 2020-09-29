@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -84,6 +84,21 @@ public class DivaDbRecordStorageTest {
 	@Test
 	public void testOrganisationFromDivaDbToCoraIsReturnedFromRead() throws Exception {
 		DataGroup readOrganisation = divaRecordStorage.read(ORGANISATION_TYPE, "someId");
+		DivaDbSpy factored = divaDbFactorySpy.factored;
+		assertEquals(readOrganisation, factored.dataGroup);
+	}
+
+	@Test
+	public void testReadUserMakeCorrectCalls() throws Exception {
+		divaRecordStorage.read("user", "53");
+		DivaDbSpy factored = divaDbFactorySpy.factored;
+		assertEquals(factored.type, "user");
+		assertEquals(factored.id, "53");
+	}
+
+	@Test
+	public void testUserFromDivaDbToCoraIsReturnedFromRead() throws Exception {
+		DataGroup readOrganisation = divaRecordStorage.read("user", "53");
 		DivaDbSpy factored = divaDbFactorySpy.factored;
 		assertEquals(readOrganisation, factored.dataGroup);
 	}
@@ -181,19 +196,19 @@ public class DivaDbRecordStorageTest {
 		List<Map<String, Object>> readRows = recordReader.returnedList;
 
 		List<MultipleRowDbToDataReaderSpy> multipleReaders = divaDbFactorySpy.listOfFactoredMultiples;
-		assertEquals(multipleReaders.get(0).usedType, "divaOrganisationParent");
+		// assertEquals(multipleReaders.get(0).usedType, "divaOrganisationParent");
 		assertSame(multipleReaders.get(0).usedId, readRows.get(0).get("id"));
-		assertEquals(multipleReaders.get(1).usedType, "divaOrganisationPredecessor");
+		// assertEquals(multipleReaders.get(1).usedType, "divaOrganisationPredecessor");
 		assertSame(multipleReaders.get(1).usedId, readRows.get(0).get("id"));
 
-		assertEquals(multipleReaders.get(2).usedType, "divaOrganisationParent");
+		// assertEquals(multipleReaders.get(2).usedType, "divaOrganisationParent");
 		assertSame(multipleReaders.get(2).usedId, readRows.get(1).get("id"));
-		assertEquals(multipleReaders.get(3).usedType, "divaOrganisationPredecessor");
+		// assertEquals(multipleReaders.get(3).usedType, "divaOrganisationPredecessor");
 		assertSame(multipleReaders.get(3).usedId, readRows.get(1).get("id"));
 
-		assertEquals(multipleReaders.get(4).usedType, "divaOrganisationParent");
+		// assertEquals(multipleReaders.get(4).usedType, "divaOrganisationParent");
 		assertSame(multipleReaders.get(4).usedId, readRows.get(2).get("id"));
-		assertEquals(multipleReaders.get(5).usedType, "divaOrganisationPredecessor");
+		// assertEquals(multipleReaders.get(5).usedType, "divaOrganisationPredecessor");
 		assertSame(multipleReaders.get(5).usedId, readRows.get(2).get("id"));
 
 	}
@@ -269,6 +284,41 @@ public class DivaDbRecordStorageTest {
 			+ "readAbstractList is not implemented")
 	public void readAbstractListThrowsNotImplementedException() throws Exception {
 		divaRecordStorage.readAbstractList(null, null);
+	}
+
+	@Test
+	public void testReadAbstractListForUserFactorDbReader() throws Exception {
+		divaRecordStorage.readAbstractList("user", new DataGroupSpy("filter"));
+		assertTrue(recordReaderFactorySpy.factorWasCalled);
+		RecordReaderSpy factored = recordReaderFactorySpy.factored;
+		assertEquals(factored.usedTableName, "public.user");
+	}
+
+	@Test
+	public void testReadAbstractListForUserReturnsCorrectData() throws Exception {
+		recordReaderFactorySpy.noOfRecordsToReturn = 3;
+		StorageReadResult result = divaRecordStorage.readAbstractList("user",
+				new DataGroupSpy("filter"));
+
+		RecordReaderSpy factoredReader = recordReaderFactorySpy.factored;
+		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 0);
+		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 1);
+		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 2);
+
+	}
+
+	private void assertDataSentFromDbToConverterToResultUsingIndex(RecordReaderSpy factoredReader,
+			StorageReadResult result, int index) {
+		List<Map<String, Object>> returnedList = factoredReader.returnedList;
+		DivaDbToCoraConverterSpy converter = converterFactorySpy.factoredConverters.get(index);
+
+		Map<String, Object> rowFromDb = returnedList.get(index);
+		Map<String, Object> rowSentToConverter = converter.mapToConvert;
+		assertEquals(rowFromDb, rowSentToConverter);
+
+		DataGroup dataGroupInReturnedResult = result.listOfDataGroups.get(index);
+		DataGroup dataGroupReturnedFromConverter = converter.convertedDbDataGroup;
+		assertSame(dataGroupInReturnedResult, dataGroupReturnedFromConverter);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

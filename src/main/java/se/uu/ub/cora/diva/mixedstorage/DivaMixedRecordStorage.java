@@ -22,6 +22,7 @@ import java.util.Collection;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.searchstorage.SearchStorage;
+import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
@@ -32,17 +33,21 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private RecordStorage basicStorage;
 	private RecordStorage divaFedoraStorage;
 	private RecordStorage divaDbStorage;
+	private DivaStorageFactory storageFactory;
 
 	public static RecordStorage usingBasicAndFedoraAndDbStorage(RecordStorage basicStorage,
-			RecordStorage divaFedoraStorage, RecordStorage divaDbStorage) {
-		return new DivaMixedRecordStorage(basicStorage, divaFedoraStorage, divaDbStorage);
+			RecordStorage divaFedoraStorage, RecordStorage divaDbStorage,
+			DivaStorageFactory storageFactory) {
+		return new DivaMixedRecordStorage(basicStorage, divaFedoraStorage, divaDbStorage,
+				storageFactory);
 	}
 
-	private DivaMixedRecordStorage(RecordStorage basicStorage,
-			RecordStorage divaFedoraStorage, RecordStorage divaDbStorage) {
+	private DivaMixedRecordStorage(RecordStorage basicStorage, RecordStorage divaFedoraStorage,
+			RecordStorage divaDbStorage, DivaStorageFactory storageFactory) {
 		this.basicStorage = basicStorage;
 		this.divaFedoraStorage = divaFedoraStorage;
 		this.divaDbStorage = divaDbStorage;
+		this.storageFactory = storageFactory;
 	}
 
 	@Override
@@ -52,6 +57,19 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		}
 		if (ORGANISATION.equals(type)) {
 			return divaDbStorage.read(type, id);
+		}
+		if ("user".equals(type) || "coraUser".equals(type)) {
+			return handleUser(type, id);
+		}
+		return basicStorage.read(type, id);
+	}
+
+	private DataGroup handleUser(String type, String id) {
+		try {
+			RecordStorage userRecordStorage = storageFactory.factorForRecordType(type);
+			return userRecordStorage.read(type, id);
+		} catch (RecordNotFoundException e) {
+			// do nothing, we keep looking in basicstorage
 		}
 		return basicStorage.read(type, id);
 	}
@@ -92,11 +110,31 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (ORGANISATION.equals(type)) {
 			return divaDbStorage.readList(type, filter);
 		}
+		if ("coraUser".equals(type)) {
+			return readListOfUsersFromDbAndBasicStorage(type, filter);
+		}
 		return basicStorage.readList(type, filter);
+	}
+
+	private StorageReadResult readListOfUsersFromDbAndBasicStorage(String type, DataGroup filter) {
+		StorageReadResult resultFromDataBase = divaDbStorage.readList(type, filter);
+		StorageReadResult resultFromBasicStorage = basicStorage.readList(type, filter);
+
+		addResultFromDbToBasicStorageResult(resultFromDataBase, resultFromBasicStorage);
+		return resultFromBasicStorage;
+	}
+
+	private void addResultFromDbToBasicStorageResult(StorageReadResult resultFromDataBase,
+			StorageReadResult resultFromBasicStorage) {
+		resultFromBasicStorage.listOfDataGroups.addAll(resultFromDataBase.listOfDataGroups);
+		resultFromBasicStorage.totalNumberOfMatches += resultFromDataBase.totalNumberOfMatches;
 	}
 
 	@Override
 	public StorageReadResult readAbstractList(String type, DataGroup filter) {
+		if ("user".equals(type)) {
+			return divaDbStorage.readAbstractList(type, filter);
+		}
 		return basicStorage.readAbstractList(type, filter);
 	}
 
@@ -119,8 +157,8 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
 		if (ORGANISATION.equals(type)) {
-			return divaDbStorage
-					.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
+			return divaDbStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type,
+					id);
 		}
 		return basicStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
 	}
@@ -148,5 +186,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	@Override
 	public DataGroup getCollectIndexTerm(String collectIndexTermId) {
 		return ((SearchStorage) basicStorage).getCollectIndexTerm(collectIndexTermId);
+	}
+
+	public DivaStorageFactory getStorageFactory() {
+		return storageFactory;
 	}
 }

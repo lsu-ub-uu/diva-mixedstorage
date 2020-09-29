@@ -230,8 +230,14 @@ public class DataGroupSpy implements DataGroup {
 
 	@Override
 	public DataAtomic getFirstDataAtomicWithNameInData(String childNameInData) {
-		// TODO Auto-generated method stub
-		return null;
+		for (DataElement dataElement : children) {
+			if (childNameInData.equals(dataElement.getNameInData())) {
+				if (dataElement instanceof DataAtomic) {
+					return (DataAtomic) dataElement;
+				}
+			}
+		}
+		throw new RuntimeException("Atomic value not found for childNameInData:" + childNameInData);
 	}
 
 	@Override

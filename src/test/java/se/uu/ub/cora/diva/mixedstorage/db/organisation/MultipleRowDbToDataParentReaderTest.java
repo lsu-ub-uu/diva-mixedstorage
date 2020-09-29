@@ -20,8 +20,10 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -115,5 +117,44 @@ public class MultipleRowDbToDataParentReaderTest {
 		assertEquals(readParents.get(0).getRepeatId(), "0");
 		assertEquals(readParents.get(1).getRepeatId(), "1");
 		assertEquals(readParents.get(2).getRepeatId(), "2");
+	}
+
+	@Test
+	public void testReadUsingTableNameAndConditionsFactorDbReader() {
+		recordReaderFactory.numToReturn = 3;
+
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("organisation_id", "567");
+
+		List<DataGroup> result = parentReader.read(TABLE_NAME, conditions);
+
+		assertTrue(recordReaderFactory.factorWasCalled);
+
+		OrganisationMultipleRowsRecordReaderSpy factoredRecordReader = recordReaderFactory.factored;
+		assertEquals(factoredRecordReader.usedTableName, TABLE_NAME);
+		assertEquals(factoredRecordReader.usedConditions, conditions);
+
+		assertDataSentFromReaderToConverter(factoredRecordReader, result, 0);
+		assertDataSentFromReaderToConverter(factoredRecordReader, result, 1);
+
+	}
+
+	private void assertDataSentFromReaderToConverter(
+			OrganisationMultipleRowsRecordReaderSpy factoredRecordReader, List<DataGroup> result,
+			int index) {
+
+		List<DivaDbToCoraConverterSpy> factoredConverters = converterFactory.factoredConverters;
+		DivaDbToCoraConverterSpy divaDbToCoraConverter = factoredConverters.get(index);
+
+		List<Map<String, Object>> returnedList = factoredRecordReader.returnedList;
+		Map<String, Object> firstRowFromReader = returnedList.get(index);
+
+		Map<String, Object> firstMapSentToConverter = divaDbToCoraConverter.mapToConvert;
+		assertEquals(firstRowFromReader, firstMapSentToConverter);
+
+		DataGroup dataGroupReturnedFromConverter = divaDbToCoraConverter.convertedDbDataGroup;
+		DataGroup dataGroupInResult = result.get(index);
+		assertSame(dataGroupReturnedFromConverter, dataGroupInResult);
+		assertEquals(dataGroupInResult.getRepeatId(), String.valueOf(index));
 	}
 }

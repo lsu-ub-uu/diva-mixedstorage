@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,33 +16,30 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.fedora;
-
-import java.util.ArrayList;
-import java.util.List;
+package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
+import se.uu.ub.cora.gatekeeper.user.UserStorage;
 
-public class DataGroupFactorySpy implements DataGroupFactory {
+public class UserStorageSpy implements UserStorage {
 
-	public DataGroupSpy factoredDataGroup;
-	public List<DataGroupSpy> factoredDataGroups = new ArrayList<>();
+	public boolean getUserByIdWasCalled = false;
+	public String userId;
+	public DataGroup returnedUser;
 
 	@Override
-	public DataGroup factorUsingNameInData(String nameInData) {
-		factoredDataGroup = new DataGroupSpy(nameInData);
-		factoredDataGroups.add(factoredDataGroup);
-		return factoredDataGroup;
+	public DataGroup getUserById(String id) {
+		userId = id;
+		getUserByIdWasCalled = true;
+		returnedUser = new DataGroupSpy("user");
+		return returnedUser;
 	}
 
 	@Override
-	public DataGroup factorAsLinkWithNameInDataTypeAndId(String nameInData, String recordType,
-			String recordId) {
-		factoredDataGroup = new DataGroupSpy(nameInData, recordType, recordId);
-		factoredDataGroups.add(factoredDataGroup);
-		return factoredDataGroup;
+	public DataGroup getUserByIdFromLogin(String idFromLogin) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

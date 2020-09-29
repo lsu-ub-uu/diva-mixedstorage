@@ -24,25 +24,30 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collection;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.storage.RecordStorage;
+import se.uu.ub.cora.storage.StorageReadResult;
 
 public class DivaMixedRecordStorageTest {
 	private RecordStorageSpy basicStorage;
 	private RecordStorageSpy divaFedoraToCoraStorage;
 	private RecordStorage divaMixedRecordStorage;
 	private RecordStorageSpy divaDbToCoraStorage;
+	private DivaStorageFactorySpy storageFactory;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		basicStorage = new RecordStorageSpy();
 		divaFedoraToCoraStorage = new RecordStorageSpy();
 		divaDbToCoraStorage = new RecordStorageSpy();
+		storageFactory = new DivaStorageFactorySpy();
 		divaMixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
-				basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorage);
+				basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorage, storageFactory);
 	}
 
 	@Test
@@ -125,6 +130,82 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
+	public void readUserGoesToDivaDBToCoraStorage() throws Exception {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+
+		RecordStorageSpyData data = new RecordStorageSpyData();
+		data.type = "user";
+		data.id = "someUserId";
+		data.answer = divaMixedRecordStorage.read(data.type, data.id);
+
+		assertEquals(storageFactory.type, "user");
+		RecordStorageSpy factored = (RecordStorageSpy) storageFactory.factored;
+		RecordStorageSpyData dataFromFactored = factored.data;
+		assertEquals(dataFromFactored.calledMethod, "read");
+		assertEquals(dataFromFactored.type, "user");
+		assertEquals(dataFromFactored.id, "someUserId");
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+
+		assertSame(data.answer, dataFromFactored.answer);
+	}
+
+	@Test
+	public void readUserGoesToDivaDBToCoraStorageWithSomeDifferentUser() throws Exception {
+		RecordStorageSpyData data = new RecordStorageSpyData();
+		data.type = "user";
+		data.id = "someDifferentUserId";
+		data.answer = divaMixedRecordStorage.read(data.type, data.id);
+
+		RecordStorageSpy factored = (RecordStorageSpy) storageFactory.factored;
+		RecordStorageSpyData dataFromFactored = factored.data;
+		assertEquals(dataFromFactored.id, "someDifferentUserId");
+	}
+
+	@Test
+	public void readCoraUserGoesToDivaDBToCoraStorage() throws Exception {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+
+		RecordStorageSpyData data = new RecordStorageSpyData();
+		data.type = "coraUser";
+		data.id = "someUserId";
+		data.answer = divaMixedRecordStorage.read(data.type, data.id);
+
+		assertEquals(storageFactory.type, "coraUser");
+		RecordStorageSpy factored = (RecordStorageSpy) storageFactory.factored;
+		RecordStorageSpyData dataFromFactored = factored.data;
+		assertEquals(dataFromFactored.calledMethod, "read");
+		assertEquals(dataFromFactored.type, "coraUser");
+		assertEquals(dataFromFactored.id, "someUserId");
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+
+		assertSame(data.answer, dataFromFactored.answer);
+	}
+
+	@Test
+	public void readUserGUESTGoesToBasicStorage() throws Exception {
+		storageFactory.factorNotFound = true;
+		DivaDbToCoraStorageNotFoundSpy divaDbToCoraStorageSpy = new DivaDbToCoraStorageNotFoundSpy();
+		divaMixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
+				basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorageSpy, storageFactory);
+
+		RecordStorageSpyData expectedData = new RecordStorageSpyData();
+		expectedData.type = "user";
+		expectedData.id = "coraUser:5368656924943436";
+		expectedData.answer = divaMixedRecordStorage.read(expectedData.type, expectedData.id);
+
+		expectedData.calledMethod = "read";
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertTrue(storageFactory.readWasCalled);
+		assertExpectedDataSameAsInStorageSpy(basicStorage, expectedData);
+	}
+
+	@Test
 	public void readListGoesToBasicStorage() throws Exception {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
@@ -171,6 +252,46 @@ public class DivaMixedRecordStorageTest {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 		assertExpectedDataSameAsInStorageSpy(divaDbToCoraStorage, data);
+	}
+
+	// TODO: fortsätt här
+	@Test
+	public void readUserListGoesToDbToCoraStorageANDToBasicStorage() throws Exception {
+		divaDbToCoraStorage = new RecordStorageSpy("db");
+		divaMixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
+				basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorage, storageFactory);
+
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+
+		String type = "coraUser";
+		DataGroupSpy filter = new DataGroupSpy("filter");
+		StorageReadResult answer = divaMixedRecordStorage.readList(type, filter);
+
+		RecordStorageSpyData dataSentToBasicStorage = basicStorage.data;
+		assertEquals(dataSentToBasicStorage.type, type);
+		assertEquals(dataSentToBasicStorage.calledMethod, "readList");
+		assertSame(dataSentToBasicStorage.filter, filter);
+
+		RecordStorageSpyData dataSentToDbStorage = divaDbToCoraStorage.data;
+		assertEquals(dataSentToDbStorage.type, type);
+		assertEquals(dataSentToDbStorage.calledMethod, "readList");
+		assertSame(dataSentToDbStorage.filter, filter);
+
+		assertReturnedListContainsResultsFromBothStorage(answer, dataSentToBasicStorage,
+				dataSentToDbStorage);
+
+		assertEquals(answer.totalNumberOfMatches, 3);
+
+	}
+
+	private void assertReturnedListContainsResultsFromBothStorage(StorageReadResult answer,
+			RecordStorageSpyData dataSentToBasicStorage, RecordStorageSpyData dataSentToDbStorage) {
+		Collection<?> listOfDataGroupsReturnedFromBasicstorage = (Collection<?>) dataSentToBasicStorage.answer;
+		assertTrue(answer.listOfDataGroups.containsAll(listOfDataGroupsReturnedFromBasicstorage));
+		Collection<?> listOfDataGroupsReturnedFromDatabase = (Collection<?>) dataSentToDbStorage.answer;
+		assertTrue(answer.listOfDataGroups.containsAll(listOfDataGroupsReturnedFromDatabase));
 	}
 
 	@Test
@@ -275,7 +396,7 @@ public class DivaMixedRecordStorageTest {
 
 		DivaDbToCoraStorageSpy divaDbToCoraStorageSpy = new DivaDbToCoraStorageSpy();
 		divaMixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
-				basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorageSpy);
+				basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorageSpy, null);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = "divaOrganisation";
@@ -310,6 +431,23 @@ public class DivaMixedRecordStorageTest {
 		expectedData.calledMethod = "readAbstractList";
 		assertExpectedDataSameAsInStorageSpy(basicStorage, expectedData);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+	}
+
+	@Test
+	public void readAbstractListForUserGoesToDivaDBToCoraStorage() throws Exception {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+
+		RecordStorageSpyData expectedData = new RecordStorageSpyData();
+		expectedData.type = "user";
+		expectedData.filter = new DataGroupSpy("filter");
+		expectedData.answer = divaMixedRecordStorage.readAbstractList(expectedData.type,
+				expectedData.filter).listOfDataGroups;
+
+		expectedData.calledMethod = "readAbstractList";
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertExpectedDataSameAsInStorageSpy(divaDbToCoraStorage, expectedData);
 	}
 
 	@Test
@@ -382,7 +520,7 @@ public class DivaMixedRecordStorageTest {
 			throws Exception {
 		DivaDbToCoraStorageSpy divaDbToCoraStorageSpy = new DivaDbToCoraStorageSpy();
 		divaMixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
-				basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorageSpy);
+				basicStorage, divaFedoraToCoraStorage, divaDbToCoraStorageSpy, null);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = "divaOrganisation";

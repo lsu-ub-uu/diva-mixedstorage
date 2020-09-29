@@ -13,6 +13,7 @@ public class DivaDbFactorySpy implements DivaDbFactory {
 	public List<MultipleRowDbToDataReaderSpy> listOfFactoredMultiples = new ArrayList<>();
 	public List<String> usedTypes = new ArrayList<>();
 	public boolean returnEmptyResult = false;
+	public MultipleRowDbToDataReaderSpy factoredMultiple;
 
 	@Override
 	public DivaDbReader factor(String type) {
@@ -26,7 +27,7 @@ public class DivaDbFactorySpy implements DivaDbFactory {
 	@Override
 	public MultipleRowDbToDataReader factorMultipleReader(String type) {
 		usedTypes.add(type);
-		MultipleRowDbToDataReaderSpy factoredMultiple = new MultipleRowDbToDataReaderSpy();
+		factoredMultiple = new MultipleRowDbToDataReaderSpy();
 		factoredMultiple.returnEmptyResult = returnEmptyResult;
 		listOfFactoredMultiples.add(factoredMultiple);
 		return factoredMultiple;

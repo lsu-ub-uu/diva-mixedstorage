@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -69,5 +69,11 @@ public class DivaDbToCoraConverterFactoryTest {
 		DivaDbToCoraConverter converter = divaDbToCoraConverterFactoryImp
 				.factor("divaOrganisationSuccessor");
 		assertTrue(converter instanceof DivaDbToCoraOrganisationSuccessorConverter);
+	}
+
+	@Test
+	public void testFactoryUser() throws Exception {
+		DivaDbToCoraConverter converter = divaDbToCoraConverterFactoryImp.factor("user");
+		assertTrue(converter instanceof DivaDbToCoraUserConverter);
 	}
 }

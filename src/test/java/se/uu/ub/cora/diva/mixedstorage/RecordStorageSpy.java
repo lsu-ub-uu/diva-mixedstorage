@@ -15,6 +15,16 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 	public DataGroup returnedSearchTerm = new DataGroupSpy("searchTerm");
 	public String indexTermId;
 	public DataGroup returnedIndexTerm = new DataGroupSpy("indexTerm");
+	private String storageType;
+	public StorageReadResult storageReadResult;
+
+	public RecordStorageSpy() {
+		this.storageType = "basicStorage";
+	}
+
+	public RecordStorageSpy(String storageType) {
+		this.storageType = storageType;
+	}
 
 	@Override
 	public DataGroup read(String type, String id) {
@@ -74,10 +84,15 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 		data.filter = filter;
 		data.calledMethod = "readList";
 		List<DataGroup> readList = new ArrayList<>();
+		if ("db".equals(storageType)) {
+			DataGroup dummyDataGroup = new DataGroupSpy("DummyGroupFromDbRecordStorageSpy");
+			readList.add(dummyDataGroup);
+		}
 		DataGroup dummyDataGroup = new DataGroupSpy("DummyGroupFromRecordStorageSpy");
 		readList.add(dummyDataGroup);
 		data.answer = readList;
-		StorageReadResult storageReadResult = new StorageReadResult();
+		storageReadResult = new StorageReadResult();
+		storageReadResult.totalNumberOfMatches = readList.size();
 		storageReadResult.listOfDataGroups = readList;
 		return storageReadResult;
 	}

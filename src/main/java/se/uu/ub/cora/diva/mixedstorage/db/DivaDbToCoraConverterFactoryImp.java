@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -39,6 +39,9 @@ public class DivaDbToCoraConverterFactoryImp implements DivaDbToCoraConverterFac
 		}
 		if ("divaOrganisationSuccessor".equals(type)) {
 			return new DivaDbToCoraOrganisationSuccessorConverter();
+		}
+		if ("user".equals(type)) {
+			return new DivaDbToCoraUserConverter();
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}

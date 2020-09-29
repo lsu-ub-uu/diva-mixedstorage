@@ -16,17 +16,34 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage;
 
-import java.util.List;
 import java.util.Map;
 
-import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.db.user.UserStorageSpy;
+import se.uu.ub.cora.gatekeeper.user.UserStorage;
+import se.uu.ub.cora.gatekeeper.user.UserStorageProvider;
 
-public interface MultipleRowDbToDataReader {
+public class UserStorageProviderSpy implements UserStorageProvider {
 
-	List<DataGroup> read(String type, String id);
+	public UserStorageSpy userStorageSpy;
+	public Map<String, String> initInfo;
 
-	List<DataGroup> read(String tableName, Map<String, Object> conditions);
+	@Override
+	public int getOrderToSelectImplementionsBy() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public UserStorage getUserStorage() {
+		userStorageSpy = new UserStorageSpy();
+		return userStorageSpy;
+	}
+
+	@Override
+	public void startUsingInitInfo(Map<String, String> initInfo) {
+		this.initInfo = initInfo;
+	}
 
 }

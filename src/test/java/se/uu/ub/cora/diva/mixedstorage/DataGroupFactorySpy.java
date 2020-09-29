@@ -21,33 +21,34 @@ package se.uu.ub.cora.diva.mixedstorage;
 import java.util.ArrayList;
 import java.util.List;
 
-import se.uu.ub.cora.data.DataAtomic;
-import se.uu.ub.cora.data.DataAtomicFactory;
+import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.DataGroupFactory;
 
-public class DataAtomicFactorySpy implements DataAtomicFactory {
+public class DataGroupFactorySpy implements DataGroupFactory {
 
-	public DataAtomicSpy factoredDataAtomic;
-	public List<DataAtomicSpy> factoredDataAtomics = new ArrayList<>();
+	public DataGroupSpy factoredDataGroup;
+	public List<DataGroupSpy> factoredDataGroups = new ArrayList<>();
 	public List<String> usedNameInDatas = new ArrayList<>();
-	public List<String> usedValues = new ArrayList<>();
-	public List<String> usedRepeatIds = new ArrayList<>();
+	public List<String> usedRecordTypes = new ArrayList<>();
+	public List<String> usedRecordIds = new ArrayList<>();
 
 	@Override
-	public DataAtomic factorUsingNameInDataAndValue(String nameInData, String value) {
-		factoredDataAtomic = new DataAtomicSpy(nameInData, value);
-		factoredDataAtomics.add(factoredDataAtomic);
-		return factoredDataAtomic;
+	public DataGroup factorUsingNameInData(String nameInData) {
+		usedNameInDatas.add(nameInData);
+		factoredDataGroup = new DataGroupSpy(nameInData);
+		factoredDataGroups.add(factoredDataGroup);
+		return factoredDataGroup;
 	}
 
 	@Override
-	public DataAtomic factorUsingNameInDataAndValueAndRepeatId(String nameInData, String value,
-			String repeatId) {
+	public DataGroup factorAsLinkWithNameInDataTypeAndId(String nameInData, String recordType,
+			String recordId) {
 		usedNameInDatas.add(nameInData);
-		usedValues.add(value);
-		usedRepeatIds.add(repeatId);
-		factoredDataAtomic = new DataAtomicSpy(nameInData, value);
-		factoredDataAtomics.add(factoredDataAtomic);
-		return factoredDataAtomic;
+		usedRecordTypes.add(recordType);
+		usedRecordIds.add(recordId);
+		factoredDataGroup = new DataGroupSpy(nameInData, recordType, recordId);
+		factoredDataGroups.add(factoredDataGroup);
+		return factoredDataGroup;
 	}
 
 }

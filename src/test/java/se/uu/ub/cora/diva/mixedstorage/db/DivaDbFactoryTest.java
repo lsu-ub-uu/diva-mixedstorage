@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -71,6 +71,12 @@ public class DivaDbFactoryTest {
 				.factor("divaOrganisation");
 		assertSame(divaDbToCoraOrganisation.getRecordReaderFactory(), readerFactory);
 		assertSame(divaDbToCoraOrganisation.getConverterFactory(), converterFactory);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "No implementation found for: user")
+	public void testFactorUser() {
+		divaDbToCoraFactoryImp.factor("user");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

@@ -16,41 +16,32 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db;
+package se.uu.ub.cora.diva.mixedstorage.db.user;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
-import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
+import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 
-public class MultipleRowDbToDataReaderSpy implements MultipleRowDbToDataReader {
-
-	// public String usedType;
-	public String usedId;
-	public List<DataGroup> returnedList = new ArrayList<>();
-	public boolean returnEmptyResult = false;
+public class DataGroupRoleReferenceCreatorSpy implements DataGroupRoleReferenceCreator {
+	public MethodCallRecorder methodCallRecorder = new MethodCallRecorder();
 
 	@Override
-	public List<DataGroup> read(String type, String id) {
-		// usedType = type;
-		usedId = id;
-		if (returnEmptyResult) {
-			return Collections.emptyList();
-		}
-		returnedList.add(new DataGroupSpy(type + "ChildFromSpy"));
-		returnedList.add(new DataGroupSpy(type + "ChildFromSpy"));
-		return returnedList;
+	public DataGroup createRoleReferenceForDomainAdminUsingDomains(List<String> domains) {
+		methodCallRecorder.addCall("domains", domains);
+
+		DataGroupSpy dataGroupSpy = new DataGroupSpy("userRole");
+		methodCallRecorder.addReturned(dataGroupSpy);
+		return dataGroupSpy;
 	}
 
 	@Override
-	public List<DataGroup> read(String tableName, Map<String, Object> conditions) {
-		// TODO Auto-generated method stub
-		return null;
+	public DataGroup createRoleReferenceForSystemAdmin() {
+		methodCallRecorder.addCall();
 
+		DataGroupSpy dataGroupSpy = new DataGroupSpy("userRole");
+		methodCallRecorder.addReturned(dataGroupSpy);
+		return dataGroupSpy;
 	}
-
 }

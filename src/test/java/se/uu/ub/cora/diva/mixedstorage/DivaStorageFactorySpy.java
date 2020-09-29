@@ -16,17 +16,27 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage;
 
-import java.util.List;
-import java.util.Map;
+import se.uu.ub.cora.storage.RecordStorage;
 
-import se.uu.ub.cora.data.DataGroup;
+public class DivaStorageFactorySpy implements DivaStorageFactory {
 
-public interface MultipleRowDbToDataReader {
+	public String type;
+	public RecordStorage factored;
+	public boolean readWasCalled = false;
+	public boolean factorNotFound = false;
 
-	List<DataGroup> read(String type, String id);
-
-	List<DataGroup> read(String tableName, Map<String, Object> conditions);
+	@Override
+	public RecordStorage factorForRecordType(String type) {
+		readWasCalled = true;
+		this.type = type;
+		if (factorNotFound) {
+			factored = new DivaDbToCoraStorageNotFoundSpy();
+		} else {
+			factored = new RecordStorageSpy();
+		}
+		return factored;
+	}
 
 }

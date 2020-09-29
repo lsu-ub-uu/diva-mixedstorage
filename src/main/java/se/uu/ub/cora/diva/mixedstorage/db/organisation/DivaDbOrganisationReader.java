@@ -52,7 +52,7 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 
 	@Override
 	public DataGroup read(String type, String id) {
-		recordReader = getRecordReaderFactory().factor();
+		recordReader = recordReaderFactory.factor();
 		Map<String, Object> readRow = readOneRowFromDbUsingTypeAndId(type, id);
 		DataGroup organisation = convertOneMapFromDbToDataGroup(type, readRow);
 		tryToReadAndConvertParents(id, organisation);
@@ -67,7 +67,7 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 	}
 
 	private DataGroup convertOneMapFromDbToDataGroup(String type, Map<String, Object> readRow) {
-		DivaDbToCoraConverter dbToCoraConverter = getConverterFactory().factor(type);
+		DivaDbToCoraConverter dbToCoraConverter = converterFactory.factor(type);
 		return dbToCoraConverter.fromMap(readRow);
 	}
 

@@ -34,9 +34,12 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
 import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactory;
 import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraRecordStorage;
+import se.uu.ub.cora.gatekeeper.user.UserStorage;
+import se.uu.ub.cora.gatekeeper.user.UserStorageProvider;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.Logger;
@@ -56,6 +59,8 @@ public class DivaMixedRecordStorageProvider
 
 	private Logger log = LoggerProvider.getLoggerForClass(DivaMixedRecordStorageProvider.class);
 	private Map<String, String> initInfo;
+	private UserStorageProvider userStorageProvider = new DivaMixedUserStorageProvider();
+	private SqlConnectionProvider sqlConnectionProvider;
 
 	@Override
 	public int getOrderToSelectImplementionsBy() {
@@ -73,7 +78,7 @@ public class DivaMixedRecordStorageProvider
 
 	private void startRecordStorage() {
 		if (noRunningRecordStorageExists()) {
-			startNewRecordStorageOnDiskInstance();
+			startNewMixedRecordStorageInstance();
 		} else {
 			useExistingRecordStorage();
 		}
@@ -83,14 +88,21 @@ public class DivaMixedRecordStorageProvider
 		return RecordStorageInstance.getInstance() == null;
 	}
 
-	private void startNewRecordStorageOnDiskInstance() {
+	private void startNewMixedRecordStorageInstance() {
 		RecordStorage basicStorage = createBasicStorage();
 		DivaFedoraRecordStorage fedoraStorage = createFedoraStorage();
 
-		DivaDbRecordStorage dbStorage = createDbStorage();
+		sqlConnectionProvider = tryToCreateConnectionProvider();
 
-		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
-				.usingBasicAndFedoraAndDbStorage(basicStorage, fedoraStorage, dbStorage);
+		RecordReaderFactoryImp recordReaderFactory = createRecordReaderFactory();
+		DivaDbRecordStorage dbStorage = createDbStorage(recordReaderFactory);
+		UserStorage userStorage = getUserStorage();
+
+		DivaStorageFactory divaStorageFactory = DivaStorageFactoryImp
+				.usingGuestUserStorageAndRecordReader(userStorage, recordReaderFactory);
+
+		RecordStorage mixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
+				basicStorage, fedoraStorage, dbStorage, divaStorageFactory);
 		setStaticInstance(mixedRecordStorage);
 	}
 
@@ -121,8 +133,7 @@ public class DivaMixedRecordStorageProvider
 						fedoraPassword);
 	}
 
-	private DivaDbRecordStorage createDbStorage() {
-		RecordReaderFactoryImp recordReaderFactory = createRecordReaderFactory();
+	private DivaDbRecordStorage createDbStorage(RecordReaderFactoryImp recordReaderFactory) {
 
 		DivaDbToCoraConverterFactoryImp divaDbToCoraConverterFactory = new DivaDbToCoraConverterFactoryImp();
 		DivaDbFactoryImp divaDbToCoraFactory = new DivaDbFactoryImp(recordReaderFactory,
@@ -134,8 +145,18 @@ public class DivaMixedRecordStorageProvider
 				divaDbToCoraConverterFactory);
 	}
 
+	private SqlConnectionProvider tryToCreateConnectionProvider() {
+		try {
+			InitialContext context = new InitialContext();
+			String databaseLookupName = tryToGetInitParameterLogIfFound("databaseLookupName");
+			return ContextConnectionProviderImp.usingInitialContextAndName(context,
+					databaseLookupName);
+		} catch (Exception e) {
+			throw DataStorageException.withMessageAndException(e.getMessage(), e);
+		}
+	}
+
 	private RecordReaderFactoryImp createRecordReaderFactory() {
-		SqlConnectionProvider sqlConnectionProvider = tryToCreateConnectionProvider();
 		return RecordReaderFactoryImp.usingSqlConnectionProvider(sqlConnectionProvider);
 	}
 
@@ -151,28 +172,15 @@ public class DivaMixedRecordStorageProvider
 				recordReaderFactory, recordDeleterFactory, recordCreatorFactory);
 
 		return new DivaDbUpdaterFactoryImp(translaterFactory, recordReaderFactory, relatedFactory,
-				tryToCreateConnectionProvider());
+				sqlConnectionProvider);
 	}
 
 	private RecordCreatorFactoryImp createRecordCreatorFactory() {
-		SqlConnectionProvider sqlConnectionProvider = tryToCreateConnectionProvider();
 		return RecordCreatorFactoryImp.usingSqlConnectionProvider(sqlConnectionProvider);
 	}
 
 	private RecordDeleterFactory createRecordDeleterFactory() {
-		SqlConnectionProvider sqlConnectionProvider = tryToCreateConnectionProvider();
 		return RecordDeleterFactoryImp.usingSqlConnectionProvider(sqlConnectionProvider);
-	}
-
-	private SqlConnectionProvider tryToCreateConnectionProvider() {
-		try {
-			InitialContext context = new InitialContext();
-			String databaseLookupName = tryToGetInitParameterLogIfFound("databaseLookupName");
-			return ContextConnectionProviderImp.usingInitialContextAndName(context,
-					databaseLookupName);
-		} catch (Exception e) {
-			throw DataStorageException.withMessageAndException(e.getMessage(), e);
-		}
 	}
 
 	private String tryToGetInitParameter(String parameterName) {
@@ -202,6 +210,11 @@ public class DivaMixedRecordStorageProvider
 		}
 	}
 
+	private UserStorage getUserStorage() {
+		userStorageProvider.startUsingInitInfo(initInfo);
+		return userStorageProvider.getUserStorage();
+	}
+
 	@Override
 	public MetadataStorage getMetadataStorage() {
 		DivaMixedRecordStorage mixedStorage = (DivaMixedRecordStorage) RecordStorageInstance
@@ -212,6 +225,14 @@ public class DivaMixedRecordStorageProvider
 	@Override
 	public RecordStorage getRecordStorage() {
 		return RecordStorageInstance.getInstance();
+	}
+
+	void setUserStorageProvider(UserStorageProvider userStorageProvider) {
+		this.userStorageProvider = userStorageProvider;
+	}
+
+	UserStorageProvider getUserStorageProvider() {
+		return userStorageProvider;
 	}
 
 }
