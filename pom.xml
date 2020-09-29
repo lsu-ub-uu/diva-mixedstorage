@@ -81,7 +81,6 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>searchstorage</artifactId>
 			<version>${searchstorage.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
@@ -93,7 +92,6 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>sqldatabase</artifactId>
 			<version>${sqldatabase.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
