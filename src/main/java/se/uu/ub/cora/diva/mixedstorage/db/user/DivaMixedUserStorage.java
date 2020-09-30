@@ -82,7 +82,12 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	private DataGroup readUserByUserId(String idFromLogin) {
 		logAndThrowExceptionIfUnexpectedFormatOf(idFromLogin);
 		Map<String, Object> conditions = createConditions(idFromLogin);
-		return readAndConvertUser(conditions);
+		Map<String, Object> userRowFromDb = recordReader
+				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
+		DataGroup user = userConverter.fromMap(userRowFromDb);
+		readAndPossiblyAddRoles(userRowFromDb, user);
+
+		return user;
 	}
 
 	private void logAndThrowExceptionIfUnexpectedFormatOf(String idFromLogin) {
@@ -112,15 +117,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	private void addDomain(String idFromLogin, Map<String, Object> conditions) {
 		String userDomain = getDomainFromLogin(idFromLogin);
 		conditions.put(DOMAIN, userDomain);
-	}
-
-	private DataGroup readAndConvertUser(Map<String, Object> conditions) {
-		Map<String, Object> userRowFromDb = recordReader
-				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
-		DataGroup user = userConverter.fromMap(userRowFromDb);
-		readAndPossiblyAddRoles(userRowFromDb, user);
-
-		return user;
 	}
 
 	private void readAndPossiblyAddRoles(Map<String, Object> userRowFromDb, DataGroup user) {
@@ -241,18 +237,43 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	@Override
 	public DataGroup read(String type, String id) {
-		Map<String, Object> conditions = null;
+		Map<String, Object> userRowFromDb = createConditionsAndTryToRead(id);
+		return tryToConvertUserAndAddRoles(id, userRowFromDb);
+	}
+
+	private Map<String, Object> createConditionsAndTryToRead(String id) {
+		throwDbExceptionIfIdNotAnIntegerValue(id);
+		Map<String, Object> conditions = createConditionsForId(id);
+		return tryToReadUser(id, conditions);
+	}
+
+	private void throwDbExceptionIfIdNotAnIntegerValue(String id) {
 		try {
-			conditions = createConditionsForId(id);
-		} catch (NumberFormatException e) {
-			throw new RecordNotFoundException("Can not convert id to integer for id: " + id, e);
+			Integer.valueOf(id);
+		} catch (NumberFormatException ne) {
+			throw new RecordNotFoundException("Can not convert id to integer for id: " + id, ne);
 		}
+	}
+
+	private DataGroup tryToConvertUserAndAddRoles(String id, Map<String, Object> userRowFromDb) {
 		try {
-			return readAndConvertUser(conditions);
+			DataGroup user = userConverter.fromMap(userRowFromDb);
+			readAndPossiblyAddRoles(userRowFromDb, user);
+			return user;
 		} catch (SqlStorageException sqle) {
-			throw new RecordNotFoundException("Record not found for type: user and id: " + id,
-					sqle);
+			throw new RecordNotFoundException("Error when reading roles for user: " + id, sqle);
 		}
+	}
+
+	private Map<String, Object> tryToReadUser(String id, Map<String, Object> conditions) {
+		Map<String, Object> userRowFromDb = new HashMap<>();
+		try {
+			userRowFromDb = recordReader.readOneRowFromDbUsingTableAndConditions("public.user",
+					conditions);
+		} catch (SqlStorageException s) {
+			throw new RecordNotFoundException("Record not found for type: user and id: " + id, s);
+		}
+		return userRowFromDb;
 	}
 
 	private Map<String, Object> createConditionsForId(String id) {
@@ -314,8 +335,20 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
+		if ("user".equals(type) || "coraUser".equals(type)) {
+			return checkIfUserExist(id);
+		}
 		throw NotImplementedException.withMessage(
 				"recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented for user");
+	}
+
+	private boolean checkIfUserExist(String id) {
+		try {
+			createConditionsAndTryToRead(id);
+		} catch (RecordNotFoundException exception) {
+			return false;
+		}
+		return true;
 	}
 
 	public UserStorage getUserStorageForGuest() {

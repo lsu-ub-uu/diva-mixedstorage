@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
@@ -541,7 +542,7 @@ public class DivaMixedUserStorageTest {
 
 	@Test
 	public void testReadingThroughRecordStorageMustUserNotFoundThrowException() throws Exception {
-		recordReader.throwException = true;
+		recordReader.tablesToThrowExceptionFor.add("public.user");
 		try {
 			recordStorage.read("", "14");
 		} catch (Exception e) {
@@ -551,11 +552,58 @@ public class DivaMixedUserStorageTest {
 		}
 	}
 
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForUser() {
+		boolean userExists = userStorage
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("user", "26");
+
+		recordReader.MCR.assertMethodWasCalled("readOneRowFromDbUsingTableAndConditions");
+		recordReader.MCR.assertParameter("readOneRowFromDbUsingTableAndConditions", 0, "tableName",
+				"public.user");
+		Map<?, ?> usedConditions = (Map<?, ?>) recordReader.MCR
+				.getValueForMethodNameAndCallNumberAndParameterName(
+						"readOneRowFromDbUsingTableAndConditions", 0, "conditions");
+		assertEquals(usedConditions.get("db_id"), 26);
+		assertEquals(usedConditions.size(), 1);
+		assertTrue(userExists);
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForCoraUser() {
+		boolean userExists = userStorage
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("coraUser", "26");
+
+		recordReader.MCR.assertMethodWasCalled("readOneRowFromDbUsingTableAndConditions");
+		recordReader.MCR.assertParameter("readOneRowFromDbUsingTableAndConditions", 0, "tableName",
+				"public.user");
+		Map<?, ?> usedConditions = (Map<?, ?>) recordReader.MCR
+				.getValueForMethodNameAndCallNumberAndParameterName(
+						"readOneRowFromDbUsingTableAndConditions", 0, "conditions");
+		assertEquals(usedConditions.get("db_id"), 26);
+		assertEquals(usedConditions.size(), 1);
+		assertTrue(userExists);
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForCoraUserNotFound() {
+		recordReader.tablesToThrowExceptionFor.add("public.user");
+		boolean userExists = userStorage
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("coraUser", "26");
+		assertFalse(userExists);
+	}
+
 	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
 			+ "Record not found for type: user and id: 15")
 	public void testReadingThroughRecordStorageMustUserNotFoundThrowExceptionOtherId()
 			throws Exception {
-		recordReader.throwException = true;
+		recordReader.tablesToThrowExceptionFor.add("public.user");
+		recordStorage.read("", "15");
+	}
+
+	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
+			+ "Error when reading roles for user: 15")
+	public void testReadingThroughRecordStorageThrowExceptionWhenReadingRole() throws Exception {
+		recordReader.tablesToThrowExceptionFor.add("public.groupsforuser");
 		recordStorage.read("", "15");
 	}
 
