@@ -26,6 +26,7 @@ public class DivaStorageFactorySpy implements DivaStorageFactory {
 	public RecordStorage factored;
 	public boolean readWasCalled = false;
 	public boolean factorNotFound = false;
+	public boolean recordExists = false;
 
 	@Override
 	public RecordStorage factorForRecordType(String type) {
@@ -35,6 +36,7 @@ public class DivaStorageFactorySpy implements DivaStorageFactory {
 			factored = new DivaDbToCoraStorageNotFoundSpy();
 		} else {
 			factored = new RecordStorageSpy();
+			((RecordStorageSpy) factored).existsInStorage = recordExists;
 		}
 		return factored;
 	}
