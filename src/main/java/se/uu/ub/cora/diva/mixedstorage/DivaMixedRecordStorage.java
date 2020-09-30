@@ -28,6 +28,8 @@ import se.uu.ub.cora.storage.StorageReadResult;
 
 public final class DivaMixedRecordStorage implements RecordStorage, SearchStorage {
 
+	private static final String USER = "user";
+	private static final String CORA_USER = "coraUser";
 	private static final String PERSON = "person";
 	private static final String ORGANISATION = "divaOrganisation";
 	private RecordStorage basicStorage;
@@ -35,9 +37,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private RecordStorage divaDbStorage;
 	private DivaStorageFactory storageFactory;
 
-	public static RecordStorage usingBasicAndFedoraAndDbStorage(RecordStorage basicStorage,
-			RecordStorage divaFedoraStorage, RecordStorage divaDbStorage,
-			DivaStorageFactory storageFactory) {
+	public static RecordStorage usingBasicFedoraAndDbStorageAndStorageFactory(
+			RecordStorage basicStorage, RecordStorage divaFedoraStorage,
+			RecordStorage divaDbStorage, DivaStorageFactory storageFactory) {
 		return new DivaMixedRecordStorage(basicStorage, divaFedoraStorage, divaDbStorage,
 				storageFactory);
 	}
@@ -58,7 +60,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (ORGANISATION.equals(type)) {
 			return divaDbStorage.read(type, id);
 		}
-		if ("user".equals(type) || "coraUser".equals(type)) {
+		if (USER.equals(type) || CORA_USER.equals(type)) {
 			return handleUser(type, id);
 		}
 		return basicStorage.read(type, id);
@@ -110,7 +112,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (ORGANISATION.equals(type)) {
 			return divaDbStorage.readList(type, filter);
 		}
-		if ("coraUser".equals(type)) {
+		if (CORA_USER.equals(type)) {
 			return readListOfUsersFromDbAndBasicStorage(type, filter);
 		}
 		return basicStorage.readList(type, filter);
@@ -132,7 +134,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public StorageReadResult readAbstractList(String type, DataGroup filter) {
-		if ("user".equals(type)) {
+		if (USER.equals(type)) {
 			return divaDbStorage.readAbstractList(type, filter);
 		}
 		return basicStorage.readAbstractList(type, filter);
@@ -157,9 +159,19 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
 		if (ORGANISATION.equals(type)) {
-			return divaDbStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type,
-					id);
+			return linkExistInDbStorage(type, id);
 		}
+		if (USER.equals(type) || CORA_USER.equals(type)) {
+			return linkExistInDbStorage(type, id) || linkExistInBasicStorage(type, id);
+		}
+		return linkExistInBasicStorage(type, id);
+	}
+
+	private boolean linkExistInDbStorage(String type, String id) {
+		return divaDbStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
+	}
+
+	private boolean linkExistInBasicStorage(String type, String id) {
 		return basicStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
 	}
 

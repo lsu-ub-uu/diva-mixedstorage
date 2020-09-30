@@ -17,6 +17,7 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 	public DataGroup returnedIndexTerm = new DataGroupSpy("indexTerm");
 	private String storageType;
 	public StorageReadResult storageReadResult;
+	public boolean existsInStorage = false;
 
 	public RecordStorageSpy() {
 		this.storageType = "basicStorage";
@@ -148,8 +149,8 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 		data.type = type;
 		data.id = id;
 		data.calledMethod = "recordExistsForAbstractOrImplementingRecordTypeAndRecordId";
-		data.answer = false;
-		return false;
+		data.answer = existsInStorage;
+		return existsInStorage;
 	}
 
 	@Override

@@ -10,6 +10,8 @@ import se.uu.ub.cora.storage.StorageReadResult;
 public class DivaDbToCoraStorageNotFoundSpy implements RecordStorage {
 
 	public boolean readWasCalled = false;
+	public String type;
+	public String id;
 
 	@Override
 	public void create(String arg0, String arg1, DataGroup arg2, DataGroup arg3, DataGroup arg4,
@@ -61,8 +63,10 @@ public class DivaDbToCoraStorageNotFoundSpy implements RecordStorage {
 	}
 
 	@Override
-	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String arg0,
-			String arg1) {
+	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
+			String id) {
+		this.type = type;
+		this.id = id;
 		// TODO Auto-generated method stub
 		return false;
 	}

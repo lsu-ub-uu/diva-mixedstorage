@@ -101,7 +101,7 @@ public class DivaMixedRecordStorageProvider
 		DivaStorageFactory divaStorageFactory = DivaStorageFactoryImp
 				.usingGuestUserStorageAndRecordReader(userStorage, recordReaderFactory);
 
-		RecordStorage mixedRecordStorage = DivaMixedRecordStorage.usingBasicAndFedoraAndDbStorage(
+		RecordStorage mixedRecordStorage = DivaMixedRecordStorage.usingBasicFedoraAndDbStorageAndStorageFactory(
 				basicStorage, fedoraStorage, dbStorage, divaStorageFactory);
 		setStaticInstance(mixedRecordStorage);
 	}
