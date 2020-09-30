@@ -71,7 +71,7 @@ public class DataGroupRoleReferenceCreatorImp implements DataGroupRoleReferenceC
 
 	private DataAtomic createValuePartForDomain(int repeatId, String domain) {
 		return DataAtomicProvider.getDataAtomicUsingNameInDataAndValueAndRepeatId("value",
-				"domain." + domain, String.valueOf(repeatId));
+				"system." + domain, String.valueOf(repeatId));
 	}
 
 	@Override

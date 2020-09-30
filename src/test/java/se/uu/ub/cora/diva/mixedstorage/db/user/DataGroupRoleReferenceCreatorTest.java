@@ -131,8 +131,8 @@ public class DataGroupRoleReferenceCreatorTest {
 		assertEquals(dataGroupFactory.usedNameInDatas.get(3), "rule");
 		DataGroupSpy termRulePartGroup = createdDataGroups.get(2);
 		assertTrue(termRulePartGroup.getChildren().contains(createdDataGroups.get(3)));
-		assertAtomicValueIsFactoredCorrectlyAndAddedToRulePart(termRulePartGroup, 0, "domain.uu");
-		assertAtomicValueIsFactoredCorrectlyAndAddedToRulePart(termRulePartGroup, 1, "domain.liu");
+		assertAtomicValueIsFactoredCorrectlyAndAddedToRulePart(termRulePartGroup, 0, "system.uu");
+		assertAtomicValueIsFactoredCorrectlyAndAddedToRulePart(termRulePartGroup, 1, "system.liu");
 	}
 
 	private void assertAtomicValueIsFactoredCorrectlyAndAddedToRulePart(
