@@ -31,7 +31,8 @@ public class RecordReaderUserSpy implements RecordReader {
 	public MethodCallRecorder MCR = new MethodCallRecorder();
 	public Map<String, Object> responseToReadOneRowFromDbUsingTableAndConditions = new HashMap<>();
 	public List<Map<String, Object>> responseToReadFromTableUsingConditions = new ArrayList<>();
-	public boolean throwException = false;
+	// public boolean throwException = false;
+	public List<String> tablesToThrowExceptionFor = new ArrayList<>();
 
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName) {
@@ -43,7 +44,8 @@ public class RecordReaderUserSpy implements RecordReader {
 	public List<Map<String, Object>> readFromTableUsingConditions(String tableName,
 			Map<String, Object> conditions) {
 		MCR.addCall("tableName", tableName, "conditions", conditions);
-		if (throwException) {
+		// if (throwException) {
+		if (tablesToThrowExceptionFor.contains(tableName)) {
 			SqlStorageException exception = SqlStorageException.withMessageAndException(
 					"Exception from RecordReaderUserSpy", new RuntimeException());
 			MCR.addReturned(exception);
@@ -52,13 +54,15 @@ public class RecordReaderUserSpy implements RecordReader {
 
 		MCR.addReturned(responseToReadFromTableUsingConditions);
 		return responseToReadFromTableUsingConditions;
+
 	}
 
 	@Override
 	public Map<String, Object> readOneRowFromDbUsingTableAndConditions(String tableName,
 			Map<String, Object> conditions) {
 		MCR.addCall("tableName", tableName, "conditions", conditions);
-		if (throwException) {
+		// if (throwException) {
+		if (tablesToThrowExceptionFor.contains(tableName)) {
 			SqlStorageException exception = SqlStorageException.withMessageAndException(
 					"Exception from RecordReaderUserSpy", new RuntimeException());
 			MCR.addReturned(exception);
