@@ -217,11 +217,6 @@ public class DivaDbRecordStorage implements RecordStorage {
 		if (DIVA_ORGANISATION.equals(type)) {
 			return organisationExistsInDb(id);
 		}
-		if ("user".equals(type)) {
-			RecordReader recordReader = recordReaderFactory.factor();
-			Map<String, Object> conditions = createConditionsAddingOrganisationId(id);
-			recordReader.readOneRowFromDbUsingTableAndConditions("organisation", conditions);
-		}
 		throw NotImplementedException.withMessage(
 				"recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented");
 	}

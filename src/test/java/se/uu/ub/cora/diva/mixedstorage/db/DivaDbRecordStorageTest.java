@@ -359,17 +359,6 @@ public class DivaDbRecordStorageTest {
 		assertTrue(organisationExists);
 	}
 
-	// @Test
-	// public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForUser() {
-	// boolean userExists = divaRecordStorage
-	// .recordExistsForAbstractOrImplementingRecordTypeAndRecordId("user", "26");
-	// RecordReaderSpy readerSpy = recordReaderFactorySpy.factored;
-	// assertEquals(readerSpy.usedTableName, "public.user");
-	// Map<String, Object> usedConditions = readerSpy.usedConditions;
-	// assertEquals(usedConditions.get("db_id"), 26);
-	// // assertTrue(userExists);
-	// }
-
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForDivaOrganisationWhenOrganisationDoesNotExist() {
 		boolean organisationExists = divaRecordStorage
