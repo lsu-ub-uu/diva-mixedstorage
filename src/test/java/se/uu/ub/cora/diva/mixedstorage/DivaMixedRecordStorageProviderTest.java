@@ -420,22 +420,4 @@ public class DivaMixedRecordStorageProviderTest {
 		assertEquals(loggerFactorySpy.getNoOfFatalLogMessagesUsingClassName(testedClassName), 1);
 	}
 
-	private void assertCorrectErrorAndLogOnMissingParameterAndPassedOnError(String parameter,
-			int noOfInfoMessages) {
-		initInfo.remove(parameter);
-		String errorMessage = "InitInfo must contain " + parameter;
-		try {
-			divaMixedRecordStorageProvider.startUsingInitInfo(initInfo);
-		} catch (Exception e) {
-			assertTrue(e instanceof DataStorageException);
-			assertEquals(e.getMessage(), errorMessage);
-			assertTrue(e.getCause() instanceof DataStorageException);
-
-		}
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
-				"DivaMixedRecordStorageProvider starting DivaMixedRecordStorage...");
-		assertEquals(loggerFactorySpy.getFatalLogMessageUsingClassNameAndNo(testedClassName, 0),
-				errorMessage);
-		assertEquals(loggerFactorySpy.getNoOfFatalLogMessagesUsingClassName(testedClassName), 1);
-	}
 }

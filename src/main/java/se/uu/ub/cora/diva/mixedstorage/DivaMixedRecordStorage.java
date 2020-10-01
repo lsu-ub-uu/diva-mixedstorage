@@ -68,7 +68,6 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	private DataGroup handleUserStorage(String type, String id) {
 		try {
-			// RecordStorage userRecordStorage = userStorage.factorForRecordType(type);
 			return userStorage.read(type, id);
 		} catch (RecordNotFoundException e) {
 			// do nothing, we keep looking in basicstorage
@@ -172,7 +171,6 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	}
 
 	private boolean linkExistInUserStorage(String type, String id) {
-		// RecordStorage userRecordStorage = userStorage.factorForRecordType(type);
 		return userStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
 	}
 
