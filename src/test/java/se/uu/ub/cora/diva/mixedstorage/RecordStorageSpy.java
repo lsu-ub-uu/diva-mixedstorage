@@ -6,6 +6,7 @@ import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.searchstorage.SearchStorage;
+import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
@@ -17,7 +18,8 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 	public DataGroup returnedIndexTerm = new DataGroupSpy("indexTerm");
 	private String storageType;
 	public StorageReadResult storageReadResult;
-	public boolean existsInStorage = false;
+	public boolean linkExistsInStorage = false;
+	public boolean existsInStorage = true;
 
 	public RecordStorageSpy() {
 		this.storageType = "basicStorage";
@@ -33,6 +35,9 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 		data.id = id;
 		data.calledMethod = "read";
 
+		if (!existsInStorage) {
+			throw new RecordNotFoundException("error from spy");
+		}
 		DataGroup dummyDataGroup = new DataGroupSpy("DummyGroupFromRecordStorageSpy");
 		data.answer = dummyDataGroup;
 		return dummyDataGroup;
@@ -149,8 +154,8 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 		data.type = type;
 		data.id = id;
 		data.calledMethod = "recordExistsForAbstractOrImplementingRecordTypeAndRecordId";
-		data.answer = existsInStorage;
-		return existsInStorage;
+		data.answer = linkExistsInStorage;
+		return linkExistsInStorage;
 	}
 
 	@Override

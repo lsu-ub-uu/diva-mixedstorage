@@ -40,6 +40,7 @@ public class DivaMixedRecordStorageTest {
 	private RecordStorage divaMixedRecordStorage;
 	private RecordStorageSpy divaDbToCoraStorage;
 	private DivaStorageFactorySpy storageFactory;
+	private RecordStorageSpy userStorage;
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -47,9 +48,10 @@ public class DivaMixedRecordStorageTest {
 		divaFedoraToCoraStorage = new RecordStorageSpy();
 		divaDbToCoraStorage = new RecordStorageSpy();
 		storageFactory = new DivaStorageFactorySpy();
+		userStorage = new RecordStorageSpy();
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, divaDbToCoraStorage, storageFactory);
+						divaFedoraToCoraStorage, divaDbToCoraStorage, userStorage);
 	}
 
 	@Test
@@ -190,12 +192,14 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
-	public void readUserGUESTGoesToBasicStorage() throws Exception {
+	public void testUserGoesToBasicStorageWhenNotFoundInUserStorage() throws Exception {
 		storageFactory.factorNotFound = true;
 		DivaDbToCoraStorageNotFoundSpy divaDbToCoraStorageSpy = new DivaDbToCoraStorageNotFoundSpy();
+		userStorage.existsInStorage = false;
+
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, divaDbToCoraStorageSpy, storageFactory);
+						divaFedoraToCoraStorage, divaDbToCoraStorageSpy, userStorage);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = "user";
@@ -204,7 +208,9 @@ public class DivaMixedRecordStorageTest {
 
 		expectedData.calledMethod = "read";
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
-		assertTrue(storageFactory.readWasCalled);
+		RecordStorageSpyData dataFromSpy = userStorage.data;
+
+		assertEquals(dataFromSpy.calledMethod, "read");
 		assertExpectedDataSameAsInStorageSpy(basicStorage, expectedData);
 	}
 
@@ -263,7 +269,7 @@ public class DivaMixedRecordStorageTest {
 		divaDbToCoraStorage = new RecordStorageSpy("db");
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, divaDbToCoraStorage, storageFactory);
+						divaFedoraToCoraStorage, divaDbToCoraStorage, userStorage);
 
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
@@ -557,7 +563,7 @@ public class DivaMixedRecordStorageTest {
 		storageFactory.recordExists = true;
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, null, storageFactory);
+						divaFedoraToCoraStorage, null, userStorage);
 
 		String type = "user";
 		String id = "userId";
@@ -583,7 +589,7 @@ public class DivaMixedRecordStorageTest {
 		storageFactory.recordExists = true;
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, null, storageFactory);
+						divaFedoraToCoraStorage, null, userStorage);
 
 		String type = "coraUser";
 		String id = "userId";
@@ -608,7 +614,7 @@ public class DivaMixedRecordStorageTest {
 		storageFactory.factorNotFound = true;
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, null, storageFactory);
+						divaFedoraToCoraStorage, null, userStorage);
 
 		boolean recordExists = divaMixedRecordStorage
 				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("user", "id");
@@ -619,10 +625,10 @@ public class DivaMixedRecordStorageTest {
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForCoraUserAlsoGoesToBasicStorage()
 			throws Exception {
 		storageFactory.factorNotFound = true;
-		basicStorage.existsInStorage = true;
+		basicStorage.linkExistsInStorage = true;
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, null, storageFactory);
+						divaFedoraToCoraStorage, null, userStorage);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = "coraUser";

@@ -307,7 +307,26 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
-		throw NotImplementedException.withMessage("readList is not implemented for user");
+		List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable("public.user");
+		List<DataGroup> dataGroups = convertUserGroupsAndAddToList(rowsFromDb);
+		return createStorageResult(dataGroups);
+	}
+
+	private List<DataGroup> convertUserGroupsAndAddToList(List<Map<String, Object>> rowsFromDb) {
+		List<DataGroup> dataGroups = new ArrayList<>();
+		for (Map<String, Object> row : rowsFromDb) {
+			DataGroup convertedUser = userConverter.fromMap(row);
+			dataGroups.add(convertedUser);
+		}
+		return dataGroups;
+	}
+
+	private StorageReadResult createStorageResult(List<DataGroup> dataGroups) {
+		StorageReadResult storageReadResult = new StorageReadResult();
+		storageReadResult.listOfDataGroups = dataGroups;
+		storageReadResult.start = 0;
+		storageReadResult.totalNumberOfMatches = dataGroups.size();
+		return storageReadResult;
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
+import se.uu.ub.cora.storage.StorageReadResult;
 
 public class DivaMixedUserStorageTest {
 
@@ -631,10 +633,32 @@ public class DivaMixedUserStorageTest {
 		recordStorage.update(null, null, null, null, null, null);
 	}
 
-	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
-			+ "readList is not implemented for user")
-	public void readListNotImplementedForUser() throws Exception {
-		recordStorage.readList(null, null);
+	@Test
+	public void testReadList() throws Exception {
+		List<Map<String, Object>> userRows = createDbResponseAndAddToSpy();
+		recordReader.responseToReadFromTable = userRows;
+
+		StorageReadResult result = recordStorage.readList("user", new DataGroupSpy(""));
+		recordReader.MCR.assertMethodWasCalled("readAllFromTable");
+		recordReader.MCR.assertParameter("readAllFromTable", 0, "tableName", "public.user");
+		assertSame(userConverter.mapsToConvert.get(0), userRows.get(0));
+		assertSame(userConverter.mapsToConvert.get(1), userRows.get(1));
+		assertSame(result.listOfDataGroups.get(0), userConverter.convertedDataGroups.get(0));
+		assertEquals(result.start, 0);
+		assertEquals(result.totalNumberOfMatches, result.listOfDataGroups.size());
+	}
+
+	private List<Map<String, Object>> createDbResponseAndAddToSpy() {
+		List<Map<String, Object>> userRows = new ArrayList<>();
+		createAndAddUserRowUsingId(userRows, 100);
+		createAndAddUserRowUsingId(userRows, 200);
+		return userRows;
+	}
+
+	private void createAndAddUserRowUsingId(List<Map<String, Object>> userRows, int userId) {
+		Map<String, Object> userRow = new HashMap<>();
+		userRow.put("db_id", userId);
+		userRows.add(userRow);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

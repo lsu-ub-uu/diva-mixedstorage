@@ -36,7 +36,7 @@ public class DivaStorageFactorySpy implements DivaStorageFactory {
 			factored = new DivaDbToCoraStorageNotFoundSpy();
 		} else {
 			factored = new RecordStorageSpy();
-			((RecordStorageSpy) factored).existsInStorage = recordExists;
+			((RecordStorageSpy) factored).linkExistsInStorage = recordExists;
 		}
 		return factored;
 	}
