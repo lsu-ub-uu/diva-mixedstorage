@@ -35,21 +35,21 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private RecordStorage basicStorage;
 	private RecordStorage divaFedoraStorage;
 	private RecordStorage divaDbStorage;
-	private DivaStorageFactory storageFactory;
+	private RecordStorage userStorage;
 
 	public static RecordStorage usingBasicFedoraAndDbStorageAndStorageFactory(
 			RecordStorage basicStorage, RecordStorage divaFedoraStorage,
-			RecordStorage divaDbStorage, DivaStorageFactory storageFactory) {
+			RecordStorage divaDbStorage, RecordStorage userStorage) {
 		return new DivaMixedRecordStorage(basicStorage, divaFedoraStorage, divaDbStorage,
-				storageFactory);
+				userStorage);
 	}
 
 	private DivaMixedRecordStorage(RecordStorage basicStorage, RecordStorage divaFedoraStorage,
-			RecordStorage divaDbStorage, DivaStorageFactory storageFactory) {
+			RecordStorage divaDbStorage, RecordStorage userStorage) {
 		this.basicStorage = basicStorage;
 		this.divaFedoraStorage = divaFedoraStorage;
 		this.divaDbStorage = divaDbStorage;
-		this.storageFactory = storageFactory;
+		this.userStorage = userStorage;
 	}
 
 	@Override
@@ -61,15 +61,14 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			return divaDbStorage.read(type, id);
 		}
 		if (USER.equals(type) || CORA_USER.equals(type)) {
-			return handleUser(type, id);
+			return handleUserStorage(type, id);
 		}
 		return basicStorage.read(type, id);
 	}
 
-	private DataGroup handleUser(String type, String id) {
+	private DataGroup handleUserStorage(String type, String id) {
 		try {
-			RecordStorage userRecordStorage = storageFactory.factorForRecordType(type);
-			return userRecordStorage.read(type, id);
+			return userStorage.read(type, id);
 		} catch (RecordNotFoundException e) {
 			// do nothing, we keep looking in basicstorage
 		}
@@ -172,9 +171,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	}
 
 	private boolean linkExistInUserStorage(String type, String id) {
-		RecordStorage userRecordStorage = storageFactory.factorForRecordType(type);
-		return userRecordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type,
-				id);
+		return userStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
 	}
 
 	private boolean linkExistInBasicStorage(String type, String id) {
@@ -206,7 +203,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		return ((SearchStorage) basicStorage).getCollectIndexTerm(collectIndexTermId);
 	}
 
-	public DivaStorageFactory getStorageFactory() {
-		return storageFactory;
+	public RecordStorage getUserStorage() {
+		// Needed for tests
+		return userStorage;
+
 	}
 }

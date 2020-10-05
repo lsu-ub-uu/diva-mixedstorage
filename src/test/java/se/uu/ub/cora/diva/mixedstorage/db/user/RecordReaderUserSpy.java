@@ -31,13 +31,15 @@ public class RecordReaderUserSpy implements RecordReader {
 	public MethodCallRecorder MCR = new MethodCallRecorder();
 	public Map<String, Object> responseToReadOneRowFromDbUsingTableAndConditions = new HashMap<>();
 	public List<Map<String, Object>> responseToReadFromTableUsingConditions = new ArrayList<>();
+	public List<Map<String, Object>> responseToReadFromTable = new ArrayList<>();
 	// public boolean throwException = false;
 	public List<String> tablesToThrowExceptionFor = new ArrayList<>();
 
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName) {
 		MCR.addCall("tableName", tableName);
-		return null;
+		MCR.addReturned(responseToReadFromTable);
+		return responseToReadFromTable;
 	}
 
 	@Override

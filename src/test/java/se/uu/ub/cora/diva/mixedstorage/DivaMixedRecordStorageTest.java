@@ -39,17 +39,17 @@ public class DivaMixedRecordStorageTest {
 	private RecordStorageSpy divaFedoraToCoraStorage;
 	private RecordStorage divaMixedRecordStorage;
 	private RecordStorageSpy divaDbToCoraStorage;
-	private DivaStorageFactorySpy storageFactory;
+	private RecordStorageSpy userStorage;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		basicStorage = new RecordStorageSpy();
 		divaFedoraToCoraStorage = new RecordStorageSpy();
 		divaDbToCoraStorage = new RecordStorageSpy();
-		storageFactory = new DivaStorageFactorySpy();
+		userStorage = new RecordStorageSpy();
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, divaDbToCoraStorage, storageFactory);
+						divaFedoraToCoraStorage, divaDbToCoraStorage, userStorage);
 	}
 
 	@Test
@@ -132,7 +132,7 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
-	public void readUserGoesToDivaDBToCoraStorage() throws Exception {
+	public void readUserGoesToUserStorage() throws Exception {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 		assertNoInteractionWithStorage(divaDbToCoraStorage);
@@ -142,16 +142,14 @@ public class DivaMixedRecordStorageTest {
 		data.id = "someUserId";
 		data.answer = divaMixedRecordStorage.read(data.type, data.id);
 
-		assertEquals(storageFactory.type, "user");
-		RecordStorageSpy factored = (RecordStorageSpy) storageFactory.factored;
-		RecordStorageSpyData dataFromFactored = factored.data;
-		assertEquals(dataFromFactored.calledMethod, "read");
-		assertEquals(dataFromFactored.type, "user");
-		assertEquals(dataFromFactored.id, "someUserId");
+		RecordStorageSpyData userStorageData = userStorage.data;
+		assertEquals(userStorageData.calledMethod, "read");
+		assertEquals(userStorageData.type, "user");
+		assertEquals(userStorageData.id, "someUserId");
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 
-		assertSame(data.answer, dataFromFactored.answer);
+		assertSame(data.answer, userStorageData.answer);
 	}
 
 	@Test
@@ -161,13 +159,12 @@ public class DivaMixedRecordStorageTest {
 		data.id = "someDifferentUserId";
 		data.answer = divaMixedRecordStorage.read(data.type, data.id);
 
-		RecordStorageSpy factored = (RecordStorageSpy) storageFactory.factored;
-		RecordStorageSpyData dataFromFactored = factored.data;
-		assertEquals(dataFromFactored.id, "someDifferentUserId");
+		RecordStorageSpyData userStorageData = userStorage.data;
+		assertEquals(userStorageData.id, "someDifferentUserId");
 	}
 
 	@Test
-	public void readCoraUserGoesToDivaDBToCoraStorage() throws Exception {
+	public void readCoraUserGoesToUserStorage() throws Exception {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 		assertNoInteractionWithStorage(divaDbToCoraStorage);
@@ -177,25 +174,24 @@ public class DivaMixedRecordStorageTest {
 		data.id = "someUserId";
 		data.answer = divaMixedRecordStorage.read(data.type, data.id);
 
-		assertEquals(storageFactory.type, "coraUser");
-		RecordStorageSpy factored = (RecordStorageSpy) storageFactory.factored;
-		RecordStorageSpyData dataFromFactored = factored.data;
-		assertEquals(dataFromFactored.calledMethod, "read");
-		assertEquals(dataFromFactored.type, "coraUser");
-		assertEquals(dataFromFactored.id, "someUserId");
+		RecordStorageSpyData userStorageData = userStorage.data;
+		assertEquals(userStorageData.calledMethod, "read");
+		assertEquals(userStorageData.type, "coraUser");
+		assertEquals(userStorageData.id, "someUserId");
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 
-		assertSame(data.answer, dataFromFactored.answer);
+		assertSame(data.answer, userStorageData.answer);
 	}
 
 	@Test
-	public void readUserGUESTGoesToBasicStorage() throws Exception {
-		storageFactory.factorNotFound = true;
+	public void testUserGoesToBasicStorageWhenNotFoundInUserStorage() throws Exception {
 		DivaDbToCoraStorageNotFoundSpy divaDbToCoraStorageSpy = new DivaDbToCoraStorageNotFoundSpy();
+		userStorage.existsInStorage = false;
+
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, divaDbToCoraStorageSpy, storageFactory);
+						divaFedoraToCoraStorage, divaDbToCoraStorageSpy, userStorage);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = "user";
@@ -204,7 +200,9 @@ public class DivaMixedRecordStorageTest {
 
 		expectedData.calledMethod = "read";
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
-		assertTrue(storageFactory.readWasCalled);
+		RecordStorageSpyData dataFromSpy = userStorage.data;
+
+		assertEquals(dataFromSpy.calledMethod, "read");
 		assertExpectedDataSameAsInStorageSpy(basicStorage, expectedData);
 	}
 
@@ -263,7 +261,7 @@ public class DivaMixedRecordStorageTest {
 		divaDbToCoraStorage = new RecordStorageSpy("db");
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, divaDbToCoraStorage, storageFactory);
+						divaFedoraToCoraStorage, divaDbToCoraStorage, userStorage);
 
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
@@ -554,20 +552,18 @@ public class DivaMixedRecordStorageTest {
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForUserGoesFirstToUserStorage()
 			throws Exception {
-		storageFactory.recordExists = true;
+		userStorage.linkExistsInStorage = true;
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, null, storageFactory);
+						divaFedoraToCoraStorage, null, userStorage);
 
 		String type = "user";
 		String id = "userId";
 		boolean recordExists = divaMixedRecordStorage
 				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
 		assertTrue(recordExists);
-		assertEquals(storageFactory.type, type);
 
-		RecordStorageSpy factored = (RecordStorageSpy) storageFactory.factored;
-		RecordStorageSpyData data = factored.data;
+		RecordStorageSpyData data = userStorage.data;
 
 		assertEquals(data.calledMethod,
 				"recordExistsForAbstractOrImplementingRecordTypeAndRecordId");
@@ -580,20 +576,18 @@ public class DivaMixedRecordStorageTest {
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForCoraUserGoesFirstToUserStorage()
 			throws Exception {
-		storageFactory.recordExists = true;
+		userStorage.linkExistsInStorage = true;
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, null, storageFactory);
+						divaFedoraToCoraStorage, null, userStorage);
 
 		String type = "coraUser";
 		String id = "userId";
 		boolean recordExists = divaMixedRecordStorage
 				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
 		assertTrue(recordExists);
-		assertEquals(storageFactory.type, type);
 
-		RecordStorageSpy factored = (RecordStorageSpy) storageFactory.factored;
-		RecordStorageSpyData data = factored.data;
+		RecordStorageSpyData data = userStorage.data;
 
 		assertEquals(data.calledMethod,
 				"recordExistsForAbstractOrImplementingRecordTypeAndRecordId");
@@ -605,10 +599,9 @@ public class DivaMixedRecordStorageTest {
 
 	@Test
 	public void recordDoesNotExistForAbstractOrImplementingRecordTypeAndRecordIdForUser() {
-		storageFactory.factorNotFound = true;
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, null, storageFactory);
+						divaFedoraToCoraStorage, null, userStorage);
 
 		boolean recordExists = divaMixedRecordStorage
 				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("user", "id");
@@ -618,11 +611,11 @@ public class DivaMixedRecordStorageTest {
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForCoraUserAlsoGoesToBasicStorage()
 			throws Exception {
-		storageFactory.factorNotFound = true;
-		basicStorage.existsInStorage = true;
+		userStorage.existsInStorage = false;
+		basicStorage.linkExistsInStorage = true;
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
-						divaFedoraToCoraStorage, null, storageFactory);
+						divaFedoraToCoraStorage, null, userStorage);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = "coraUser";
@@ -637,10 +630,9 @@ public class DivaMixedRecordStorageTest {
 		assertExpectedDataSameAsInStorageSpy(basicStorage, expectedData);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 
-		DivaDbToCoraStorageNotFoundSpy factored = (DivaDbToCoraStorageNotFoundSpy) storageFactory.factored;
-
-		assertEquals(factored.type, expectedData.type);
-		assertEquals(factored.id, expectedData.id);
+		assertEquals(userStorage.data.type, expectedData.type);
+		assertEquals(userStorage.data.id, expectedData.id);
+		assertEquals(userStorage.data.calledMethod, expectedData.calledMethod);
 
 	}
 

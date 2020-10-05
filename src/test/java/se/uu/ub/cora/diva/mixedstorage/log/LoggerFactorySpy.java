@@ -60,4 +60,19 @@ public class LoggerFactorySpy implements LoggerFactory {
 		return ((createdLoggers.get(testedClassName)).fatalMessages).size();
 	}
 
+	public boolean infoLogMessageUsingClassNameExists(String className, String expectedMessage) {
+		List<String> infoMessages = (createdLoggers.get(className)).infoMessages;
+		return infoMessages.contains(expectedMessage);
+	}
+
+	public boolean errorLogMessageUsingClassNameExists(String className, String expectedMessage) {
+		List<String> errorMessages = (createdLoggers.get(className)).errorMessages;
+		return errorMessages.contains(expectedMessage);
+	}
+
+	public boolean fatalLogMessageUsingClassNameExists(String className, String expectedMessage) {
+		List<String> fatalMessages = (createdLoggers.get(className)).fatalMessages;
+		return fatalMessages.contains(expectedMessage);
+	}
+
 }
