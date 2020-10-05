@@ -90,7 +90,7 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 		data.filter = filter;
 		data.calledMethod = "readList";
 		List<DataGroup> readList = new ArrayList<>();
-		if ("db".equals(storageType)) {
+		if ("db".equals(storageType) || "userStorage".equals(storageType)) {
 			DataGroup dummyDataGroup = new DataGroupSpy("DummyGroupFromDbRecordStorageSpy");
 			readList.add(dummyDataGroup);
 		}

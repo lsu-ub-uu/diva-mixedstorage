@@ -255,10 +255,9 @@ public class DivaMixedRecordStorageTest {
 		assertExpectedDataSameAsInStorageSpy(divaDbToCoraStorage, data);
 	}
 
-	// TODO: fortsätt här
 	@Test
-	public void readUserListGoesToDbToCoraStorageANDToBasicStorage() throws Exception {
-		divaDbToCoraStorage = new RecordStorageSpy("db");
+	public void readUserListGoesToDUserStorageANDToBasicStorage() throws Exception {
+		userStorage = new RecordStorageSpy("userStorage");
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
 						divaFedoraToCoraStorage, divaDbToCoraStorage, userStorage);
@@ -276,23 +275,25 @@ public class DivaMixedRecordStorageTest {
 		assertEquals(dataSentToBasicStorage.calledMethod, "readList");
 		assertSame(dataSentToBasicStorage.filter, filter);
 
-		RecordStorageSpyData dataSentToDbStorage = divaDbToCoraStorage.data;
-		assertEquals(dataSentToDbStorage.type, type);
-		assertEquals(dataSentToDbStorage.calledMethod, "readList");
-		assertSame(dataSentToDbStorage.filter, filter);
+		RecordStorageSpyData userStorageData = userStorage.data;
+		assertEquals(userStorageData.calledMethod, "readList");
+		assertEquals(userStorageData.type, type);
+		assertSame(userStorageData.filter, filter);
+
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
 
 		assertReturnedListContainsResultsFromBothStorage(answer, dataSentToBasicStorage,
-				dataSentToDbStorage);
+				userStorageData);
 
 		assertEquals(answer.totalNumberOfMatches, 3);
 
 	}
 
 	private void assertReturnedListContainsResultsFromBothStorage(StorageReadResult answer,
-			RecordStorageSpyData dataSentToBasicStorage, RecordStorageSpyData dataSentToDbStorage) {
+			RecordStorageSpyData dataSentToBasicStorage, RecordStorageSpyData dataSentToUserStorage) {
 		Collection<?> listOfDataGroupsReturnedFromBasicstorage = (Collection<?>) dataSentToBasicStorage.answer;
 		assertTrue(answer.listOfDataGroups.containsAll(listOfDataGroupsReturnedFromBasicstorage));
-		Collection<?> listOfDataGroupsReturnedFromDatabase = (Collection<?>) dataSentToDbStorage.answer;
+		Collection<?> listOfDataGroupsReturnedFromDatabase = (Collection<?>) dataSentToUserStorage.answer;
 		assertTrue(answer.listOfDataGroups.containsAll(listOfDataGroupsReturnedFromDatabase));
 	}
 
