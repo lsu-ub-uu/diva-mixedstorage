@@ -112,31 +112,40 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			return divaDbStorage.readList(type, filter);
 		}
 		if (CORA_USER.equals(type)) {
-			return readListOfUsersFromDbAndBasicStorage(type, filter);
+			return readListOfUsersFromUserStorageAndBasicStorage(type, filter);
 		}
 		return basicStorage.readList(type, filter);
 	}
 
-	private StorageReadResult readListOfUsersFromDbAndBasicStorage(String type, DataGroup filter) {
+	private StorageReadResult readListOfUsersFromUserStorageAndBasicStorage(String type,
+			DataGroup filter) {
 		StorageReadResult resultFromUserStorage = userStorage.readList(type, filter);
 		StorageReadResult resultFromBasicStorage = basicStorage.readList(type, filter);
 
-		addResultFromDbToBasicStorageResult(resultFromUserStorage, resultFromBasicStorage);
+		addResultFromSecondResultToFirst(resultFromUserStorage, resultFromBasicStorage);
 		return resultFromBasicStorage;
 	}
 
-	private void addResultFromDbToBasicStorageResult(StorageReadResult resultFromDataBase,
-			StorageReadResult resultFromBasicStorage) {
-		resultFromBasicStorage.listOfDataGroups.addAll(resultFromDataBase.listOfDataGroups);
-		resultFromBasicStorage.totalNumberOfMatches += resultFromDataBase.totalNumberOfMatches;
+	private void addResultFromSecondResultToFirst(StorageReadResult firstResult,
+			StorageReadResult secondResult) {
+		secondResult.listOfDataGroups.addAll(firstResult.listOfDataGroups);
+		secondResult.totalNumberOfMatches += firstResult.totalNumberOfMatches;
 	}
 
 	@Override
 	public StorageReadResult readAbstractList(String type, DataGroup filter) {
 		if (USER.equals(type)) {
-			return divaDbStorage.readAbstractList(type, filter);
+			return readAbstractListOfUsersFromUserStorageAndBasicStorage(type, filter);
 		}
 		return basicStorage.readAbstractList(type, filter);
+	}
+
+	private StorageReadResult readAbstractListOfUsersFromUserStorageAndBasicStorage(String type,
+			DataGroup filter) {
+		StorageReadResult dbUsers = divaDbStorage.readAbstractList(type, filter);
+		StorageReadResult basicStorageUsers = basicStorage.readAbstractList(type, filter);
+		addResultFromSecondResultToFirst(basicStorageUsers, dbUsers);
+		return dbUsers;
 	}
 
 	@Override

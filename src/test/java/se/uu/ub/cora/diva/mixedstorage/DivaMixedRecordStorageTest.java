@@ -290,7 +290,8 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	private void assertReturnedListContainsResultsFromBothStorage(StorageReadResult answer,
-			RecordStorageSpyData dataSentToBasicStorage, RecordStorageSpyData dataSentToUserStorage) {
+			RecordStorageSpyData dataSentToBasicStorage,
+			RecordStorageSpyData dataSentToUserStorage) {
 		Collection<?> listOfDataGroupsReturnedFromBasicstorage = (Collection<?>) dataSentToBasicStorage.answer;
 		assertTrue(answer.listOfDataGroups.containsAll(listOfDataGroupsReturnedFromBasicstorage));
 		Collection<?> listOfDataGroupsReturnedFromDatabase = (Collection<?>) dataSentToUserStorage.answer;
@@ -438,20 +439,35 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
-	public void readAbstractListForUserGoesToDivaDBToCoraStorage() throws Exception {
+	public void readAbstractListForUserGoesToDivaDBToCoraStorageAndBasicStorage() throws Exception {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaDbToCoraStorage);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = "user";
 		expectedData.filter = new DataGroupSpy("filter");
-		expectedData.answer = divaMixedRecordStorage.readAbstractList(expectedData.type,
-				expectedData.filter).listOfDataGroups;
+		StorageReadResult answer = divaMixedRecordStorage.readAbstractList(expectedData.type,
+				expectedData.filter);
 
 		expectedData.calledMethod = "readAbstractList";
-		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
-		assertExpectedDataSameAsInStorageSpy(divaDbToCoraStorage, expectedData);
+
+		RecordStorageSpyData divaDbToCoraStorageData = divaDbToCoraStorage.data;
+		assertEquals(divaDbToCoraStorageData.calledMethod, expectedData.calledMethod);
+		assertEquals(divaDbToCoraStorageData.type, expectedData.type);
+		assertSame(divaDbToCoraStorageData.filter, expectedData.filter);
+
+		RecordStorageSpyData dataSentToBasicStorage = basicStorage.data;
+		assertEquals(dataSentToBasicStorage.type, expectedData.type);
+		assertEquals(dataSentToBasicStorage.calledMethod, expectedData.calledMethod);
+		assertSame(dataSentToBasicStorage.filter, expectedData.filter);
+
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+
+		assertReturnedListContainsResultsFromBothStorage(answer, dataSentToBasicStorage,
+				divaDbToCoraStorageData);
+
+		assertEquals(answer.totalNumberOfMatches, 2);
 	}
 
 	@Test
