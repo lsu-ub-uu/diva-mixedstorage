@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
@@ -272,5 +273,31 @@ public class DivaFedoraRecordStorageTest {
 			throws Exception {
 		divaToCoraRecordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(null,
 				null);
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForPerson() {
+		httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseCode = 200;
+
+		boolean personExists = divaToCoraRecordStorage
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("person",
+						"authority-person:11685");
+		assertEquals(httpHandlerFactory.urls.get(0), baseURL + "get/authority-person:11685");
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
+		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
+		assertEquals(httpHandler.requestMetod, "GET");
+		assertTrue(personExists);
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForPersonNotFound() {
+		httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseCode = 404;
+
+		boolean personExists = divaToCoraRecordStorage
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("person",
+						"authority-person:11685");
+		assertFalse(personExists);
 	}
 }

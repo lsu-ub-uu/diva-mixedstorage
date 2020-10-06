@@ -243,8 +243,21 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
+		if (PERSON.equals(type)) {
+			return recordExistsForPerson(id);
+		}
 		throw NotImplementedException.withMessage(
 				"recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented");
+	}
+
+	private boolean recordExistsForPerson(String id) {
+		// TODO:not sure what url to use
+		String url = baseURL + "get/" + id;
+		HttpHandler httpHandler = httpHandlerFactory.factor(url);
+		httpHandler.setRequestMethod("GET");
+		// TODO: should we check for 404 instead?
+		int responseCode = httpHandler.getResponseCode();
+		return OK == responseCode;
 	}
 
 	public HttpHandlerFactory getHttpHandlerFactory() {
