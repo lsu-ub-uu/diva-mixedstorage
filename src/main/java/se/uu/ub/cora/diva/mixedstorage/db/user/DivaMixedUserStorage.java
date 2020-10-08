@@ -81,7 +81,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	private DataGroup readUserByUserId(String idFromLogin) {
 		logAndThrowExceptionIfUnexpectedFormatOf(idFromLogin);
-		log.logErrorUsingMessage("After checking idFromLogin");
 		Map<String, Object> conditions = createConditions(idFromLogin);
 		Map<String, Object> userRowFromDb = recordReader
 				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
@@ -128,7 +127,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	private List<DataGroup> readAndConvertClassicGroupsToCoraRoles(
 			Map<String, Object> userRowFromDb) {
 		List<Map<String, Object>> groupRowsFromDb = readGroupsFromDb(userRowFromDb);
-		log.logErrorUsingMessage("Returned size of groups " + groupRowsFromDb.size());
 		return convertClassicGroupsToCoraRoles(groupRowsFromDb);
 	}
 
@@ -142,16 +140,12 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	private List<DataGroup> convertClassicGroupsToCoraRoles(
 			List<Map<String, Object>> groupRowsFromDb) {
 		String groupType = getUsersGroupTypeWithMostPermissions(groupRowsFromDb);
-		log.logErrorUsingMessage("GroupType is " + groupType);
 		if (groupType.equals(SYSTEM_ADMIN)) {
-			log.logErrorUsingMessage("SystemAdmin role");
 			return createSystemAdminRole();
 		}
 		if (groupType.equals(DOMAIN_ADMIN)) {
-			log.logErrorUsingMessage("DomainAdmin role");
 			return createDomainAdminRole(groupRowsFromDb);
 		}
-		log.logErrorUsingMessage("Other role");
 		return createNoRolesForAllOtherGroupTypes();
 	}
 
