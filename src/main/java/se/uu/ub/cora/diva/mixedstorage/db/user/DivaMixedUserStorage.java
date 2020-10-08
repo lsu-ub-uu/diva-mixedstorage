@@ -81,6 +81,7 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	private DataGroup readUserByUserId(String idFromLogin) {
 		logAndThrowExceptionIfUnexpectedFormatOf(idFromLogin);
+		log.logErrorUsingMessage("After checking idFromLogin");
 		Map<String, Object> conditions = createConditions(idFromLogin);
 		Map<String, Object> userRowFromDb = recordReader
 				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
