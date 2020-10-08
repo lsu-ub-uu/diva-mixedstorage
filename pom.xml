@@ -43,6 +43,8 @@
 		<apptokenstorage.version>2.1.0</apptokenstorage.version>
 		<gatekeeper.version>3.5.0</gatekeeper.version>
 		<json.version>2.1.0</json.version>
+		<converter.version>1.2.0</converter.version>
+		<xmlconverter.version>1.4-SNAPSHOT</xmlconverter.version>
 	</properties>
 
 	<scm>
@@ -116,6 +118,16 @@
 			<artifactId>json</artifactId>
 			<version>${json.version}</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>converter</artifactId>
+			<version>${converter.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>xmlconverter</artifactId>
+			<version>${xmlconverter.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>

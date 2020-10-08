@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2018 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,19 +18,10 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
-import static org.testng.Assert.assertEquals;
+import se.uu.ub.cora.data.DataGroup;
 
-import org.testng.annotations.Test;
+public interface DivaXmlParserFedoraToCoraConverter {
 
-public class DivaFedoraToCoraPersonConverterTest {
-
-	@Test
-	public void testInit() {
-		XsltTransformerSpy transformer = new XsltTransformerSpy();
-		DivaFedoraToCoraConverter converter = new DivaFedoraToCoraPersonConverter(transformer);
-		String xmlToTransform = "";
-		converter.fromXML(xmlToTransform);
-		assertEquals(transformer.inputXml, "xslt/DivaFedoraToCoraPerson.xsl");
-	}
+	DataGroup fromXML(String xml);
 
 }

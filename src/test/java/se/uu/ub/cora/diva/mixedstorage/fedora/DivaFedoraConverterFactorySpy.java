@@ -23,15 +23,15 @@ import java.util.List;
 
 public class DivaFedoraConverterFactorySpy implements DivaFedoraConverterFactory {
 
-	List<DivaFedoraToCoraConverter> factoredConverters = new ArrayList<>();
+	List<DivaXmlParserFedoraToCoraConverter> factoredConverters = new ArrayList<>();
 	List<String> factoredTypes = new ArrayList<>();
 	List<DivaCoraToFedoraConverter> factoredToFedoraConverters = new ArrayList<>();
 	public List<String> factoredToFedoraTypes = new ArrayList<>();
 
 	@Override
-	public DivaFedoraToCoraConverter factorToCoraConverter(String type) {
+	public DivaXmlParserFedoraToCoraConverter factorToCoraConverter(String type) {
 		factoredTypes.add(type);
-		DivaFedoraToCoraConverter converter = new DivaFedoraToCoraConverterSpy();
+		DivaXmlParserFedoraToCoraConverter converter = new DivaFedoraToCoraConverterSpy();
 		factoredConverters.add(converter);
 		return converter;
 	}

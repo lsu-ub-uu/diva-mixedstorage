@@ -35,9 +35,9 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	}
 
 	@Override
-	public DivaFedoraToCoraConverter factorToCoraConverter(String type) {
+	public DivaXmlParserFedoraToCoraConverter factorToCoraConverter(String type) {
 		if ("person".equals(type)) {
-			return new DivaFedoraToCoraPersonConverter();
+			return new DivaXmlParserFedoraToCoraPersonConverter();
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}

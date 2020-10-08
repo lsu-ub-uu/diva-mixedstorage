@@ -21,7 +21,7 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 
-public class DivaFedoraToCoraConverterSpy implements DivaFedoraToCoraConverter {
+public class DivaFedoraToCoraConverterSpy implements DivaXmlParserFedoraToCoraConverter {
 
 	public String xml;
 	public DataGroup convertedDataGroup;

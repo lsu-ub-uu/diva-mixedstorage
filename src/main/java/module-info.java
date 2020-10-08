@@ -8,6 +8,7 @@ module se.uu.ub.cora.diva.mixedstorage {
 	requires se.uu.ub.cora.searchstorage;
 	requires se.uu.ub.cora.gatekeeper;
 	requires java.sql;
+	requires transitive se.uu.ub.cora.xmlconverter;
 
 	provides se.uu.ub.cora.gatekeeper.user.UserStorageProvider
 			with se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;

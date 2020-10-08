@@ -44,9 +44,9 @@ public class DivaFedoraConverterFactoryTest {
 
 	@Test
 	public void testFactoryPerson() throws Exception {
-		DivaFedoraToCoraConverter converter = divaToCoraConverterFactoryImp
+		DivaXmlParserFedoraToCoraConverter converter = divaToCoraConverterFactoryImp
 				.factorToCoraConverter("person");
-		assertTrue(converter instanceof DivaFedoraToCoraPersonConverter);
+		assertTrue(converter instanceof DivaXmlParserFedoraToCoraPersonConverter);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

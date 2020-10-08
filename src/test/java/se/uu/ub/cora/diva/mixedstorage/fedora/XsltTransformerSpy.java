@@ -18,19 +18,16 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
-import static org.testng.Assert.assertEquals;
+import se.uu.ub.cora.xmlconverter.converter.XsltTransformer;
 
-import org.testng.annotations.Test;
+public class XsltTransformerSpy implements XsltTransformer {
 
-public class DivaFedoraToCoraPersonConverterTest {
+	public String inputXml;
 
-	@Test
-	public void testInit() {
-		XsltTransformerSpy transformer = new XsltTransformerSpy();
-		DivaFedoraToCoraConverter converter = new DivaFedoraToCoraPersonConverter(transformer);
-		String xmlToTransform = "";
-		converter.fromXML(xmlToTransform);
-		assertEquals(transformer.inputXml, "xslt/DivaFedoraToCoraPerson.xsl");
+	@Override
+	public String transform(String inputXml) {
+		this.inputXml = inputXml;
+		return null;
 	}
 
 }

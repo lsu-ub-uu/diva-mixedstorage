@@ -71,7 +71,7 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 
 	private DataGroup readAndConvertPersonFromFedora(String id) {
 		HttpHandler httpHandler = createHttpHandlerForPerson(id);
-		DivaFedoraToCoraConverter toCoraConverter = converterFactory.factorToCoraConverter(PERSON);
+		DivaXmlParserFedoraToCoraConverter toCoraConverter = converterFactory.factorToCoraConverter(PERSON);
 		return toCoraConverter.fromXML(httpHandler.getResponseText());
 	}
 
