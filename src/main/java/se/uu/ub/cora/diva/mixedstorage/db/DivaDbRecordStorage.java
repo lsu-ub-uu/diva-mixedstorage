@@ -182,7 +182,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	private List<DataGroup> convertDbResultToDataGroups(String type,
 			List<Map<String, Object>> readAllFromDb) {
-		List<DataGroup> userDataGroups = new ArrayList<>();
+		List<DataGroup> userDataGroups = new ArrayList<>(readAllFromDb.size());
 		for (Map<String, Object> rowFromDb : readAllFromDb) {
 			DataGroup userDataGroup = convertRowToDataGroup(type, rowFromDb);
 			userDataGroups.add(userDataGroup);

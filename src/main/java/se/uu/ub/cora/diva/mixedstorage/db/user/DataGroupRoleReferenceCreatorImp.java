@@ -27,10 +27,12 @@ import se.uu.ub.cora.data.DataGroupProvider;
 
 public class DataGroupRoleReferenceCreatorImp implements DataGroupRoleReferenceCreator {
 
+	private static final String USER_ROLE = "userRole";
+
 	@Override
 	public DataGroup createRoleReferenceForDomainAdminUsingDomains(List<String> domains) {
-		DataGroup role = DataGroupProvider.getDataGroupUsingNameInData("userRole");
-		DataGroup child = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId("userRole",
+		DataGroup role = DataGroupProvider.getDataGroupUsingNameInData(USER_ROLE);
+		DataGroup child = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId(USER_ROLE,
 				"permissionRole", "divaDomainAdminRole");
 		role.addChild(child);
 		if (domainsExist(domains)) {
@@ -76,8 +78,8 @@ public class DataGroupRoleReferenceCreatorImp implements DataGroupRoleReferenceC
 
 	@Override
 	public DataGroup createRoleReferenceForSystemAdmin() {
-		DataGroup role = DataGroupProvider.getDataGroupUsingNameInData("userRole");
-		DataGroup child = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId("userRole",
+		DataGroup role = DataGroupProvider.getDataGroupUsingNameInData(USER_ROLE);
+		DataGroup child = DataGroupProvider.getDataGroupAsLinkUsingNameInDataTypeAndId(USER_ROLE,
 				"permissionRole", "divaSystemAdminRole");
 		role.addChild(child);
 		return role;

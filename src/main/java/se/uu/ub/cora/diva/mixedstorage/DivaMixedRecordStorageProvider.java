@@ -162,8 +162,7 @@ public class DivaMixedRecordStorageProvider
 						fedoraPassword);
 	}
 
-	private DivaDbRecordStorage createDbStorage(RecordReaderFactoryImp recordReaderFactory) {
-
+	private DivaDbRecordStorage createDbStorage(RecordReaderFactory recordReaderFactory) {
 		DivaDbToCoraConverterFactoryImp divaDbToCoraConverterFactory = new DivaDbToCoraConverterFactoryImp();
 		DivaDbFactoryImp divaDbToCoraFactory = new DivaDbFactoryImp(recordReaderFactory,
 				divaDbToCoraConverterFactory);

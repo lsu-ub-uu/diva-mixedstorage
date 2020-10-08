@@ -19,7 +19,6 @@
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,6 +40,7 @@ import se.uu.ub.cora.storage.StorageReadResult;
 
 public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
+	private static final String PUBLIC_USER = "public.user";
 	private static final String DOMAIN = "domain";
 	private static final String USER_ID = "user_id";
 	private static final String DOMAIN_ADMIN = "domainAdmin";
@@ -83,7 +83,7 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		logAndThrowExceptionIfUnexpectedFormatOf(idFromLogin);
 		Map<String, Object> conditions = createConditions(idFromLogin);
 		Map<String, Object> userRowFromDb = recordReader
-				.readOneRowFromDbUsingTableAndConditions("public.user", conditions);
+				.readOneRowFromDbUsingTableAndConditions(PUBLIC_USER, conditions);
 		DataGroup user = userConverter.fromMap(userRowFromDb);
 		readAndPossiblyAddRoles(userRowFromDb, user);
 
@@ -140,10 +140,10 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	private List<DataGroup> convertClassicGroupsToCoraRoles(
 			List<Map<String, Object>> groupRowsFromDb) {
 		String groupType = getUsersGroupTypeWithMostPermissions(groupRowsFromDb);
-		if (groupType.equals(SYSTEM_ADMIN)) {
+		if (SYSTEM_ADMIN.equals(groupType)) {
 			return createSystemAdminRole();
 		}
-		if (groupType.equals(DOMAIN_ADMIN)) {
+		if (DOMAIN_ADMIN.equals(groupType)) {
 			return createDomainAdminRole(groupRowsFromDb);
 		}
 		return createNoRolesForAllOtherGroupTypes();
@@ -171,14 +171,14 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	private List<DataGroup> createSystemAdminRole() {
 		DataGroup systemAdmin = dataGroupRoleReferenceCreator.createRoleReferenceForSystemAdmin();
-		return Arrays.asList(systemAdmin);
+		return Collections.singletonList(systemAdmin);
 	}
 
 	private List<DataGroup> createDomainAdminRole(List<Map<String, Object>> groupRowsFromDb) {
 		List<String> domains = readDomainsForDomainAdminRoles(groupRowsFromDb);
 		DataGroup domainAdmin = dataGroupRoleReferenceCreator
 				.createRoleReferenceForDomainAdminUsingDomains(domains);
-		return Arrays.asList(domainAdmin);
+		return Collections.singletonList(domainAdmin);
 	}
 
 	private List<String> readDomainsForDomainAdminRoles(List<Map<String, Object>> groupRowsFromDb) {
@@ -265,19 +265,16 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	}
 
 	private Map<String, Object> tryToReadUser(String id, Map<String, Object> conditions) {
-		Map<String, Object> userRowFromDb = new HashMap<>();
 		try {
-			userRowFromDb = recordReader.readOneRowFromDbUsingTableAndConditions("public.user",
-					conditions);
+			return recordReader.readOneRowFromDbUsingTableAndConditions(PUBLIC_USER, conditions);
 		} catch (SqlStorageException s) {
 			throw new RecordNotFoundException("Record not found for type: user and id: " + id, s);
 		}
-		return userRowFromDb;
 	}
 
 	private Map<String, Object> createConditionsForId(String id) {
 		Map<String, Object> conditions = new HashMap<>();
-		conditions.put(DB_ID, Integer.parseInt(id));
+		conditions.put(DB_ID, Integer.valueOf(id));
 		return conditions;
 	}
 
@@ -306,13 +303,13 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
-		List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable("public.user");
+		List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable(PUBLIC_USER);
 		List<DataGroup> dataGroups = convertUserGroupsAndAddToList(rowsFromDb);
 		return createStorageResult(dataGroups);
 	}
 
 	private List<DataGroup> convertUserGroupsAndAddToList(List<Map<String, Object>> rowsFromDb) {
-		List<DataGroup> dataGroups = new ArrayList<>();
+		List<DataGroup> dataGroups = new ArrayList<>(rowsFromDb.size());
 		for (Map<String, Object> row : rowsFromDb) {
 			DataGroup convertedUser = userConverter.fromMap(row);
 			dataGroups.add(convertedUser);
