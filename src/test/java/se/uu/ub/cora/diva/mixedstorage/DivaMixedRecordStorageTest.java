@@ -115,12 +115,16 @@ public class DivaMixedRecordStorageTest {
 
 	@Test
 	public void readOrganisationGoesToDivaDBToCoraStorage() throws Exception {
+		assertReadGoesToBasicStorageForOrganisationType("organisation");
+	}
+
+	private void assertReadGoesToBasicStorageForOrganisationType(String recordType) {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 		assertNoInteractionWithStorage(divaDbToCoraStorage);
 
 		RecordStorageSpyData data = new RecordStorageSpyData();
-		data.type = "divaOrganisation";
+		data.type = recordType;
 		data.id = "someOrgId";
 		data.answer = divaMixedRecordStorage.read(data.type, data.id);
 
@@ -129,6 +133,16 @@ public class DivaMixedRecordStorageTest {
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 
 		assertExpectedDataSameAsInStorageSpy(divaDbToCoraStorage, data);
+	}
+
+	@Test
+	public void readRootOrganisationGoesToDivaDBToCoraStorage() throws Exception {
+		assertReadGoesToBasicStorageForOrganisationType("rootOrganisation");
+	}
+
+	@Test
+	public void readChildOrganisationGoesToDivaDBToCoraStorage() throws Exception {
+		assertReadGoesToBasicStorageForOrganisationType("childOrganisation");
 	}
 
 	@Test
@@ -240,12 +254,16 @@ public class DivaMixedRecordStorageTest {
 
 	@Test
 	public void readOrganisationListGoesToDbToCoraStorage() throws Exception {
+		assertReadListGoesToDbForOrganisationType("organisation");
+	}
+
+	private void assertReadListGoesToDbForOrganisationType(String recordType) {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 		assertNoInteractionWithStorage(divaDbToCoraStorage);
 
 		RecordStorageSpyData data = new RecordStorageSpyData();
-		data.type = "divaOrganisation";
+		data.type = recordType;
 		data.filter = new DataGroupSpy("filter");
 		data.answer = divaMixedRecordStorage.readList(data.type, data.filter).listOfDataGroups;
 
@@ -253,6 +271,16 @@ public class DivaMixedRecordStorageTest {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 		assertExpectedDataSameAsInStorageSpy(divaDbToCoraStorage, data);
+	}
+
+	@Test
+	public void readRootOrganisationListGoesToDbToCoraStorage() throws Exception {
+		assertReadListGoesToDbForOrganisationType("rootOrganisation");
+	}
+
+	@Test
+	public void readChildOrganisationListGoesToDbToCoraStorage() throws Exception {
+		assertReadListGoesToDbForOrganisationType("childOrganisation");
 	}
 
 	@Test
@@ -394,6 +422,10 @@ public class DivaMixedRecordStorageTest {
 
 	@Test
 	public void updateOrganisationGoesToDbStorage() {
+		assertUpdateGoesToDbForOrganisationType("organisation");
+	}
+
+	private void assertUpdateGoesToDbForOrganisationType(String type) {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 		assertNoInteractionWithStorage(divaDbToCoraStorage);
@@ -404,7 +436,7 @@ public class DivaMixedRecordStorageTest {
 						divaFedoraToCoraStorage, divaDbToCoraStorageSpy, null);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
-		expectedData.type = "divaOrganisation";
+		expectedData.type = type;
 		expectedData.id = "someId";
 		expectedData.record = new DataGroupSpy("dummyRecord");
 		expectedData.collectedTerms = new DataGroupSpy("collectedTerms");
@@ -420,6 +452,16 @@ public class DivaMixedRecordStorageTest {
 
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 		assertNoInteractionWithStorage(basicStorage);
+	}
+
+	@Test
+	public void updateRootOrganisationGoesToDbStorage() {
+		assertUpdateGoesToDbForOrganisationType("rootOrganisation");
+	}
+
+	@Test
+	public void updateChildOrganisationGoesToDbStorage() {
+		assertUpdateGoesToDbForOrganisationType("childOrganisation");
 	}
 
 	@Test
@@ -538,13 +580,17 @@ public class DivaMixedRecordStorageTest {
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForOrgansiationGoesToDbStorage()
 			throws Exception {
+		assertRecordExistsGoesToDbForOrganisationType("organisation");
+	}
+
+	private void assertRecordExistsGoesToDbForOrganisationType(String recordType) {
 		DivaDbToCoraStorageSpy divaDbToCoraStorageSpy = new DivaDbToCoraStorageSpy();
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage,
 						divaFedoraToCoraStorage, divaDbToCoraStorageSpy, null);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
-		expectedData.type = "divaOrganisation";
+		expectedData.type = recordType;
 		expectedData.id = "someId";
 		expectedData.calledMethod = "recordExistsForAbstractOrImplementingRecordTypeAndRecordId";
 		boolean recordExists = divaMixedRecordStorage
@@ -564,6 +610,18 @@ public class DivaMixedRecordStorageTest {
 		assertEquals(spyData.type, expectedData.type);
 		assertEquals(spyData.id, expectedData.id);
 		assertEquals(spyData.calledMethod, expectedData.calledMethod);
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForRootOrgansiationGoesToDbStorage()
+			throws Exception {
+		assertRecordExistsGoesToDbForOrganisationType("rootOrganisation");
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForChildOrgansiationGoesToDbStorage()
+			throws Exception {
+		assertRecordExistsGoesToDbForOrganisationType("childOrganisation");
 	}
 
 	@Test

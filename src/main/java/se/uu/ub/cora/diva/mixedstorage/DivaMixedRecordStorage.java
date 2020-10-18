@@ -31,7 +31,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private static final String USER = "user";
 	private static final String CORA_USER = "coraUser";
 	private static final String PERSON = "person";
-	private static final String ORGANISATION = "divaOrganisation";
+	private static final String ORGANISATION = "organisation";
 	private RecordStorage basicStorage;
 	private RecordStorage divaFedoraStorage;
 	private RecordStorage divaDbStorage;
@@ -57,13 +57,18 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (PERSON.equals(type)) {
 			return divaFedoraStorage.read(type, id);
 		}
-		if (ORGANISATION.equals(type)) {
+		if (isOrganisation(type)) {
 			return divaDbStorage.read(type, id);
 		}
 		if (USER.equals(type) || CORA_USER.equals(type)) {
 			return handleUserStorage(type, id);
 		}
 		return basicStorage.read(type, id);
+	}
+
+	private boolean isOrganisation(String type) {
+		return ORGANISATION.equals(type) || "rootOrganisation".equals(type)
+				|| "childOrganisation".equals(type);
 	}
 
 	private DataGroup handleUserStorage(String type, String id) {
@@ -96,7 +101,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
 			divaFedoraStorage.update(type, id, record, collectedTerms, linkList, dataDivider);
-		} else if (ORGANISATION.equals(type)) {
+		} else if (isOrganisation(type)) {
 			divaDbStorage.update(type, id, record, collectedTerms, linkList, dataDivider);
 		} else {
 			basicStorage.update(type, id, record, collectedTerms, linkList, dataDivider);
@@ -108,7 +113,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (PERSON.equals(type)) {
 			return divaFedoraStorage.readList(type, filter);
 		}
-		if (ORGANISATION.equals(type)) {
+		if (isOrganisation(type)) {
 			return divaDbStorage.readList(type, filter);
 		}
 		if (CORA_USER.equals(type)) {
@@ -166,7 +171,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
-		if (ORGANISATION.equals(type)) {
+		if (isOrganisation(type)) {
 			return linkExistInDbStorage(type, id);
 		}
 		if (USER.equals(type) || CORA_USER.equals(type)) {
