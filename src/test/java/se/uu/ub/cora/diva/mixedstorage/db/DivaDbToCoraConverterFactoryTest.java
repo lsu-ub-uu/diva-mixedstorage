@@ -45,9 +45,22 @@ public class DivaDbToCoraConverterFactoryTest {
 
 	@Test
 	public void testFactoryOrganisation() throws Exception {
-		DivaDbToCoraConverter converter = divaDbToCoraConverterFactoryImp
-				.factor("divaOrganisation");
+		testCorrectConverterForOrganisationType("organisation");
+	}
+
+	private void testCorrectConverterForOrganisationType(String type) {
+		DivaDbToCoraConverter converter = divaDbToCoraConverterFactoryImp.factor(type);
 		assertTrue(converter instanceof DivaDbToCoraOrganisationConverter);
+	}
+
+	@Test
+	public void testFactoryRootOrganisation() throws Exception {
+		testCorrectConverterForOrganisationType("rootOrganisation");
+	}
+
+	@Test
+	public void testFactoryChildOrganisation() throws Exception {
+		testCorrectConverterForOrganisationType("childOrganisation");
 	}
 
 	@Test

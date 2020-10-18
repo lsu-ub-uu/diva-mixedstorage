@@ -41,10 +41,15 @@ public class DivaDbUpdaterFactoryImp implements DivaDbUpdaterFactory {
 
 	@Override
 	public DivaDbUpdater factor(String type) {
-		if ("divaOrganisation".equals(type)) {
+		if (isOrganisation(type)) {
 			return factorForOrganisation();
 		}
 		throw NotImplementedException.withMessage("Updater not implemented for " + type);
+	}
+
+	private boolean isOrganisation(String type) {
+		return "organisation".equals(type) || "rootOrganisation".equals(type)
+				|| "childOrganisation".equals(type);
 	}
 
 	private DivaDbUpdater factorForOrganisation() {

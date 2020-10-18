@@ -52,25 +52,65 @@ public class DivaDbFactoryTest {
 
 	@Test
 	public void testFactorOrganisation() {
-		DivaDbReader divaDbToCoraOrganisation = divaDbToCoraFactoryImp.factor("divaOrganisation");
+		DivaDbReader divaDbToCoraOrganisation = divaDbToCoraFactoryImp.factor("organisation");
 		assertTrue(divaDbToCoraOrganisation instanceof DivaDbOrganisationReader);
 	}
 
 	@Test
-	public void testFactorOrganisationGetDbFactory() {
+	public void testFactorRootOrganisation() {
+		DivaDbReader divaDbToCoraOrganisation = divaDbToCoraFactoryImp.factor("childOrganisation");
+		assertTrue(divaDbToCoraOrganisation instanceof DivaDbOrganisationReader);
+	}
+
+	@Test
+	public void testFactorChildOrganisation() {
+		DivaDbReader divaDbToCoraOrganisation = divaDbToCoraFactoryImp.factor("rootOrganisation");
+		assertTrue(divaDbToCoraOrganisation instanceof DivaDbOrganisationReader);
+	}
+
+	@Test
+	public void testFactorOrganisationCorrectDbFactory() {
+		assertCorrectDbFactoryForOrganisationType("organisation");
+	}
+
+	private void assertCorrectDbFactoryForOrganisationType(String type) {
 		DivaDbOrganisationReader factored = (DivaDbOrganisationReader) divaDbToCoraFactoryImp
-				.factor("divaOrganisation");
+				.factor(type);
 		DivaDbFactoryImp dbFactory = (DivaDbFactoryImp) factored.getDbFactory();
 		assertSame(dbFactory.getConverterFactory(), converterFactory);
 		assertSame(dbFactory.getReaderFactory(), readerFactory);
 	}
 
 	@Test
-	public void testFactoryOrganisationSentInFactoriesAreSentToImplementation() {
-		DivaDbOrganisationReader divaDbToCoraOrganisation = (DivaDbOrganisationReader) divaDbToCoraFactoryImp
-				.factor("divaOrganisation");
-		assertSame(divaDbToCoraOrganisation.getRecordReaderFactory(), readerFactory);
-		assertSame(divaDbToCoraOrganisation.getConverterFactory(), converterFactory);
+	public void testFactorRootOrganisationCorrectDbFactory() {
+		assertCorrectDbFactoryForOrganisationType("rootOrganisation");
+	}
+
+	@Test
+	public void testFactorChildOrganisationCorrectDbFactory() {
+		assertCorrectDbFactoryForOrganisationType("childOrganisation");
+	}
+
+	@Test
+	public void testFactorOrganisationSentInFactoriesAreSentToImplementation() {
+		assertCorrectFactoriesSentToImplementationForOrganisationType("organisation");
+	}
+
+	private void assertCorrectFactoriesSentToImplementationForOrganisationType(String type) {
+		DivaDbOrganisationReader factored = (DivaDbOrganisationReader) divaDbToCoraFactoryImp
+				.factor(type);
+		assertSame(factored.getRecordReaderFactory(), readerFactory);
+		assertSame(factored.getConverterFactory(), converterFactory);
+	}
+
+	@Test
+	public void testFactorRootOrganisationSentInFactoriesAreSentToImplementation() {
+		assertCorrectFactoriesSentToImplementationForOrganisationType("rootOrganisation");
+	}
+
+	@Test
+	public void testFactorChildOrganisationSentInFactoriesAreSentToImplementation() {
+		assertCorrectFactoriesSentToImplementationForOrganisationType("childOrganisation");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

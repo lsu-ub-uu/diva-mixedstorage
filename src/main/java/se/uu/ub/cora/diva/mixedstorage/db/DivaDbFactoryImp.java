@@ -38,12 +38,17 @@ public class DivaDbFactoryImp implements DivaDbFactory {
 
 	@Override
 	public DivaDbReader factor(String type) {
-		if ("divaOrganisation".equals(type)) {
+		if (isOrganisation(type)) {
 			DivaDbFactory divaDbFactory = new DivaDbFactoryImp(readerFactory, converterFactory);
 			return DivaDbOrganisationReader.usingRecordReaderFactoryAndConverterFactory(
 					readerFactory, converterFactory, divaDbFactory);
 		}
 		throw NotImplementedException.withMessage("No implementation found for: " + type);
+	}
+
+	private boolean isOrganisation(String type) {
+		return "organisation".equals(type) || "rootOrganisation".equals(type)
+				|| "childOrganisation".equals(type);
 	}
 
 	public RecordReaderFactory getReaderFactory() {

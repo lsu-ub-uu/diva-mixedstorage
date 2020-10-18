@@ -38,7 +38,7 @@ import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
 public class DivaDbRecordStorageTest {
-	private static final String ORGANISATION_TYPE = "divaOrganisation";
+	private static final String ORGANISATION_TYPE = "organisation";
 	private DivaDbRecordStorage divaRecordStorage;
 	private DivaDbToCoraConverterFactorySpy converterFactorySpy;
 	private RecordReaderFactorySpy recordReaderFactorySpy;
@@ -70,7 +70,7 @@ public class DivaDbRecordStorageTest {
 	public void testCallToDivaDbToCoraFactory() throws Exception {
 		divaRecordStorage.read(ORGANISATION_TYPE, "someId");
 		assertTrue(divaDbFactorySpy.factorWasCalled);
-		assertEquals(divaDbFactorySpy.type, "divaOrganisation");
+		assertEquals(divaDbFactorySpy.type, "organisation");
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void testOrganisationFromDivaDbToCoraIsReturnedFromRead() throws Exception {
+	public void testReturnedDataGroupIsSameAsReturnedFromFactoredForRead() throws Exception {
 		DataGroup readOrganisation = divaRecordStorage.read(ORGANISATION_TYPE, "someId");
 		DivaDbSpy factored = divaDbFactorySpy.factored;
 		assertEquals(readOrganisation, factored.dataGroup);
@@ -128,9 +128,19 @@ public class DivaDbRecordStorageTest {
 		record.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
 
 		String dataDivider = "";
-		divaRecordStorage.update("divaOrganisation", "56", record, null, null, dataDivider);
+		divaRecordStorage.update("organisation", "56", record, null, null, dataDivider);
 		assertTrue(divaDbUpdaterFactorySpy.factorWasCalled);
-		assertEquals(divaDbUpdaterFactorySpy.types.get(0), "divaOrganisation");
+		assertEquals(divaDbUpdaterFactorySpy.types.get(0), "organisation");
+	}
+
+	@Test
+	public void testUpdateUsesSentInType() throws Exception {
+		DataGroup organisation = new DataGroupSpy("someType");
+		organisation.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
+
+		divaRecordStorage.update("someType", "56", organisation, null, null, "");
+
+		assertEquals(divaDbUpdaterFactorySpy.types.get(0), "someType");
 	}
 
 	@Test
@@ -159,8 +169,22 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void testReadOrganisationListCountryTableRequestedFromReader() throws Exception {
+	public void testReadOrganisationListTableRequestedFromReader() throws Exception {
 		divaRecordStorage.readList(ORGANISATION_TYPE, new DataGroupSpy("filter"));
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.usedTableName, ORGANISATION_TYPE);
+	}
+
+	@Test
+	public void testReadRootOrganisationListTableRequestedFromReader() throws Exception {
+		divaRecordStorage.readList("rootOrganisation", new DataGroupSpy("filter"));
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.usedTableName, ORGANISATION_TYPE);
+	}
+
+	@Test
+	public void testReadChildOrganisationListTableRequestedFromReader() throws Exception {
+		divaRecordStorage.readList("childOrganisation", new DataGroupSpy("filter"));
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
 		assertEquals(recordReader.usedTableName, ORGANISATION_TYPE);
 	}
@@ -196,19 +220,13 @@ public class DivaDbRecordStorageTest {
 		List<Map<String, Object>> readRows = recordReader.returnedList;
 
 		List<MultipleRowDbToDataReaderSpy> multipleReaders = divaDbFactorySpy.listOfFactoredMultiples;
-		// assertEquals(multipleReaders.get(0).usedType, "divaOrganisationParent");
 		assertSame(multipleReaders.get(0).usedId, readRows.get(0).get("id"));
-		// assertEquals(multipleReaders.get(1).usedType, "divaOrganisationPredecessor");
 		assertSame(multipleReaders.get(1).usedId, readRows.get(0).get("id"));
 
-		// assertEquals(multipleReaders.get(2).usedType, "divaOrganisationParent");
 		assertSame(multipleReaders.get(2).usedId, readRows.get(1).get("id"));
-		// assertEquals(multipleReaders.get(3).usedType, "divaOrganisationPredecessor");
 		assertSame(multipleReaders.get(3).usedId, readRows.get(1).get("id"));
 
-		// assertEquals(multipleReaders.get(4).usedType, "divaOrganisationParent");
 		assertSame(multipleReaders.get(4).usedId, readRows.get(2).get("id"));
-		// assertEquals(multipleReaders.get(5).usedType, "divaOrganisationPredecessor");
 		assertSame(multipleReaders.get(5).usedId, readRows.get(2).get("id"));
 
 	}
@@ -348,10 +366,13 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForDivaOrganisation() {
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForOrganisationWhenExists() {
+		assertCorrectRecordExistsWhenExistsForOrganisationType("organisation");
+	}
+
+	private void assertCorrectRecordExistsWhenExistsForOrganisationType(String type) {
 		boolean organisationExists = divaRecordStorage
-				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("divaOrganisation",
-						"26");
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, "26");
 		RecordReaderSpy readerSpy = recordReaderFactorySpy.factored;
 		assertEquals(readerSpy.usedTableName, "organisation");
 		Map<String, Object> usedConditions = readerSpy.usedConditions;
@@ -360,10 +381,23 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForDivaOrganisationWhenOrganisationDoesNotExist() {
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForRootOrganisationWhenExists() {
+		assertCorrectRecordExistsWhenExistsForOrganisationType("rootOrganisation");
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForChildOrganisationWhenExists() {
+		assertCorrectRecordExistsWhenExistsForOrganisationType("childOrganisation");
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForOrganisationWhenNotExist() {
+		assertCorrectRecordExistsWhenNotExistsForOrganisationType("organisation");
+	}
+
+	private void assertCorrectRecordExistsWhenNotExistsForOrganisationType(String type) {
 		boolean organisationExists = divaRecordStorage
-				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("divaOrganisation",
-						"600");
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, "600");
 		RecordReaderSpy readerSpy = recordReaderFactorySpy.factored;
 		assertEquals(readerSpy.usedTableName, "organisation");
 		Map<String, Object> usedConditions = readerSpy.usedConditions;
@@ -372,10 +406,20 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForRootOrganisationWhenNotExist() {
+		assertCorrectRecordExistsWhenNotExistsForOrganisationType("rootOrganisation");
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForChildOrganisationWhenNotExist() {
+		assertCorrectRecordExistsWhenNotExistsForOrganisationType("childOrganisation");
+	}
+
+	@Test
 	public void testRecordExistsDivaOrganisationCallsDataReaderWithStringIdReturnsFalse()
 			throws Exception {
 		boolean organisationExists = divaRecordStorage
-				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("divaOrganisation",
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("organisation",
 						"notAnInt");
 		assertFalse(organisationExists);
 	}

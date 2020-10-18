@@ -36,7 +36,7 @@ import se.uu.ub.cora.storage.StorageReadResult;
 
 public class DivaDbRecordStorage implements RecordStorage {
 
-	private static final String DIVA_ORGANISATION = "divaOrganisation";
+	private static final String DIVA_ORGANISATION = "organisation";
 	private RecordReaderFactory recordReaderFactory;
 	private DivaDbFactory divaDbFactory;
 	private DivaDbUpdaterFactory divaDbUpdaterFactory;
@@ -85,7 +85,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	@Override
 	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		DivaDbUpdater divaDbUpdater = divaDbUpdaterFactory.factor(DIVA_ORGANISATION);
+		DivaDbUpdater divaDbUpdater = divaDbUpdaterFactory.factor(type);
 		divaDbUpdater.update(record);
 	}
 
@@ -111,10 +111,15 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
-		if (DIVA_ORGANISATION.equals(type)) {
-			return readOrganisationList(type);
+		if (isOrganisation(type)) {
+			return readOrganisationList(DIVA_ORGANISATION);
 		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
+	}
+
+	private boolean isOrganisation(String type) {
+		return DIVA_ORGANISATION.equals(type) || "rootOrganisation".equals(type)
+				|| "childOrganisation".equals(type);
 	}
 
 	private StorageReadResult readOrganisationList(String type) {
@@ -214,7 +219,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
-		if (DIVA_ORGANISATION.equals(type)) {
+		if (isOrganisation(type)) {
 			return organisationExistsInDb(id);
 		}
 		throw NotImplementedException.withMessage(
