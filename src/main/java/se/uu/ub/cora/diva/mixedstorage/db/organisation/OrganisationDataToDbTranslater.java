@@ -30,7 +30,6 @@ import se.uu.ub.cora.sqldatabase.RecordReader;
 
 public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 
-	private static final int ROOT_ORGANISATION_TYPE_ID = 49;
 	private Map<String, Object> values = new HashMap<>();
 	private Map<String, Object> conditions = new HashMap<>(1);
 	private DataGroup dataGroup;
@@ -157,9 +156,7 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	}
 
 	private void addOrgansiationType() {
-		boolean isRootOrganisation = booleanValueExistsAndIsTrue("rootOrganisation");
-		Object typeId = isRootOrganisation ? ROOT_ORGANISATION_TYPE_ID
-				: getTypeCodeForOrganisationType();
+		Object typeId = getTypeCodeForOrganisationType();
 		values.put("organisation_type_id", typeId);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+  * Copyright 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -275,23 +275,6 @@ public class OrganisationDataToDbTranslaterTest {
 
 		assertEquals(recordReader.oneRowRead.get("organisation_type_id"),
 				translater.getValues().get("organisation_type_id"));
-	}
-
-	@Test
-	public void testOrganisationRootOrganisationTrueOverridesOrganisationType() {
-		DataGroup dataGroup = createDataGroupAddChildWithNameInDataAndValue("rootOrganisation",
-				"yes");
-
-		translater.translate(dataGroup);
-		assertEquals(translater.getConditions().get("organisation_id"), 45);
-		assertEquals(translater.getValues().get("organisation_name"), "someChangedName");
-		assertEquals(translater.getValues().get("organisation_type_id"), 49);
-
-		assertOrgTypeWasNotRead();
-	}
-
-	private void assertOrgTypeWasNotRead() {
-		assertTrue(recordReader.usedTableNames.isEmpty());
 	}
 
 	@Test

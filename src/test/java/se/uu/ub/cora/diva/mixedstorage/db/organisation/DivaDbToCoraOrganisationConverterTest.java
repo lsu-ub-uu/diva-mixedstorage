@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -112,6 +112,10 @@ public class DivaDbToCoraOrganisationConverterTest {
 
 	private DataAtomicSpy getFactoredDataAtomicByNumber(int noFactored) {
 		return dataAtomicFactorySpy.factoredDataAtomics.get(noFactored);
+	}
+
+	private DataAtomicSpy getFactoredDataAtomicByNameInData(String nameInData) {
+		return dataAtomicFactorySpy.factoredDataAtomicsMap.get(nameInData);
 	}
 
 	@Test
@@ -242,23 +246,23 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb.put("country_code", "fi");
 
 		DataGroup organisation = converter.fromMap(rowFromDb);
-		DataAtomicSpy factoredDataAtomicForCity = getFactoredDataAtomicByNumber(18);
+		DataAtomicSpy factoredDataAtomicForCity = getFactoredDataAtomicByNameInData("city");
 		assertEquals(factoredDataAtomicForCity.nameInData, "city");
 		assertEquals(factoredDataAtomicForCity.value, "uppsala");
 
-		DataAtomicSpy factoredDataAtomicForStreet = getFactoredDataAtomicByNumber(19);
+		DataAtomicSpy factoredDataAtomicForStreet = getFactoredDataAtomicByNameInData("street");
 		assertEquals(factoredDataAtomicForStreet.nameInData, "street");
 		assertEquals(factoredDataAtomicForStreet.value, "Övre slottsgatan 1");
 
-		DataAtomicSpy factoredDataAtomicForBox = getFactoredDataAtomicByNumber(20);
+		DataAtomicSpy factoredDataAtomicForBox = getFactoredDataAtomicByNameInData("box");
 		assertEquals(factoredDataAtomicForBox.nameInData, "box");
 		assertEquals(factoredDataAtomicForBox.value, "Box5435");
 
-		DataAtomicSpy factoredDataAtomicForPostcode = getFactoredDataAtomicByNumber(21);
+		DataAtomicSpy factoredDataAtomicForPostcode = getFactoredDataAtomicByNameInData("postcode");
 		assertEquals(factoredDataAtomicForPostcode.nameInData, "postcode");
 		assertEquals(factoredDataAtomicForPostcode.value, "345 34");
 
-		DataAtomicSpy factoredDataAtomicForCountry = getFactoredDataAtomicByNumber(22);
+		DataAtomicSpy factoredDataAtomicForCountry = getFactoredDataAtomicByNameInData("country");
 		assertEquals(factoredDataAtomicForCountry.nameInData, "country");
 		assertEquals(factoredDataAtomicForCountry.value, "FI");
 
@@ -451,18 +455,4 @@ public class DivaDbToCoraOrganisationConverterTest {
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("showInPortal"), "yes");
 	}
 
-	@Test
-	public void testOrganisationNotRoot() {
-		rowFromDb.put("type_code", "unit");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("rootOrganisation"), "no");
-	}
-
-	@Test
-	public void testOrganisationRoot() {
-		rowFromDb.put("type_code", "root");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("organisationType"));
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("rootOrganisation"), "yes");
-	}
 }

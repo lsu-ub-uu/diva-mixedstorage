@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -176,22 +176,8 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 
 	private void createAndAddOrganisationType() {
 		String typeCode = (String) dbRow.get("type_code");
-		String rootValue = typeIsRoot(typeCode) ? "yes" : "no";
-
 		organisation.addChild(DataAtomicProvider
-				.getDataAtomicUsingNameInDataAndValue("rootOrganisation", rootValue));
-		addOrganisationTypeIfNotRoot(typeCode);
-	}
-
-	private boolean typeIsRoot(String typeCode) {
-		return "root".equals(typeCode);
-	}
-
-	private void addOrganisationTypeIfNotRoot(String typeCode) {
-		if (!typeIsRoot(typeCode)) {
-			organisation.addChild(DataAtomicProvider
-					.getDataAtomicUsingNameInDataAndValue("organisationType", typeCode));
-		}
+				.getDataAtomicUsingNameInDataAndValue("organisationType", typeCode));
 	}
 
 	private void possiblyCreateAndAddEligibility() {
