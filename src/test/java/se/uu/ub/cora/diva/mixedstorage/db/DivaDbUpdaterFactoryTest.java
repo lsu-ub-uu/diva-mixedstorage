@@ -71,8 +71,8 @@ public class DivaDbUpdaterFactoryTest {
 	}
 
 	@Test
-	public void testFactorChildOrganisation() {
-		assertCorrectFactoredUpdatedForOrganisationType("childOrganisation");
+	public void testFactorcommonOrganisation() {
+		assertCorrectFactoredUpdatedForOrganisationType("commonOrganisation");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

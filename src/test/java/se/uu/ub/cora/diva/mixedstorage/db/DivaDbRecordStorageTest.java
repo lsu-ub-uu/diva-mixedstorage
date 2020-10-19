@@ -183,8 +183,8 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void testReadChildOrganisationListTableRequestedFromReader() throws Exception {
-		divaRecordStorage.readList("childOrganisation", new DataGroupSpy("filter"));
+	public void testReadcommonOrganisationListTableRequestedFromReader() throws Exception {
+		divaRecordStorage.readList("commonOrganisation", new DataGroupSpy("filter"));
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
 		assertEquals(recordReader.usedTableName, ORGANISATION_TYPE);
 	}
@@ -386,8 +386,8 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForChildOrganisationWhenExists() {
-		assertCorrectRecordExistsWhenExistsForOrganisationType("childOrganisation");
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForcommonOrganisationWhenExists() {
+		assertCorrectRecordExistsWhenExistsForOrganisationType("commonOrganisation");
 	}
 
 	@Test
@@ -411,8 +411,8 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForChildOrganisationWhenNotExist() {
-		assertCorrectRecordExistsWhenNotExistsForOrganisationType("childOrganisation");
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForcommonOrganisationWhenNotExist() {
+		assertCorrectRecordExistsWhenNotExistsForOrganisationType("commonOrganisation");
 	}
 
 	@Test

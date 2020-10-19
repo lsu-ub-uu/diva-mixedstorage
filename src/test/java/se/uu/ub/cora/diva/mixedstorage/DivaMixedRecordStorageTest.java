@@ -141,8 +141,8 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
-	public void readChildOrganisationGoesToDivaDBToCoraStorage() throws Exception {
-		assertReadGoesToBasicStorageForOrganisationType("childOrganisation");
+	public void readcommonOrganisationGoesToDivaDBToCoraStorage() throws Exception {
+		assertReadGoesToBasicStorageForOrganisationType("commonOrganisation");
 	}
 
 	@Test
@@ -279,8 +279,8 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
-	public void readChildOrganisationListGoesToDbToCoraStorage() throws Exception {
-		assertReadListGoesToDbForOrganisationType("childOrganisation");
+	public void readcommonOrganisationListGoesToDbToCoraStorage() throws Exception {
+		assertReadListGoesToDbForOrganisationType("commonOrganisation");
 	}
 
 	@Test
@@ -460,8 +460,8 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
-	public void updateChildOrganisationGoesToDbStorage() {
-		assertUpdateGoesToDbForOrganisationType("childOrganisation");
+	public void updatecommonOrganisationGoesToDbStorage() {
+		assertUpdateGoesToDbForOrganisationType("commonOrganisation");
 	}
 
 	@Test
@@ -621,7 +621,7 @@ public class DivaMixedRecordStorageTest {
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForChildOrgansiationGoesToDbStorage()
 			throws Exception {
-		assertRecordExistsGoesToDbForOrganisationType("childOrganisation");
+		assertRecordExistsGoesToDbForOrganisationType("commonOrganisation");
 	}
 
 	@Test

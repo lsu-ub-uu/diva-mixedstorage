@@ -68,7 +68,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	private boolean isOrganisation(String type) {
 		return ORGANISATION.equals(type) || "rootOrganisation".equals(type)
-				|| "childOrganisation".equals(type);
+				|| "commonOrganisation".equals(type);
 	}
 
 	private DataGroup handleUserStorage(String type, String id) {

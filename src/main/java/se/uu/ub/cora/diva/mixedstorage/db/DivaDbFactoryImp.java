@@ -48,7 +48,7 @@ public class DivaDbFactoryImp implements DivaDbFactory {
 
 	private boolean isOrganisation(String type) {
 		return "organisation".equals(type) || "rootOrganisation".equals(type)
-				|| "childOrganisation".equals(type);
+				|| "commonOrganisation".equals(type);
 	}
 
 	public RecordReaderFactory getReaderFactory() {

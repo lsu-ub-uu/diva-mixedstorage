@@ -59,8 +59,8 @@ public class DivaDbToCoraConverterFactoryTest {
 	}
 
 	@Test
-	public void testFactoryChildOrganisation() throws Exception {
-		testCorrectConverterForOrganisationType("childOrganisation");
+	public void testFactorycommonOrganisation() throws Exception {
+		testCorrectConverterForOrganisationType("commonOrganisation");
 	}
 
 	@Test

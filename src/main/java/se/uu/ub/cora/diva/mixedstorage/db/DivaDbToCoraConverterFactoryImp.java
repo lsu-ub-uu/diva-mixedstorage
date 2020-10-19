@@ -48,7 +48,7 @@ public class DivaDbToCoraConverterFactoryImp implements DivaDbToCoraConverterFac
 
 	private boolean isOrganisation(String type) {
 		return "organisation".equals(type) || "rootOrganisation".equals(type)
-				|| "childOrganisation".equals(type);
+				|| "commonOrganisation".equals(type);
 	}
 
 }

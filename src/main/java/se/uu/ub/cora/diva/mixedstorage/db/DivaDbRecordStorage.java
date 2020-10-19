@@ -119,7 +119,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	private boolean isOrganisation(String type) {
 		return DIVA_ORGANISATION.equals(type) || "rootOrganisation".equals(type)
-				|| "childOrganisation".equals(type);
+				|| "commonOrganisation".equals(type);
 	}
 
 	private StorageReadResult readOrganisationList(String type) {
