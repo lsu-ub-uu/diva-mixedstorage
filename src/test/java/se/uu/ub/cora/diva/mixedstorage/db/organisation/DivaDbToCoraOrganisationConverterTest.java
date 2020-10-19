@@ -96,7 +96,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 	public void testMinimalValuesReturnsDataGroupWithCorrectRecordInfo() {
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertEquals(organisation.getNameInData(), "organisation");
-		assertCorrectRecordInfoWithId(organisation, "someOrgId");
+		assertCorrectRecordInfoWithIdAndRecordType(organisation, "someOrgId", "commonOrganisation");
 
 		DataGroupSpy factoredOrganisation = dataGroupFactorySpy.factoredDataGroups.get(0);
 		assertEquals(factoredOrganisation.nameInData, "organisation");
@@ -110,12 +110,37 @@ public class DivaDbToCoraOrganisationConverterTest {
 		assertEquals(factoredDataAtomicForId.value, "someOrgId");
 	}
 
+	private void assertCorrectRecordInfoWithIdAndRecordType(DataGroup organisation, String id,
+			String recordType) {
+		DataGroup recordInfo = organisation.getFirstGroupWithNameInData("recordInfo");
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"), id);
+
+		DataGroup type = recordInfo.getFirstGroupWithNameInData("type");
+		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordType"), "recordType");
+		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordId"), recordType);
+
+		DataGroup dataDivider = recordInfo.getFirstGroupWithNameInData("dataDivider");
+		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordType"), "system");
+		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordId"), "diva");
+
+		assertCorrectCreatedAndUpdatedInfo(recordInfo);
+	}
+
 	private DataAtomicSpy getFactoredDataAtomicByNumber(int noFactored) {
 		return dataAtomicFactorySpy.factoredDataAtomics.get(noFactored);
 	}
 
 	private DataAtomicSpy getFactoredDataAtomicByNameInData(String nameInData) {
 		return dataAtomicFactorySpy.factoredDataAtomicsMap.get(nameInData);
+	}
+
+	@Test
+	public void testCorrectRecordTypeWhenOrganisationTypeIsRoot() {
+		rowFromDb.put("type_code", "root");
+		DataGroup organisation = converter.fromMap(rowFromDb);
+		assertEquals(organisation.getNameInData(), "organisation");
+		assertCorrectRecordInfoWithIdAndRecordType(organisation, "someOrgId", "rootOrganisation");
+
 	}
 
 	@Test
@@ -187,21 +212,6 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb.put("not_eligible", false);
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("eligible"), "yes");
-	}
-
-	private void assertCorrectRecordInfoWithId(DataGroup organisation, String id) {
-		DataGroup recordInfo = organisation.getFirstGroupWithNameInData("recordInfo");
-		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"), id);
-
-		DataGroup type = recordInfo.getFirstGroupWithNameInData("type");
-		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordType"), "recordType");
-		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordId"), "divaOrganisation");
-
-		DataGroup dataDivider = recordInfo.getFirstGroupWithNameInData("dataDivider");
-		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordType"), "system");
-		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordId"), "diva");
-
-		assertCorrectCreatedAndUpdatedInfo(recordInfo);
 	}
 
 	private void assertCorrectCreatedAndUpdatedInfo(DataGroup recordInfo) {

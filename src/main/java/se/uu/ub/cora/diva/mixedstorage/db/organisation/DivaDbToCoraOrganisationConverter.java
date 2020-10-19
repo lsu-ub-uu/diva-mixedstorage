@@ -76,22 +76,24 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	private void createAndAddOrganisationWithRecordInfo() {
 		organisation = DataGroupProvider.getDataGroupUsingNameInData("organisation");
 		String id = (String) dbRow.get(ORGANISATION_ID);
-		DataGroup recordInfo = createRecordInfo(id);
+		String typeCode = (String) dbRow.get("type_code");
+		String recordType = "root".equals(typeCode) ? "rootOrganisation" : "commonOrganisation";
+		DataGroup recordInfo = createRecordInfo(recordType, id);
 		organisation.addChild(recordInfo);
 	}
 
-	private DataGroup createRecordInfo(String id) {
+	private DataGroup createRecordInfo(String recordType, String id) {
 		DataGroup recordInfo = DataGroupProvider.getDataGroupUsingNameInData("recordInfo");
 		recordInfo.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("id", id));
-		createAndAddType(recordInfo);
+		createAndAddType(recordInfo, recordType);
 		createAndAddDataDivider(recordInfo);
 		createAndAddCreatedAndUpdatedInfo(recordInfo);
 		return recordInfo;
 	}
 
-	private void createAndAddType(DataGroup recordInfo) {
+	private void createAndAddType(DataGroup recordInfo, String recordType) {
 		DataGroup type = createLinkUsingNameInDataRecordTypeAndRecordId("type", "recordType",
-				"divaOrganisation");
+				recordType);
 		recordInfo.addChild(type);
 	}
 
