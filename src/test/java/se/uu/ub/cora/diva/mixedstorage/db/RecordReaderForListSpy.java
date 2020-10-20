@@ -36,7 +36,7 @@ public class RecordReaderForListSpy implements RecordReader {
 	public List<Map<String, Object>> readAllFromTable(String tableName) {
 		for (int i = 0; i < noOfRecordsToReturn; i++) {
 			Map<String, Object> map = new HashMap<>();
-			map.put("id", String.valueOf(i));
+			map.put("id", i);
 			returnedList.add(map);
 		}
 		returnedListCollection.add(returnedList);

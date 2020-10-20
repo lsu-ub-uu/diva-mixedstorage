@@ -220,14 +220,14 @@ public class DivaDbRecordStorageTest {
 		List<Map<String, Object>> readRows = recordReader.returnedList;
 
 		List<MultipleRowDbToDataReaderSpy> multipleReaders = divaDbFactorySpy.listOfFactoredMultiples;
-		assertSame(multipleReaders.get(0).usedId, readRows.get(0).get("id"));
-		assertSame(multipleReaders.get(1).usedId, readRows.get(0).get("id"));
+		assertEquals(multipleReaders.get(0).usedId, String.valueOf(readRows.get(0).get("id")));
+		assertEquals(multipleReaders.get(1).usedId, String.valueOf(readRows.get(0).get("id")));
 
-		assertSame(multipleReaders.get(2).usedId, readRows.get(1).get("id"));
-		assertSame(multipleReaders.get(3).usedId, readRows.get(1).get("id"));
+		assertEquals(multipleReaders.get(2).usedId, String.valueOf(readRows.get(1).get("id")));
+		assertEquals(multipleReaders.get(3).usedId, String.valueOf(readRows.get(1).get("id")));
 
-		assertSame(multipleReaders.get(4).usedId, readRows.get(2).get("id"));
-		assertSame(multipleReaders.get(5).usedId, readRows.get(2).get("id"));
+		assertEquals(multipleReaders.get(4).usedId, String.valueOf(readRows.get(2).get("id")));
+		assertEquals(multipleReaders.get(5).usedId, String.valueOf(readRows.get(2).get("id")));
 
 	}
 

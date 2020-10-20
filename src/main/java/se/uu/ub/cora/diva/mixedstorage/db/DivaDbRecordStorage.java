@@ -145,7 +145,6 @@ public class DivaDbRecordStorage implements RecordStorage {
 	private void convertOrganisation(String type, List<DataGroup> convertedGroups,
 			Map<String, Object> map) {
 		DataGroup convertedOrganisation = convertOneMapFromDbToDataGroup(type, map);
-		// TODO: fixa ordentligt, testerna ska ha id som integer för org, inte string
 		String id = String.valueOf(map.get("id"));
 		addParentsToOrganisation(convertedOrganisation, id);
 		addPredecessorsToOrganisation(convertedOrganisation, id);
@@ -251,7 +250,8 @@ public class DivaDbRecordStorage implements RecordStorage {
 		try {
 			RecordReader recordReader = recordReaderFactory.factor();
 			Map<String, Object> conditions = createConditionsAddingOrganisationId(id);
-			return recordReader.readOneRowFromDbUsingTableAndConditions("organisation", conditions);
+			return recordReader.readOneRowFromDbUsingTableAndConditions(DIVA_ORGANISATION,
+					conditions);
 		} catch (SqlStorageException | DbException e) {
 			throw new RecordNotFoundException("Organisation not found: " + id);
 		}
