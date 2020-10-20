@@ -172,21 +172,21 @@ public class DivaDbRecordStorageTest {
 	public void testReadOrganisationListTableRequestedFromReader() throws Exception {
 		divaRecordStorage.readList(ORGANISATION_TYPE, new DataGroupSpy("filter"));
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, ORGANISATION_TYPE);
+		assertEquals(recordReader.usedTableName, "organisationview");
 	}
 
 	@Test
 	public void testReadRootOrganisationListTableRequestedFromReader() throws Exception {
 		divaRecordStorage.readList("rootOrganisation", new DataGroupSpy("filter"));
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, ORGANISATION_TYPE);
+		assertEquals(recordReader.usedTableName, "rootorganisationview");
 	}
 
 	@Test
 	public void testReadcommonOrganisationListTableRequestedFromReader() throws Exception {
 		divaRecordStorage.readList("commonOrganisation", new DataGroupSpy("filter"));
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, ORGANISATION_TYPE);
+		assertEquals(recordReader.usedTableName, "commonorganisationview");
 	}
 
 	@Test

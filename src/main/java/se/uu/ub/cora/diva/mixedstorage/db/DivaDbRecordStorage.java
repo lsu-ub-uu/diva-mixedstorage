@@ -112,9 +112,20 @@ public class DivaDbRecordStorage implements RecordStorage {
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
 		if (isOrganisation(type)) {
-			return readOrganisationList(DIVA_ORGANISATION);
+			String tableName = getTableName(type);
+			return readOrganisationList(type, tableName);
 		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
+	}
+
+	private String getTableName(String type) {
+		String tableName = "organisationview";
+		if ("rootOrganisation".equals(type)) {
+			tableName = "rootorganisationview";
+		} else if ("commonOrganisation".equals(type)) {
+			tableName = "commonorganisationview";
+		}
+		return tableName;
 	}
 
 	private boolean isOrganisation(String type) {
@@ -122,8 +133,8 @@ public class DivaDbRecordStorage implements RecordStorage {
 				|| "commonOrganisation".equals(type);
 	}
 
-	private StorageReadResult readOrganisationList(String type) {
-		List<Map<String, Object>> rowsFromDb = readAllFromDb(type);
+	private StorageReadResult readOrganisationList(String type, String tableName) {
+		List<Map<String, Object>> rowsFromDb = readAllFromDb(tableName);
 		List<DataGroup> convertedGroups = new ArrayList<>();
 		for (Map<String, Object> map : rowsFromDb) {
 			convertOrganisation(type, convertedGroups, map);
@@ -134,7 +145,8 @@ public class DivaDbRecordStorage implements RecordStorage {
 	private void convertOrganisation(String type, List<DataGroup> convertedGroups,
 			Map<String, Object> map) {
 		DataGroup convertedOrganisation = convertOneMapFromDbToDataGroup(type, map);
-		String id = (String) map.get("id");
+		// TODO: fixa ordentligt, testerna ska ha id som integer för org, inte string
+		String id = String.valueOf(map.get("id"));
 		addParentsToOrganisation(convertedOrganisation, id);
 		addPredecessorsToOrganisation(convertedOrganisation, id);
 		convertedGroups.add(convertedOrganisation);

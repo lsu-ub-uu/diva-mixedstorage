@@ -75,7 +75,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 
 	private void createAndAddOrganisationWithRecordInfo() {
 		organisation = DataGroupProvider.getDataGroupUsingNameInData("organisation");
-		String id = (String) dbRow.get(ORGANISATION_ID);
+		String id = String.valueOf(dbRow.get(ORGANISATION_ID));
 		String typeCode = (String) dbRow.get("type_code");
 		String recordType = "root".equals(typeCode) ? "rootOrganisation" : "commonOrganisation";
 		DataGroup recordInfo = createRecordInfo(recordType, id);

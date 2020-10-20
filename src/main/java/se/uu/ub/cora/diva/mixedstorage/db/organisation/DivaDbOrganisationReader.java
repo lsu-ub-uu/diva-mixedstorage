@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbReader;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
@@ -36,6 +37,7 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 	private DivaDbToCoraConverterFactory converterFactory;
 	private RecordReader recordReader;
 	private DivaDbFactory divaDbFactory;
+	private static final String DEFAULT_TABLENAME = "organisationview";
 
 	public DivaDbOrganisationReader(RecordReaderFactory recordReaderFactory,
 			DivaDbToCoraConverterFactory converterFactory, DivaDbFactory divaDbFactory) {
@@ -53,17 +55,36 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 	@Override
 	public DataGroup read(String type, String id) {
 		recordReader = recordReaderFactory.factor();
-		Map<String, Object> readRow = readOneRowFromDbUsingTypeAndId(type, id);
+		String tableName = getTableName(type);
+		Map<String, Object> readRow = readOneRowFromDbUsingTypeAndId(tableName, id);
 		DataGroup organisation = convertOneMapFromDbToDataGroup(type, readRow);
 		tryToReadAndConvertParents(id, organisation);
 		tryToReadAndConvertPredecessors(id, organisation);
 		return organisation;
 	}
 
+	private String getTableName(String type) {
+		if ("rootOrganisation".equals(type)) {
+			return "rootorganisationview";
+		} else if ("commonOrganisation".equals(type)) {
+			return "commonorganisationview";
+		}
+		return DEFAULT_TABLENAME;
+	}
+
 	private Map<String, Object> readOneRowFromDbUsingTypeAndId(String type, String id) {
+		throwDbExceptionIfIdNotAnIntegerValue(id);
 		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("id", id);
+		conditions.put("id", Integer.valueOf(id));
 		return recordReader.readOneRowFromDbUsingTableAndConditions(type, conditions);
+	}
+
+	private void throwDbExceptionIfIdNotAnIntegerValue(String id) {
+		try {
+			Integer.valueOf(id);
+		} catch (NumberFormatException ne) {
+			throw DbException.withMessageAndException("Record not found: " + id, ne);
+		}
 	}
 
 	private DataGroup convertOneMapFromDbToDataGroup(String type, Map<String, Object> readRow) {
