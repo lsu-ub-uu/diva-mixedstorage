@@ -36,7 +36,7 @@ import se.uu.ub.cora.storage.StorageReadResult;
 
 public class DivaDbRecordStorage implements RecordStorage {
 
-	private static final String DIVA_ORGANISATION = "organisation";
+	private static final String ORGANISATION = "organisation";
 	private RecordReaderFactory recordReaderFactory;
 	private DivaDbFactory divaDbFactory;
 	private DivaDbUpdaterFactory divaDbUpdaterFactory;
@@ -129,7 +129,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	}
 
 	private boolean isOrganisation(String type) {
-		return DIVA_ORGANISATION.equals(type) || "rootOrganisation".equals(type)
+		return ORGANISATION.equals(type) || "rootOrganisation".equals(type)
 				|| "commonOrganisation".equals(type);
 	}
 
@@ -250,7 +250,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 		try {
 			RecordReader recordReader = recordReaderFactory.factor();
 			Map<String, Object> conditions = createConditionsAddingOrganisationId(id);
-			return recordReader.readOneRowFromDbUsingTableAndConditions(DIVA_ORGANISATION,
+			return recordReader.readOneRowFromDbUsingTableAndConditions(ORGANISATION,
 					conditions);
 		} catch (SqlStorageException | DbException e) {
 			throw new RecordNotFoundException("Organisation not found: " + id);

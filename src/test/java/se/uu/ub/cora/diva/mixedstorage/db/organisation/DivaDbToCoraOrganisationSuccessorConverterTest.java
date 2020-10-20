@@ -101,7 +101,7 @@ public class DivaDbToCoraOrganisationSuccessorConverterTest {
 		assertEquals(linkedOrganisation.getNameInData(), "organisationLink");
 
 		assertEquals(linkedOrganisation.getFirstAtomicValueWithNameInData("linkedRecordType"),
-				"divaOrganisation");
+				"organisation");
 		assertEquals(linkedOrganisation.getFirstAtomicValueWithNameInData("linkedRecordId"),
 				"someOrgId");
 		assertFalse(linkedOrganisation.containsChildWithNameInData("closedDate"));

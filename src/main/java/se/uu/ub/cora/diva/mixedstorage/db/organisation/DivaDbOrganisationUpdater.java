@@ -80,7 +80,7 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	private List<Map<String, Object>> readExistingOrganisationRow() {
 		Map<String, Object> readConditionsForOrganisation = generateReadConditions();
-		return recordReader.readFromTableUsingConditions("divaorganisation",
+		return recordReader.readFromTableUsingConditions("organisationview",
 				readConditionsForOrganisation);
 	}
 

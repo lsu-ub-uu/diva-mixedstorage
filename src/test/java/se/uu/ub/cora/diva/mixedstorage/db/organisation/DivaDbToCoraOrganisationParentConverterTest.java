@@ -103,7 +103,7 @@ public class DivaDbToCoraOrganisationParentConverterTest {
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) parent
 				.getFirstGroupWithNameInData("organisationLink");
 
-		assertEquals(linkedOrganisation.recordType, "divaOrganisation");
+		assertEquals(linkedOrganisation.recordType, "organisation");
 		assertEquals(linkedOrganisation.recordId, "52");
 	}
 
