@@ -85,7 +85,7 @@ public class DivaDbOrganisationUpdaterTest {
 
 		RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
 		assertEquals(factoredReader.usedTableNames.get(0), "organisationview");
-		assertEquals(factoredReader.usedConditionsList.get(0).get("id"), "4567");
+		assertEquals(factoredReader.usedConditionsList.get(0).get("id"), 4567);
 
 		assertEquals(relatedTableFactory.relatedTableNames.get(0), "organisationAlternativeName");
 		RelatedTableSpy firstRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables

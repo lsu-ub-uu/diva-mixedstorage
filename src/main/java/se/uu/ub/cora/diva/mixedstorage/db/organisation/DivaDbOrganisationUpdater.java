@@ -86,7 +86,7 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	private Map<String, Object> generateReadConditions() {
 		Map<String, Object> readConditions = new HashMap<>();
-		String organisationsId = String.valueOf(organisationConditions.get(ORGANISATION_ID));
+		int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
 		readConditions.put("id", organisationsId);
 		return readConditions;
 	}
