@@ -513,6 +513,33 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
+	public void readAbstractListForOrganisationGoesToDivaDBToCoraStorage() throws Exception {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+
+		RecordStorageSpyData expectedData = new RecordStorageSpyData();
+		expectedData.type = "organisation";
+		expectedData.filter = new DataGroupSpy("filter");
+		StorageReadResult answer = divaMixedRecordStorage.readAbstractList(expectedData.type,
+				expectedData.filter);
+
+		expectedData.calledMethod = "readAbstractList";
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+
+		RecordStorageSpyData divaDbToCoraStorageData = divaDbToCoraStorage.data;
+		assertEquals(divaDbToCoraStorageData.calledMethod, expectedData.calledMethod);
+		assertEquals(divaDbToCoraStorageData.type, expectedData.type);
+		assertSame(divaDbToCoraStorageData.filter, expectedData.filter);
+
+		assertEquals(answer.listOfDataGroups, divaDbToCoraStorageData.answer);
+
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(basicStorage);
+
+		assertEquals(answer.totalNumberOfMatches, 1);
+	}
+
+	@Test
 	public void readLinkListGoesToBasicStorage() throws Exception {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);

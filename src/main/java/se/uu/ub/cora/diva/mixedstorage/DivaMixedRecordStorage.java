@@ -142,6 +142,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (USER.equals(type)) {
 			return readAbstractListOfUsersFromUserStorageAndBasicStorage(type, filter);
 		}
+		if (ORGANISATION.equals(type)) {
+			return divaDbStorage.readAbstractList(type, filter);
+		}
 		return basicStorage.readAbstractList(type, filter);
 	}
 

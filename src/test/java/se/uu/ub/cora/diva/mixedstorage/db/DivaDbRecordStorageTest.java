@@ -339,6 +339,27 @@ public class DivaDbRecordStorageTest {
 		assertSame(dataGroupInReturnedResult, dataGroupReturnedFromConverter);
 	}
 
+	@Test
+	public void testReadAbstractListForOrganisationFactorDbReader() throws Exception {
+		divaRecordStorage.readAbstractList("organisation", new DataGroupSpy("filter"));
+		assertTrue(recordReaderFactorySpy.factorWasCalled);
+		RecordReaderSpy factored = recordReaderFactorySpy.factored;
+		assertEquals(factored.usedTableName, "organisationview");
+	}
+
+	@Test
+	public void testReadAbstractListForOrganisationReturnsCorrectData() throws Exception {
+		recordReaderFactorySpy.noOfRecordsToReturn = 3;
+		StorageReadResult result = divaRecordStorage.readAbstractList("organisation",
+				new DataGroupSpy("filter"));
+
+		RecordReaderSpy factoredReader = recordReaderFactorySpy.factored;
+		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 0);
+		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 1);
+		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 2);
+
+	}
+
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "readLinkList is not implemented")
 	public void readLinkListThrowsNotImplementedException() throws Exception {

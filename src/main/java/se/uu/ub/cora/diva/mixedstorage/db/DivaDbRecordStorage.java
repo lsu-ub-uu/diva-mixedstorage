@@ -185,6 +185,9 @@ public class DivaDbRecordStorage implements RecordStorage {
 	public StorageReadResult readAbstractList(String type, DataGroup filter) {
 		if ("user".equals(type)) {
 			return readAndConvertUsers(type);
+		}
+		if (ORGANISATION.equals(type)) {
+			return readOrganisationList(type, "organisationview");
 		} else {
 			throw NotImplementedException.withMessage("readAbstractList is not implemented");
 		}
@@ -250,8 +253,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 		try {
 			RecordReader recordReader = recordReaderFactory.factor();
 			Map<String, Object> conditions = createConditionsAddingOrganisationId(id);
-			return recordReader.readOneRowFromDbUsingTableAndConditions(ORGANISATION,
-					conditions);
+			return recordReader.readOneRowFromDbUsingTableAndConditions(ORGANISATION, conditions);
 		} catch (SqlStorageException | DbException e) {
 			throw new RecordNotFoundException("Organisation not found: " + id);
 		}
