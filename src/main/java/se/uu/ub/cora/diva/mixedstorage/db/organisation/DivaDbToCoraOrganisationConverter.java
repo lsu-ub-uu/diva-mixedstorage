@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -75,23 +75,25 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 
 	private void createAndAddOrganisationWithRecordInfo() {
 		organisation = DataGroupProvider.getDataGroupUsingNameInData("organisation");
-		String id = (String) dbRow.get(ORGANISATION_ID);
-		DataGroup recordInfo = createRecordInfo(id);
+		String id = String.valueOf(dbRow.get(ORGANISATION_ID));
+		String typeCode = (String) dbRow.get("type_code");
+		String recordType = "root".equals(typeCode) ? "rootOrganisation" : "commonOrganisation";
+		DataGroup recordInfo = createRecordInfo(recordType, id);
 		organisation.addChild(recordInfo);
 	}
 
-	private DataGroup createRecordInfo(String id) {
+	private DataGroup createRecordInfo(String recordType, String id) {
 		DataGroup recordInfo = DataGroupProvider.getDataGroupUsingNameInData("recordInfo");
 		recordInfo.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("id", id));
-		createAndAddType(recordInfo);
+		createAndAddType(recordInfo, recordType);
 		createAndAddDataDivider(recordInfo);
 		createAndAddCreatedAndUpdatedInfo(recordInfo);
 		return recordInfo;
 	}
 
-	private void createAndAddType(DataGroup recordInfo) {
+	private void createAndAddType(DataGroup recordInfo, String recordType) {
 		DataGroup type = createLinkUsingNameInDataRecordTypeAndRecordId("type", "recordType",
-				"divaOrganisation");
+				recordType);
 		recordInfo.addChild(type);
 	}
 
@@ -176,22 +178,8 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 
 	private void createAndAddOrganisationType() {
 		String typeCode = (String) dbRow.get("type_code");
-		String rootValue = typeIsRoot(typeCode) ? "yes" : "no";
-
 		organisation.addChild(DataAtomicProvider
-				.getDataAtomicUsingNameInDataAndValue("rootOrganisation", rootValue));
-		addOrganisationTypeIfNotRoot(typeCode);
-	}
-
-	private boolean typeIsRoot(String typeCode) {
-		return "root".equals(typeCode);
-	}
-
-	private void addOrganisationTypeIfNotRoot(String typeCode) {
-		if (!typeIsRoot(typeCode)) {
-			organisation.addChild(DataAtomicProvider
-					.getDataAtomicUsingNameInDataAndValue("organisationType", typeCode));
-		}
+				.getDataAtomicUsingNameInDataAndValue("organisationType", typeCode));
 	}
 
 	private void possiblyCreateAndAddEligibility() {

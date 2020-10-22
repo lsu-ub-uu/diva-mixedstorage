@@ -34,6 +34,7 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupFactorySpy;
+import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactorySpy;
@@ -44,7 +45,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderSpy;
 
 public class DivaDbOrganisationReaderTest {
 
-	private static final String TABLE_NAME = "divaOrganisation";
+	private static final String TYPE = "organisation";
 	private DivaDbToCoraConverterFactorySpy converterFactory;
 	private RecordReaderFactorySpy recordReaderFactory;
 	private DivaDbOrganisationReader divaDbOrganisationReader;
@@ -65,35 +66,55 @@ public class DivaDbOrganisationReaderTest {
 
 	@Test
 	public void testReadOrgansiationFactorDbReader() throws Exception {
-		divaDbOrganisationReader.read(TABLE_NAME, "567");
+		divaDbOrganisationReader.read(TYPE, "567");
 		assertTrue(recordReaderFactory.factorWasCalled);
 	}
 
 	@Test
 	public void testReadOrgansiationTableRequestedFromReader() throws Exception {
-		divaDbOrganisationReader.read(TABLE_NAME, "567");
+		divaDbOrganisationReader.read(TYPE, "567");
 		RecordReaderSpy recordReader = recordReaderFactory.factored;
-		assertEquals(recordReader.usedTableNames.get(0), TABLE_NAME);
+		assertEquals(recordReader.usedTableNames.get(0), "organisationview");
 	}
 
 	@Test
+	public void testReadRootOrgansiationTableRequestedFromReader() throws Exception {
+		divaDbOrganisationReader.read("rootOrganisation", "567");
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
+		assertEquals(recordReader.usedTableNames.get(0), "rootorganisationview");
+	}
+
+	@Test
+	public void testReadCommonOrgansiationTableRequestedFromReader() throws Exception {
+		divaDbOrganisationReader.read("commonOrganisation", "567");
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
+		assertEquals(recordReader.usedTableNames.get(0), "commonorganisationview");
+	}
+
+	@Test(expectedExceptions = DbException.class, expectedExceptionsMessageRegExp = ""
+			+ "Record not found: notAnInt")
 	public void testReadOrganisationConditionsForOrganisationTable() throws Exception {
-		divaDbOrganisationReader.read(TABLE_NAME, "567");
+		divaDbOrganisationReader.read(TYPE, "notAnInt");
+	}
+
+	@Test
+	public void testReadOrganisationNotAnIntegerId() throws Exception {
+		divaDbOrganisationReader.read(TYPE, "567");
 		RecordReaderSpy recordReader = recordReaderFactory.factored;
 		Map<String, Object> conditions = recordReader.usedConditionsList.get(0);
-		assertEquals(conditions.get("id"), "567");
+		assertEquals(conditions.get("id"), 567);
 	}
 
 	@Test
 	public void testReadOrganisationConverterIsFactored() throws Exception {
-		divaDbOrganisationReader.read(TABLE_NAME, "567");
+		divaDbOrganisationReader.read(TYPE, "567");
 		DivaDbToCoraConverter divaDbToCoraConverter = converterFactory.factoredConverters.get(0);
 		assertNotNull(divaDbToCoraConverter);
 	}
 
 	@Test
 	public void testReadOrganisationConverterIsCalledWithDataFromDbStorage() throws Exception {
-		divaDbOrganisationReader.read(TABLE_NAME, "567");
+		divaDbOrganisationReader.read(TYPE, "567");
 		RecordReaderSpy recordReader = recordReaderFactory.factored;
 		DivaDbToCoraConverterSpy divaDbToCoraConverter = converterFactory.factoredConverters.get(0);
 		assertNotNull(divaDbToCoraConverter.mapToConvert);
@@ -102,14 +123,14 @@ public class DivaDbOrganisationReaderTest {
 
 	@Test
 	public void testConvertedOrganisationIsReturned() throws Exception {
-		DataGroup convertedOrganisation = divaDbOrganisationReader.read(TABLE_NAME, "567");
+		DataGroup convertedOrganisation = divaDbOrganisationReader.read(TYPE, "567");
 		DivaDbToCoraConverterSpy organisationConverter = converterFactory.factoredConverters.get(0);
 		assertEquals(convertedOrganisation, organisationConverter.convertedDbDataGroup);
 	}
 
 	@Test
 	public void testMultipleRowDbReaderIsFactoredCorrectlyForParent() throws Exception {
-		divaDbOrganisationReader.read(TABLE_NAME, "567");
+		divaDbOrganisationReader.read(TYPE, "567");
 		MultipleRowDbToDataReader multipleDbToDataReader = divaDbFactorySpy.listOfFactoredMultiples
 				.get(0);
 		assertNotNull(multipleDbToDataReader);
@@ -119,7 +140,7 @@ public class DivaDbOrganisationReaderTest {
 
 	@Test
 	public void testParentMultipleRowDbReaderIsCalledCorrectly() throws Exception {
-		divaDbOrganisationReader.read(TABLE_NAME, "567");
+		divaDbOrganisationReader.read(TYPE, "567");
 		MultipleRowDbToDataReaderSpy multipleDbToDataReader = divaDbFactorySpy.listOfFactoredMultiples
 				.get(0);
 		// assertEquals(multipleDbToDataReader.usedType, "divaOrganisationParent");
@@ -129,14 +150,14 @@ public class DivaDbOrganisationReaderTest {
 	@Test
 	public void testNoParentAreAddedToOrganisation() {
 		divaDbFactorySpy.returnEmptyResult = true;
-		DataGroup organisation = divaDbOrganisationReader.read(TABLE_NAME, "567");
+		DataGroup organisation = divaDbOrganisationReader.read(TYPE, "567");
 
 		assertFalse(organisation.containsChildWithNameInData("divaOrganisationParentChildFromSpy"));
 	}
 
 	@Test
 	public void testConvertedParentAreAddedToOrganisation() throws Exception {
-		DataGroup organisation = divaDbOrganisationReader.read(TABLE_NAME, "567");
+		DataGroup organisation = divaDbOrganisationReader.read(TYPE, "567");
 
 		MultipleRowDbToDataReaderSpy multipleDbToDataReader = divaDbFactorySpy.listOfFactoredMultiples
 				.get(0);
@@ -149,7 +170,7 @@ public class DivaDbOrganisationReaderTest {
 
 	@Test
 	public void testMultipleRowDbReaderIsFactoredCorrectlyForPredecessor() throws Exception {
-		divaDbOrganisationReader.read(TABLE_NAME, "567");
+		divaDbOrganisationReader.read(TYPE, "567");
 		MultipleRowDbToDataReader multipleDbToDataReader = divaDbFactorySpy.listOfFactoredMultiples
 				.get(1);
 		assertNotNull(multipleDbToDataReader);
@@ -159,7 +180,7 @@ public class DivaDbOrganisationReaderTest {
 
 	@Test
 	public void testPredecessorMultipleRowDbReaderIsCalledCorrectly() throws Exception {
-		divaDbOrganisationReader.read(TABLE_NAME, "567");
+		divaDbOrganisationReader.read(TYPE, "567");
 		MultipleRowDbToDataReaderSpy multipleDbToDataReader = divaDbFactorySpy.listOfFactoredMultiples
 				.get(1);
 		// assertEquals(multipleDbToDataReader.usedType, "divaOrganisationPredecessor");
@@ -169,7 +190,7 @@ public class DivaDbOrganisationReaderTest {
 	@Test
 	public void testNoPredecessorAreAddedToOrganisation() {
 		divaDbFactorySpy.returnEmptyResult = true;
-		DataGroup organisation = divaDbOrganisationReader.read(TABLE_NAME, "567");
+		DataGroup organisation = divaDbOrganisationReader.read(TYPE, "567");
 
 		assertFalse(organisation
 				.containsChildWithNameInData("divaOrganisationPredecessorChildFromSpy"));
@@ -177,7 +198,7 @@ public class DivaDbOrganisationReaderTest {
 
 	@Test
 	public void testConvertedPredecessorAreAddedToOrganisation() throws Exception {
-		DataGroup organisation = divaDbOrganisationReader.read(TABLE_NAME, "567");
+		DataGroup organisation = divaDbOrganisationReader.read(TYPE, "567");
 
 		MultipleRowDbToDataReaderSpy multipleDbToDataReader = divaDbFactorySpy.listOfFactoredMultiples
 				.get(1);

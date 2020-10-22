@@ -104,7 +104,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 
 		assertFalse(predecessor.containsChildWithNameInData("organisationComment"));
 
-		assertEquals(linkedOrganisation.recordType, "divaOrganisation");
+		assertEquals(linkedOrganisation.recordType, "organisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
 	}
 
@@ -117,7 +117,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 				.getFirstGroupWithNameInData("organisationLink");
 		assertFalse(predecessor.containsChildWithNameInData("organisationComment"));
 
-		assertEquals(linkedOrganisation.recordType, "divaOrganisation");
+		assertEquals(linkedOrganisation.recordType, "organisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
 	}
 
@@ -131,7 +131,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 				.getFirstGroupWithNameInData("organisationLink");
 		assertFalse(predecessor.containsChildWithNameInData("organisationComment"));
 
-		assertEquals(linkedOrganisation.recordType, "divaOrganisation");
+		assertEquals(linkedOrganisation.recordType, "organisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
 	}
 
@@ -145,7 +145,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
 				.getFirstGroupWithNameInData("organisationLink");
-		assertEquals(linkedOrganisation.recordType, "divaOrganisation");
+		assertEquals(linkedOrganisation.recordType, "organisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
 
 	}

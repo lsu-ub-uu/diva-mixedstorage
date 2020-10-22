@@ -32,15 +32,15 @@ import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.ConnectionSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslaterSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
+import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdater;
 import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderSpy;
-import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdater;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableSpy;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
 
-public class OrganisationDbRecordStorageForOneTypeTest {
+public class DivaDbOrganisationUpdaterTest {
 
-	private DivaDbUpdater recordStorageForOneType;
+	private DivaDbUpdater organisationUpdater;
 	private DataToDbTranslaterSpy dataTranslater;
 	private RelatedTableFactorySpy relatedTableFactory;
 	private RecordReaderFactorySpy recordReaderFactory;
@@ -56,9 +56,8 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 		relatedTableFactory = new RelatedTableFactorySpy();
 		connectionProvider = new SqlConnectionProviderSpy();
 		preparedStatementCreator = new PreparedStatementExecutorSpy();
-		recordStorageForOneType = new DivaDbOrganisationUpdater(dataTranslater,
-				recordReaderFactory, relatedTableFactory, connectionProvider,
-				preparedStatementCreator);
+		organisationUpdater = new DivaDbOrganisationUpdater(dataTranslater, recordReaderFactory,
+				relatedTableFactory, connectionProvider, preparedStatementCreator);
 	}
 
 	private void createDefultDataGroup() {
@@ -70,7 +69,7 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 
 	@Test
 	public void testTranslaterAndDbStatmentForOrganisation() {
-		recordStorageForOneType.update(dataGroup);
+		organisationUpdater.update(dataGroup);
 		assertEquals(dataTranslater.dataGroup, dataGroup);
 
 		DbStatement organisationDbStatement = preparedStatementCreator.dbStatements.get(0);
@@ -82,11 +81,11 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 
 	@Test
 	public void testAlternativeName() {
-		recordStorageForOneType.update(dataGroup);
+		organisationUpdater.update(dataGroup);
 
 		RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
-		assertEquals(factoredReader.usedTableNames.get(0), "divaorganisation");
-		assertEquals(factoredReader.usedConditionsList.get(0).get("id"), "4567");
+		assertEquals(factoredReader.usedTableNames.get(0), "organisationview");
+		assertEquals(factoredReader.usedConditionsList.get(0).get("id"), 4567);
 
 		assertEquals(relatedTableFactory.relatedTableNames.get(0), "organisationAlternativeName");
 		RelatedTableSpy firstRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
@@ -99,7 +98,7 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 
 	@Test
 	public void testAddress() {
-		recordStorageForOneType.update(dataGroup);
+		organisationUpdater.update(dataGroup);
 
 		RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
 		assertEquals(relatedTableFactory.relatedTableNames.get(1), "organisationAddress");
@@ -111,7 +110,7 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 
 	@Test
 	public void testParent() {
-		recordStorageForOneType.update(dataGroup);
+		organisationUpdater.update(dataGroup);
 
 		RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
 		assertEquals(factoredReader.usedTableNames.get(1), "organisation_parent");
@@ -127,7 +126,7 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 
 	@Test
 	public void testPredecessor() {
-		recordStorageForOneType.update(dataGroup);
+		organisationUpdater.update(dataGroup);
 		RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
 		assertEquals(factoredReader.usedTableNames.get(2), "divaorganisationpredecessor");
 		assertEquals(factoredReader.usedConditionsList.get(2).get("organisation_id"), 4567);
@@ -144,7 +143,7 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 	public void testConnectionAutoCommitIsFirstSetToFalseAndThenTrueOnException() {
 		preparedStatementCreator.throwExceptionOnGenerateStatement = true;
 		try {
-			recordStorageForOneType.update(dataGroup);
+			organisationUpdater.update(dataGroup);
 		} catch (Exception sqlException) {
 		}
 		ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
@@ -154,7 +153,7 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 
 	@Test
 	public void testSQLConnectionConfiguration() {
-		recordStorageForOneType.update(dataGroup);
+		organisationUpdater.update(dataGroup);
 		assertTrue(connectionProvider.getConnectionHasBeenCalled);
 		ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
 		assertFalse(factoredConnection.autoCommitChanges.get(0));
@@ -167,7 +166,7 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 	public void testConnectionClosedOnSQLException() throws Exception {
 		preparedStatementCreator.throwExceptionOnGenerateStatement = true;
 		try {
-			recordStorageForOneType.update(dataGroup);
+			organisationUpdater.update(dataGroup);
 		} catch (Exception sqlException) {
 		}
 		ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
@@ -178,7 +177,7 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 	public void testConnectionRollbackOnSQLException() throws Exception {
 		preparedStatementCreator.throwExceptionOnGenerateStatement = true;
 		try {
-			recordStorageForOneType.update(dataGroup);
+			organisationUpdater.update(dataGroup);
 		} catch (Exception sqlException) {
 		}
 		ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
@@ -187,7 +186,7 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 
 	@Test
 	public void testPreparedStatements() {
-		recordStorageForOneType.update(dataGroup);
+		organisationUpdater.update(dataGroup);
 		assertTrue(preparedStatementCreator.createWasCalled);
 		assertSame(preparedStatementCreator.connection, connectionProvider.factoredConnection);
 		int orgStatementAndStatmentsFromSpy = 5;
@@ -199,6 +198,6 @@ public class OrganisationDbRecordStorageForOneTypeTest {
 			+ "Error executing prepared statement: Error executing statement: error from spy")
 	public void testPreparedStatementThrowsException() {
 		preparedStatementCreator.throwExceptionOnGenerateStatement = true;
-		recordStorageForOneType.update(dataGroup);
+		organisationUpdater.update(dataGroup);
 	}
 }

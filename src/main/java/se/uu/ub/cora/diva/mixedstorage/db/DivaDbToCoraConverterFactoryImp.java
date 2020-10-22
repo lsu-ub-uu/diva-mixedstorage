@@ -28,7 +28,7 @@ public class DivaDbToCoraConverterFactoryImp implements DivaDbToCoraConverterFac
 
 	@Override
 	public DivaDbToCoraConverter factor(String type) {
-		if ("divaOrganisation".equals(type)) {
+		if (isOrganisation(type)) {
 			return new DivaDbToCoraOrganisationConverter();
 		}
 		if ("divaOrganisationParent".equals(type)) {
@@ -44,6 +44,11 @@ public class DivaDbToCoraConverterFactoryImp implements DivaDbToCoraConverterFac
 			return new DivaDbToCoraUserConverter();
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
+	}
+
+	private boolean isOrganisation(String type) {
+		return "organisation".equals(type) || "rootOrganisation".equals(type)
+				|| "commonOrganisation".equals(type);
 	}
 
 }

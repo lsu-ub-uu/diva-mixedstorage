@@ -50,9 +50,12 @@ public class DivaDbUpdaterFactoryTest {
 	}
 
 	@Test
-	public void testFactorOrganisationTable() {
-		var divaDbOrganisationUpdater = (DivaDbOrganisationUpdater) factory
-				.factor("divaOrganisation");
+	public void testFactorOrganisation() {
+		assertCorrectFactoredUpdatedForOrganisationType("organisation");
+	}
+
+	private void assertCorrectFactoredUpdatedForOrganisationType(String type) {
+		var divaDbOrganisationUpdater = (DivaDbOrganisationUpdater) factory.factor(type);
 		assertSame(divaDbOrganisationUpdater.getDataToDbTranslater(),
 				translaterFactory.factoredTranslater);
 		assertSame(divaDbOrganisationUpdater.getRelatedTableFactory(), relatedTableFactory);
@@ -60,6 +63,16 @@ public class DivaDbUpdaterFactoryTest {
 		assertSame(divaDbOrganisationUpdater.getSqlConnectionProvider(), sqlConnectionProvider);
 		assertTrue(divaDbOrganisationUpdater
 				.getPreparedStatementCreator() instanceof PreparedStatementExecutorImp);
+	}
+
+	@Test
+	public void testFactorRootOrganisation() {
+		assertCorrectFactoredUpdatedForOrganisationType("rootOrganisation");
+	}
+
+	@Test
+	public void testFactorcommonOrganisation() {
+		assertCorrectFactoredUpdatedForOrganisationType("commonOrganisation");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

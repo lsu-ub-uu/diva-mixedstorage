@@ -36,7 +36,7 @@ import se.uu.ub.cora.storage.StorageReadResult;
 
 public class DivaDbRecordStorage implements RecordStorage {
 
-	private static final String DIVA_ORGANISATION = "divaOrganisation";
+	private static final String ORGANISATION = "organisation";
 	private RecordReaderFactory recordReaderFactory;
 	private DivaDbFactory divaDbFactory;
 	private DivaDbUpdaterFactory divaDbUpdaterFactory;
@@ -85,7 +85,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	@Override
 	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		DivaDbUpdater divaDbUpdater = divaDbUpdaterFactory.factor(DIVA_ORGANISATION);
+		DivaDbUpdater divaDbUpdater = divaDbUpdaterFactory.factor(type);
 		divaDbUpdater.update(record);
 	}
 
@@ -111,14 +111,30 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
-		if (DIVA_ORGANISATION.equals(type)) {
-			return readOrganisationList(type);
+		if (isOrganisation(type)) {
+			String tableName = getTableName(type);
+			return readOrganisationList(type, tableName);
 		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
 	}
 
-	private StorageReadResult readOrganisationList(String type) {
-		List<Map<String, Object>> rowsFromDb = readAllFromDb(type);
+	private String getTableName(String type) {
+		String tableName = "organisationview";
+		if ("rootOrganisation".equals(type)) {
+			tableName = "rootorganisationview";
+		} else if ("commonOrganisation".equals(type)) {
+			tableName = "commonorganisationview";
+		}
+		return tableName;
+	}
+
+	private boolean isOrganisation(String type) {
+		return ORGANISATION.equals(type) || "rootOrganisation".equals(type)
+				|| "commonOrganisation".equals(type);
+	}
+
+	private StorageReadResult readOrganisationList(String type, String tableName) {
+		List<Map<String, Object>> rowsFromDb = readAllFromDb(tableName);
 		List<DataGroup> convertedGroups = new ArrayList<>();
 		for (Map<String, Object> map : rowsFromDb) {
 			convertOrganisation(type, convertedGroups, map);
@@ -129,7 +145,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	private void convertOrganisation(String type, List<DataGroup> convertedGroups,
 			Map<String, Object> map) {
 		DataGroup convertedOrganisation = convertOneMapFromDbToDataGroup(type, map);
-		String id = (String) map.get("id");
+		String id = String.valueOf(map.get("id"));
 		addParentsToOrganisation(convertedOrganisation, id);
 		addPredecessorsToOrganisation(convertedOrganisation, id);
 		convertedGroups.add(convertedOrganisation);
@@ -169,6 +185,9 @@ public class DivaDbRecordStorage implements RecordStorage {
 	public StorageReadResult readAbstractList(String type, DataGroup filter) {
 		if ("user".equals(type)) {
 			return readAndConvertUsers(type);
+		}
+		if (ORGANISATION.equals(type)) {
+			return readOrganisationList(type, "organisationview");
 		} else {
 			throw NotImplementedException.withMessage("readAbstractList is not implemented");
 		}
@@ -214,7 +233,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
-		if (DIVA_ORGANISATION.equals(type)) {
+		if (isOrganisation(type)) {
 			return organisationExistsInDb(id);
 		}
 		throw NotImplementedException.withMessage(
@@ -234,7 +253,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 		try {
 			RecordReader recordReader = recordReaderFactory.factor();
 			Map<String, Object> conditions = createConditionsAddingOrganisationId(id);
-			return recordReader.readOneRowFromDbUsingTableAndConditions("organisation", conditions);
+			return recordReader.readOneRowFromDbUsingTableAndConditions(ORGANISATION, conditions);
 		} catch (SqlStorageException | DbException e) {
 			throw new RecordNotFoundException("Organisation not found: " + id);
 		}
