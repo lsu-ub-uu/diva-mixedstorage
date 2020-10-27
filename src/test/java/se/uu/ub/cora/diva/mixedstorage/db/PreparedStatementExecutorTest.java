@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
 
-public class StatementExecutorTest {
+public class PreparedStatementExecutorTest {
 
 	private StatementExecutor sqlCreator;
 	private Map<String, Object> conditions;

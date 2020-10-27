@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.data.DataGroup;
@@ -33,6 +34,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdater;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.StatementExecutor;
+import se.uu.ub.cora.sqldatabase.DataReader;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
@@ -48,15 +50,18 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	private StatementExecutor statementExecutor;
 	private Map<String, Object> organisationConditions;
 	private Map<String, Object> organisationValues;
+	private DataReader dataReader;
 
 	public DivaDbOrganisationUpdater(DataToDbTranslater dataTranslater,
 			RecordReaderFactory recordReaderFactory, RelatedTableFactory relatedTableFactory,
-			SqlConnectionProvider connectionProvider, StatementExecutor preparedStatementCreator) {
+			SqlConnectionProvider connectionProvider, StatementExecutor preparedStatementCreator,
+			DataReader dataReader) {
 		this.organisationToDbTranslater = dataTranslater;
 		this.recordReaderFactory = recordReaderFactory;
 		this.relatedTableFactory = relatedTableFactory;
 		this.connectionProvider = connectionProvider;
 		this.statementExecutor = preparedStatementCreator;
+		this.dataReader = dataReader;
 
 	}
 
@@ -71,11 +76,92 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private void updateOrganisation(DataGroup dataGroup) {
+		possiblyThrowErrorIfCircularDependencyDetected(dataGroup);
+
 		List<Map<String, Object>> existingDbOrganisation = readExistingOrganisationRow();
 		Map<String, Object> readConditionsRelatedTables = generateReadConditionsForRelatedTables();
 		List<DbStatement> dbStatements = generateDbStatements(dataGroup,
 				readConditionsRelatedTables, existingDbOrganisation);
 		tryUpdateDatabaseWithGivenDbStatements(dbStatements);
+	}
+
+	private void possiblyThrowErrorIfCircularDependencyDetected(DataGroup dataGroup) {
+		List<DataGroup> parentsAndPredecessors = getListOfParentsAndPredecessors(dataGroup);
+		if (!parentsAndPredecessors.isEmpty()) {
+			throwErrorIfCircularDependencyDetected(parentsAndPredecessors);
+		}
+	}
+
+	private List<DataGroup> getListOfParentsAndPredecessors(DataGroup dataGroup) {
+		List<DataGroup> parentsAndPredecessors = dataGroup
+				.getAllGroupsWithNameInData("parentOrganisation");
+		List<DataGroup> predecessors = dataGroup.getAllGroupsWithNameInData("formerName");
+		parentsAndPredecessors.addAll(predecessors);
+		return parentsAndPredecessors;
+	}
+
+	private void throwErrorIfCircularDependencyDetected(List<DataGroup> parentsAndPredecessors) {
+		StringJoiner questionMarkPart = getCorrectNumberOfConditionPlaceHolders(
+				parentsAndPredecessors);
+
+		String sql = getSqlForFindingRecursion(questionMarkPart);
+		List<Object> values = createValuesForCircularDependencyQuery(parentsAndPredecessors);
+		executeAndThrowErrorIfCircularDependencyExist(sql, values);
+	}
+
+	private StringJoiner getCorrectNumberOfConditionPlaceHolders(
+			List<DataGroup> parentsAndPredecessors) {
+		StringJoiner questionMarkPart = new StringJoiner(", ");
+		for (int i = 0; i < parentsAndPredecessors.size(); i++) {
+			questionMarkPart.add("?");
+		}
+		return questionMarkPart;
+	}
+
+	private String getSqlForFindingRecursion(StringJoiner questionMarkPart) {
+		return "with recursive org_tree as (select distinct organisation_id, relation"
+				+ " from organisation_relations where organisation_id in (" + questionMarkPart
+				+ ") " + "union all"
+				+ " select distinct relation.organisation_id, relation.relation from"
+				+ " organisation_relations as relation"
+				+ " join org_tree as child on child.relation = relation.organisation_id)"
+				+ " select * from org_tree where relation = ?";
+	}
+
+	private void executeAndThrowErrorIfCircularDependencyExist(String sql, List<Object> values) {
+		List<Map<String, Object>> result = dataReader
+				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		if (!result.isEmpty()) {
+			throw SqlStorageException.withMessage(
+					"Organisation not updated due to circular dependency with parent or predecessor");
+		}
+	}
+
+	private List<Object> createValuesForCircularDependencyQuery(
+			List<DataGroup> parentsAndPredecessors) {
+		List<Object> values = new ArrayList<>();
+		addValuesForParentsAndPredecessors(parentsAndPredecessors, values);
+		addValueForOrganisationId(values);
+		return values;
+	}
+
+	private void addValueForOrganisationId(List<Object> values) {
+		int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
+		values.add(organisationsId);
+	}
+
+	private void addValuesForParentsAndPredecessors(List<DataGroup> parentsAndPredecessors,
+			List<Object> values) {
+		for (DataGroup parent : parentsAndPredecessors) {
+			int organisationId = extractOrganisationIdFromLink(parent);
+			values.add(organisationId);
+		}
+	}
+
+	private int extractOrganisationIdFromLink(DataGroup parent) {
+		DataGroup parentLink = parent.getFirstGroupWithNameInData("organisationLink");
+		String linkedRecordId = parentLink.getFirstAtomicValueWithNameInData("linkedRecordId");
+		return Integer.parseInt(linkedRecordId);
 	}
 
 	private List<Map<String, Object>> readExistingOrganisationRow() {

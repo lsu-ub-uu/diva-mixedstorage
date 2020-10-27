@@ -19,12 +19,15 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 
 import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.diva.mixedstorage.db.ConnectionSpy;
 
 public class SqlConnectionProviderSpy implements SqlConnectionProvider {
 	public ConnectionSpy factoredConnection;
+	public List<ConnectionSpy> factoredConnections = new ArrayList<>();
 	public boolean returnErrorConnection = false;
 	public boolean getConnectionHasBeenCalled = false;
 
@@ -32,6 +35,7 @@ public class SqlConnectionProviderSpy implements SqlConnectionProvider {
 	public Connection getConnection() {
 		getConnectionHasBeenCalled = true;
 		factoredConnection = new ConnectionSpy();
+		factoredConnections.add(factoredConnection);
 		if (returnErrorConnection) {
 			factoredConnection.throwException = true;
 		}

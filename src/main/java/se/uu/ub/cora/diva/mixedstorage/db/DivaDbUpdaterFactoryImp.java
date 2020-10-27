@@ -56,7 +56,7 @@ public class DivaDbUpdaterFactoryImp implements DivaDbUpdaterFactory {
 		StatementExecutor preparedStatementCreator = new PreparedStatementExecutorImp();
 		DataToDbTranslater translater = translaterFactory.factorForTableName("organisation");
 		return new DivaDbOrganisationUpdater(translater, recordReaderFactory, relatedTableFactory,
-				sqlConnectionProvider, preparedStatementCreator);
+				sqlConnectionProvider, preparedStatementCreator, null);
 	}
 
 	public DataToDbTranslaterFactory getTranslaterFactory() {

@@ -34,38 +34,20 @@ public class DataReaderSpy implements DataReader {
 	public List<Object> valuesSentToReader = new ArrayList<>();
 	public List<Map<String, Object>> listOfRows;
 	public Map<String, Object> row;
+	public int numOfRowsToReturn = 0;
 
 	@Override
 	public List<Map<String, Object>> executePreparedStatementQueryUsingSqlAndValues(String sql,
 			List<Object> values) {
 		executePreparedStatementWasCalled = true;
 		sqlSentToReader = sql;
+		valuesSentToReader = values;
 		listOfRows = new ArrayList<>();
-		// if (values != null && !values.isEmpty()) {
-		// valuesSentToReader.addAll(values);
-		// Object userId = values.get(0);
-		// if ("userIdNotFound".equals(userId)) {
-		// return Collections.emptyList();
-		// }
-		//
-		// if ("userIdNotAdmin".equals(userId)) {
-		// listOfRows.add(createDbRowUsingGroupId(22));
-		// }
-		//
-		// if ("someId".equals(userId) || "otherId".equals(userId)) {
-		// listOfRows.add(createDbRowUsingGroupId(53));
-		// listOfRows.add(createDbRowUsingGroupId(54));
-		// }
-		// if ("userHasNoName".equals(userId)) {
-		// Map<String, Object> dbRowUsingGroupId = createDbRowUsingGroupId(54);
-		// dbRowUsingGroupId.remove("firstname");
-		// dbRowUsingGroupId.remove("lastname");
-		// listOfRows.add(dbRowUsingGroupId);
-		// }
-		// } else if (sql.contains("seam_user")) {
-		// listOfRows.add(createDbRowUsingGroupId(53));
-		// listOfRows.add(createDbRowUsingGroupId(54));
-		// }
+		for (int i = 0; i < numOfRowsToReturn; i++) {
+			Map<String, Object> row = new HashMap<>();
+			row.put("valueFromSpy", i);
+			listOfRows.add(row);
+		}
 		return listOfRows;
 	}
 
