@@ -29,10 +29,14 @@ import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbOrganisationUpdater;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlConnectionProviderSpy;
+import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
+import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.sqldatabase.DataReaderImp;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public class DivaDbUpdaterFactoryTest {
 
+	private LoggerFactorySpy loggerFactorySpy = new LoggerFactorySpy();
 	private DivaDbUpdaterFactory factory;
 	private DataToDbTranslaterFactorySpy translaterFactory;
 	private RelatedTableFactorySpy relatedTableFactory;
@@ -41,6 +45,7 @@ public class DivaDbUpdaterFactoryTest {
 
 	@BeforeMethod
 	public void setUp() {
+		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		translaterFactory = new DataToDbTranslaterFactorySpy();
 		relatedTableFactory = new RelatedTableFactorySpy();
 		recordReaderFactory = new RecordReaderFactorySpy();
@@ -63,6 +68,9 @@ public class DivaDbUpdaterFactoryTest {
 		assertSame(divaDbOrganisationUpdater.getSqlConnectionProvider(), sqlConnectionProvider);
 		assertTrue(divaDbOrganisationUpdater
 				.getPreparedStatementCreator() instanceof PreparedStatementExecutorImp);
+
+		DataReaderImp dataReader = (DataReaderImp) divaDbOrganisationUpdater.getDataReader();
+		assertSame(dataReader.getSqlConnectionProvider(), sqlConnectionProvider);
 	}
 
 	@Test

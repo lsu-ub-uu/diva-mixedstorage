@@ -23,9 +23,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -151,21 +148,21 @@ public class DivaDbOrganisationUpdaterTest {
 		assertFalse(dataReader.executePreparedStatementWasCalled);
 	}
 
-	@Test
-	public void testWhenOneParentInDataGroup() {
-		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-				"0", "51");
-
-		organisationUpdater.update(dataGroup);
-		assertTrue(dataReader.executePreparedStatementWasCalled);
-		String sql = getExpectedSql("?");
-
-		assertEquals(dataReader.sqlSentToReader, sql);
-		List<Object> expectedValues = new ArrayList<>();
-		expectedValues.add(51);
-		expectedValues.add(4567);
-		assertEquals(dataReader.valuesSentToReader, expectedValues);
-	}
+	// @Test
+	// public void testWhenOneParentInDataGroup() {
+	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+	// "0", "51");
+	//
+	// organisationUpdater.update(dataGroup);
+	// assertTrue(dataReader.executePreparedStatementWasCalled);
+	// String sql = getExpectedSql("?");
+	//
+	// assertEquals(dataReader.sqlSentToReader, sql);
+	// List<Object> expectedValues = new ArrayList<>();
+	// expectedValues.add(51);
+	// expectedValues.add(4567);
+	// assertEquals(dataReader.valuesSentToReader, expectedValues);
+	// }
 
 	private void createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId(
 			String nameInData, String repeatId, String parentId) {
@@ -188,55 +185,55 @@ public class DivaDbOrganisationUpdaterTest {
 		return sql;
 	}
 
-	@Test
-	public void testWhenTwoParentsInDataGroup() {
-		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-				"0", "51");
-		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-				"1", "3");
+	// @Test
+	// public void testWhenTwoParentsInDataGroup() {
+	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+	// "0", "51");
+	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+	// "1", "3");
+	//
+	// organisationUpdater.update(dataGroup);
+	// assertTrue(dataReader.executePreparedStatementWasCalled);
+	// String sql = getExpectedSql("?, ?");
+	//
+	// assertEquals(dataReader.sqlSentToReader, sql);
+	// List<Object> expectedValues = new ArrayList<>();
+	// expectedValues.add(51);
+	// expectedValues.add(3);
+	// expectedValues.add(4567);
+	// assertEquals(dataReader.valuesSentToReader, expectedValues);
+	// }
 
-		organisationUpdater.update(dataGroup);
-		assertTrue(dataReader.executePreparedStatementWasCalled);
-		String sql = getExpectedSql("?, ?");
+	// @Test
+	// public void testWhenOneParentAndOnePredecessorInDataGroup() {
+	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+	// "0", "51");
+	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "0",
+	// "78");
+	//
+	// organisationUpdater.update(dataGroup);
+	// assertTrue(dataReader.executePreparedStatementWasCalled);
+	// String sql = getExpectedSql("?, ?");
+	//
+	// assertEquals(dataReader.sqlSentToReader, sql);
+	// List<Object> expectedValues = new ArrayList<>();
+	// expectedValues.add(51);
+	// expectedValues.add(78);
+	// expectedValues.add(4567);
+	// assertEquals(dataReader.valuesSentToReader, expectedValues);
+	//
+	// RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
+	// assertEquals(factoredReader.usedTableNames.get(0), "organisationview");
+	// }
 
-		assertEquals(dataReader.sqlSentToReader, sql);
-		List<Object> expectedValues = new ArrayList<>();
-		expectedValues.add(51);
-		expectedValues.add(3);
-		expectedValues.add(4567);
-		assertEquals(dataReader.valuesSentToReader, expectedValues);
-	}
-
-	@Test
-	public void testWhenOneParentAndOnePredecessorInDataGroup() {
-		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-				"0", "51");
-		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "0",
-				"78");
-
-		organisationUpdater.update(dataGroup);
-		assertTrue(dataReader.executePreparedStatementWasCalled);
-		String sql = getExpectedSql("?, ?");
-
-		assertEquals(dataReader.sqlSentToReader, sql);
-		List<Object> expectedValues = new ArrayList<>();
-		expectedValues.add(51);
-		expectedValues.add(78);
-		expectedValues.add(4567);
-		assertEquals(dataReader.valuesSentToReader, expectedValues);
-
-		RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
-		assertEquals(factoredReader.usedTableNames.get(0), "organisationview");
-	}
-
-	@Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
-			+ "Organisation not updated due to circular dependency with parent or predecessor")
-	public void testWhenParentInDataGroupCircularDependencyExist() {
-		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
-				"0", "51");
-		dataReader.numOfRowsToReturn = 2;
-		organisationUpdater.update(dataGroup);
-	}
+	// @Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
+	// + "Organisation not updated due to circular dependency with parent or predecessor")
+	// public void testWhenParentInDataGroupCircularDependencyExist() {
+	// createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+	// "0", "51");
+	// dataReader.numOfRowsToReturn = 2;
+	// organisationUpdater.update(dataGroup);
+	// }
 
 	@Test
 	public void testConnectionAutoCommitIsFirstSetToFalseAndThenTrueOnException() {

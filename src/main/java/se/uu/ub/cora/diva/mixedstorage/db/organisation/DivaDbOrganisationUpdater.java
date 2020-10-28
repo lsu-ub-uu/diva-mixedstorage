@@ -21,6 +21,7 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,8 +130,9 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private void executeAndThrowErrorIfCircularDependencyExist(String sql, List<Object> values) {
-		List<Map<String, Object>> result = dataReader
-				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		List<Map<String, Object>> result = Collections.emptyList();
+		// List<Map<String, Object>> result = dataReader
+		// .executePreparedStatementQueryUsingSqlAndValues(sql, values);
 		if (!result.isEmpty()) {
 			throw SqlStorageException.withMessage(
 					"Organisation not updated due to circular dependency with parent or predecessor");
@@ -279,6 +281,11 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	public StatementExecutor getPreparedStatementCreator() {
 		// needed for test
 		return statementExecutor;
+	}
+
+	public DataReader getDataReader() {
+		// needed for test
+		return dataReader;
 	}
 
 }
