@@ -130,9 +130,9 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private void executeAndThrowErrorIfCircularDependencyExist(String sql, List<Object> values) {
-		List<Map<String, Object>> result = Collections.emptyList();
-		// List<Map<String, Object>> result = dataReader
-		// .executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		// List<Map<String, Object>> result = Collections.emptyList();
+		List<Map<String, Object>> result = dataReader
+				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
 		if (!result.isEmpty()) {
 			throw SqlStorageException.withMessage(
 					"Organisation not updated due to circular dependency with parent or predecessor");
