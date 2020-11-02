@@ -151,8 +151,26 @@ public class DivaDbOrganisationUpdaterTest {
 		assertFalse(dataReader.executePreparedStatementWasCalled);
 	}
 
-	// TODO: check that the organisation itself is not present in the
-	// list of predecessors and parents BEFORE statement is executed
+	@Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
+			+ "Organisation not updated due to link to self")
+	public void testWhenSelfPresentAsParentInDataGroup() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "4567");
+
+		organisationUpdater.update(dataGroup);
+	}
+
+	@Test
+	public void testWhenSelfPresentAsParentInDataGroupNoStatementIsExecuted() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "4567");
+		try {
+			organisationUpdater.update(dataGroup);
+		} catch (SqlStorageException e) {
+			// do nothing
+		}
+		assertFalse(dataReader.executePreparedStatementWasCalled);
+	}
 
 	@Test
 	public void testWhenOneParentInDataGroup() {

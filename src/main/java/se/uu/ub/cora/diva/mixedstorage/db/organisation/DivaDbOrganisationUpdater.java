@@ -21,7 +21,6 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,31 +86,49 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private void possiblyThrowErrorIfCircularDependencyDetected(DataGroup dataGroup) {
-		List<DataGroup> parentsAndPredecessors = getListOfParentsAndPredecessors(dataGroup);
+		List<Integer> parentsAndPredecessors = getListOfParentsAndPredecessors(dataGroup);
 		if (!parentsAndPredecessors.isEmpty()) {
+			throwErrorIfLinkToSelf(parentsAndPredecessors);
 			throwErrorIfCircularDependencyDetected(parentsAndPredecessors);
 		}
 	}
 
-	private List<DataGroup> getListOfParentsAndPredecessors(DataGroup dataGroup) {
+	private void throwErrorIfLinkToSelf(List<Integer> parentsAndPredecessorIds) {
+		int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
+		if (parentsAndPredecessorIds.contains(organisationsId)) {
+			throw SqlStorageException.withMessage("Organisation not updated due to link to self");
+		}
+	}
+
+	private List<Integer> getIdListOfParentsAndPredecessors(
+			List<DataGroup> parentsAndPredecessors) {
+		List<Integer> organisationIds = new ArrayList<>();
+		for (DataGroup parent : parentsAndPredecessors) {
+			int organisationId = extractOrganisationIdFromLink(parent);
+			organisationIds.add(organisationId);
+		}
+		return organisationIds;
+	}
+
+	private List<Integer> getListOfParentsAndPredecessors(DataGroup dataGroup) {
 		List<DataGroup> parentsAndPredecessors = dataGroup
 				.getAllGroupsWithNameInData("parentOrganisation");
 		List<DataGroup> predecessors = dataGroup.getAllGroupsWithNameInData("formerName");
 		parentsAndPredecessors.addAll(predecessors);
-		return parentsAndPredecessors;
+		return getIdListOfParentsAndPredecessors(parentsAndPredecessors);
 	}
 
-	private void throwErrorIfCircularDependencyDetected(List<DataGroup> parentsAndPredecessors) {
+	private void throwErrorIfCircularDependencyDetected(List<Integer> parentsAndPredecessorIds) {
 		StringJoiner questionMarkPart = getCorrectNumberOfConditionPlaceHolders(
-				parentsAndPredecessors);
+				parentsAndPredecessorIds);
 
 		String sql = getSqlForFindingRecursion(questionMarkPart);
-		List<Object> values = createValuesForCircularDependencyQuery(parentsAndPredecessors);
+		List<Object> values = createValuesForCircularDependencyQuery(parentsAndPredecessorIds);
 		executeAndThrowErrorIfCircularDependencyExist(sql, values);
 	}
 
 	private StringJoiner getCorrectNumberOfConditionPlaceHolders(
-			List<DataGroup> parentsAndPredecessors) {
+			List<Integer> parentsAndPredecessors) {
 		StringJoiner questionMarkPart = new StringJoiner(", ");
 		for (int i = 0; i < parentsAndPredecessors.size(); i++) {
 			questionMarkPart.add("?");
@@ -130,7 +147,6 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private void executeAndThrowErrorIfCircularDependencyExist(String sql, List<Object> values) {
-		// List<Map<String, Object>> result = Collections.emptyList();
 		List<Map<String, Object>> result = dataReader
 				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
 		if (!result.isEmpty()) {
@@ -140,9 +156,9 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private List<Object> createValuesForCircularDependencyQuery(
-			List<DataGroup> parentsAndPredecessors) {
+			List<Integer> parentsAndPredecessorIds) {
 		List<Object> values = new ArrayList<>();
-		addValuesForParentsAndPredecessors(parentsAndPredecessors, values);
+		addValuesForParentsAndPredecessors(parentsAndPredecessorIds, values);
 		addValueForOrganisationId(values);
 		return values;
 	}
@@ -152,11 +168,10 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		values.add(organisationsId);
 	}
 
-	private void addValuesForParentsAndPredecessors(List<DataGroup> parentsAndPredecessors,
+	private void addValuesForParentsAndPredecessors(List<Integer> parentsAndPredecessorIds,
 			List<Object> values) {
-		for (DataGroup parent : parentsAndPredecessors) {
-			int organisationId = extractOrganisationIdFromLink(parent);
-			values.add(organisationId);
+		for (Integer parentId : parentsAndPredecessorIds) {
+			values.add(parentId);
 		}
 	}
 
