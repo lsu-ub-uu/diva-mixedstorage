@@ -259,6 +259,33 @@ public class DivaDbOrganisationUpdaterTest {
 		organisationUpdater.update(dataGroup);
 	}
 
+	@Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
+			+ "Organisation not updated due to same parent and predecessor")
+	public void testWhenSamePresentInParentAndPredecessor() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "5");
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"1", "7");
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "0", "5");
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "1",
+				"89");
+
+		organisationUpdater.update(dataGroup);
+	}
+
+	@Test
+	public void testWhenSamePresentInParentAndPredecessorNoStatementIsExecuted() {
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("parentOrganisation",
+				"0", "5");
+		createAndAddOrganisationLinkToDefaultUsingRepeatIdAndOrganisationId("formerName", "0", "5");
+		try {
+			organisationUpdater.update(dataGroup);
+		} catch (SqlStorageException e) {
+			// do nothing
+		}
+		assertFalse(dataReader.executePreparedStatementWasCalled);
+	}
+
 	@Test
 	public void testConnectionAutoCommitIsFirstSetToFalseAndThenTrueOnException() {
 		preparedStatementCreator.throwExceptionOnGenerateStatement = true;

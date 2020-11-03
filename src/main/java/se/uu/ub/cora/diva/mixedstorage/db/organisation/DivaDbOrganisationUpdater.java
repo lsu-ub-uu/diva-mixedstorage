@@ -86,11 +86,44 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private void possiblyThrowErrorIfCircularDependencyDetected(DataGroup dataGroup) {
-		List<Integer> parentsAndPredecessors = getListOfParentsAndPredecessors(dataGroup);
+		List<Integer> parentIds = getIdsFromOrganisationLinkUsingNameInData(dataGroup,
+				"parentOrganisation");
+		List<Integer> predecessorIds = getIdsFromOrganisationLinkUsingNameInData(dataGroup,
+				"formerName");
+
+		throwErrorIfSameParentAndPredecessor(parentIds, predecessorIds);
+		// TODO: vad göra om samma flera gånger i parent eller predecessor? Bara ta bort eller kasta
+		// exception?
+		List<Integer> parentsAndPredecessors = combineParentsAndPredecessors(parentIds,
+				predecessorIds);
+
 		if (!parentsAndPredecessors.isEmpty()) {
 			throwErrorIfLinkToSelf(parentsAndPredecessors);
 			throwErrorIfCircularDependencyDetected(parentsAndPredecessors);
 		}
+	}
+
+	private List<Integer> getIdsFromOrganisationLinkUsingNameInData(DataGroup dataGroup,
+			String nameInData) {
+		List<DataGroup> parents = dataGroup.getAllGroupsWithNameInData(nameInData);
+		return getIdListOfParentsAndPredecessors(parents);
+	}
+
+	private void throwErrorIfSameParentAndPredecessor(List<Integer> parentIds,
+			List<Integer> predecessorIds) {
+		boolean sameIdInBothList = parentIds.stream().anyMatch(predecessorIds::contains);
+		if (sameIdInBothList) {
+			throw SqlStorageException
+					.withMessage("Organisation not updated due to same parent and predecessor");
+		}
+	}
+
+	private List<Integer> combineParentsAndPredecessors(List<Integer> parentIds,
+			List<Integer> predecessorIds) {
+		List<Integer> combinedList = new ArrayList<>();
+		combinedList.addAll(parentIds);
+		combinedList.addAll(predecessorIds);
+		return combinedList;
 	}
 
 	private void throwErrorIfLinkToSelf(List<Integer> parentsAndPredecessorIds) {
@@ -108,14 +141,6 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 			organisationIds.add(organisationId);
 		}
 		return organisationIds;
-	}
-
-	private List<Integer> getListOfParentsAndPredecessors(DataGroup dataGroup) {
-		List<DataGroup> parentsAndPredecessors = dataGroup
-				.getAllGroupsWithNameInData("parentOrganisation");
-		List<DataGroup> predecessors = dataGroup.getAllGroupsWithNameInData("formerName");
-		parentsAndPredecessors.addAll(predecessors);
-		return getIdListOfParentsAndPredecessors(parentsAndPredecessors);
 	}
 
 	private void throwErrorIfCircularDependencyDetected(List<Integer> parentsAndPredecessorIds) {
