@@ -76,7 +76,7 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private void updateOrganisation(DataGroup dataGroup) {
-		possiblyThrowErrorIfCircularDependencyDetected(dataGroup);
+		possiblyThrowErrorIfDisallowedDependencyDetected(dataGroup);
 
 		List<Map<String, Object>> existingDbOrganisation = readExistingOrganisationRow();
 		Map<String, Object> readConditionsRelatedTables = generateReadConditionsForRelatedTables();
@@ -85,22 +85,14 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		tryUpdateDatabaseWithGivenDbStatements(dbStatements);
 	}
 
-	private void possiblyThrowErrorIfCircularDependencyDetected(DataGroup dataGroup) {
+	private void possiblyThrowErrorIfDisallowedDependencyDetected(DataGroup dataGroup) {
 		List<Integer> parentIds = getIdsFromOrganisationLinkUsingNameInData(dataGroup,
 				"parentOrganisation");
 		List<Integer> predecessorIds = getIdsFromOrganisationLinkUsingNameInData(dataGroup,
 				"formerName");
 
 		throwErrorIfSameParentAndPredecessor(parentIds, predecessorIds);
-		// TODO: vad göra om samma flera gånger i parent eller predecessor? Bara ta bort eller kasta
-		// exception?
-		List<Integer> parentsAndPredecessors = combineParentsAndPredecessors(parentIds,
-				predecessorIds);
-
-		if (!parentsAndPredecessors.isEmpty()) {
-			throwErrorIfLinkToSelf(parentsAndPredecessors);
-			throwErrorIfCircularDependencyDetected(parentsAndPredecessors);
-		}
+		possiblyThrowErrorIfCircularDependencyDetected(parentIds, predecessorIds);
 	}
 
 	private List<Integer> getIdsFromOrganisationLinkUsingNameInData(DataGroup dataGroup,
@@ -115,6 +107,17 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		if (sameIdInBothList) {
 			throw SqlStorageException
 					.withMessage("Organisation not updated due to same parent and predecessor");
+		}
+	}
+
+	private void possiblyThrowErrorIfCircularDependencyDetected(List<Integer> parentIds,
+			List<Integer> predecessorIds) {
+		List<Integer> parentsAndPredecessors = combineParentsAndPredecessors(parentIds,
+				predecessorIds);
+
+		if (!parentsAndPredecessors.isEmpty()) {
+			throwErrorIfLinkToSelf(parentsAndPredecessors);
+			throwErrorIfCircularDependencyDetected(parentsAndPredecessors);
 		}
 	}
 
