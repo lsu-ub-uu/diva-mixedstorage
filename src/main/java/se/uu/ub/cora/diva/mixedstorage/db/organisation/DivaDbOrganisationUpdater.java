@@ -138,10 +138,9 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	private String getSqlForFindingRecursion(StringJoiner questionMarkPart) {
 		return "with recursive org_tree as (select distinct organisation_id, relation"
-				+ " from organisation_relations where organisation_id in (" + questionMarkPart
-				+ ") " + "union all"
-				+ " select distinct relation.organisation_id, relation.relation from"
-				+ " organisation_relations as relation"
+				+ " from organisationrelations where organisation_id in (" + questionMarkPart + ") "
+				+ "union all" + " select distinct relation.organisation_id, relation.relation from"
+				+ " organisationrelations as relation"
 				+ " join org_tree as child on child.relation = relation.organisation_id)"
 				+ " select * from org_tree where relation = ?";
 	}

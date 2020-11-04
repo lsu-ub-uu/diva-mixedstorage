@@ -201,9 +201,9 @@ public class DivaDbOrganisationUpdaterTest {
 
 	private String getExpectedSql(String questionsMarks) {
 		String sql = "with recursive org_tree as (select distinct organisation_id, relation"
-				+ " from organisation_relations where organisation_id in (" + questionsMarks + ") "
+				+ " from organisationrelations where organisation_id in (" + questionsMarks + ") "
 				+ "union all" + " select distinct relation.organisation_id, relation.relation from"
-				+ " organisation_relations as relation"
+				+ " organisationrelations as relation"
 				+ " join org_tree as child on child.relation = relation.organisation_id)"
 				+ " select * from org_tree where relation = ?";
 		return sql;
