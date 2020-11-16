@@ -38,9 +38,6 @@ public class OrganisationAtomicColumnsTest {
 		assertEquals(OrganisationAtomicColumns.URL.dbName, "organisation_homepage");
 		assertEquals(OrganisationAtomicColumns.URL.coraName, "URL");
 		assertEquals(OrganisationAtomicColumns.URL.type, "string");
-		assertEquals(OrganisationAtomicColumns.LIBRIS_ID.dbName, "libris_code");
-		assertEquals(OrganisationAtomicColumns.LIBRIS_ID.coraName, "librisId");
-		assertEquals(OrganisationAtomicColumns.LIBRIS_ID.type, "string");
 
 	}
 }

@@ -103,7 +103,6 @@ public class OrganisationDataToDbTranslaterTest {
 		dataGroup.addChild(new DataAtomicSpy("organisationCode", "1235"));
 		dataGroup.addChild(new DataAtomicSpy("organisationNumber", "78979-45654"));
 		dataGroup.addChild(new DataAtomicSpy("URL", "www.someaddress.se"));
-		dataGroup.addChild(new DataAtomicSpy("librisId", "someLibrisId"));
 
 		translater.translate(dataGroup);
 
@@ -115,7 +114,6 @@ public class OrganisationDataToDbTranslaterTest {
 		assertEquals(translater.getValues().get("organisation_code"), "1235");
 		assertEquals(translater.getValues().get("orgnumber"), "78979-45654");
 		assertEquals(translater.getValues().get("organisation_homepage"), "www.someaddress.se");
-		assertEquals(translater.getValues().get("libris_code"), "someLibrisId");
 	}
 
 	@Test
@@ -138,7 +136,7 @@ public class OrganisationDataToDbTranslaterTest {
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getConditions().size(), 1);
-		assertEquals(translater.getValues().size(), 13);
+		assertEquals(translater.getValues().size(), 12);
 		assertEquals(translater.getConditions().get("organisation_id"), 45);
 		assertEquals(translater.getValues().get("organisation_name"), "someChangedName");
 		Timestamp lastUpdated = (Timestamp) translater.getValues().get("last_updated");
@@ -150,7 +148,7 @@ public class OrganisationDataToDbTranslaterTest {
 
 		translater.translate(dataGroup2);
 		assertEquals(translater.getConditions().size(), 1);
-		assertEquals(translater.getValues().size(), 13);
+		assertEquals(translater.getValues().size(), 12);
 
 		assertEquals(translater.getConditions().get("organisation_id"), 4500);
 		assertEquals(translater.getValues().get("organisation_name"), "someOtherChangedName");
