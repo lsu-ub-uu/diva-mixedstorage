@@ -33,6 +33,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdater;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.StatementExecutor;
+import se.uu.ub.cora.sqldatabase.DataReader;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
@@ -48,15 +49,18 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	private StatementExecutor statementExecutor;
 	private Map<String, Object> organisationConditions;
 	private Map<String, Object> organisationValues;
+	private DataReader dataReader;
 
 	public DivaDbOrganisationUpdater(DataToDbTranslater dataTranslater,
 			RecordReaderFactory recordReaderFactory, RelatedTableFactory relatedTableFactory,
-			SqlConnectionProvider connectionProvider, StatementExecutor preparedStatementCreator) {
+			SqlConnectionProvider connectionProvider, StatementExecutor preparedStatementCreator,
+			DataReader dataReader) {
 		this.organisationToDbTranslater = dataTranslater;
 		this.recordReaderFactory = recordReaderFactory;
 		this.relatedTableFactory = relatedTableFactory;
 		this.connectionProvider = connectionProvider;
 		this.statementExecutor = preparedStatementCreator;
+		this.dataReader = dataReader;
 
 	}
 
@@ -193,6 +197,11 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	public StatementExecutor getPreparedStatementCreator() {
 		// needed for test
 		return statementExecutor;
+	}
+
+	public DataReader getDataReader() {
+		// needed for test
+		return dataReader;
 	}
 
 }

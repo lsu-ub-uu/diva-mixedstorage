@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
+import se.uu.ub.cora.diva.mixedstorage.DataReaderSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.ConnectionSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslaterSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
@@ -47,6 +48,7 @@ public class DivaDbOrganisationUpdaterTest {
 	private DataGroup dataGroup;
 	private SqlConnectionProviderSpy connectionProvider;
 	private PreparedStatementExecutorSpy preparedStatementCreator;
+	private DataReaderSpy dataReader;
 
 	@BeforeMethod
 	public void setUp() {
@@ -56,8 +58,9 @@ public class DivaDbOrganisationUpdaterTest {
 		relatedTableFactory = new RelatedTableFactorySpy();
 		connectionProvider = new SqlConnectionProviderSpy();
 		preparedStatementCreator = new PreparedStatementExecutorSpy();
+		dataReader = new DataReaderSpy();
 		organisationUpdater = new DivaDbOrganisationUpdater(dataTranslater, recordReaderFactory,
-				relatedTableFactory, connectionProvider, preparedStatementCreator);
+				relatedTableFactory, connectionProvider, preparedStatementCreator, dataReader);
 	}
 
 	private void createDefultDataGroup() {

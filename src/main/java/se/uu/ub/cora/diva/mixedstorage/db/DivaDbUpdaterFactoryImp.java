@@ -21,6 +21,8 @@ package se.uu.ub.cora.diva.mixedstorage.db;
 import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbOrganisationUpdater;
+import se.uu.ub.cora.sqldatabase.DataReader;
+import se.uu.ub.cora.sqldatabase.DataReaderImp;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public class DivaDbUpdaterFactoryImp implements DivaDbUpdaterFactory {
@@ -54,9 +56,10 @@ public class DivaDbUpdaterFactoryImp implements DivaDbUpdaterFactory {
 
 	private DivaDbUpdater factorForOrganisation() {
 		StatementExecutor preparedStatementCreator = new PreparedStatementExecutorImp();
+		DataReader dataReader = DataReaderImp.usingSqlConnectionProvider(sqlConnectionProvider);
 		DataToDbTranslater translater = translaterFactory.factorForTableName("organisation");
 		return new DivaDbOrganisationUpdater(translater, recordReaderFactory, relatedTableFactory,
-				sqlConnectionProvider, preparedStatementCreator);
+				sqlConnectionProvider, preparedStatementCreator, dataReader);
 	}
 
 	public DataToDbTranslaterFactory getTranslaterFactory() {
