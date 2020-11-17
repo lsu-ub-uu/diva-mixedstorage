@@ -396,32 +396,6 @@ public class DivaDbToCoraOrganisationConverterTest {
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("closedDate"), "2018-12-31");
 	}
 
-	@Test
-	public void testOrganisationLibrisIdMissing() {
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("librisId"));
-	}
-
-	@Test
-	public void testOrganisationLibrisIdIsNull() {
-		rowFromDb.put("libris_code", null);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("librisId"));
-	}
-
-	@Test
-	public void testOrganisationLibrisIdIsEmpty() {
-		rowFromDb.put("libris_code", "");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("librisId"));
-	}
-
-	@Test
-	public void testOrganisationLibrisId() {
-		rowFromDb.put("libris_code", "uuLibrisCode");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("librisId"), "uuLibrisCode");
-	}
 
 	@Test
 	public void testOrganisationShowInDefenceFalse() {

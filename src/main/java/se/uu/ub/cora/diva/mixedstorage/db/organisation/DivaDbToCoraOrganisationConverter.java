@@ -66,7 +66,6 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 		possiblyCreateAndAddOrganisationCode();
 		possiblyCreateAndAddURL();
 		possiblyCreateAndAddClosedDate();
-		possiblyCreateAndAddLibrisId();
 		possiblyCreateAndAddShowInDefence();
 		possiblyCreateAndAddTopLevel();
 		possiblyCreateAndAddShowInPortal();
@@ -261,10 +260,6 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 		Date dbClosedDate = (Date) dbRow.get("closed_date");
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		return dateFormat.format(dbClosedDate);
-	}
-
-	private void possiblyCreateAndAddLibrisId() {
-		possiblyAddAtomicValueUsingKeyAndNameInData("libris_code", "librisId");
 	}
 
 	private void possiblyCreateAndAddShowInDefence() {
