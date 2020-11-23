@@ -24,7 +24,6 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
-import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +34,7 @@ import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
 
 public class DivaDbToCoraOrganisationConverterTest {
@@ -46,9 +43,11 @@ public class DivaDbToCoraOrganisationConverterTest {
 	private Map<String, Object> rowFromDb;
 	private DataGroupFactorySpy dataGroupFactorySpy;
 	private DataAtomicFactorySpy dataAtomicFactorySpy;
+	private DefaultConverterFactorySpy converterFactory;
 
 	@BeforeMethod
 	public void beforeMethod() {
+		converterFactory = new DefaultConverterFactorySpy();
 		dataGroupFactorySpy = new DataGroupFactorySpy();
 		DataGroupProvider.setDataGroupFactory(dataGroupFactorySpy);
 		dataAtomicFactorySpy = new DataAtomicFactorySpy();
@@ -56,7 +55,8 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb = new HashMap<>();
 		rowFromDb.put("id", 57);
 		rowFromDb.put("type_code", "unit");
-		converter = new DivaDbToCoraOrganisationConverter();
+		rowFromDb.put("top_level", false);
+		converter = new DivaDbToCoraOrganisationConverter(converterFactory);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
@@ -93,113 +93,249 @@ public class DivaDbToCoraOrganisationConverterTest {
 	}
 
 	@Test
-	public void testMinimalValuesReturnsDataGroupWithCorrectRecordInfo() {
+	public void testConverterIsFactored() {
 		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getNameInData(), "organisation");
-		assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "commonOrganisation");
 
-		DataGroupSpy factoredOrganisation = dataGroupFactorySpy.factoredDataGroups.get(0);
-		assertEquals(factoredOrganisation.nameInData, "organisation");
+		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
+		assertSame(factoredConverter.rowFromDb, rowFromDb);
+		assertSame(organisation, factoredConverter.returnedDataGroup);
 
-		DataGroupSpy factoredRecordInfo = dataGroupFactorySpy.factoredDataGroups.get(1);
-		assertEquals(factoredRecordInfo.nameInData, "recordInfo");
-		assertSame(factoredRecordInfo, organisation.getFirstChildWithNameInData("recordInfo"));
-
-		DataAtomicSpy factoredDataAtomicForId = getFactoredDataAtomicByNumber(0);
-		assertEquals(factoredDataAtomicForId.nameInData, "id");
-		assertEquals(factoredDataAtomicForId.value, "57");
-	}
-
-	private void assertCorrectRecordInfoWithIdAndRecordType(DataGroup organisation, String id,
-			String recordType) {
-		DataGroup recordInfo = organisation.getFirstGroupWithNameInData("recordInfo");
-		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"), id);
-
-		DataGroup type = recordInfo.getFirstGroupWithNameInData("type");
-		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordType"), "recordType");
-		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordId"), recordType);
-
-		DataGroup dataDivider = recordInfo.getFirstGroupWithNameInData("dataDivider");
-		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordType"), "system");
-		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordId"), "diva");
-
-		assertCorrectCreatedAndUpdatedInfo(recordInfo);
-	}
-
-	private DataAtomicSpy getFactoredDataAtomicByNumber(int noFactored) {
-		return dataAtomicFactorySpy.factoredDataAtomics.get(noFactored);
-	}
-
-	private DataAtomicSpy getFactoredDataAtomicByNameInData(String nameInData) {
-		return dataAtomicFactorySpy.factoredDataAtomicsMap.get(nameInData);
 	}
 
 	@Test
-	public void testCorrectRecordTypeWhenOrganisationTypeIsRoot() {
+	public void testRootDoesNotIncludeMoreThanDefault() {
 		rowFromDb.put("type_code", "root");
+		rowFromDb.put("organisation_code", "someCode");
+		rowFromDb.put("organisation_homepage", "www.someaddress.com");
+		rowFromDb.put("show_in_defence", true);
+		rowFromDb.put("orgnumber", "33445566");
+		rowFromDb.put("not_eligible", true);
 		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getNameInData(), "organisation");
-		assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "rootOrganisation");
+		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
+		assertSame(organisation, factoredConverter.returnedDataGroup);
+
+		assertFalse(organisation.containsChildWithNameInData("address"));
+		assertFalse(organisation.containsChildWithNameInData("organisationCode"));
+		assertFalse(organisation.containsChildWithNameInData("URL"));
+		assertFalse(organisation.containsChildWithNameInData("doctoralDegreeGrantor"));
+		assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
+		assertFalse(organisation.containsChildWithNameInData("eligible"));
 
 	}
 
 	@Test
-	public void testOrganisationDomain() throws Exception {
-		rowFromDb.put("domain", "uu");
-
+	public void testTopLevelIncludeCorrectChildren() {
+		rowFromDb.put("type_code", "university");
+		rowFromDb.put("top_level", true);
+		rowFromDb.put("organisation_code", "someCode");
+		rowFromDb.put("organisation_homepage", "www.someaddress.com");
+		rowFromDb.put("show_in_defence", true);
+		rowFromDb.put("orgnumber", "33445566");
+		rowFromDb.put("country_code", "fi");
+		rowFromDb.put("city", "Uppsala");
+		rowFromDb.put("street", "Övre slottsgatan 1");
+		rowFromDb.put("postbox", "Box5435");
+		rowFromDb.put("postnumber", "345 34");
+		rowFromDb.put("not_eligible", false);
 		DataGroup organisation = converter.fromMap(rowFromDb);
+		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
+		assertSame(organisation, factoredConverter.returnedDataGroup);
 
-		DataAtomicSpy factoredDataAtomicForId = getFactoredDataAtomicByNumber(11);
-		assertEquals(factoredDataAtomicForId.nameInData, "domain");
-		assertEquals(factoredDataAtomicForId.value, "uu");
+		assertTrue(organisation.containsChildWithNameInData("address"));
+		assertTrue(organisation.containsChildWithNameInData("organisationCode"));
+		assertTrue(organisation.containsChildWithNameInData("URL"));
+		assertTrue(organisation.containsChildWithNameInData("doctoralDegreeGrantor"));
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("doctoralDegreeGrantor"),
+				"yes");
+		assertTrue(organisation.containsChildWithNameInData("organisationNumber"));
+		assertTrue(organisation.containsChildWithNameInData("eligible"));
 
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("domain"), "uu");
 	}
 
 	@Test
-	public void testOrganisationName() {
-		rowFromDb.put("defaultname", "Java-fakulteten");
-		rowFromDb.put("organisation_name_locale", "sv");
+	public void testTopLevelDoesNotIncludeAddressWhenNoPartOfAddressInDb() {
+		rowFromDb.put("type_code", "university");
+		rowFromDb.put("top_level", true);
+		rowFromDb.put("organisation_code", "someCode");
+		rowFromDb.put("organisation_homepage", "www.someaddress.com");
+		rowFromDb.put("show_in_defence", true);
+		rowFromDb.put("orgnumber", "33445566");
 		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getNameInData(), "organisation");
+		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
+		assertSame(organisation, factoredConverter.returnedDataGroup);
 
-		assertCorrectValuesForNameWasFactored();
+		assertFalse(organisation.containsChildWithNameInData("address"));
 
-		DataGroup nameGroup = organisation.getFirstGroupWithNameInData("name");
-		assertEquals(nameGroup.getFirstAtomicValueWithNameInData("organisationName"),
-				"Java-fakulteten");
-		assertEquals(nameGroup.getFirstAtomicValueWithNameInData("language"), "sv");
-	}
-
-	private void assertCorrectValuesForNameWasFactored() {
-		DataAtomicSpy factoredDataAtomicForName = getFactoredDataAtomicByNumber(12);
-		assertEquals(factoredDataAtomicForName.nameInData, "organisationName");
-		assertEquals(factoredDataAtomicForName.value, "Java-fakulteten");
-		DataAtomicSpy factoredDataAtomicForLanguage = getFactoredDataAtomicByNumber(13);
-		assertEquals(factoredDataAtomicForLanguage.nameInData, "language");
-		assertEquals(factoredDataAtomicForLanguage.value, "sv");
 	}
 
 	@Test
-	public void testTypeCode() {
-		String typeCode = "university";
-		rowFromDb.put("type_code", typeCode);
-
+	public void testTopLevelDoesNotIncludeChildrenNotPresentInDb() {
+		rowFromDb.put("type_code", "university");
+		rowFromDb.put("top_level", true);
 		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationType"), typeCode);
+		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
+		assertSame(organisation, factoredConverter.returnedDataGroup);
+
+		assertFalse(organisation.containsChildWithNameInData("organisationCode"));
+		assertFalse(organisation.containsChildWithNameInData("URL"));
+		assertFalse(organisation.containsChildWithNameInData("doctoralDegreeGrantor"));
+		assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
+		assertFalse(organisation.containsChildWithNameInData("eligible"));
+
 	}
 
 	@Test
-	public void testAlternativeName() {
-		rowFromDb.put("alternative_name", "Java Faculty");
+	public void testDoctoralDegreeGrantorFalse() {
+		rowFromDb.put("type_code", "university");
+		rowFromDb.put("top_level", true);
+		rowFromDb.put("organisation_code", "someCode");
+		rowFromDb.put("organisation_homepage", "www.someaddress.com");
+		rowFromDb.put("show_in_defence", false);
+		rowFromDb.put("orgnumber", "33445566");
+		rowFromDb.put("not_eligible", false);
 		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertTrue(organisation.containsChildWithNameInData("alternativeName"));
-		DataGroup alternativeName = organisation.getFirstGroupWithNameInData("alternativeName");
-		assertEquals(alternativeName.getFirstAtomicValueWithNameInData("language"), "en");
-		assertEquals(alternativeName.getFirstAtomicValueWithNameInData("organisationName"),
-				"Java Faculty");
+		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
+		assertSame(organisation, factoredConverter.returnedDataGroup);
+
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("doctoralDegreeGrantor"), "no");
+
 	}
 
+	@Test
+	public void testSubOrganisationIncludeCorrectChildren() {
+		rowFromDb.put("type_code", "unit");
+		rowFromDb.put("top_level", false);
+		rowFromDb.put("organisation_code", "someCode");
+		rowFromDb.put("organisation_homepage", "www.someaddress.com");
+		rowFromDb.put("show_in_defence", true);
+		rowFromDb.put("orgnumber", "33445566");
+		rowFromDb.put("country_code", "fi");
+		rowFromDb.put("city", "Uppsala");
+		rowFromDb.put("street", "Övre slottsgatan 1");
+		rowFromDb.put("postbox", "Box5435");
+		rowFromDb.put("postnumber", "345 34");
+		rowFromDb.put("not_eligible", false);
+		DataGroup organisation = converter.fromMap(rowFromDb);
+		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
+		assertSame(organisation, factoredConverter.returnedDataGroup);
+
+		assertTrue(organisation.containsChildWithNameInData("address"));
+		assertTrue(organisation.containsChildWithNameInData("organisationCode"));
+		assertTrue(organisation.containsChildWithNameInData("URL"));
+		assertTrue(organisation.containsChildWithNameInData("eligible"));
+		assertFalse(organisation.containsChildWithNameInData("doctoralDegreeGrantor"));
+		assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
+
+	}
+
+	// @Test
+	// public void testMinimalValuesReturnsDataGroupWithCorrectRecordInfo() {
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getNameInData(), "organisation");
+	// assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "commonOrganisation");
+	//
+	// DataGroupSpy factoredOrganisation = dataGroupFactorySpy.factoredDataGroups.get(0);
+	// assertEquals(factoredOrganisation.nameInData, "organisation");
+	//
+	// DataGroupSpy factoredRecordInfo = dataGroupFactorySpy.factoredDataGroups.get(1);
+	// assertEquals(factoredRecordInfo.nameInData, "recordInfo");
+	// assertSame(factoredRecordInfo, organisation.getFirstChildWithNameInData("recordInfo"));
+	//
+	// DataAtomicSpy factoredDataAtomicForId = getFactoredDataAtomicByNumber(0);
+	// assertEquals(factoredDataAtomicForId.nameInData, "id");
+	// assertEquals(factoredDataAtomicForId.value, "57");
+	// }
+	//
+	// private void assertCorrectRecordInfoWithIdAndRecordType(DataGroup organisation, String id,
+	// String recordType) {
+	// DataGroup recordInfo = organisation.getFirstGroupWithNameInData("recordInfo");
+	// assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"), id);
+	//
+	// DataGroup type = recordInfo.getFirstGroupWithNameInData("type");
+	// assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordType"), "recordType");
+	// assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordId"), recordType);
+	//
+	// DataGroup dataDivider = recordInfo.getFirstGroupWithNameInData("dataDivider");
+	// assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordType"), "system");
+	// assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordId"), "diva");
+	//
+	// assertCorrectCreatedAndUpdatedInfo(recordInfo);
+	// }
+	//
+	// private DataAtomicSpy getFactoredDataAtomicByNumber(int noFactored) {
+	// return dataAtomicFactorySpy.factoredDataAtomics.get(noFactored);
+	// }
+	//
+	// private DataAtomicSpy getFactoredDataAtomicByNameInData(String nameInData) {
+	// return dataAtomicFactorySpy.factoredDataAtomicsMap.get(nameInData);
+	// }
+	//
+	// @Test
+	// public void testCorrectRecordTypeWhenOrganisationTypeIsRoot() {
+	// rowFromDb.put("type_code", "root");
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getNameInData(), "organisation");
+	// assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "rootOrganisation");
+	//
+	// }
+	//
+	// @Test
+	// public void testOrganisationDomain() throws Exception {
+	// rowFromDb.put("domain", "uu");
+	//
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	//
+	// DataAtomicSpy factoredDataAtomicForId = getFactoredDataAtomicByNumber(11);
+	// assertEquals(factoredDataAtomicForId.nameInData, "domain");
+	// assertEquals(factoredDataAtomicForId.value, "uu");
+	//
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("domain"), "uu");
+	// }
+	//
+	// @Test
+	// public void testOrganisationName() {
+	// rowFromDb.put("defaultname", "Java-fakulteten");
+	// rowFromDb.put("organisation_name_locale", "sv");
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getNameInData(), "organisation");
+	//
+	// assertCorrectValuesForNameWasFactored();
+	//
+	// DataGroup nameGroup = organisation.getFirstGroupWithNameInData("name");
+	// assertEquals(nameGroup.getFirstAtomicValueWithNameInData("organisationName"),
+	// "Java-fakulteten");
+	// assertEquals(nameGroup.getFirstAtomicValueWithNameInData("language"), "sv");
+	// }
+	//
+	// private void assertCorrectValuesForNameWasFactored() {
+	// DataAtomicSpy factoredDataAtomicForName = getFactoredDataAtomicByNumber(12);
+	// assertEquals(factoredDataAtomicForName.nameInData, "organisationName");
+	// assertEquals(factoredDataAtomicForName.value, "Java-fakulteten");
+	// DataAtomicSpy factoredDataAtomicForLanguage = getFactoredDataAtomicByNumber(13);
+	// assertEquals(factoredDataAtomicForLanguage.nameInData, "language");
+	// assertEquals(factoredDataAtomicForLanguage.value, "sv");
+	// }
+	//
+	// @Test
+	// public void testTypeCode() {
+	// String typeCode = "university";
+	// rowFromDb.put("type_code", typeCode);
+	//
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationType"), typeCode);
+	// }
+	//
+	// @Test
+	// public void testAlternativeName() {
+	// rowFromDb.put("alternative_name", "Java Faculty");
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertTrue(organisation.containsChildWithNameInData("alternativeName"));
+	// DataGroup alternativeName = organisation.getFirstGroupWithNameInData("alternativeName");
+	// assertEquals(alternativeName.getFirstAtomicValueWithNameInData("language"), "en");
+	// assertEquals(alternativeName.getFirstAtomicValueWithNameInData("organisationName"),
+	// "Java Faculty");
+	// }
+	//
 	@Test
 	public void testOrganisationNotEligible() {
 		rowFromDb.put("not_eligible", true);
@@ -207,236 +343,235 @@ public class DivaDbToCoraOrganisationConverterTest {
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("eligible"), "no");
 	}
 
-	@Test
-	public void testOrganisationEligible() {
-		rowFromDb.put("not_eligible", false);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("eligible"), "yes");
-	}
+	// @Test
+	// public void testOrganisationEligible() {
+	// rowFromDb.put("not_eligible", false);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("eligible"), "yes");
+	// }
 
-	private void assertCorrectCreatedAndUpdatedInfo(DataGroup recordInfo) {
-		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsCreated"),
-				"2017-01-01T00:00:00.000000Z");
-
-		DataGroup createdBy = recordInfo.getFirstGroupWithNameInData("createdBy");
-		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "coraUser");
-		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordId"),
-				"coraUser:4412982402853626");
-
-		assertEquals(recordInfo.getAllGroupsWithNameInData("updated").size(), 1);
-		DataGroup updated = recordInfo.getFirstGroupWithNameInData("updated");
-		assertEquals(updated.getFirstAtomicValueWithNameInData("tsUpdated"),
-				"2017-01-01T00:00:00.000000Z");
-		assertEquals(updated.getRepeatId(), "0");
-
-		DataGroup updatedBy = updated.getFirstGroupWithNameInData("updatedBy");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "coraUser");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"),
-				"coraUser:4412982402853626");
-
-	}
-
-	@Test
-	public void testAdressMissing() {
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("city"));
-		assertFalse(organisation.containsChildWithNameInData("street"));
-		assertFalse(organisation.containsChildWithNameInData("box"));
-		assertFalse(organisation.containsChildWithNameInData("postcode"));
-		assertFalse(organisation.containsChildWithNameInData("country"));
-
-	}
-
-	@Test
-	public void testAdress() {
-		rowFromDb.put("city", "uppsala");
-		rowFromDb.put("street", "Övre slottsgatan 1");
-		rowFromDb.put("postbox", "Box5435");
-		rowFromDb.put("postnumber", "345 34");
-		rowFromDb.put("country_code", "fi");
-
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		DataAtomicSpy factoredDataAtomicForCity = getFactoredDataAtomicByNameInData("city");
-		assertEquals(factoredDataAtomicForCity.nameInData, "city");
-		assertEquals(factoredDataAtomicForCity.value, "uppsala");
-
-		DataAtomicSpy factoredDataAtomicForStreet = getFactoredDataAtomicByNameInData("street");
-		assertEquals(factoredDataAtomicForStreet.nameInData, "street");
-		assertEquals(factoredDataAtomicForStreet.value, "Övre slottsgatan 1");
-
-		DataAtomicSpy factoredDataAtomicForBox = getFactoredDataAtomicByNameInData("box");
-		assertEquals(factoredDataAtomicForBox.nameInData, "box");
-		assertEquals(factoredDataAtomicForBox.value, "Box5435");
-
-		DataAtomicSpy factoredDataAtomicForPostcode = getFactoredDataAtomicByNameInData("postcode");
-		assertEquals(factoredDataAtomicForPostcode.nameInData, "postcode");
-		assertEquals(factoredDataAtomicForPostcode.value, "345 34");
-
-		DataAtomicSpy factoredDataAtomicForCountry = getFactoredDataAtomicByNameInData("country");
-		assertEquals(factoredDataAtomicForCountry.nameInData, "country");
-		assertEquals(factoredDataAtomicForCountry.value, "FI");
-
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("city"), "uppsala");
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("street"),
-				"Övre slottsgatan 1");
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("box"), "Box5435");
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("postcode"), "345 34");
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("country"), "FI");
-
-	}
-
-	@Test
-	public void testOrganisationNumberMissing() {
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
-	}
-
-	@Test
-	public void testOrganisationNumberIsnull() {
-		rowFromDb.put("orgnumber", null);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
-	}
-
-	@Test
-	public void testOrganisationNumberIsEmpty() {
-		rowFromDb.put("orgnumber", "");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
-	}
-
-	@Test
-	public void testOrganisationNumber() {
-		rowFromDb.put("orgnumber", "540002");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationNumber"),
-				"540002");
-	}
-
-	@Test
-	public void testOrganisationCodeMissing() {
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("organisationCode"));
-	}
-
-	@Test
-	public void testOrganisationCodeIsNull() {
-		rowFromDb.put("organisation_code", null);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("organisationCode"));
-	}
-
-	@Test
-	public void testOrganisationCodeIsEmpty() {
-		rowFromDb.put("organisation_code", "");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("organisationCode"));
-	}
-
-	@Test
-	public void testOrganisationCode() {
-		rowFromDb.put("organisation_code", "56783545");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationCode"),
-				"56783545");
-	}
-
-	@Test
-	public void testOrganisationUrlMissing() {
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("URL"));
-	}
-
-	@Test
-	public void testOrganisationUrlIsNull() {
-		rowFromDb.put("organisation_homepage", null);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("URL"));
-	}
-
-	@Test
-	public void testOrganisationUrlIsEmpty() {
-		rowFromDb.put("organisation_homepage", "");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("URL"));
-	}
-
-	@Test
-	public void testOrganisationURL() {
-		rowFromDb.put("organisation_homepage", "www.something.org");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("URL"), "www.something.org");
-	}
-
-	@Test
-	public void testOrganisationClosedDateMissing() {
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("closedDate"));
-	}
-
-	@Test
-	public void testOrganisationClosedDateIsnull() {
-		rowFromDb.put("closed_date", null);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("closedDate"));
-	}
-
-	@Test
-	public void testOrganisationClosedDateIsEmpty() {
-		rowFromDb.put("closed_date", "");
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertFalse(organisation.containsChildWithNameInData("closedDate"));
-	}
-
-	@Test
-	public void testOrganisationClosedDate() {
-		Date date = Date.valueOf("2018-12-31");
-		rowFromDb.put("closed_date", date);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("closedDate"), "2018-12-31");
-	}
-
-
-	@Test
-	public void testOrganisationShowInDefenceFalse() {
-		rowFromDb.put("show_in_defence", false);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("showInDefence"), "no");
-	}
-
-	@Test
-	public void testOrganisationShowInDefenceTrue() {
-		rowFromDb.put("show_in_defence", true);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("showInDefence"), "yes");
-	}
-
-	@Test
-	public void testOrganisationTopLevelFalse() {
-		rowFromDb.put("top_level", false);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("topLevel"), "no");
-	}
-
-	@Test
-	public void testOrganisationTopLevelTrue() {
-		rowFromDb.put("top_level", true);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("topLevel"), "yes");
-	}
-
-	@Test
-	public void testOrganisationShowInPortalFalse() {
-		rowFromDb.put("show_in_portal", false);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("showInPortal"), "no");
-	}
-
-	@Test
-	public void testOrganisationShowInPortalTrue() {
-		rowFromDb.put("show_in_portal", true);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("showInPortal"), "yes");
-	}
+	// private void assertCorrectCreatedAndUpdatedInfo(DataGroup recordInfo) {
+	// assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsCreated"),
+	// "2017-01-01T00:00:00.000000Z");
+	//
+	// DataGroup createdBy = recordInfo.getFirstGroupWithNameInData("createdBy");
+	// assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "coraUser");
+	// assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordId"),
+	// "coraUser:4412982402853626");
+	//
+	// assertEquals(recordInfo.getAllGroupsWithNameInData("updated").size(), 1);
+	// DataGroup updated = recordInfo.getFirstGroupWithNameInData("updated");
+	// assertEquals(updated.getFirstAtomicValueWithNameInData("tsUpdated"),
+	// "2017-01-01T00:00:00.000000Z");
+	// assertEquals(updated.getRepeatId(), "0");
+	//
+	// DataGroup updatedBy = updated.getFirstGroupWithNameInData("updatedBy");
+	// assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "coraUser");
+	// assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"),
+	// "coraUser:4412982402853626");
+	//
+	// }
+	//
+	// @Test
+	// public void testAdressMissing() {
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("city"));
+	// assertFalse(organisation.containsChildWithNameInData("street"));
+	// assertFalse(organisation.containsChildWithNameInData("box"));
+	// assertFalse(organisation.containsChildWithNameInData("postcode"));
+	// assertFalse(organisation.containsChildWithNameInData("country"));
+	//
+	// }
+	//
+	// @Test
+	// public void testAdress() {
+	// rowFromDb.put("city", "uppsala");
+	// rowFromDb.put("street", "Övre slottsgatan 1");
+	// rowFromDb.put("postbox", "Box5435");
+	// rowFromDb.put("postnumber", "345 34");
+	// rowFromDb.put("country_code", "fi");
+	//
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// DataAtomicSpy factoredDataAtomicForCity = getFactoredDataAtomicByNameInData("city");
+	// assertEquals(factoredDataAtomicForCity.nameInData, "city");
+	// assertEquals(factoredDataAtomicForCity.value, "uppsala");
+	//
+	// DataAtomicSpy factoredDataAtomicForStreet = getFactoredDataAtomicByNameInData("street");
+	// assertEquals(factoredDataAtomicForStreet.nameInData, "street");
+	// assertEquals(factoredDataAtomicForStreet.value, "Övre slottsgatan 1");
+	//
+	// DataAtomicSpy factoredDataAtomicForBox = getFactoredDataAtomicByNameInData("box");
+	// assertEquals(factoredDataAtomicForBox.nameInData, "box");
+	// assertEquals(factoredDataAtomicForBox.value, "Box5435");
+	//
+	// DataAtomicSpy factoredDataAtomicForPostcode = getFactoredDataAtomicByNameInData("postcode");
+	// assertEquals(factoredDataAtomicForPostcode.nameInData, "postcode");
+	// assertEquals(factoredDataAtomicForPostcode.value, "345 34");
+	//
+	// DataAtomicSpy factoredDataAtomicForCountry = getFactoredDataAtomicByNameInData("country");
+	// assertEquals(factoredDataAtomicForCountry.nameInData, "country");
+	// assertEquals(factoredDataAtomicForCountry.value, "FI");
+	//
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("city"), "uppsala");
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("street"),
+	// "Övre slottsgatan 1");
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("box"), "Box5435");
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("postcode"), "345 34");
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("country"), "FI");
+	//
+	// }
+	//
+	// @Test
+	// public void testOrganisationNumberMissing() {
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationNumberIsnull() {
+	// rowFromDb.put("orgnumber", null);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationNumberIsEmpty() {
+	// rowFromDb.put("orgnumber", "");
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationNumber() {
+	// rowFromDb.put("orgnumber", "540002");
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationNumber"),
+	// "540002");
+	// }
+	//
+	// @Test
+	// public void testOrganisationCodeMissing() {
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("organisationCode"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationCodeIsNull() {
+	// rowFromDb.put("organisation_code", null);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("organisationCode"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationCodeIsEmpty() {
+	// rowFromDb.put("organisation_code", "");
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("organisationCode"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationCode() {
+	// rowFromDb.put("organisation_code", "56783545");
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationCode"),
+	// "56783545");
+	// }
+	//
+	// @Test
+	// public void testOrganisationUrlMissing() {
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("URL"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationUrlIsNull() {
+	// rowFromDb.put("organisation_homepage", null);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("URL"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationUrlIsEmpty() {
+	// rowFromDb.put("organisation_homepage", "");
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("URL"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationURL() {
+	// rowFromDb.put("organisation_homepage", "www.something.org");
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("URL"), "www.something.org");
+	// }
+	//
+	// @Test
+	// public void testOrganisationClosedDateMissing() {
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("closedDate"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationClosedDateIsnull() {
+	// rowFromDb.put("closed_date", null);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("closedDate"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationClosedDateIsEmpty() {
+	// rowFromDb.put("closed_date", "");
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertFalse(organisation.containsChildWithNameInData("closedDate"));
+	// }
+	//
+	// @Test
+	// public void testOrganisationClosedDate() {
+	// Date date = Date.valueOf("2018-12-31");
+	// rowFromDb.put("closed_date", date);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("closedDate"), "2018-12-31");
+	// }
+	//
+	// @Test
+	// public void testOrganisationShowInDefenceFalse() {
+	// rowFromDb.put("show_in_defence", false);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("showInDefence"), "no");
+	// }
+	//
+	// @Test
+	// public void testOrganisationShowInDefenceTrue() {
+	// rowFromDb.put("show_in_defence", true);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("showInDefence"), "yes");
+	// }
+	//
+	// @Test
+	// public void testOrganisationTopLevelFalse() {
+	// rowFromDb.put("top_level", false);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("topLevel"), "no");
+	// }
+	//
+	// @Test
+	// public void testOrganisationTopLevelTrue() {
+	// rowFromDb.put("top_level", true);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("topLevel"), "yes");
+	// }
+	//
+	// @Test
+	// public void testOrganisationShowInPortalFalse() {
+	// rowFromDb.put("show_in_portal", false);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("showInPortal"), "no");
+	// }
+	//
+	// @Test
+	// public void testOrganisationShowInPortalTrue() {
+	// rowFromDb.put("show_in_portal", true);
+	// DataGroup organisation = converter.fromMap(rowFromDb);
+	// assertEquals(organisation.getFirstAtomicValueWithNameInData("showInPortal"), "yes");
+	// }
 
 }

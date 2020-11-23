@@ -206,8 +206,7 @@ public class DataGroupSpy implements DataGroup {
 
 	@Override
 	public boolean hasChildren() {
-		// TODO Auto-generated method stub
-		return false;
+		return children.size() > 0;
 	}
 
 	@Override
