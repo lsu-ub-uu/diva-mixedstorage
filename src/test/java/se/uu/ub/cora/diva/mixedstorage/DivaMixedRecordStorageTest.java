@@ -115,10 +115,10 @@ public class DivaMixedRecordStorageTest {
 
 	@Test
 	public void readOrganisationGoesToDivaDBToCoraStorage() throws Exception {
-		assertReadGoesToBasicStorageForOrganisationType("organisation");
+		assertReadGoesToDbStorageForOrganisationType("organisation");
 	}
 
-	private void assertReadGoesToBasicStorageForOrganisationType(String recordType) {
+	private void assertReadGoesToDbStorageForOrganisationType(String recordType) {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 		assertNoInteractionWithStorage(divaDbToCoraStorage);
@@ -137,12 +137,17 @@ public class DivaMixedRecordStorageTest {
 
 	@Test
 	public void readRootOrganisationGoesToDivaDBToCoraStorage() throws Exception {
-		assertReadGoesToBasicStorageForOrganisationType("rootOrganisation");
+		assertReadGoesToDbStorageForOrganisationType("rootOrganisation");
 	}
 
 	@Test
-	public void readcommonOrganisationGoesToDivaDBToCoraStorage() throws Exception {
-		assertReadGoesToBasicStorageForOrganisationType("commonOrganisation");
+	public void readTopOrganisationGoesToDivaDBToCoraStorage() throws Exception {
+		assertReadGoesToDbStorageForOrganisationType("topOrganisation");
+	}
+
+	@Test
+	public void readSubOrganisationGoesToDivaDBToCoraStorage() throws Exception {
+		assertReadGoesToDbStorageForOrganisationType("subOrganisation");
 	}
 
 	@Test
@@ -279,8 +284,8 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
-	public void readcommonOrganisationListGoesToDbToCoraStorage() throws Exception {
-		assertReadListGoesToDbForOrganisationType("commonOrganisation");
+	public void readSubrganisationListGoesToDbToCoraStorage() throws Exception {
+		assertReadListGoesToDbForOrganisationType("subOrganisation");
 	}
 
 	@Test
@@ -460,8 +465,8 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
-	public void updatecommonOrganisationGoesToDbStorage() {
-		assertUpdateGoesToDbForOrganisationType("commonOrganisation");
+	public void updateSubOrganisationGoesToDbStorage() {
+		assertUpdateGoesToDbForOrganisationType("subOrganisation");
 	}
 
 	@Test
@@ -646,9 +651,15 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
-	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForChildOrgansiationGoesToDbStorage()
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForTopOrgansiationGoesToDbStorage()
 			throws Exception {
-		assertRecordExistsGoesToDbForOrganisationType("commonOrganisation");
+		assertRecordExistsGoesToDbForOrganisationType("topOrganisation");
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForSubOrgansiationGoesToDbStorage()
+			throws Exception {
+		assertRecordExistsGoesToDbForOrganisationType("subOrganisation");
 	}
 
 	@Test

@@ -216,9 +216,4 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 		return value != null && !"".equals(value);
 	}
 
-	@Override
-	public String getRecordType() {
-		return recordType;
-	}
-
 }

@@ -35,10 +35,4 @@ public class DefaultConverterSpy implements DefaultConverter {
 		return returnedDataGroup;
 	}
 
-	@Override
-	public String getRecordType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

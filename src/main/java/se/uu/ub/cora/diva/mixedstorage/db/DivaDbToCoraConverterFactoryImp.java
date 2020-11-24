@@ -29,8 +29,8 @@ public class DivaDbToCoraConverterFactoryImp implements DivaDbToCoraConverterFac
 	@Override
 	public DivaDbToCoraConverter factor(String type) {
 		if (isOrganisation(type)) {
-			// TODO:skicka med en DefaultConverterFactory??
-			return new DivaDbToCoraOrganisationConverter(null);
+			DefaultConverterFactoryImp defaultConverterFactory = new DefaultConverterFactoryImp();
+			return new DivaDbToCoraOrganisationConverter(defaultConverterFactory);
 		}
 		if ("divaOrganisationParent".equals(type)) {
 			return new DivaDbToCoraOrganisationParentConverter();
@@ -49,7 +49,7 @@ public class DivaDbToCoraConverterFactoryImp implements DivaDbToCoraConverterFac
 
 	private boolean isOrganisation(String type) {
 		return "organisation".equals(type) || "rootOrganisation".equals(type)
-				|| "commonOrganisation".equals(type);
+				|| "topOrganisation".equals(type) || "subOrganisation".equals(type);
 	}
 
 }

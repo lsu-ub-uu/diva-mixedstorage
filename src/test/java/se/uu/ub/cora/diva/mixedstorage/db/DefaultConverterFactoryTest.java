@@ -16,25 +16,23 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage.db;
 
-import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
-import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
+import static org.testng.Assert.assertTrue;
 
-public class OrganisataionConverterFactory implements DivaDbToCoraConverterFactory {
+import org.testng.annotations.Test;
 
-	@Override
-	public DivaDbToCoraConverter factor(String type) {
-		if ("rootOrganisation".equals(type)) {
-			return null;
-			// return new RootOrganisationConverter();
-		}
-		if ("topLevelOrganisation".equals(type)) {
-			return null;
-			// return new TopLevelOrganisationConverter();
-		}
-		return null;
-		// return new SubOrganisationConverter();
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.DefaultConverter;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.DefaultConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.DefaultOrganisationConverter;
+
+public class DefaultConverterFactoryTest {
+
+	@Test
+	public void testInit() {
+		DefaultConverterFactory converterFactory = new DefaultConverterFactoryImp();
+		DefaultConverter converter = converterFactory.factor();
+		assertTrue(converter instanceof DefaultOrganisationConverter);
 	}
 
 }

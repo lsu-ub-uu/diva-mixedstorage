@@ -66,8 +66,10 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 	private String getTableName(String type) {
 		if ("rootOrganisation".equals(type)) {
 			return "rootorganisationview";
-		} else if ("commonOrganisation".equals(type)) {
-			return "commonorganisationview";
+		} else if ("topOrganisation".equals(type)) {
+			return "toporganisationview";
+		} else if ("subOrganisation".equals(type)) {
+			return "suborganisationview";
 		}
 		return DEFAULT_TABLENAME;
 	}

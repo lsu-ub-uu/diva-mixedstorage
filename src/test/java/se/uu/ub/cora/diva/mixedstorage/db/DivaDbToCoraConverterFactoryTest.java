@@ -24,6 +24,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.DefaultConverterFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationParentConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationPredecessorConverter;
@@ -49,8 +50,10 @@ public class DivaDbToCoraConverterFactoryTest {
 	}
 
 	private void testCorrectConverterForOrganisationType(String type) {
-		DivaDbToCoraConverter converter = divaDbToCoraConverterFactoryImp.factor(type);
-		assertTrue(converter instanceof DivaDbToCoraOrganisationConverter);
+		DivaDbToCoraOrganisationConverter converter = (DivaDbToCoraOrganisationConverter) divaDbToCoraConverterFactoryImp
+				.factor(type);
+		DefaultConverterFactory defaultConverterFactory = converter.getDefaultConverterFactory();
+		assertTrue(defaultConverterFactory instanceof DefaultConverterFactoryImp);
 	}
 
 	@Test
@@ -59,8 +62,13 @@ public class DivaDbToCoraConverterFactoryTest {
 	}
 
 	@Test
-	public void testFactorycommonOrganisation() throws Exception {
-		testCorrectConverterForOrganisationType("commonOrganisation");
+	public void testFactoryTopOrganisation() throws Exception {
+		testCorrectConverterForOrganisationType("topOrganisation");
+	}
+
+	@Test
+	public void testFactorySubOrganisation() throws Exception {
+		testCorrectConverterForOrganisationType("subOrganisation");
 	}
 
 	@Test

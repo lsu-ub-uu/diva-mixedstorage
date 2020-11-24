@@ -16,14 +16,17 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage.db;
 
-public class TopLevelOrganisationConverter extends DefaultOrganisationConverter {
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.DefaultConverter;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.DefaultConverterFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.DefaultOrganisationConverter;
 
-	// possiblyCreateAndAddAddress
+public class DefaultConverterFactoryImp implements DefaultConverterFactory {
+
 	@Override
-	public String getRecordType() {
-		return "topLevelOrganisation";
+	public DefaultConverter factor() {
+		return new DefaultOrganisationConverter();
 	}
 
 }

@@ -79,8 +79,13 @@ public class DivaDbUpdaterFactoryTest {
 	}
 
 	@Test
-	public void testFactorcommonOrganisation() {
-		assertCorrectFactoredUpdatedForOrganisationType("commonOrganisation");
+	public void testFactorTopOrganisation() {
+		assertCorrectFactoredUpdatedForOrganisationType("topOrganisation");
+	}
+
+	@Test
+	public void testFactorSubOrganisation() {
+		assertCorrectFactoredUpdatedForOrganisationType("subOrganisation");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

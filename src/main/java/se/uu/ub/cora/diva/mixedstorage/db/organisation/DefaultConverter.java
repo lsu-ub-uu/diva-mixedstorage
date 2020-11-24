@@ -26,6 +26,4 @@ public interface DefaultConverter {
 
 	DataGroup fromMap(Map<String, Object> dbRow);
 
-	String getRecordType();
-
 }

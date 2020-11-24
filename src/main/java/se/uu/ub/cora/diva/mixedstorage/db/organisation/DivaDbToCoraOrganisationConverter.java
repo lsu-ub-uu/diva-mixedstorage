@@ -29,13 +29,12 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
 public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter {
 
 	private static final String ORGANISATION_ID = "id";
-	private static final String ALTERNATIVE_NAME = "alternative_name";
 	private Map<String, Object> dbRow;
 	private DataGroup organisation;
-	private DefaultConverterFactory converterFactory;
+	private DefaultConverterFactory defaultConverterFactory;
 
 	public DivaDbToCoraOrganisationConverter(DefaultConverterFactory converterFactory) {
-		this.converterFactory = converterFactory;
+		this.defaultConverterFactory = converterFactory;
 	}
 
 	@Override
@@ -56,31 +55,47 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private DataGroup createDataGroup() {
-		DefaultConverter defaultConverter = converterFactory.factor();
+		DefaultConverter defaultConverter = defaultConverterFactory.factor();
 		organisation = defaultConverter.fromMap(dbRow);
 
-		// både toplevel och sub
-		String typeCode = (String) dbRow.get("type_code");
-		if (!"root".equals(typeCode)) {
-			possiblyCreateAndAddEligibility(); // oklar
-			possiblyCreateAndAddAddress();
-			possiblyCreateAndAddOrganisationCode();
-			possiblyCreateAndAddURL();
-			// bara toplevel
-			boolean isTopLevel = (boolean) dbRow.get("top_level");
-			if (isTopLevel) {
-				possiblyCreateAndAddDoctoralDegreeGrantor();
-				possiblyCreateAndAddOrganisationNumber();
-			}
-		}
+		possiblyAddMoreData();
 		return organisation;
+	}
+
+	private void possiblyAddMoreData() {
+		String typeCode = (String) dbRow.get("type_code");
+		if (notRootOrganisation(typeCode)) {
+			addCommonDataForSubAndTopOrganisation();
+			possiblyAddDataForTopOrganisation();
+		}
+	}
+
+	private boolean notRootOrganisation(String typeCode) {
+		return !"root".equals(typeCode);
+	}
+
+	private void possiblyAddDataForTopOrganisation() {
+		if (isTopLevel()) {
+			possiblyCreateAndAddDoctoralDegreeGrantor();
+			possiblyCreateAndAddOrganisationNumber();
+		}
+	}
+
+	private void addCommonDataForSubAndTopOrganisation() {
+		possiblyCreateAndAddEligibility();
+		possiblyCreateAndAddAddress();
+		possiblyCreateAndAddOrganisationCode();
+		possiblyCreateAndAddURL();
+	}
+
+	private boolean isTopLevel() {
+		return (boolean) dbRow.get("top_level");
 	}
 
 	private void possiblyCreateAndAddEligibility() {
 		Object notEligable = dbRow.get("not_eligible");
 		if (notEligable != null) {
 			createAndAddEligibility(notEligable);
-
 		}
 	}
 
@@ -174,5 +189,10 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 		String stringBooleanValue = showInDefence ? "yes" : "no";
 		organisation.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(nameInData,
 				stringBooleanValue));
+	}
+
+	public DefaultConverterFactory getDefaultConverterFactory() {
+		return defaultConverterFactory;
+
 	}
 }

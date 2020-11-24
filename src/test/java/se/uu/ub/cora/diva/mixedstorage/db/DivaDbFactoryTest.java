@@ -57,13 +57,19 @@ public class DivaDbFactoryTest {
 	}
 
 	@Test
-	public void testFactorRootOrganisation() {
-		DivaDbReader divaDbToCoraOrganisation = divaDbToCoraFactoryImp.factor("commonOrganisation");
+	public void testFactorSubOrganisation() {
+		DivaDbReader divaDbToCoraOrganisation = divaDbToCoraFactoryImp.factor("subOrganisation");
 		assertTrue(divaDbToCoraOrganisation instanceof DivaDbOrganisationReader);
 	}
 
 	@Test
-	public void testFactorcommonOrganisation() {
+	public void testFactorTopOrganisation() {
+		DivaDbReader divaDbToCoraOrganisation = divaDbToCoraFactoryImp.factor("topOrganisation");
+		assertTrue(divaDbToCoraOrganisation instanceof DivaDbOrganisationReader);
+	}
+
+	@Test
+	public void testFactorRootOrganisation() {
 		DivaDbReader divaDbToCoraOrganisation = divaDbToCoraFactoryImp.factor("rootOrganisation");
 		assertTrue(divaDbToCoraOrganisation instanceof DivaDbOrganisationReader);
 	}
@@ -87,8 +93,8 @@ public class DivaDbFactoryTest {
 	}
 
 	@Test
-	public void testFactorcommonOrganisationCorrectDbFactory() {
-		assertCorrectDbFactoryForOrganisationType("commonOrganisation");
+	public void testFactorSubOrganisationCorrectDbFactory() {
+		assertCorrectDbFactoryForOrganisationType("subOrganisation");
 	}
 
 	@Test
@@ -109,8 +115,8 @@ public class DivaDbFactoryTest {
 	}
 
 	@Test
-	public void testFactorcommonOrganisationSentInFactoriesAreSentToImplementation() {
-		assertCorrectFactoriesSentToImplementationForOrganisationType("commonOrganisation");
+	public void testFactorSubOrganisationSentInFactoriesAreSentToImplementation() {
+		assertCorrectFactoriesSentToImplementationForOrganisationType("subOrganisation");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
