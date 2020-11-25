@@ -184,15 +184,6 @@ public class DefaultOrganisationConverterTest {
 	}
 
 	@Test
-	public void testTypeCode() {
-		String typeCode = "root";
-		rowFromDb.put("type_code", typeCode);
-
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationType"), typeCode);
-	}
-
-	@Test
 	public void testAlternativeName() {
 		rowFromDb.put("alternative_name", "Java Faculty");
 		DataGroup organisation = converter.fromMap(rowFromDb);

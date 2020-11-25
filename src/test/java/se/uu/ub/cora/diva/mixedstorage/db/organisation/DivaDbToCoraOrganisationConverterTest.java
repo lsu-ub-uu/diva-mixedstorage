@@ -120,6 +120,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 		assertFalse(organisation.containsChildWithNameInData("doctoralDegreeGrantor"));
 		assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
 		assertFalse(organisation.containsChildWithNameInData("eligible"));
+		assertFalse(organisation.containsChildWithNameInData("organisationType"));
 
 	}
 
@@ -137,19 +138,35 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb.put("postbox", "Box5435");
 		rowFromDb.put("postnumber", "345 34");
 		rowFromDb.put("not_eligible", false);
+		rowFromDb.put("type_code", "university");
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
 		assertSame(organisation, factoredConverter.returnedDataGroup);
 
-		assertTrue(organisation.containsChildWithNameInData("address"));
-		assertTrue(organisation.containsChildWithNameInData("organisationCode"));
-		assertTrue(organisation.containsChildWithNameInData("URL"));
-		assertTrue(organisation.containsChildWithNameInData("doctoralDegreeGrantor"));
+		assertCorrectCompleteAddress(organisation);
+
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationCode"),
+				"someCode");
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("URL"), "www.someaddress.com");
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("doctoralDegreeGrantor"),
 				"yes");
-		assertTrue(organisation.containsChildWithNameInData("organisationNumber"));
-		assertTrue(organisation.containsChildWithNameInData("eligible"));
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationNumber"),
+				"33445566");
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("eligible"), "yes");
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationType"),
+				"university");
 
+	}
+
+	private void assertCorrectCompleteAddress(DataGroup organisation) {
+		assertTrue(organisation.containsChildWithNameInData("address"));
+		DataGroup addressGroup = organisation.getFirstGroupWithNameInData("address");
+		assertEquals(addressGroup.getFirstAtomicValueWithNameInData("country"), "FI");
+		assertEquals(addressGroup.getFirstAtomicValueWithNameInData("city"), "Uppsala");
+		assertEquals(addressGroup.getFirstAtomicValueWithNameInData("street"),
+				"Övre slottsgatan 1");
+		assertEquals(addressGroup.getFirstAtomicValueWithNameInData("box"), "Box5435");
+		assertEquals(addressGroup.getFirstAtomicValueWithNameInData("postcode"), "345 34");
 	}
 
 	@Test
@@ -220,12 +237,15 @@ public class DivaDbToCoraOrganisationConverterTest {
 		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
 		assertSame(organisation, factoredConverter.returnedDataGroup);
 
-		assertTrue(organisation.containsChildWithNameInData("address"));
-		assertTrue(organisation.containsChildWithNameInData("organisationCode"));
-		assertTrue(organisation.containsChildWithNameInData("URL"));
-		assertTrue(organisation.containsChildWithNameInData("eligible"));
 		assertFalse(organisation.containsChildWithNameInData("doctoralDegreeGrantor"));
 		assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
+
+		assertCorrectCompleteAddress(organisation);
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationCode"),
+				"someCode");
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("URL"), "www.someaddress.com");
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("eligible"), "yes");
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationType"), "unit");
 
 	}
 

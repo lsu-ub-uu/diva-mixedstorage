@@ -59,7 +59,7 @@ public class OrganisationAddressRelatedTableTest {
 	}
 
 	@Test
-	public void testNoAddressInDataGroupNoInAddressDatabase() {
+	public void testNoAddressInDataGroupNoAddressInDatabase() {
 		DataGroup organisation = createDataGroupWithId("678");
 		setUpOrganisationRowWithoutAddress();
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation,
@@ -88,6 +88,11 @@ public class OrganisationAddressRelatedTableTest {
 		int organisationId = 678;
 		DataGroup organisation = createDataGroupWithId("678");
 
+		assertCorrectUpdateAndDeleteOfAddress(organisationId, organisation);
+
+	}
+
+	private void assertCorrectUpdateAndDeleteOfAddress(int organisationId, DataGroup organisation) {
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation,
 				organisationRows);
 		assertEquals(dbStatements.size(), 2);
@@ -95,7 +100,6 @@ public class OrganisationAddressRelatedTableTest {
 		assertCorrectUpdateOrganisationAddressSetToNull(organisationId, dbStatement);
 
 		assertCorrectDeletedAddress(dbStatements.get(1), 4);
-
 	}
 
 	private void assertCorrectUpdateOrganisationAddressSetToNull(int organisationId,
@@ -122,9 +126,21 @@ public class OrganisationAddressRelatedTableTest {
 	}
 
 	@Test
+	public void testEmptyAddressInDataGroupButAddressInDatabase() {
+		int organisationId = 678;
+		DataGroup organisation = createDataGroupWithId("678");
+		createAddressGroupAndAddToOrganisation(organisation);
+
+		assertCorrectUpdateAndDeleteOfAddress(organisationId, organisation);
+
+	}
+
+	@Test
 	public void testCityInDataGroupAndAddressInDatabase() {
 		DataGroup organisation = createDataGroupWithId("678");
-		organisation.addChild(new DataAtomicSpy("city", "City of rock and roll"));
+		DataGroup addressGroup = new DataGroupSpy("address");
+		addressGroup.addChild(new DataAtomicSpy("city", "City of rock and roll"));
+		organisation.addChild(addressGroup);
 
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation,
 				organisationRows);
@@ -147,28 +163,30 @@ public class OrganisationAddressRelatedTableTest {
 	private void assertCorrectCommonValuesForUpdateAndInsert(DataGroup organisation,
 			DbStatement dbStatement) {
 		assertEquals(dbStatement.getTableName(), "organisation_address");
+		DataGroup addressGroup = organisation.getFirstGroupWithNameInData("address");
 		Map<String, Object> values = dbStatement.getValues();
-		assertEquals(values.get("city"), getAtomicValueOrNull(organisation, "city"));
-		assertEquals(values.get("street"), getAtomicValueOrNull(organisation, "street"));
-		assertEquals(values.get("postbox"), getAtomicValueOrNull(organisation, "box"));
-		assertEquals(values.get("postnumber"), getAtomicValueOrNull(organisation, "postcode"));
-		String countryCode = getAtomicValueOrNull(organisation, "country");
+		assertEquals(values.get("city"), getAtomicValueOrNull(addressGroup, "city"));
+		assertEquals(values.get("street"), getAtomicValueOrNull(addressGroup, "street"));
+		assertEquals(values.get("postbox"), getAtomicValueOrNull(addressGroup, "box"));
+		assertEquals(values.get("postnumber"), getAtomicValueOrNull(addressGroup, "postcode"));
+		String countryCode = getAtomicValueOrNull(addressGroup, "country");
 		if (null != countryCode) {
 			countryCode = countryCode.toLowerCase();
 		}
 		assertEquals(values.get("country_code"), countryCode);
 	}
 
-	private String getAtomicValueOrNull(DataGroup organisation, String nameInData) {
-		return organisation.containsChildWithNameInData(nameInData)
-				? organisation.getFirstAtomicValueWithNameInData(nameInData)
+	private String getAtomicValueOrNull(DataGroup dataGroup, String nameInData) {
+		return dataGroup.containsChildWithNameInData(nameInData)
+				? dataGroup.getFirstAtomicValueWithNameInData(nameInData)
 				: null;
 	}
 
 	@Test
 	public void testStreetInDataGroupAndAddressInDatabase() {
 		DataGroup organisation = createDataGroupWithId("678");
-		organisation.addChild(new DataAtomicSpy("street", "Hill street"));
+		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
+		addressGroup.addChild(new DataAtomicSpy("street", "Hill street"));
 
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation,
 				organisationRows);
@@ -181,7 +199,9 @@ public class OrganisationAddressRelatedTableTest {
 	@Test
 	public void testPostboxInDataGroupAndAddressInDatabase() {
 		DataGroup organisation = createDataGroupWithId("678");
-		organisation.addChild(new DataAtomicSpy("box", "box21"));
+		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
+
+		addressGroup.addChild(new DataAtomicSpy("box", "box21"));
 
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation,
 				organisationRows);
@@ -193,7 +213,8 @@ public class OrganisationAddressRelatedTableTest {
 	@Test
 	public void testPostnumberInDataGroupAndAddressInDatabase() {
 		DataGroup organisation = createDataGroupWithId("678");
-		organisation.addChild(new DataAtomicSpy("postcode", "90210"));
+		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
+		addressGroup.addChild(new DataAtomicSpy("postcode", "90210"));
 
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation,
 				organisationRows);
@@ -205,7 +226,8 @@ public class OrganisationAddressRelatedTableTest {
 	@Test
 	public void testCountryCodeInDataGroupAndAddressInDatabase() {
 		DataGroup organisation = createDataGroupWithId("678");
-		organisation.addChild(new DataAtomicSpy("country", "SE"));
+		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
+		addressGroup.addChild(new DataAtomicSpy("country", "SE"));
 
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation,
 				organisationRows);
@@ -217,11 +239,13 @@ public class OrganisationAddressRelatedTableTest {
 	@Test
 	public void testCompleteAddressInDataGroupAndAddressInDatabase() {
 		DataGroup organisation = createDataGroupWithId("678");
-		organisation.addChild(new DataAtomicSpy("city", "City of rock and roll"));
-		organisation.addChild(new DataAtomicSpy("country", "SE"));
-		organisation.addChild(new DataAtomicSpy("postcode", "90210"));
-		organisation.addChild(new DataAtomicSpy("box", "box21"));
-		organisation.addChild(new DataAtomicSpy("street", "Hill street"));
+		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
+
+		addressGroup.addChild(new DataAtomicSpy("city", "City of rock and roll"));
+		addressGroup.addChild(new DataAtomicSpy("country", "SE"));
+		addressGroup.addChild(new DataAtomicSpy("postcode", "90210"));
+		addressGroup.addChild(new DataAtomicSpy("box", "box21"));
+		addressGroup.addChild(new DataAtomicSpy("street", "Hill street"));
 
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation,
 				organisationRows);
@@ -234,7 +258,8 @@ public class OrganisationAddressRelatedTableTest {
 	public void testAddressInDataGroupButNOAddressInDatabase() {
 		int organisationId = 678;
 		DataGroup organisation = createDataGroupWithId("678");
-		organisation.addChild(new DataAtomicSpy("box", "box21"));
+		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
+		addressGroup.addChild(new DataAtomicSpy("box", "box21"));
 		setUpOrganisationRowWithoutAddress();
 
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation,
@@ -253,6 +278,12 @@ public class OrganisationAddressRelatedTableTest {
 		Map<String, Object> values = orgUpdateStatement.getValues();
 		assertEquals(values.get("address_id"), generatedAddressKey);
 
+	}
+
+	private DataGroup createAddressGroupAndAddToOrganisation(DataGroup organisation) {
+		DataGroup addressGroup = new DataGroupSpy("address");
+		organisation.addChild(addressGroup);
+		return addressGroup;
 	}
 
 	private void assertCorrectDataForAddressInsert(DataGroup organisation, DbStatement dbStatement,

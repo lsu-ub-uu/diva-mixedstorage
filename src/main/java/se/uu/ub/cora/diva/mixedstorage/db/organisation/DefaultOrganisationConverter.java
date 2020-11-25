@@ -81,7 +81,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 		createAndAddDomain();
 		createAndAddName();
 		createAndAddAlternativeName();
-		createAndAddOrganisationType();
+		// createAndAddOrganisationType();
 		possiblyCreateAndAddClosedDate();
 		return organisation;
 	}
@@ -185,12 +185,6 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 		alternativeNameDataGroup.addChild(DataAtomicProvider
 				.getDataAtomicUsingNameInDataAndValue("organisationName", alternativeName));
 		organisation.addChild(alternativeNameDataGroup);
-	}
-
-	private void createAndAddOrganisationType() {
-		String typeCode = (String) dbRow.get("type_code");
-		organisation.addChild(DataAtomicProvider
-				.getDataAtomicUsingNameInDataAndValue("organisationType", typeCode));
 	}
 
 	private void possiblyCreateAndAddClosedDate() {

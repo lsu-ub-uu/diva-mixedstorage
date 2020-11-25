@@ -82,6 +82,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private void addCommonDataForSubAndTopOrganisation() {
+		createAndAddOrganisationType();
 		possiblyCreateAndAddEligibility();
 		possiblyCreateAndAddAddress();
 		possiblyCreateAndAddOrganisationCode();
@@ -90,6 +91,12 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 
 	private boolean isTopLevel() {
 		return (boolean) dbRow.get("top_level");
+	}
+
+	private void createAndAddOrganisationType() {
+		String typeCode = (String) dbRow.get("type_code");
+		organisation.addChild(DataAtomicProvider
+				.getDataAtomicUsingNameInDataAndValue("organisationType", typeCode));
 	}
 
 	private void possiblyCreateAndAddEligibility() {
