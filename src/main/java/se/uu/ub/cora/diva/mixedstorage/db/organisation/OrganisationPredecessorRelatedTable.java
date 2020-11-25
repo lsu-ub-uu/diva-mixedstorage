@@ -74,7 +74,8 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	}
 
 	private void populateCollectionWithPredecessorsFromDataGroup(DataGroup organisation) {
-		List<DataGroup> predecessors = organisation.getAllGroupsWithNameInData("formerName");
+		List<DataGroup> predecessors = organisation
+				.getAllGroupsWithNameInData("earlierOrganisation");
 		predecessorsInDataGroup = new HashMap<>(predecessors.size());
 		for (DataGroup predecessor : predecessors) {
 			String predecessorId = extractPredecessorId(predecessor);

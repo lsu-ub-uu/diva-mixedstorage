@@ -126,7 +126,7 @@ public class OrganisationPredecessorRelatedTableTest {
 	}
 
 	private DataGroup createPredecessorGroupWithRepeatId(String repeatId) {
-		DataGroup predecessorGroup = new DataGroupSpy("formerName");
+		DataGroup predecessorGroup = new DataGroupSpy("earlierOrganisation");
 		predecessorGroup.setRepeatId(repeatId);
 		return predecessorGroup;
 	}

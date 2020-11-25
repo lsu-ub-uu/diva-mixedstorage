@@ -55,9 +55,9 @@ public class DivaDbToCoraOrganisationParentConverter
 		return parent;
 	}
 
-	private void addParentLink(DataGroup formerName) {
-		String predecessorId = String.valueOf(dbRow.get("organisation_parent_id"));
-		DataGroup predecessor = createOrganisationLinkUsingLinkedRecordId(predecessorId);
-		formerName.addChild(predecessor);
+	private void addParentLink(DataGroup parentGroup) {
+		String parentId = String.valueOf(dbRow.get("organisation_parent_id"));
+		DataGroup organisationLink = createOrganisationLinkUsingLinkedRecordId(parentId);
+		parentGroup.addChild(organisationLink);
 	}
 }
