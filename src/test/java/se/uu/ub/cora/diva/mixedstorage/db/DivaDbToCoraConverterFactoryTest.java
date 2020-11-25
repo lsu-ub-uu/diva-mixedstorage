@@ -28,7 +28,6 @@ import se.uu.ub.cora.diva.mixedstorage.db.organisation.DefaultConverterFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationParentConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationPredecessorConverter;
-import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationSuccessorConverter;
 
 public class DivaDbToCoraConverterFactoryTest {
 	private DivaDbToCoraConverterFactory divaDbToCoraConverterFactoryImp;
@@ -83,13 +82,6 @@ public class DivaDbToCoraConverterFactoryTest {
 		DivaDbToCoraConverter converter = divaDbToCoraConverterFactoryImp
 				.factor("divaOrganisationPredecessor");
 		assertTrue(converter instanceof DivaDbToCoraOrganisationPredecessorConverter);
-	}
-
-	@Test
-	public void testFactoryOrganisationSuccessor() throws Exception {
-		DivaDbToCoraConverter converter = divaDbToCoraConverterFactoryImp
-				.factor("divaOrganisationSuccessor");
-		assertTrue(converter instanceof DivaDbToCoraOrganisationSuccessorConverter);
 	}
 
 	@Test
