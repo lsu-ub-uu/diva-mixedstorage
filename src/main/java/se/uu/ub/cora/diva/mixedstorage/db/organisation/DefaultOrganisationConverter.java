@@ -81,7 +81,6 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 		createAndAddDomain();
 		createAndAddName();
 		createAndAddAlternativeName();
-		// createAndAddOrganisationType();
 		possiblyCreateAndAddClosedDate();
 		return organisation;
 	}
