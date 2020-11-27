@@ -61,8 +61,8 @@ public class OrganisationDataToDbTranslaterTest {
 		dataGroup.addChild(recordInfo);
 		dataGroup.addChild(new DataAtomicSpy("organisationType", "unit"));
 
-		DataGroup organisationName = new DataGroupSpy("name");
-		organisationName.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
+		DataGroup organisationName = new DataGroupSpy("organisationName");
+		organisationName.addChild(new DataAtomicSpy("name", "someChangedName"));
 		organisationName.addChild(new DataAtomicSpy("language", "sv"));
 		dataGroup.addChild(organisationName);
 
@@ -72,7 +72,7 @@ public class OrganisationDataToDbTranslaterTest {
 	@Test
 	public void testLastUpdated() {
 		DataGroup dataGroup = createDataGroupWithId("45");
-		dataGroup.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
+		// dataGroup.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getConditions().get("organisation_id"), 45);
@@ -98,7 +98,6 @@ public class OrganisationDataToDbTranslaterTest {
 	@Test
 	public void testUpdateAllAtomicChildrenInOrganisation() throws Exception {
 		DataGroup dataGroup = createDataGroupWithId("45");
-		dataGroup.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
 		dataGroup.addChild(new DataAtomicSpy("closedDate", "2017-10-31"));
 		dataGroup.addChild(new DataAtomicSpy("organisationCode", "1235"));
 		dataGroup.addChild(new DataAtomicSpy("organisationNumber", "78979-45654"));
@@ -142,9 +141,9 @@ public class OrganisationDataToDbTranslaterTest {
 		Timestamp lastUpdated = (Timestamp) translater.getValues().get("last_updated");
 
 		DataGroup dataGroup2 = createDataGroupWithId("4500");
-		DataGroup nameGroup = dataGroup2.getFirstGroupWithNameInData("name");
-		nameGroup.removeFirstChildWithNameInData("organisationName");
-		nameGroup.addChild(new DataAtomicSpy("organisationName", "someOtherChangedName"));
+		DataGroup nameGroup = dataGroup2.getFirstGroupWithNameInData("organisationName");
+		nameGroup.removeFirstChildWithNameInData("name");
+		nameGroup.addChild(new DataAtomicSpy("name", "someOtherChangedName"));
 
 		translater.translate(dataGroup2);
 		assertEquals(translater.getConditions().size(), 1);
@@ -167,8 +166,7 @@ public class OrganisationDataToDbTranslaterTest {
 	@Test
 	public void testOrganisationNotEligable() {
 		DataGroup dataGroup = createDataGroupWithId("45");
-		dataGroup.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
-		dataGroup.addChild(new DataAtomicSpy("eligible", "no"));
+		dataGroup.addChild(new DataAtomicSpy("selectable", "no"));
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getConditions().get("organisation_id"), 45);
@@ -179,8 +177,7 @@ public class OrganisationDataToDbTranslaterTest {
 	@Test
 	public void testOrganisationEligable() {
 		DataGroup dataGroup = createDataGroupWithId("45");
-		dataGroup.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
-		dataGroup.addChild(new DataAtomicSpy("eligible", "yes"));
+		dataGroup.addChild(new DataAtomicSpy("selectable", "yes"));
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getConditions().get("organisation_id"), 45);
@@ -201,7 +198,6 @@ public class OrganisationDataToDbTranslaterTest {
 	private DataGroup createDataGroupAddChildWithNameInDataAndValue(String nameInData,
 			String value) {
 		DataGroup dataGroup = createDataGroupWithId("45");
-		dataGroup.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
 		dataGroup.addChild(new DataAtomicSpy(nameInData, value));
 		return dataGroup;
 	}
@@ -218,7 +214,8 @@ public class OrganisationDataToDbTranslaterTest {
 
 	@Test
 	public void testOrganisationShowInDefenceTrue() {
-		DataGroup dataGroup = createDataGroupAddChildWithNameInDataAndValue("showInDefence", "yes");
+		DataGroup dataGroup = createDataGroupAddChildWithNameInDataAndValue("doctoralDegreeGrantor",
+				"yes");
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getConditions().get("organisation_id"), 45);
@@ -228,7 +225,8 @@ public class OrganisationDataToDbTranslaterTest {
 
 	@Test
 	public void testOrganisationShowInDefenceFalse() {
-		DataGroup dataGroup = createDataGroupAddChildWithNameInDataAndValue("showInDefence", "no");
+		DataGroup dataGroup = createDataGroupAddChildWithNameInDataAndValue("doctoralDegreeGrantor",
+				"no");
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getConditions().get("organisation_id"), 45);
@@ -259,7 +257,6 @@ public class OrganisationDataToDbTranslaterTest {
 	@Test
 	public void testOrganisationType() {
 		DataGroup dataGroup = createDataGroupWithId("45");
-		dataGroup.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getConditions().get("organisation_id"), 45);

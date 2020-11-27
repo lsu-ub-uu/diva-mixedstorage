@@ -98,6 +98,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 		createAndAddType(recordInfo, recordType);
 		createAndAddDataDivider(recordInfo);
 		createAndAddCreatedAndUpdatedInfo(recordInfo);
+		createAndAddSelectable(recordInfo);
 		return recordInfo;
 	}
 
@@ -151,6 +152,22 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 				"2017-01-01T00:00:00.000000Z"));
 	}
 
+	private void createAndAddSelectable(DataGroup recordInfo) {
+		String selectableValue = getSelectableValue();
+		DataAtomic selectable = DataAtomicProvider
+				.getDataAtomicUsingNameInDataAndValue("selectable", selectableValue);
+		recordInfo.addChild(selectable);
+	}
+
+	private String getSelectableValue() {
+		Object notEligable = dbRow.get("not_eligible");
+		return isSelectable(notEligable) ? "yes" : "no";
+	}
+
+	private boolean isSelectable(Object notEligable) {
+		return !(boolean) notEligable;
+	}
+
 	private void createAndAddDomain() {
 		String domain = (String) dbRow.get("domain");
 		organisation.addChild(
@@ -158,9 +175,8 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 	}
 
 	private void createAndAddName() {
-		DataGroup nameGroup = DataGroupProvider.getDataGroupUsingNameInData("name");
-		DataAtomic name = createAtomicDataUsingColumnNameAndNameInData("defaultname",
-				"organisationName");
+		DataGroup nameGroup = DataGroupProvider.getDataGroupUsingNameInData("organisationName");
+		DataAtomic name = createAtomicDataUsingColumnNameAndNameInData("defaultname", "name");
 		nameGroup.addChild(name);
 		String nameLanguage = (String) dbRow.get("organisation_name_locale");
 		nameGroup.addChild(
@@ -177,12 +193,12 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 
 	private void createAndAddAlternativeName() {
 		DataGroup alternativeNameDataGroup = DataGroupProvider
-				.getDataGroupUsingNameInData("alternativeName");
+				.getDataGroupUsingNameInData("organisationAlternativeName");
 		alternativeNameDataGroup.addChild(
 				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("language", "en"));
 		String alternativeName = (String) dbRow.get(ALTERNATIVE_NAME);
-		alternativeNameDataGroup.addChild(DataAtomicProvider
-				.getDataAtomicUsingNameInDataAndValue("organisationName", alternativeName));
+		alternativeNameDataGroup.addChild(
+				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("name", alternativeName));
 		organisation.addChild(alternativeNameDataGroup);
 	}
 

@@ -152,7 +152,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 				"yes");
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationNumber"),
 				"33445566");
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("eligible"), "yes");
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("selectable"), "yes");
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationType"),
 				"university");
 
@@ -244,7 +244,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationCode"),
 				"someCode");
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("URL"), "www.someaddress.com");
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("eligible"), "yes");
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("selectable"), "yes");
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationType"), "unit");
 
 	}
@@ -253,7 +253,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 	public void testOrganisationNotEligible() {
 		rowFromDb.put("not_eligible", true);
 		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("eligible"), "no");
+		assertEquals(organisation.getFirstAtomicValueWithNameInData("selectable"), "no");
 	}
 
 }

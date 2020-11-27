@@ -22,7 +22,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
 
 import java.sql.Date;
 import java.util.HashMap;
@@ -56,6 +55,7 @@ public class DefaultOrganisationConverterTest {
 		rowFromDb = new HashMap<>();
 		rowFromDb.put("id", 57);
 		rowFromDb.put("type_code", "root");
+		rowFromDb.put("not_eligible", true);
 		converter = new DefaultOrganisationConverter();
 	}
 
@@ -108,6 +108,11 @@ public class DefaultOrganisationConverterTest {
 		DataAtomicSpy factoredDataAtomicForId = getFactoredDataAtomicByNumber(0);
 		assertEquals(factoredDataAtomicForId.nameInData, "id");
 		assertEquals(factoredDataAtomicForId.value, "57");
+
+		DataAtomicSpy selectable = getFactoredDataAtomicByNumber(11);
+		assertEquals(selectable.nameInData, "selectable");
+		assertEquals(selectable.value, "no");
+
 	}
 
 	private void assertCorrectRecordInfoWithIdAndRecordType(DataGroup organisation, String id,
@@ -128,6 +133,19 @@ public class DefaultOrganisationConverterTest {
 
 	private DataAtomicSpy getFactoredDataAtomicByNumber(int noFactored) {
 		return dataAtomicFactorySpy.factoredDataAtomics.get(noFactored);
+	}
+
+	@Test
+	public void testMinimalValuesReturnsDataGroupWithCorrectRecordInfoWithSelectableTrue() {
+		rowFromDb.put("not_eligible", false);
+		DataGroup organisation = converter.fromMap(rowFromDb);
+		assertEquals(organisation.getNameInData(), "organisation");
+		assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "rootOrganisation");
+
+		DataAtomicSpy selectable = getFactoredDataAtomicByNumber(11);
+		assertEquals(selectable.nameInData, "selectable");
+		assertEquals(selectable.value, "yes");
+
 	}
 
 	@Test
@@ -168,17 +186,16 @@ public class DefaultOrganisationConverterTest {
 
 		assertCorrectValuesForNameWasFactored();
 
-		DataGroup nameGroup = organisation.getFirstGroupWithNameInData("name");
-		assertEquals(nameGroup.getFirstAtomicValueWithNameInData("organisationName"),
-				"Java-fakulteten");
+		DataGroup nameGroup = organisation.getFirstGroupWithNameInData("organisationName");
+		assertEquals(nameGroup.getFirstAtomicValueWithNameInData("name"), "Java-fakulteten");
 		assertEquals(nameGroup.getFirstAtomicValueWithNameInData("language"), "sv");
 	}
 
 	private void assertCorrectValuesForNameWasFactored() {
-		DataAtomicSpy factoredDataAtomicForName = getFactoredDataAtomicByNumber(12);
-		assertEquals(factoredDataAtomicForName.nameInData, "organisationName");
+		DataAtomicSpy factoredDataAtomicForName = getFactoredDataAtomicByNumber(13);
+		assertEquals(factoredDataAtomicForName.nameInData, "name");
 		assertEquals(factoredDataAtomicForName.value, "Java-fakulteten");
-		DataAtomicSpy factoredDataAtomicForLanguage = getFactoredDataAtomicByNumber(13);
+		DataAtomicSpy factoredDataAtomicForLanguage = getFactoredDataAtomicByNumber(14);
 		assertEquals(factoredDataAtomicForLanguage.nameInData, "language");
 		assertEquals(factoredDataAtomicForLanguage.value, "sv");
 	}
@@ -187,11 +204,10 @@ public class DefaultOrganisationConverterTest {
 	public void testAlternativeName() {
 		rowFromDb.put("alternative_name", "Java Faculty");
 		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertTrue(organisation.containsChildWithNameInData("alternativeName"));
-		DataGroup alternativeName = organisation.getFirstGroupWithNameInData("alternativeName");
+		DataGroup alternativeName = organisation
+				.getFirstGroupWithNameInData("organisationAlternativeName");
 		assertEquals(alternativeName.getFirstAtomicValueWithNameInData("language"), "en");
-		assertEquals(alternativeName.getFirstAtomicValueWithNameInData("organisationName"),
-				"Java Faculty");
+		assertEquals(alternativeName.getFirstAtomicValueWithNameInData("name"), "Java Faculty");
 	}
 
 	private void assertCorrectCreatedAndUpdatedInfo(DataGroup recordInfo) {

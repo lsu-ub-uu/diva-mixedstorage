@@ -107,12 +107,12 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private void createAndAddEligibility(Object notEligable) {
-		String coraEligible = isEligible(notEligable) ? "yes" : "no";
+		String selectable = isSelectable(notEligable) ? "yes" : "no";
 		organisation.addChild(
-				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("eligible", coraEligible));
+				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("selectable", selectable));
 	}
 
-	private boolean isEligible(Object notEligable) {
+	private boolean isSelectable(Object notEligable) {
 		return !(boolean) notEligable;
 	}
 

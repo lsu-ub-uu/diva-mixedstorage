@@ -59,9 +59,9 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	private Map<String, Object> createColumnsWithValuesForUpdateQuery() {
 		addOrganisationNameToColumns();
 		addAtomicValuesToColumns();
-		addEligible();
+		addSelectable();
 		addShowInPortal();
-		addShowInDefence();
+		addDoctoralDegreeGrantor();
 		addTopLevel();
 		values.put("last_updated", getCurrentTimestamp());
 		addOrgansiationType();
@@ -69,8 +69,8 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	}
 
 	private void addOrganisationNameToColumns() {
-		DataGroup nameGroup = dataGroup.getFirstGroupWithNameInData("name");
-		String name = nameGroup.getFirstAtomicValueWithNameInData("organisationName");
+		DataGroup nameGroup = dataGroup.getFirstGroupWithNameInData("organisationName");
+		String name = nameGroup.getFirstAtomicValueWithNameInData("name");
 		values.put("organisation_name", name);
 		String language = nameGroup.getFirstAtomicValueWithNameInData("language");
 		values.put("organisation_name_locale", language);
@@ -113,17 +113,17 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 		values.put(dbColumnName, valueAsDate);
 	}
 
-	private void addEligible() {
+	private void addSelectable() {
 		boolean notEligible = false;
-		if (eligibleIsNoOrMissing()) {
+		if (selectableIsNoOrMissing()) {
 			notEligible = true;
 		}
 		values.put("not_eligible", notEligible);
 	}
 
-	private boolean eligibleIsNoOrMissing() {
-		return !dataGroup.containsChildWithNameInData("eligible")
-				|| "no".equals(dataGroup.getFirstAtomicValueWithNameInData("eligible"));
+	private boolean selectableIsNoOrMissing() {
+		return !dataGroup.containsChildWithNameInData("selectable")
+				|| "no".equals(dataGroup.getFirstAtomicValueWithNameInData("selectable"));
 	}
 
 	private void addShowInPortal() {
@@ -135,8 +135,8 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 				&& "yes".equals(dataGroup.getFirstAtomicValueWithNameInData(nameInData));
 	}
 
-	private void addShowInDefence() {
-		translateStringToBooleanAndAddToValues("showInDefence", "show_in_defence");
+	private void addDoctoralDegreeGrantor() {
+		translateStringToBooleanAndAddToValues("doctoralDegreeGrantor", "show_in_defence");
 	}
 
 	private void translateStringToBooleanAndAddToValues(String nameInData, String columnName) {

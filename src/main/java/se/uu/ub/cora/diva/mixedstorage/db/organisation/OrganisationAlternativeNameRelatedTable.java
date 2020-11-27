@@ -37,7 +37,7 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 
 	private static final String ORGANISATION_NAME_ID = "organisation_name_id";
 	private static final String ORGANISATION_NAME = "organisation_name";
-	private static final String ALTERNATIVE_NAME = "alternativeName";
+	private static final String ALTERNATIVE_NAME = "organisationAlternativeName";
 	private RecordReader recordReader;
 	private Map<String, Object> alternativeNameRow;
 
@@ -73,7 +73,7 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 
 	private boolean alternativeNameContainsValueForName(DataGroup organisation) {
 		DataGroup alternativeNameGroup = organisation.getFirstGroupWithNameInData(ALTERNATIVE_NAME);
-		return alternativeNameGroup.containsChildWithNameInData("organisationName");
+		return alternativeNameGroup.containsChildWithNameInData("name");
 	}
 
 	private void throwErrorIfMoreThanOneAlternativeNameInDb(
@@ -110,8 +110,7 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 
 	private void handleUpdate(DataGroup organisation, String organisationId,
 			List<DbStatement> dbStatements) {
-		boolean nameInDataGroupDiffersFromNameInDb = nameInDbNotSameAsNameInDataGroup(
-				organisation);
+		boolean nameInDataGroupDiffersFromNameInDb = nameInDbNotSameAsNameInDataGroup(organisation);
 		if (nameInDataGroupDiffersFromNameInDb) {
 			int nameId = (int) alternativeNameRow.get(ORGANISATION_NAME_ID);
 			updateAlternativeName(dbStatements, organisation, organisationId, nameId);
@@ -126,7 +125,7 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 
 	private String getAlternativeNameFromOrganisation(DataGroup organisation) {
 		DataGroup alternativeNameGroup = organisation.getFirstGroupWithNameInData(ALTERNATIVE_NAME);
-		return alternativeNameGroup.getFirstAtomicValueWithNameInData("organisationName");
+		return alternativeNameGroup.getFirstAtomicValueWithNameInData("name");
 	}
 
 	private void updateAlternativeName(List<DbStatement> dbStatements, DataGroup organisation,
