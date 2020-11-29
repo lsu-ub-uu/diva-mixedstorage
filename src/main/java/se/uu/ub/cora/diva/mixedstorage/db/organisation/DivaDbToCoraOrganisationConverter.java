@@ -83,7 +83,6 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 
 	private void addCommonDataForSubAndTopOrganisation() {
 		createAndAddOrganisationType();
-		possiblyCreateAndAddEligibility();
 		possiblyCreateAndAddAddress();
 		possiblyCreateAndAddOrganisationCode();
 		possiblyCreateAndAddURL();
@@ -97,23 +96,6 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 		String typeCode = (String) dbRow.get("type_code");
 		organisation.addChild(DataAtomicProvider
 				.getDataAtomicUsingNameInDataAndValue("organisationType", typeCode));
-	}
-
-	private void possiblyCreateAndAddEligibility() {
-		Object notEligable = dbRow.get("not_eligible");
-		if (notEligable != null) {
-			createAndAddEligibility(notEligable);
-		}
-	}
-
-	private void createAndAddEligibility(Object notEligable) {
-		String selectable = isSelectable(notEligable) ? "yes" : "no";
-		organisation.addChild(
-				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("selectable", selectable));
-	}
-
-	private boolean isSelectable(Object notEligable) {
-		return !(boolean) notEligable;
 	}
 
 	private void possiblyCreateAndAddAddress() {

@@ -119,7 +119,6 @@ public class DivaDbToCoraOrganisationConverterTest {
 		assertFalse(organisation.containsChildWithNameInData("URL"));
 		assertFalse(organisation.containsChildWithNameInData("doctoralDegreeGrantor"));
 		assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
-		assertFalse(organisation.containsChildWithNameInData("eligible"));
 		assertFalse(organisation.containsChildWithNameInData("organisationType"));
 
 	}
@@ -152,7 +151,6 @@ public class DivaDbToCoraOrganisationConverterTest {
 				"yes");
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationNumber"),
 				"33445566");
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("selectable"), "yes");
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationType"),
 				"university");
 
@@ -198,7 +196,6 @@ public class DivaDbToCoraOrganisationConverterTest {
 		assertFalse(organisation.containsChildWithNameInData("URL"));
 		assertFalse(organisation.containsChildWithNameInData("doctoralDegreeGrantor"));
 		assertFalse(organisation.containsChildWithNameInData("organisationNumber"));
-		assertFalse(organisation.containsChildWithNameInData("eligible"));
 
 	}
 
@@ -244,16 +241,8 @@ public class DivaDbToCoraOrganisationConverterTest {
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationCode"),
 				"someCode");
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("URL"), "www.someaddress.com");
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("selectable"), "yes");
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("organisationType"), "unit");
 
-	}
-
-	@Test
-	public void testOrganisationNotEligible() {
-		rowFromDb.put("not_eligible", true);
-		DataGroup organisation = converter.fromMap(rowFromDb);
-		assertEquals(organisation.getFirstAtomicValueWithNameInData("selectable"), "no");
 	}
 
 }
