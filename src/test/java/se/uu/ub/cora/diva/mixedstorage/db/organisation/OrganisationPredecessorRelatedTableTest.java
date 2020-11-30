@@ -143,7 +143,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		DataGroup predecessorGroup = createPredecessorGroupWithRepeatId(repeatId);
 		DataGroupSpy predecessorLink = createPredecessorLink(predecessorId);
 		predecessorGroup.addChild(predecessorLink);
-		predecessorGroup.addChild(new DataAtomicSpy("organisationComment", "some description"));
+		predecessorGroup.addChild(new DataAtomicSpy("internalNote", "some description"));
 		organisation.addChild(predecessorGroup);
 	}
 

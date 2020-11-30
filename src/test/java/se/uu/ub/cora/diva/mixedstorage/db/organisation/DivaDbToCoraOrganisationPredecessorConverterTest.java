@@ -102,7 +102,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
 				.getFirstGroupWithNameInData("organisationLink");
 
-		assertFalse(predecessor.containsChildWithNameInData("organisationComment"));
+		assertFalse(predecessor.containsChildWithNameInData("internalNote"));
 
 		assertEquals(linkedOrganisation.recordType, "organisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
@@ -115,7 +115,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 		assertEquals(predecessor.getNameInData(), "earlierOrganisation");
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
 				.getFirstGroupWithNameInData("organisationLink");
-		assertFalse(predecessor.containsChildWithNameInData("organisationComment"));
+		assertFalse(predecessor.containsChildWithNameInData("internalNote"));
 
 		assertEquals(linkedOrganisation.recordType, "organisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
@@ -129,7 +129,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
 				.getFirstGroupWithNameInData("organisationLink");
-		assertFalse(predecessor.containsChildWithNameInData("organisationComment"));
+		assertFalse(predecessor.containsChildWithNameInData("internalNote"));
 
 		assertEquals(linkedOrganisation.recordType, "organisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
@@ -140,7 +140,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 		rowFromDb.put("description", "some description text");
 		DataGroup predecessor = converter.fromMap(rowFromDb);
 		assertEquals(predecessor.getNameInData(), "earlierOrganisation");
-		assertEquals(predecessor.getFirstAtomicValueWithNameInData("organisationComment"),
+		assertEquals(predecessor.getFirstAtomicValueWithNameInData("internalNote"),
 				"some description text");
 
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
