@@ -64,7 +64,7 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 		addDoctoralDegreeGrantor();
 		addTopLevel();
 		values.put("last_updated", getCurrentTimestamp());
-		addOrgansiationType();
+		addOrganisationType();
 		return values;
 	}
 
@@ -122,8 +122,9 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	}
 
 	private boolean selectableIsNoOrMissing() {
-		return !dataGroup.containsChildWithNameInData("selectable")
-				|| "no".equals(dataGroup.getFirstAtomicValueWithNameInData("selectable"));
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
+		return !recordInfo.containsChildWithNameInData("selectable")
+				|| "no".equals(recordInfo.getFirstAtomicValueWithNameInData("selectable"));
 	}
 
 	private void addShowInPortal() {
@@ -145,24 +146,34 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	}
 
 	private void addTopLevel() {
-		translateStringToBooleanAndAddToValues("topLevel", "top_level");
+		String linkedRecordId = extractRecordType();
+		boolean isTopLevel = "topOrganisation".equals(linkedRecordId) ? true : false;
+		values.put("top_level", isTopLevel);
+	}
+
+	private String extractRecordType() {
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
+		DataGroup type = recordInfo.getFirstGroupWithNameInData("type");
+		return type.getFirstAtomicValueWithNameInData("linkedRecordId");
 	}
 
 	private Timestamp getCurrentTimestamp() {
 		java.util.Date today = new java.util.Date();
 		long time = today.getTime();
 		return new Timestamp(time);
-
 	}
 
-	private void addOrgansiationType() {
-		Object typeId = getTypeCodeForOrganisationType();
+	private void addOrganisationType() {
+		Object typeId = isRootOrganisation() ? 49 : getTypeCodeForOrganisationType();
 		values.put("organisation_type_id", typeId);
+	}
+
+	private boolean isRootOrganisation() {
+		return "rootOrganisation".equals(extractRecordType());
 	}
 
 	private Object getTypeCodeForOrganisationType() {
 		Map<String, Object> conditionsForReadType = createConditionsForReadingType();
-
 		Map<String, Object> organisationTypeRow = recordReader
 				.readOneRowFromDbUsingTableAndConditions("organisation_type",
 						conditionsForReadType);
