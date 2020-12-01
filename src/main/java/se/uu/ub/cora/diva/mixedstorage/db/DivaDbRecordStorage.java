@@ -122,15 +122,17 @@ public class DivaDbRecordStorage implements RecordStorage {
 		String tableName = "organisationview";
 		if ("rootOrganisation".equals(type)) {
 			tableName = "rootorganisationview";
-		} else if ("commonOrganisation".equals(type)) {
-			tableName = "commonorganisationview";
+		} else if ("topOrganisation".equals(type)) {
+			tableName = "toporganisationview";
+		} else if ("subOrganisation".equals(type)) {
+			tableName = "suborganisationview";
 		}
 		return tableName;
 	}
 
 	private boolean isOrganisation(String type) {
 		return ORGANISATION.equals(type) || "rootOrganisation".equals(type)
-				|| "commonOrganisation".equals(type);
+				|| "subOrganisation".equals(type) || "topOrganisation".equals(type);
 	}
 
 	private StorageReadResult readOrganisationList(String type, String tableName) {

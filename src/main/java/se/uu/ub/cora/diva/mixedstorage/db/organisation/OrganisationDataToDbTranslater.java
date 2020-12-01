@@ -59,18 +59,18 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	private Map<String, Object> createColumnsWithValuesForUpdateQuery() {
 		addOrganisationNameToColumns();
 		addAtomicValuesToColumns();
-		addEligible();
+		addSelectable();
 		addShowInPortal();
-		addShowInDefence();
+		addDoctoralDegreeGrantor();
 		addTopLevel();
 		values.put("last_updated", getCurrentTimestamp());
-		addOrgansiationType();
+		addOrganisationType();
 		return values;
 	}
 
 	private void addOrganisationNameToColumns() {
-		DataGroup nameGroup = dataGroup.getFirstGroupWithNameInData("name");
-		String name = nameGroup.getFirstAtomicValueWithNameInData("organisationName");
+		DataGroup nameGroup = dataGroup.getFirstGroupWithNameInData("organisationName");
+		String name = nameGroup.getFirstAtomicValueWithNameInData("name");
 		values.put("organisation_name", name);
 		String language = nameGroup.getFirstAtomicValueWithNameInData("language");
 		values.put("organisation_name_locale", language);
@@ -113,21 +113,23 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 		values.put(dbColumnName, valueAsDate);
 	}
 
-	private void addEligible() {
+	private void addSelectable() {
 		boolean notEligible = false;
-		if (eligibleIsNoOrMissing()) {
+		if (selectableIsNoOrMissing()) {
 			notEligible = true;
 		}
 		values.put("not_eligible", notEligible);
 	}
 
-	private boolean eligibleIsNoOrMissing() {
-		return !dataGroup.containsChildWithNameInData("eligible")
-				|| "no".equals(dataGroup.getFirstAtomicValueWithNameInData("eligible"));
+	private boolean selectableIsNoOrMissing() {
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
+		return !recordInfo.containsChildWithNameInData("selectable")
+				|| "no".equals(recordInfo.getFirstAtomicValueWithNameInData("selectable"));
 	}
 
 	private void addShowInPortal() {
-		translateStringToBooleanAndAddToValues("showInPortal", "show_in_portal");
+		boolean showInPortal = isTopLevel();
+		values.put("show_in_portal", showInPortal);
 	}
 
 	private boolean booleanValueExistsAndIsTrue(String nameInData) {
@@ -135,8 +137,8 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 				&& "yes".equals(dataGroup.getFirstAtomicValueWithNameInData(nameInData));
 	}
 
-	private void addShowInDefence() {
-		translateStringToBooleanAndAddToValues("showInDefence", "show_in_defence");
+	private void addDoctoralDegreeGrantor() {
+		translateStringToBooleanAndAddToValues("doctoralDegreeGrantor", "show_in_defence");
 	}
 
 	private void translateStringToBooleanAndAddToValues(String nameInData, String columnName) {
@@ -145,24 +147,38 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	}
 
 	private void addTopLevel() {
-		translateStringToBooleanAndAddToValues("topLevel", "top_level");
+		boolean isTopLevel = isTopLevel();
+		values.put("top_level", isTopLevel);
+	}
+
+	private boolean isTopLevel() {
+		String linkedRecordId = extractRecordType();
+		return "topOrganisation".equals(linkedRecordId);
+	}
+
+	private String extractRecordType() {
+		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
+		DataGroup type = recordInfo.getFirstGroupWithNameInData("type");
+		return type.getFirstAtomicValueWithNameInData("linkedRecordId");
 	}
 
 	private Timestamp getCurrentTimestamp() {
 		java.util.Date today = new java.util.Date();
 		long time = today.getTime();
 		return new Timestamp(time);
-
 	}
 
-	private void addOrgansiationType() {
-		Object typeId = getTypeCodeForOrganisationType();
+	private void addOrganisationType() {
+		Object typeId = isRootOrganisation() ? 49 : getTypeCodeForOrganisationType();
 		values.put("organisation_type_id", typeId);
+	}
+
+	private boolean isRootOrganisation() {
+		return "rootOrganisation".equals(extractRecordType());
 	}
 
 	private Object getTypeCodeForOrganisationType() {
 		Map<String, Object> conditionsForReadType = createConditionsForReadingType();
-
 		Map<String, Object> organisationTypeRow = recordReader
 				.readOneRowFromDbUsingTableAndConditions("organisation_type",
 						conditionsForReadType);

@@ -81,7 +81,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 			+ "Organisation must have alternative name")
 	public void testIncompleteNameInDataGroupThrowsException() {
 		DataGroup organisation = createDataGroupWithId("678");
-		DataGroupSpy alternativeNameGroup = new DataGroupSpy("alternativeName");
+		DataGroupSpy alternativeNameGroup = new DataGroupSpy("organisationAlternativeName");
 		organisation.addChild(alternativeNameGroup);
 
 		alternativeName.handleDbForDataGroup(organisation, alternativeNameRows);
@@ -143,8 +143,8 @@ public class OrganisationAlternativeNameRelatedTableTest {
 	}
 
 	private void addAlternativeName(DataGroup organisation, String name) {
-		DataGroupSpy alternativeNameGroup = new DataGroupSpy("alternativeName");
-		alternativeNameGroup.addChild(new DataAtomicSpy("organisationName", name));
+		DataGroupSpy alternativeNameGroup = new DataGroupSpy("organisationAlternativeName");
+		alternativeNameGroup.addChild(new DataAtomicSpy("name", name));
 		alternativeNameGroup.addChild(new DataAtomicSpy("language", "en"));
 		organisation.addChild(alternativeNameGroup);
 	}
@@ -154,9 +154,9 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		alternativeName = new OrganisationAlternativeNameRelatedTable(recordReader);
 
 		DataGroup organisation = createDataGroupWithId("678");
-		DataGroupSpy alternativeNameGroup = new DataGroupSpy("alternativeName");
+		DataGroupSpy alternativeNameGroup = new DataGroupSpy("organisationAlternativeName");
 		String newAlternativeName = "some english name";
-		alternativeNameGroup.addChild(new DataAtomicSpy("organisationName", newAlternativeName));
+		alternativeNameGroup.addChild(new DataAtomicSpy("name", newAlternativeName));
 		alternativeNameGroup.addChild(new DataAtomicSpy("language", "en"));
 		organisation.addChild(alternativeNameGroup);
 

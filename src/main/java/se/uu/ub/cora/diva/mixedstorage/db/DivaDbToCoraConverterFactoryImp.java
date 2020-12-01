@@ -22,23 +22,20 @@ import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationParentConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationPredecessorConverter;
-import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbToCoraOrganisationSuccessorConverter;
 
 public class DivaDbToCoraConverterFactoryImp implements DivaDbToCoraConverterFactory {
 
 	@Override
 	public DivaDbToCoraConverter factor(String type) {
 		if (isOrganisation(type)) {
-			return new DivaDbToCoraOrganisationConverter();
+			DefaultConverterFactoryImp defaultConverterFactory = new DefaultConverterFactoryImp();
+			return new DivaDbToCoraOrganisationConverter(defaultConverterFactory);
 		}
 		if ("divaOrganisationParent".equals(type)) {
 			return new DivaDbToCoraOrganisationParentConverter();
 		}
 		if ("divaOrganisationPredecessor".equals(type)) {
 			return new DivaDbToCoraOrganisationPredecessorConverter();
-		}
-		if ("divaOrganisationSuccessor".equals(type)) {
-			return new DivaDbToCoraOrganisationSuccessorConverter();
 		}
 		if ("user".equals(type)) {
 			return new DivaDbToCoraUserConverter();
@@ -48,7 +45,7 @@ public class DivaDbToCoraConverterFactoryImp implements DivaDbToCoraConverterFac
 
 	private boolean isOrganisation(String type) {
 		return "organisation".equals(type) || "rootOrganisation".equals(type)
-				|| "commonOrganisation".equals(type);
+				|| "topOrganisation".equals(type) || "subOrganisation".equals(type);
 	}
 
 }

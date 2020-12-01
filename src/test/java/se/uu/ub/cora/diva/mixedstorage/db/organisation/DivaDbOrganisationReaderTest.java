@@ -85,10 +85,17 @@ public class DivaDbOrganisationReaderTest {
 	}
 
 	@Test
-	public void testReadCommonOrgansiationTableRequestedFromReader() throws Exception {
-		divaDbOrganisationReader.read("commonOrganisation", "567");
+	public void testReadTopOrgansiationTableRequestedFromReader() throws Exception {
+		divaDbOrganisationReader.read("topOrganisation", "567");
 		RecordReaderSpy recordReader = recordReaderFactory.factored;
-		assertEquals(recordReader.usedTableNames.get(0), "commonorganisationview");
+		assertEquals(recordReader.usedTableNames.get(0), "toporganisationview");
+	}
+
+	@Test
+	public void testReadSubOrgansiationTableRequestedFromReader() throws Exception {
+		divaDbOrganisationReader.read("subOrganisation", "567");
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
+		assertEquals(recordReader.usedTableNames.get(0), "suborganisationview");
 	}
 
 	@Test(expectedExceptions = DbException.class, expectedExceptionsMessageRegExp = ""

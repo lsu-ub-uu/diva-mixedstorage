@@ -183,10 +183,17 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void testReadcommonOrganisationListTableRequestedFromReader() throws Exception {
-		divaRecordStorage.readList("commonOrganisation", new DataGroupSpy("filter"));
+	public void testReadTopOrganisationListTableRequestedFromReader() throws Exception {
+		divaRecordStorage.readList("topOrganisation", new DataGroupSpy("filter"));
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "commonorganisationview");
+		assertEquals(recordReader.usedTableName, "toporganisationview");
+	}
+
+	@Test
+	public void testReadSubOrganisationListTableRequestedFromReader() throws Exception {
+		divaRecordStorage.readList("subOrganisation", new DataGroupSpy("filter"));
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.usedTableName, "suborganisationview");
 	}
 
 	@Test
@@ -407,8 +414,13 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForcommonOrganisationWhenExists() {
-		assertCorrectRecordExistsWhenExistsForOrganisationType("commonOrganisation");
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForTopOrganisationWhenExists() {
+		assertCorrectRecordExistsWhenExistsForOrganisationType("topOrganisation");
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForSubOrganisationWhenExists() {
+		assertCorrectRecordExistsWhenExistsForOrganisationType("subOrganisation");
 	}
 
 	@Test
@@ -432,8 +444,13 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForcommonOrganisationWhenNotExist() {
-		assertCorrectRecordExistsWhenNotExistsForOrganisationType("commonOrganisation");
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForTopOrganisationWhenNotExist() {
+		assertCorrectRecordExistsWhenNotExistsForOrganisationType("topOrganisation");
+	}
+
+	@Test
+	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForSubOrganisationWhenNotExist() {
+		assertCorrectRecordExistsWhenNotExistsForOrganisationType("subOrganisation");
 	}
 
 	@Test

@@ -37,7 +37,7 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	private static final String DESCRIPTION = "description";
 	private static final String INSERT = "insert";
 	private static final String DELETE = "delete";
-	private static final String ORGANISATION_COMMENT = "organisationComment";
+	private static final String INTERNAL_NOTE = "internalNote";
 	private static final String ORGANISATION_PREDECESSOR_DESCRIPTION = "organisation_predecessor_description";
 	private static final String PREDECESSOR_ID = "predecessor_id";
 	private static final String ORGANISATION_PREDECESSOR_ID = "organisation_predecessor_id";
@@ -74,7 +74,8 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	}
 
 	private void populateCollectionWithPredecessorsFromDataGroup(DataGroup organisation) {
-		List<DataGroup> predecessors = organisation.getAllGroupsWithNameInData("formerName");
+		List<DataGroup> predecessors = organisation
+				.getAllGroupsWithNameInData("earlierOrganisation");
 		predecessorsInDataGroup = new HashMap<>(predecessors.size());
 		for (DataGroup predecessor : predecessors) {
 			String predecessorId = extractPredecessorId(predecessor);
@@ -171,8 +172,8 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	private void possiblyAddPredecessorDescription(List<DbStatement> dbStatments,
 			String predecessorId) {
 		DataGroup dataGroup = predecessorsInDataGroup.get(predecessorId);
-		if (dataGroup.containsChildWithNameInData(ORGANISATION_COMMENT)) {
-			String comment = dataGroup.getFirstAtomicValueWithNameInData(ORGANISATION_COMMENT);
+		if (dataGroup.containsChildWithNameInData(INTERNAL_NOTE)) {
+			String comment = dataGroup.getFirstAtomicValueWithNameInData(INTERNAL_NOTE);
 			Map<String, Object> values = createValuesForDescriptionCreate(predecessorId, comment);
 			dbStatments.add(new DbStatement(INSERT, ORGANISATION_PREDECESSOR_DESCRIPTION, values,
 					Collections.emptyMap()));
@@ -229,7 +230,7 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 		Map<String, Object> conditions = createConditionsForPredecessorDescription(predecessorId);
 		Map<String, Object> readDescription = mapWithPredecessorAsKey
 				.get(Integer.valueOf(predecessorId));
-		if (dataGroup.containsChildWithNameInData(ORGANISATION_COMMENT)) {
+		if (dataGroup.containsChildWithNameInData(INTERNAL_NOTE)) {
 			handleDeleteAndCreatedForDescription(dbStatements, predecessorId, dataGroup, conditions,
 					readDescription);
 		} else {
@@ -241,7 +242,7 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 			DataGroup dataGroup, Map<String, Object> conditions,
 			Map<String, Object> readDescription) {
 		String descriptionInDataGroup = dataGroup
-				.getFirstAtomicValueWithNameInData(ORGANISATION_COMMENT);
+				.getFirstAtomicValueWithNameInData(INTERNAL_NOTE);
 		if (!predecessorHasDescription(readDescription)) {
 			createNewDescriptionInDb(dbStatements, id, descriptionInDataGroup);
 		} else {

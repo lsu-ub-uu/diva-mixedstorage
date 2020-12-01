@@ -51,7 +51,7 @@ public class DivaDbUpdaterFactoryImp implements DivaDbUpdaterFactory {
 
 	private boolean isOrganisation(String type) {
 		return "organisation".equals(type) || "rootOrganisation".equals(type)
-				|| "commonOrganisation".equals(type);
+				|| "topOrganisation".equals(type) || "subOrganisation".equals(type);
 	}
 
 	private DivaDbUpdater factorForOrganisation() {

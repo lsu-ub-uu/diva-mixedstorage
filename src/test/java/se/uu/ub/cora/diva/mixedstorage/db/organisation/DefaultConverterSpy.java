@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,27 +21,18 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
-import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
+import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 
-public class DivaDbToCoraOrganisationSuccessorConverter
-		extends DivaDbToCoraOrganisationAncestryConverter implements DivaDbToCoraConverter {
+public class DefaultConverterSpy implements DefaultConverter {
+
+	public Map<String, Object> rowFromDb;
+	public DataGroup returnedDataGroup;
 
 	@Override
 	public DataGroup fromMap(Map<String, Object> dbRow) {
-		this.dbRow = dbRow;
-		if (mandatoryValuesAreMissing()) {
-			throw ConversionException.withMessageAndException(
-					"Error converting organisation successor to Cora organisation successor: Map does not "
-							+ "contain mandatory values for organisation id and prdecessor id",
-					null);
-		}
-		return createDataGroup();
-	}
-
-	private DataGroup createDataGroup() {
-		String id = (String) dbRow.get(ORGANISATION_ID);
-		return createOrganisationLinkUsingLinkedRecordId(id);
+		rowFromDb = dbRow;
+		returnedDataGroup = new DataGroupSpy("organisation");
+		return returnedDataGroup;
 	}
 
 }

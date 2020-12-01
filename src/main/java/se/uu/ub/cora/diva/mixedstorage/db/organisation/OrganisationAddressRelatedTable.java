@@ -95,11 +95,17 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 	}
 
 	private boolean organisationDataGroupContainsAddress(DataGroup organisation) {
-		return organisation.containsChildWithNameInData(CITY)
-				|| organisation.containsChildWithNameInData(STREET)
-				|| organisation.containsChildWithNameInData("box")
-				|| organisation.containsChildWithNameInData("postcode")
-				|| organisation.containsChildWithNameInData("country");
+		return organisation.containsChildWithNameInData("address")
+				&& addressContainsData(organisation);
+	}
+
+	private boolean addressContainsData(DataGroup organisation) {
+		DataGroup address = organisation.getFirstGroupWithNameInData("address");
+		return address.containsChildWithNameInData(CITY)
+				|| address.containsChildWithNameInData(STREET)
+				|| address.containsChildWithNameInData("box")
+				|| address.containsChildWithNameInData("postcode")
+				|| address.containsChildWithNameInData("country");
 	}
 
 	private void deleteAddressAndUpdateOrganisation(List<DbStatement> dbStatements, int addressId) {
@@ -140,12 +146,13 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 
 	private Map<String, Object> createValuesForAddressInsertOrUpdate(DataGroup organisation) {
 		Map<String, Object> values = new HashMap<>();
+		DataGroup addressGroup = organisation.getFirstGroupWithNameInData("address");
 		values.put("last_updated", getCurrentTimestamp());
-		values.put(CITY, getAtomicValueOrNull(organisation, CITY));
-		values.put(STREET, getAtomicValueOrNull(organisation, STREET));
-		values.put("postbox", getAtomicValueOrNull(organisation, "box"));
-		values.put("postnumber", getAtomicValueOrNull(organisation, "postcode"));
-		values.put("country_code", getCountryCode(organisation));
+		values.put(CITY, getAtomicValueOrNull(addressGroup, CITY));
+		values.put(STREET, getAtomicValueOrNull(addressGroup, STREET));
+		values.put("postbox", getAtomicValueOrNull(addressGroup, "box"));
+		values.put("postnumber", getAtomicValueOrNull(addressGroup, "postcode"));
+		values.put("country_code", getCountryCode(addressGroup));
 		return values;
 	}
 

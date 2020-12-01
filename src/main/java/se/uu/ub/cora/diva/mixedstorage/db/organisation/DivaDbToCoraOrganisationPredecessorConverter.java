@@ -44,22 +44,23 @@ public class DivaDbToCoraOrganisationPredecessorConverter
 	}
 
 	private DataGroup createDataGroup() {
-		DataGroup formerName = DataGroupProvider.getDataGroupUsingNameInData("formerName");
-		addPredecessorLink(formerName);
-		possiblyAddDescription(formerName);
-		return formerName;
+		DataGroup earlierOrganisation = DataGroupProvider
+				.getDataGroupUsingNameInData("earlierOrganisation");
+		addPredecessorLink(earlierOrganisation);
+		possiblyAddDescription(earlierOrganisation);
+		return earlierOrganisation;
 	}
 
-	private void addPredecessorLink(DataGroup formerName) {
-		DataGroup predecessor = createOrganisationLinkUsingLinkedRecordId(
+	private void addPredecessorLink(DataGroup predecessorGroup) {
+		DataGroup predecessorLink = createOrganisationLinkUsingLinkedRecordId(
 				String.valueOf(dbRow.get(PREDECESSOR_ID)));
-		formerName.addChild(predecessor);
+		predecessorGroup.addChild(predecessorLink);
 	}
 
-	private void possiblyAddDescription(DataGroup formerName) {
+	private void possiblyAddDescription(DataGroup earlierOrganisation) {
 		if (predecessorHasDescription()) {
-			formerName.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(
-					"organisationComment", (String) dbRow.get(DESCRIPTION)));
+			earlierOrganisation.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(
+					"internalNote", (String) dbRow.get(DESCRIPTION)));
 		}
 	}
 
