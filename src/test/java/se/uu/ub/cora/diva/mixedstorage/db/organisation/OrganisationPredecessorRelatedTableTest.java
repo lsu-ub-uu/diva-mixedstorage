@@ -42,7 +42,7 @@ public class OrganisationPredecessorRelatedTableTest {
 
 	private RecordReaderRelatedTableSpy recordReader;
 	private RelatedTable predecessor;
-	private List<Map<String, Object>> predecssorRows;
+	private List<Map<String, Object>> predecessorRows;
 
 	@BeforeMethod
 	public void setUp() {
@@ -52,12 +52,12 @@ public class OrganisationPredecessorRelatedTableTest {
 	}
 
 	private void initPredecessorRows() {
-		predecssorRows = new ArrayList<>();
+		predecessorRows = new ArrayList<>();
 
 		Map<String, Object> predeccessorRow = new HashMap<>();
 		predeccessorRow.put("organisation_id", 678);
 		predeccessorRow.put("organisation_predecessor_id", 234);
-		predecssorRows.add(predeccessorRow);
+		predecessorRows.add(predeccessorRow);
 	}
 
 	private DataGroup createDataGroupWithId(String id) {
@@ -81,7 +81,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
-				predecssorRows);
+				predecessorRows);
 		assertEquals(dbStatements.size(), 2);
 		assertCorrectDeleteForPredecessorDescription(dbStatements.get(0), 678, 234);
 		assertCorrectDeleteForPredecessor(dbStatements.get(1), 678, 234);
@@ -114,7 +114,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		addPredecessor(organisation, "234", "0");
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
-				predecssorRows);
+				predecessorRows);
 		assertTrue(dbStatements.isEmpty());
 	}
 
@@ -153,7 +153,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		addPredecessor(organisation, "22234", "0");
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
-				predecssorRows);
+				predecessorRows);
 		assertEquals(dbStatements.size(), 3);
 
 		assertCorrectPredecessorInsert(dbStatements.get(0), 678, 22234);
@@ -306,12 +306,12 @@ public class OrganisationPredecessorRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addPredecessorWithDescription(organisation, "234", "0");
 
-		Map<String, Object> predecessorRow = predecssorRows.get(0);
+		Map<String, Object> predecessorRow = predecessorRows.get(0);
 		predecessorRow.put("predecessordescriptionid", 7777);
 		predecessorRow.put("description", "some description");
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
-				predecssorRows);
+				predecessorRows);
 		assertTrue(dbStatements.isEmpty());
 	}
 
@@ -320,12 +320,12 @@ public class OrganisationPredecessorRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addPredecessorWithDescription(organisation, "234", "0");
 
-		Map<String, Object> predecessorRow = predecssorRows.get(0);
+		Map<String, Object> predecessorRow = predecessorRows.get(0);
 		predecessorRow.put("predecessordescriptionid", 7778);
 		predecessorRow.put("description", "some OTHER description");
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
-				predecssorRows);
+				predecessorRows);
 		assertEquals(dbStatements.size(), 2);
 		assertCorrectDeleteForPredecessorDescription(dbStatements.get(0), 678, 234);
 		assertCorrectPredecessorDescriptionInsert(dbStatements.get(1), 678, 234,
@@ -338,12 +338,12 @@ public class OrganisationPredecessorRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addPredecessor(organisation, "234", "0");
 
-		Map<String, Object> predecessorRow = predecssorRows.get(0);
+		Map<String, Object> predecessorRow = predecessorRows.get(0);
 		predecessorRow.put("predecessordescriptionid", 7778);
 		predecessorRow.put("description", "some OTHER description");
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
-				predecssorRows);
+				predecessorRows);
 		assertEquals(dbStatements.size(), 1);
 		assertCorrectDeleteForPredecessorDescription(dbStatements.get(0), 678, 234);
 	}
@@ -354,7 +354,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		addPredecessorWithDescription(organisation, "234", "0");
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
-				predecssorRows);
+				predecessorRows);
 		assertEquals(dbStatements.size(), 1);
 		assertCorrectPredecessorDescriptionInsert(dbStatements.get(0), 678, 234,
 				"some description");
@@ -366,12 +366,12 @@ public class OrganisationPredecessorRelatedTableTest {
 		addPredecessorWithDescription(organisation, "22234", "0");
 		addPredecessorWithDescription(organisation, "234", "1");
 
-		Map<String, Object> predecessorRow = predecssorRows.get(0);
+		Map<String, Object> predecessorRow = predecessorRows.get(0);
 		predecessorRow.put("predecessordescriptionid", 7778);
 		predecessorRow.put("description", "some description");
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
-				predecssorRows);
+				predecessorRows);
 		assertEquals(dbStatements.size(), 2);
 		assertCorrectPredecessorInsert(dbStatements.get(0), 678, 22234);
 		assertCorrectPredecessorDescriptionInsert(dbStatements.get(1), 678, 22234,

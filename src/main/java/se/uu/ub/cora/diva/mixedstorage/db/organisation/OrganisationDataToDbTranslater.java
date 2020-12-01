@@ -128,7 +128,8 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	}
 
 	private void addShowInPortal() {
-		translateStringToBooleanAndAddToValues("showInPortal", "show_in_portal");
+		boolean showInPortal = isTopLevel();
+		values.put("show_in_portal", showInPortal);
 	}
 
 	private boolean booleanValueExistsAndIsTrue(String nameInData) {
@@ -146,9 +147,13 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	}
 
 	private void addTopLevel() {
-		String linkedRecordId = extractRecordType();
-		boolean isTopLevel = "topOrganisation".equals(linkedRecordId) ? true : false;
+		boolean isTopLevel = isTopLevel();
 		values.put("top_level", isTopLevel);
+	}
+
+	private boolean isTopLevel() {
+		String linkedRecordId = extractRecordType();
+		return "topOrganisation".equals(linkedRecordId);
 	}
 
 	private String extractRecordType() {

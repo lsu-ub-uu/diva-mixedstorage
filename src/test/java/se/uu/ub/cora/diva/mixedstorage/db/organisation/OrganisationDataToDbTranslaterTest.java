@@ -199,8 +199,8 @@ public class OrganisationDataToDbTranslaterTest {
 	}
 
 	@Test
-	public void testOrganisationShowInPortalTrue() {
-		DataGroup dataGroup = createDataGroupAddChildWithNameInDataAndValue("showInPortal", "yes");
+	public void testOrganisationShowInPortalTrueWhenTopOrganisation() {
+		DataGroup dataGroup = createDataGroupWithIdTypeAndOrgType("45", "topOrganisation", "unit");
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getConditions().get("organisation_id"), 45);
@@ -216,8 +216,18 @@ public class OrganisationDataToDbTranslaterTest {
 	}
 
 	@Test
-	public void testOrganisationShowInPortalFalse() {
-		DataGroup dataGroup = createDataGroupAddChildWithNameInDataAndValue("showInPortal", "no");
+	public void testOrganisationShowInPortalFalseWhenSubOrganisation() {
+		DataGroup dataGroup = createDataGroupWithIdTypeAndOrgType("45", "subOrganisation", "unit");
+
+		translater.translate(dataGroup);
+		assertEquals(translater.getConditions().get("organisation_id"), 45);
+		assertEquals(translater.getValues().get("organisation_name"), "someChangedName");
+		assertEquals(translater.getValues().get("show_in_portal"), false);
+	}
+
+	@Test
+	public void testOrganisationShowInPortalFalseWhenRootOrganisation() {
+		DataGroup dataGroup = createDataGroupWithIdTypeAndOrgType("45", "rootOrganisation", "unit");
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getConditions().get("organisation_id"), 45);
