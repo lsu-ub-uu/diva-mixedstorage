@@ -72,8 +72,9 @@ public class RecordReaderSpy implements RecordReader {
 		usedTableNames.add(usedTableName);
 		usedConditions = conditions;
 		usedConditionsList.add(usedConditions);
-		if (conditions.containsKey("organisation_id")
-				&& conditions.get("organisation_id").equals(600)) {
+		if ((conditions.containsKey("organisation_id")
+				&& conditions.get("organisation_id").equals(600))
+				|| (conditions.containsKey("id") && conditions.get("id").equals(600))) {
 			throw SqlStorageException.withMessage("Error from spy");
 		}
 		Map<String, Object> map = new HashMap<>();

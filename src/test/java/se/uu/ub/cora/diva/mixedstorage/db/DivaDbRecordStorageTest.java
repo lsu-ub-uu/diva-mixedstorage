@@ -395,62 +395,71 @@ public class DivaDbRecordStorageTest {
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForOrganisationWhenExists() {
-		assertCorrectRecordExistsWhenExistsForOrganisationType("organisation");
+		assertCorrectRecordExistsWhenExistsForOrganisationType("organisation", "organisationview");
 	}
 
-	private void assertCorrectRecordExistsWhenExistsForOrganisationType(String type) {
+	private void assertCorrectRecordExistsWhenExistsForOrganisationType(String type,
+			String tableName) {
 		boolean organisationExists = divaRecordStorage
 				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, "26");
 		RecordReaderSpy readerSpy = recordReaderFactorySpy.factored;
-		assertEquals(readerSpy.usedTableName, "organisation");
+		assertEquals(readerSpy.usedTableName, tableName);
 		Map<String, Object> usedConditions = readerSpy.usedConditions;
-		assertEquals(usedConditions.get("organisation_id"), 26);
+		assertEquals(usedConditions.get("id"), 26);
 		assertTrue(organisationExists);
 	}
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForRootOrganisationWhenExists() {
-		assertCorrectRecordExistsWhenExistsForOrganisationType("rootOrganisation");
+		assertCorrectRecordExistsWhenExistsForOrganisationType("rootOrganisation",
+				"rootorganisationview");
 	}
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForTopOrganisationWhenExists() {
-		assertCorrectRecordExistsWhenExistsForOrganisationType("topOrganisation");
+		assertCorrectRecordExistsWhenExistsForOrganisationType("topOrganisation",
+				"toporganisationview");
 	}
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForSubOrganisationWhenExists() {
-		assertCorrectRecordExistsWhenExistsForOrganisationType("subOrganisation");
+		assertCorrectRecordExistsWhenExistsForOrganisationType("subOrganisation",
+				"suborganisationview");
 	}
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForOrganisationWhenNotExist() {
-		assertCorrectRecordExistsWhenNotExistsForOrganisationType("organisation");
+		assertCorrectRecordExistsWhenNotExistsForOrganisationType("organisation",
+				"organisationview");
 	}
 
-	private void assertCorrectRecordExistsWhenNotExistsForOrganisationType(String type) {
+	private void assertCorrectRecordExistsWhenNotExistsForOrganisationType(String type,
+			String tableName) {
 		boolean organisationExists = divaRecordStorage
 				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, "600");
 		RecordReaderSpy readerSpy = recordReaderFactorySpy.factored;
-		assertEquals(readerSpy.usedTableName, "organisation");
+		assertEquals(readerSpy.usedTableName, tableName);
 		Map<String, Object> usedConditions = readerSpy.usedConditions;
-		assertEquals(usedConditions.get("organisation_id"), 600);
+		assertEquals(usedConditions.get("id"), 600);
 		assertFalse(organisationExists);
 	}
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForRootOrganisationWhenNotExist() {
-		assertCorrectRecordExistsWhenNotExistsForOrganisationType("rootOrganisation");
+		assertCorrectRecordExistsWhenNotExistsForOrganisationType("rootOrganisation",
+				"rootorganisationview");
 	}
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForTopOrganisationWhenNotExist() {
-		assertCorrectRecordExistsWhenNotExistsForOrganisationType("topOrganisation");
+		assertCorrectRecordExistsWhenNotExistsForOrganisationType("topOrganisation",
+				"toporganisationview");
 	}
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForSubOrganisationWhenNotExist() {
-		assertCorrectRecordExistsWhenNotExistsForOrganisationType("subOrganisation");
+		assertCorrectRecordExistsWhenNotExistsForOrganisationType("subOrganisation",
+				"suborganisationview");
 	}
 
 	@Test

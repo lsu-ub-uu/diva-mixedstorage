@@ -92,7 +92,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	private Map<String, Object> createConditionsAddingOrganisationId(String id) {
 		throwDbExceptionIfIdNotAnIntegerValue(id);
 		Map<String, Object> conditions = new HashMap<>(1);
-		conditions.put("organisation_id", Integer.valueOf(id));
+		conditions.put("id", Integer.valueOf(id));
 		return conditions;
 	}
 
@@ -236,26 +236,27 @@ public class DivaDbRecordStorage implements RecordStorage {
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
 		if (isOrganisation(type)) {
-			return organisationExistsInDb(id);
+			return organisationExistsInDb(id, type);
 		}
 		throw NotImplementedException.withMessage(
 				"recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented");
 	}
 
-	private boolean organisationExistsInDb(String id) {
+	private boolean organisationExistsInDb(String id, String type) {
 		try {
-			tryToReadOrganisationFromDb(id);
+			String tableName = getTableName(type);
+			tryToReadOrganisationFromDb(id, tableName);
 			return true;
 		} catch (RecordNotFoundException e) {
 			return false;
 		}
 	}
 
-	private Map<String, Object> tryToReadOrganisationFromDb(String id) {
+	private Map<String, Object> tryToReadOrganisationFromDb(String id, String tableName) {
 		try {
 			RecordReader recordReader = recordReaderFactory.factor();
 			Map<String, Object> conditions = createConditionsAddingOrganisationId(id);
-			return recordReader.readOneRowFromDbUsingTableAndConditions(ORGANISATION, conditions);
+			return recordReader.readOneRowFromDbUsingTableAndConditions(tableName, conditions);
 		} catch (SqlStorageException | DbException e) {
 			throw new RecordNotFoundException("Organisation not found: " + id);
 		}
