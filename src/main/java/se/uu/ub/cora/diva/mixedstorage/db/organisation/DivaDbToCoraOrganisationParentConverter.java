@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -57,7 +57,9 @@ public class DivaDbToCoraOrganisationParentConverter
 
 	private void addParentLink(DataGroup parentGroup) {
 		String parentId = String.valueOf(dbRow.get("organisation_parent_id"));
-		DataGroup organisationLink = createOrganisationLinkUsingLinkedRecordId(parentId);
+		String coraOrganisationType = (String) dbRow.get("coraorganisationtype");
+		DataGroup organisationLink = createOrganisationLinkUsingLinkedRecordIdAndRecordType(
+				parentId, coraOrganisationType);
 		parentGroup.addChild(organisationLink);
 	}
 }

@@ -66,7 +66,7 @@ public class MultipleRowDbToDataParentReaderTest {
 		parentReader.read(TABLE_NAME, "567");
 		OrganisationMultipleRowsRecordReaderSpy recordReader = recordReaderFactory.factored;
 		Map<String, Object> conditions = recordReader.usedConditions;
-		assertEquals(conditions.get("organisation_id"), "567");
+		assertEquals(conditions.get("organisation_id"), 567);
 	}
 
 	@Test

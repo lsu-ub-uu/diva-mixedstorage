@@ -36,7 +36,7 @@ public class MultipleRowDbToDataParentReader extends DivaMultipleRowDbToDataRead
 	@Override
 	protected Map<String, Object> getConditions(String id) {
 		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("organisation_id", id);
+		conditions.put("organisation_id", Integer.valueOf(id));
 		return conditions;
 	}
 

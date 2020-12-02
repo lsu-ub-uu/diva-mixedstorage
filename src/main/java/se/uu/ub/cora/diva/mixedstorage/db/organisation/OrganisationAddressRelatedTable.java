@@ -35,6 +35,7 @@ import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public class OrganisationAddressRelatedTable implements RelatedTable {
 
+	private static final String ADDRESS = "address";
 	private static final String CITY = "city";
 	private static final String STREET = "street";
 	private static final String ORGANISATION_ADDRESS = "organisation_address";
@@ -95,12 +96,12 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 	}
 
 	private boolean organisationDataGroupContainsAddress(DataGroup organisation) {
-		return organisation.containsChildWithNameInData("address")
+		return organisation.containsChildWithNameInData(ADDRESS)
 				&& addressContainsData(organisation);
 	}
 
 	private boolean addressContainsData(DataGroup organisation) {
-		DataGroup address = organisation.getFirstGroupWithNameInData("address");
+		DataGroup address = organisation.getFirstGroupWithNameInData(ADDRESS);
 		return address.containsChildWithNameInData(CITY)
 				|| address.containsChildWithNameInData(STREET)
 				|| address.containsChildWithNameInData("box")
@@ -146,7 +147,7 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 
 	private Map<String, Object> createValuesForAddressInsertOrUpdate(DataGroup organisation) {
 		Map<String, Object> values = new HashMap<>();
-		DataGroup addressGroup = organisation.getFirstGroupWithNameInData("address");
+		DataGroup addressGroup = organisation.getFirstGroupWithNameInData(ADDRESS);
 		values.put("last_updated", getCurrentTimestamp());
 		values.put(CITY, getAtomicValueOrNull(addressGroup, CITY));
 		values.put(STREET, getAtomicValueOrNull(addressGroup, STREET));

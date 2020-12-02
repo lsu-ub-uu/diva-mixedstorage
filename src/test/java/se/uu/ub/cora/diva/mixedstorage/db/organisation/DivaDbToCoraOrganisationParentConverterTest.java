@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -56,6 +56,7 @@ public class DivaDbToCoraOrganisationParentConverterTest {
 		rowFromDb = new HashMap<>();
 		rowFromDb.put("organisation_id", "someOrgId");
 		rowFromDb.put("organisation_parent_id", 52);
+		rowFromDb.put("coraorganisationtype", "subOrganisation");
 		converter = new DivaDbToCoraOrganisationParentConverter();
 
 	}
@@ -103,7 +104,19 @@ public class DivaDbToCoraOrganisationParentConverterTest {
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) parent
 				.getFirstGroupWithNameInData("organisationLink");
 
-		assertEquals(linkedOrganisation.recordType, "organisation");
+		assertEquals(linkedOrganisation.recordType, "subOrganisation");
+		assertEquals(linkedOrganisation.recordId, "52");
+	}
+
+	@Test
+	public void testCoraOrganisationTypeTopOrganisation() {
+		rowFromDb.put("coraorganisationtype", "topOrganisation");
+		DataGroup parent = converter.fromMap(rowFromDb);
+		assertEquals(parent.getNameInData(), "parentOrganisation");
+		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) parent
+				.getFirstGroupWithNameInData("organisationLink");
+
+		assertEquals(linkedOrganisation.recordType, "topOrganisation");
 		assertEquals(linkedOrganisation.recordId, "52");
 	}
 

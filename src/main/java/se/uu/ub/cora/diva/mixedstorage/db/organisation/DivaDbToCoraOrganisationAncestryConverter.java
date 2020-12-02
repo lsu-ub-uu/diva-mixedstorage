@@ -46,7 +46,13 @@ public class DivaDbToCoraOrganisationAncestryConverter {
 	}
 
 	protected DataRecordLink createOrganisationLinkUsingLinkedRecordId(String organisationId) {
+		return createOrganisationLinkUsingLinkedRecordIdAndRecordType(organisationId,
+				"organisation");
+	}
+
+	protected DataRecordLink createOrganisationLinkUsingLinkedRecordIdAndRecordType(
+			String organisationId, String recordType) {
 		return DataRecordLinkProvider.getDataRecordLinkAsLinkUsingNameInDataTypeAndId(
-				"organisationLink", "organisation", organisationId);
+				"organisationLink", recordType, organisationId);
 	}
 }
