@@ -56,8 +56,9 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 		dataRecordLinkFactory = new DataRecordLinkFactorySpy();
 		DataRecordLinkProvider.setDataRecordLinkFactory(dataRecordLinkFactory);
 		rowFromDb = new HashMap<>();
-		rowFromDb.put("organisation_id", "someOrgId");
+		rowFromDb.put("organisation_id", 1234);
 		rowFromDb.put("organisation_predecessor_id", 7788);
+		rowFromDb.put("coraorganisationtype", "subOrganisation");
 		converter = new DivaDbToCoraOrganisationPredecessorConverter();
 
 	}
@@ -82,7 +83,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 			+ "Error converting organisation predecessor to Cora organisation predecessor: Map does not contain mandatory values for organisation id and predecessor id")
 	public void testMapWithMissingPredecessorIdThrowsError() {
 		rowFromDb = new HashMap<>();
-		rowFromDb.put("organisation_id", "someOrgId");
+		rowFromDb.put("organisation_id", 2134);
 		converter.fromMap(rowFromDb);
 	}
 
@@ -90,7 +91,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 			+ "Error converting organisation predecessor to Cora organisation predecessor: Map does not contain mandatory values for organisation id and predecessor id")
 	public void testMapWithEmptyValueForPredecessorIdThrowsError() {
 		rowFromDb = new HashMap<>();
-		rowFromDb.put("organisation_id", "someOrgId");
+		rowFromDb.put("organisation_id", 1234);
 		rowFromDb.put("predecessorid", "");
 		converter.fromMap(rowFromDb);
 	}
@@ -104,7 +105,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 
 		assertFalse(predecessor.containsChildWithNameInData("internalNote"));
 
-		assertEquals(linkedOrganisation.recordType, "organisation");
+		assertEquals(linkedOrganisation.recordType, "subOrganisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
 	}
 
@@ -117,7 +118,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 				.getFirstGroupWithNameInData("organisationLink");
 		assertFalse(predecessor.containsChildWithNameInData("internalNote"));
 
-		assertEquals(linkedOrganisation.recordType, "organisation");
+		assertEquals(linkedOrganisation.recordType, "subOrganisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
 	}
 
@@ -131,7 +132,7 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 				.getFirstGroupWithNameInData("organisationLink");
 		assertFalse(predecessor.containsChildWithNameInData("internalNote"));
 
-		assertEquals(linkedOrganisation.recordType, "organisation");
+		assertEquals(linkedOrganisation.recordType, "subOrganisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
 	}
 
@@ -145,9 +146,23 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
 				.getFirstGroupWithNameInData("organisationLink");
-		assertEquals(linkedOrganisation.recordType, "organisation");
+		assertEquals(linkedOrganisation.recordType, "subOrganisation");
 		assertEquals(linkedOrganisation.recordId, "7788");
 
+	}
+
+	@Test
+	public void testCoraOrganisationTypeTopOrganisation() {
+		rowFromDb.put("description", null);
+		rowFromDb.put("coraorganisationtype", "topOrganisation");
+
+		DataGroup predecessor = converter.fromMap(rowFromDb);
+
+		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
+				.getFirstGroupWithNameInData("organisationLink");
+
+		assertEquals(linkedOrganisation.recordType, "topOrganisation");
+		assertEquals(linkedOrganisation.recordId, "7788");
 	}
 
 }

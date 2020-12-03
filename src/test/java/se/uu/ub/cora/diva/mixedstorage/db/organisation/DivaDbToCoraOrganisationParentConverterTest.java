@@ -54,7 +54,7 @@ public class DivaDbToCoraOrganisationParentConverterTest {
 		dataRecordLinkFactory = new DataRecordLinkFactorySpy();
 		DataRecordLinkProvider.setDataRecordLinkFactory(dataRecordLinkFactory);
 		rowFromDb = new HashMap<>();
-		rowFromDb.put("organisation_id", "someOrgId");
+		rowFromDb.put("organisation_id", 1567);
 		rowFromDb.put("organisation_parent_id", 52);
 		rowFromDb.put("coraorganisationtype", "subOrganisation");
 		converter = new DivaDbToCoraOrganisationParentConverter();
