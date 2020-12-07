@@ -33,6 +33,8 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.DataRecordLink;
+import se.uu.ub.cora.data.DataRecordLinkProvider;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupFactorySpy;
@@ -45,6 +47,7 @@ public class DefaultOrganisationConverterTest {
 	private Map<String, Object> rowFromDb;
 	private DataGroupFactorySpy dataGroupFactorySpy;
 	private DataAtomicFactorySpy dataAtomicFactorySpy;
+	private DataRecordLinkFactorySpy dataRecordLinkFactorySpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -52,6 +55,8 @@ public class DefaultOrganisationConverterTest {
 		DataGroupProvider.setDataGroupFactory(dataGroupFactorySpy);
 		dataAtomicFactorySpy = new DataAtomicFactorySpy();
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactorySpy);
+		dataRecordLinkFactorySpy = new DataRecordLinkFactorySpy();
+		DataRecordLinkProvider.setDataRecordLinkFactory(dataRecordLinkFactorySpy);
 		rowFromDb = new HashMap<>();
 		rowFromDb.put("id", 57);
 		rowFromDb.put("type_code", "root");
@@ -120,11 +125,12 @@ public class DefaultOrganisationConverterTest {
 		DataGroup recordInfo = organisation.getFirstGroupWithNameInData("recordInfo");
 		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"), id);
 
-		DataGroup type = recordInfo.getFirstGroupWithNameInData("type");
+		DataRecordLink type = (DataRecordLink) recordInfo.getFirstGroupWithNameInData("type");
 		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordType"), "recordType");
 		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordId"), recordType);
 
-		DataGroup dataDivider = recordInfo.getFirstGroupWithNameInData("dataDivider");
+		DataRecordLink dataDivider = (DataRecordLink) recordInfo
+				.getFirstGroupWithNameInData("dataDivider");
 		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordType"), "system");
 		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordId"), "diva");
 
@@ -213,7 +219,8 @@ public class DefaultOrganisationConverterTest {
 	private void assertCorrectCreatedAndUpdatedInfo(DataGroup recordInfo) {
 		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsCreated"),
 				"2017-01-01T00:00:00.000000Z");
-		DataGroup createdBy = recordInfo.getFirstGroupWithNameInData("createdBy");
+		DataRecordLink createdBy = (DataRecordLink) recordInfo
+				.getFirstGroupWithNameInData("createdBy");
 		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "coraUser");
 		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordId"),
 				"coraUser:4412982402853626");
@@ -224,7 +231,8 @@ public class DefaultOrganisationConverterTest {
 				"2017-01-01T00:00:00.000000Z");
 		assertEquals(updated.getRepeatId(), "0");
 
-		DataGroup updatedBy = updated.getFirstGroupWithNameInData("updatedBy");
+		DataRecordLink updatedBy = (DataRecordLink) updated
+				.getFirstGroupWithNameInData("updatedBy");
 		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "coraUser");
 		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"),
 				"coraUser:4412982402853626");

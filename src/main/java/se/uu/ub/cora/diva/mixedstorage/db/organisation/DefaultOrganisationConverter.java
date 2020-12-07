@@ -27,6 +27,7 @@ import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.DataRecordLinkProvider;
 import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
 
 public class DefaultOrganisationConverter implements DefaultConverter {
@@ -110,7 +111,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 
 	private DataGroup createLinkUsingNameInDataRecordTypeAndRecordId(String nameInData,
 			String linkedRecordType, String linkedRecordId) {
-		DataGroup linkGroup = DataGroupProvider.getDataGroupUsingNameInData(nameInData);
+		DataGroup linkGroup = DataRecordLinkProvider.getDataRecordLinkUsingNameInData(nameInData);
 		linkGroup.addChild(DataAtomicProvider
 				.getDataAtomicUsingNameInDataAndValue("linkedRecordType", linkedRecordType));
 		linkGroup.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("linkedRecordId",
