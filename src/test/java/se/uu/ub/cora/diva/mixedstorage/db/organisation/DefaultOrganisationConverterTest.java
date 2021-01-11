@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019, 2020 Uppsala University Library
+ * Copyright 2018, 2019, 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -22,6 +22,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.sql.Date;
 import java.util.HashMap;
@@ -61,6 +62,7 @@ public class DefaultOrganisationConverterTest {
 		rowFromDb.put("id", 57);
 		rowFromDb.put("type_code", "root");
 		rowFromDb.put("not_eligible", true);
+		rowFromDb.put("domain", "someDomain");
 		converter = new DefaultOrganisationConverter();
 	}
 
@@ -114,7 +116,7 @@ public class DefaultOrganisationConverterTest {
 		assertEquals(factoredDataAtomicForId.nameInData, "id");
 		assertEquals(factoredDataAtomicForId.value, "57");
 
-		DataAtomicSpy selectable = getFactoredDataAtomicByNumber(11);
+		DataAtomicSpy selectable = getFactoredDataAtomicByNumber(12);
 		assertEquals(selectable.nameInData, "selectable");
 		assertEquals(selectable.value, "no");
 
@@ -134,6 +136,9 @@ public class DefaultOrganisationConverterTest {
 		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordType"), "system");
 		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordId"), "diva");
 
+		assertTrue(recordInfo.containsChildWithNameInData("selectable"));
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("domain"), "someDomain");
+
 		assertCorrectCreatedAndUpdatedInfo(recordInfo);
 	}
 
@@ -148,7 +153,7 @@ public class DefaultOrganisationConverterTest {
 		assertEquals(organisation.getNameInData(), "organisation");
 		assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "rootOrganisation");
 
-		DataAtomicSpy selectable = getFactoredDataAtomicByNumber(11);
+		DataAtomicSpy selectable = getFactoredDataAtomicByNumber(12);
 		assertEquals(selectable.nameInData, "selectable");
 		assertEquals(selectable.value, "yes");
 

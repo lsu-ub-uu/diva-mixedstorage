@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -79,7 +79,6 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 
 	private DataGroup createDataGroup() {
 		createAndAddOrganisationWithRecordInfo();
-		createAndAddDomain();
 		createAndAddName();
 		createAndAddAlternativeName();
 		possiblyCreateAndAddClosedDate();
@@ -99,6 +98,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 		createAndAddType(recordInfo, recordType);
 		createAndAddDataDivider(recordInfo);
 		createAndAddCreatedAndUpdatedInfo(recordInfo);
+		createAndAddDomain(recordInfo);
 		createAndAddSelectable(recordInfo);
 		return recordInfo;
 	}
@@ -169,9 +169,9 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 		return !(boolean) notEligable;
 	}
 
-	private void createAndAddDomain() {
+	private void createAndAddDomain(DataGroup recordInfo) {
 		String domain = (String) dbRow.get("domain");
-		organisation.addChild(
+		recordInfo.addChild(
 				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("domain", domain));
 	}
 
