@@ -37,6 +37,7 @@ public class DataGroupSpy implements DataGroup {
 	public Set<DataAttribute> addedAttributes = new HashSet<>();
 	public String recordType;
 	public String recordId;
+	public boolean setRepeatIdWasCalled = false;
 
 	public DataGroupSpy(String nameInData) {
 		this.nameInData = nameInData;
@@ -105,6 +106,7 @@ public class DataGroupSpy implements DataGroup {
 
 	@Override
 	public void setRepeatId(String repeatId) {
+		setRepeatIdWasCalled = true;
 		this.repeatId = repeatId;
 
 	}

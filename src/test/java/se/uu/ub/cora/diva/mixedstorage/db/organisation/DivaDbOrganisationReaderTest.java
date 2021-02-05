@@ -21,6 +21,7 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
@@ -34,6 +35,7 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupFactorySpy;
+import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
@@ -214,6 +216,29 @@ public class DivaDbOrganisationReaderTest {
 				.getAllGroupsWithNameInData("divaOrganisationPredecessorChildFromSpy");
 		assertSame(predecessorChildren.get(0), returnedListFromSpy.get(0));
 		assertSame(predecessorChildren.get(1), returnedListFromSpy.get(1));
+	}
+
+	@Test
+	public void testReadSubOrgansiationRepeatIdNOTRemovedForParent() throws Exception {
+		divaDbOrganisationReader.read("subOrganisation", "567");
+
+		MultipleRowDbToDataReaderSpy multipleDbToDataReader = divaDbFactorySpy.listOfFactoredMultiples
+				.get(0);
+		List<DataGroup> returnedList = multipleDbToDataReader.returnedList;
+		DataGroupSpy returnedParent = (DataGroupSpy) returnedList.get(0);
+		assertFalse(returnedParent.setRepeatIdWasCalled);
+	}
+
+	@Test
+	public void testReadTopOrgansiationRemovedRepeatIdForParent() throws Exception {
+		divaDbOrganisationReader.read("topOrganisation", "567");
+
+		MultipleRowDbToDataReaderSpy multipleDbToDataReader = divaDbFactorySpy.listOfFactoredMultiples
+				.get(0);
+		List<DataGroup> returnedList = multipleDbToDataReader.returnedList;
+		DataGroupSpy returnedParent = (DataGroupSpy) returnedList.get(0);
+		assertTrue(returnedParent.setRepeatIdWasCalled);
+		assertNull(returnedParent.getRepeatId());
 	}
 
 }

@@ -58,7 +58,7 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 		String tableName = getTableName(type);
 		Map<String, Object> readRow = readOneRowFromDbUsingTypeAndId(tableName, id);
 		DataGroup organisation = convertOneMapFromDbToDataGroup(type, readRow);
-		tryToReadAndConvertParents(id, organisation);
+		tryToReadAndConvertParents(type, id, organisation);
 		tryToReadAndConvertPredecessors(id, organisation);
 		return organisation;
 	}
@@ -94,12 +94,21 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 		return dbToCoraConverter.fromMap(readRow);
 	}
 
-	private void tryToReadAndConvertParents(String id, DataGroup organisation) {
+	private void tryToReadAndConvertParents(String organisationType, String id,
+			DataGroup organisation) {
 		String type = "divaOrganisationParent";
 		MultipleRowDbToDataReader parentReader = divaDbFactory.factorMultipleReader(type);
 		List<DataGroup> convertedParents = parentReader.read(type, id);
 		for (DataGroup convertedParent : convertedParents) {
+			removeRepeatIdIfParentInTopOrganisation(organisationType, convertedParent);
 			organisation.addChild(convertedParent);
+		}
+	}
+
+	private void removeRepeatIdIfParentInTopOrganisation(String organisationType,
+			DataGroup convertedParent) {
+		if ("topOrganisation".equals(organisationType)) {
+			convertedParent.setRepeatId(null);
 		}
 	}
 
