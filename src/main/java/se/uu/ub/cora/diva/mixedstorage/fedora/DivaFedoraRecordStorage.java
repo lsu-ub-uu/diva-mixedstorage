@@ -102,23 +102,23 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
-			convertAndWritePlaceToFedora(type, id, record);
+			convertAndWritePersonToFedora(type, id, record);
 		} else {
 			throw NotImplementedException
 					.withMessage("update is not implemented for type: " + type);
 		}
 	}
 
-	private void convertAndWritePlaceToFedora(String type, String id, DataGroup record) {
+	private void convertAndWritePersonToFedora(String type, String id, DataGroup record) {
 		try {
-			tryToConvertAndWritePlaceToFedora(type, id, record);
+			tryToConvertAndWritePersonToFedora(type, id, record);
 		} catch (Exception e) {
 			throw FedoraException
 					.withMessageAndException("update to fedora failed for record: " + id, e);
 		}
 	}
 
-	private void tryToConvertAndWritePlaceToFedora(String type, String id, DataGroup record) {
+	private void tryToConvertAndWritePersonToFedora(String type, String id, DataGroup record) {
 		String url = createUrlForWritingMetadataStreamToFedora(id);
 		HttpHandler httpHandler = createHttpHandlerForUpdatingDatastreamUsingURL(url);
 		String fedoraXML = convertRecordToFedoraXML(type, record);

@@ -51,9 +51,9 @@ public class DivaFedoraToCoraPersonConverter implements DivaFedoraToCoraConverte
 		return person;
 	}
 
-	private void createRecordInfoAndAddToPerson(DataGroup place) {
+	private void createRecordInfoAndAddToPerson(DataGroup person) {
 		DataGroup recordInfo = DivaFedoraToCoraRecordInfoConverter.createRecordInfo(parser);
-		place.addChild(recordInfo);
+		person.addChild(recordInfo);
 	}
 
 	private String getStringFromDocumentUsingXPath(String xpathString) {
