@@ -41,10 +41,10 @@ import se.uu.ub.cora.diva.mixedstorage.DataAtomicFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.ParseException;
 
-public class DivaFedoraToCoraPersonConverterTest {
+public class DivaFedoraToCoraPersonConverterOldTest {
 
 	private static final String TOP_DATAGROUP_NAMEINDATA = "authorityPerson";
-	private DivaFedoraToCoraPersonConverter converter;
+	private DivaFedoraToCoraPersonConverterOld converter;
 
 	private DataGroupFactory dataGroupFactorySpy;
 	private DataAtomicFactory dataAtomicFactory;
@@ -55,7 +55,7 @@ public class DivaFedoraToCoraPersonConverterTest {
 		DataGroupProvider.setDataGroupFactory(dataGroupFactorySpy);
 		dataAtomicFactory = new DataAtomicFactorySpy();
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactory);
-		converter = new DivaFedoraToCoraPersonConverter();
+		converter = new DivaFedoraToCoraPersonConverterOld();
 	}
 
 	@Test(expectedExceptions = ParseException.class, expectedExceptionsMessageRegExp = ""

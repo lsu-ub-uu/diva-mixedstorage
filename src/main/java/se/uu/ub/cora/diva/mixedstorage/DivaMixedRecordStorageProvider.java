@@ -154,7 +154,7 @@ public class DivaMixedRecordStorageProvider
 		HttpHandlerFactory httpHandlerFactory = new HttpHandlerFactoryImp();
 
 		DivaFedoraConverterFactory converterFactory = DivaFedoraConverterFactoryImp
-				.usingFedoraURL(fedoraURL);
+				.usingFedoraURL(fedoraURL, null);
 
 		return DivaFedoraRecordStorage
 				.usingHttpHandlerFactoryAndConverterFactoryAndBaseURLAndUsernameAndPassword(

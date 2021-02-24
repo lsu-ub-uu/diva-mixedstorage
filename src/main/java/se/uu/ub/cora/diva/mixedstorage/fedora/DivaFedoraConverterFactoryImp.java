@@ -21,23 +21,31 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
+import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
+import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 
 public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory {
 
+	private static final String PERSON_XSLT_PATH = "person/coraPerson.xsl";
 	private String fedoraURL;
+	private CoraTransformationFactory transformationFactory;
 
-	public static DivaFedoraConverterFactoryImp usingFedoraURL(String fedoraURL) {
-		return new DivaFedoraConverterFactoryImp(fedoraURL);
+	public static DivaFedoraConverterFactoryImp usingFedoraURL(String fedoraURL,
+			CoraTransformationFactory transformationFactory) {
+		return new DivaFedoraConverterFactoryImp(fedoraURL, transformationFactory);
 	}
 
-	private DivaFedoraConverterFactoryImp(String fedoraURL) {
+	private DivaFedoraConverterFactoryImp(String fedoraURL,
+			CoraTransformationFactory transformationFactory) {
 		this.fedoraURL = fedoraURL;
+		this.transformationFactory = transformationFactory;
 	}
 
 	@Override
 	public DivaFedoraToCoraConverter factorToCoraConverter(String type) {
 		if ("person".equals(type)) {
-			return new DivaFedoraToCoraPersonConverter();
+			CoraTransformation coraTransformation = transformationFactory.factor(PERSON_XSLT_PATH);
+			return new DivaFedoraToCoraPersonConverter(coraTransformation);
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}

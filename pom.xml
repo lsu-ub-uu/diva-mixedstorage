@@ -42,6 +42,7 @@
 		<apptokenstorage.version>2.1.0</apptokenstorage.version>
 		<gatekeeper.version>3.5.0</gatekeeper.version>
 		<json.version>2.1.0</json.version>
+		<xmlutils.version>1.0-SNAPSHOT</xmlutils.version>
 	</properties>
 
 	<scm>
@@ -109,6 +110,11 @@
 			<artifactId>json</artifactId>
 			<version>${json.version}</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>xmlutils</artifactId>
+			<version>${xmlutils.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>
