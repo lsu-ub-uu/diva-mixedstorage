@@ -28,23 +28,23 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 
 	private static final String PERSON_XSLT_PATH = "person/coraPerson.xsl";
 	private String fedoraURL;
-	private CoraTransformationFactory transformationFactory;
+	private CoraTransformationFactory coraTransformationFactory;
 
-	public static DivaFedoraConverterFactoryImp usingFedoraURL(String fedoraURL,
-			CoraTransformationFactory transformationFactory) {
+	public static DivaFedoraConverterFactoryImp usingFedoraURLAndTransformerFactory(
+			String fedoraURL, CoraTransformationFactory transformationFactory) {
 		return new DivaFedoraConverterFactoryImp(fedoraURL, transformationFactory);
 	}
 
 	private DivaFedoraConverterFactoryImp(String fedoraURL,
-			CoraTransformationFactory transformationFactory) {
+			CoraTransformationFactory coraTransformationFactory) {
 		this.fedoraURL = fedoraURL;
-		this.transformationFactory = transformationFactory;
+		this.coraTransformationFactory = coraTransformationFactory;
 	}
 
 	@Override
 	public DivaFedoraToCoraConverter factorToCoraConverter(String type) {
 		if ("person".equals(type)) {
-			CoraTransformation coraTransformation = transformationFactory.factor(PERSON_XSLT_PATH);
+			CoraTransformation coraTransformation = coraTransformationFactory.factor(PERSON_XSLT_PATH);
 			return new DivaFedoraToCoraPersonConverter(coraTransformation);
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
@@ -63,6 +63,10 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	public String getFedoraURL() {
 		// needed for tests
 		return fedoraURL;
+	}
+
+	public CoraTransformationFactory getCoraTransformerFactory() {
+		return coraTransformationFactory;
 	}
 
 }

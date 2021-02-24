@@ -29,7 +29,7 @@ import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerFactory;
 import se.uu.ub.cora.logger.LoggerProvider;
 
-public class DivaFedoraToCoraPersonConverter2Test {
+public class DivaFedoraToCoraPersonConverterTest {
 
 	private ConverterFactorySpy converterFactory;
 
