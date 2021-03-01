@@ -17,8 +17,9 @@
       You should have received a copy of the GNU General Public License
       along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  -->
-<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output indent="yes"/>
+    <xsl:key name="domain" match="identifiers/identifier[type = 'LOCAL'] | affiliations/affiliation[string-length(domain) &gt; 0]" use="domain"/>
     <xsl:template match="/">
         <xsl:apply-templates select="authorityPerson"/>
     </xsl:template>
@@ -49,20 +50,20 @@
         </person>
     </xsl:template>
     <xsl:template match="recordInfo">
-        <recordinfo>
+        <recordInfo>
             <id>
                 <xsl:value-of select="../pid"></xsl:value-of>
             </id>
             <type>
                 <linkedRecordType>recordType</linkedRecordType>
-                <linkRecordId>
+                <linkedRecordId>
                     <xsl:text>person</xsl:text>
-                </linkRecordId>
+                </linkedRecordId>
             </type>
             <xsl:for-each select="events/event[type = 'CREATE']">
                 <createdBy>
                     <linkedRecordType>user</linkedRecordType>
-                    <linkRecordId>
+                    <linkedRecordId>
                         <xsl:choose>
                             <xsl:when test="string-length(userId) &gt; 0">
                                 <xsl:value-of select="userId"></xsl:value-of>
@@ -71,7 +72,7 @@
                                 <xsl:text>SYSTEM</xsl:text>
                             </xsl:otherwise>
                         </xsl:choose>
-                    </linkRecordId>
+                    </linkedRecordId>
                 </createdBy>
                 <tsCreated>
                     <xsl:value-of select="timestamp"></xsl:value-of>
@@ -79,8 +80,9 @@
             </xsl:for-each>
             <dataDivider>
                 <linkedRecordType>system</linkedRecordType>
-                <linkRecordId>diva</linkRecordId>
+                <linkedRecordId>diva</linkedRecordId>
             </dataDivider>
+            
             <xsl:for-each select="events/event[type = 'UPDATE']">
                 <updated>
                     <xsl:attribute name="repeatId">
@@ -88,7 +90,7 @@
                     </xsl:attribute>
                     <updatedBy>
                         <linkedRecordType>user</linkedRecordType>
-                        <linkRecordId>
+                        <linkedRecordId>
                             <xsl:choose>
                                 <xsl:when test="string-length(userId) &gt; 0">
                                     <xsl:value-of select="userId"></xsl:value-of>
@@ -97,7 +99,7 @@
                                     <xsl:text>SYSTEM</xsl:text>
                                 </xsl:otherwise>
                             </xsl:choose>
-                        </linkRecordId>
+                        </linkedRecordId>
                     </updatedBy>
                     <tsUpdated>
                         <xsl:value-of select="timestamp"></xsl:value-of>
@@ -116,6 +118,8 @@
                     </xsl:choose>
                 </public>
             </xsl:for-each>
+            <!-- XSLT 2.0 version-->
+            <!--
             <xsl:for-each-group select="../affiliations/affiliation | ../identifiers/identifier[type = 'LOCAL']" group-by="domain">
                 <xsl:variable name="repeat">
                     <xsl:value-of select="position() - 1"></xsl:value-of>
@@ -129,7 +133,20 @@
                         </domain>
                     </xsl:for-each>
             </xsl:for-each-group>
-        </recordinfo>
+             -->
+            <!-- XSLT 1.0 version-->
+            <xsl:for-each select="../affiliations/affiliation[string-length(domain) &gt; 0][generate-id(.)=generate-id(key('domain', domain))]/domain | ../identifiers/identifier[type = 'LOCAL'][generate-id(.)=generate-id(key('domain', domain))]/domain">
+                <xsl:sort/>
+                <xsl:variable name="repeat">
+                    <xsl:value-of select="position() - 1"></xsl:value-of>
+                </xsl:variable>
+                <domain>
+                    <xsl:attribute name="repeatId">
+                        <xsl:value-of select="$repeat"></xsl:value-of>
+                    </xsl:attribute>
+                    <xsl:value-of select="."/></domain>
+            </xsl:for-each>
+        </recordInfo>
     </xsl:template>
     <xsl:template match="defaultName">
         <authorisedName>
@@ -198,9 +215,9 @@
                 </xsl:attribute>
                 <organisationLink>
                     <linkedRecordType>organisation</linkedRecordType>
-                    <linkRecordId>
+                    <linkedRecordId>
                         <xsl:value-of select="organisationId"></xsl:value-of>  
-                    </linkRecordId>     
+                    </linkedRecordId>     
                 </organisationLink>  
                 <xsl:if test="string-length(from) &gt; 0">
                     <affiliationFromYear>
