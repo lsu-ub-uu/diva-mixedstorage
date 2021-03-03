@@ -19,27 +19,22 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.converter.Converter;
-import se.uu.ub.cora.converter.ConverterProvider;
-import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
+import se.uu.ub.cora.converter.ConverterFactory;
 
-public class DivaFedoraToCoraPersonConverter implements DivaFedoraToCoraConverter {
+public class ConverterFactorySpy implements ConverterFactory {
 
-	private CoraTransformation transformation;
+	public ConverterSpy factoredConverter;
 
-	public DivaFedoraToCoraPersonConverter(CoraTransformation transformation) {
-		this.transformation = transformation;
+	@Override
+	public Converter factorConverter() {
+		factoredConverter = new ConverterSpy();
+		return factoredConverter;
 	}
 
 	@Override
-	public DataGroup fromXML(String xmlToTransform) {
-		String coraXml = transformation.transform(xmlToTransform);
-		Converter converter = ConverterProvider.getConverter("xml");
-		return (DataGroup) converter.convert(coraXml);
-	}
-
-	public CoraTransformation getCoraTransformation() {
-		return transformation;
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -78,30 +78,6 @@ public final class XMLXPathParser {
 		return doc;
 	}
 
-	public String getStringFromDocumentUsingXPath(String xpathString) {
-		try {
-			XPathExpression expr;
-			expr = xpath.compile(xpathString);
-			return (String) expr.evaluate(document, XPathConstants.STRING);
-		} catch (XPathExpressionException e) {
-			throw ParseException
-					.withMessageAndException(XPATH_STRING_ERROR_MESSAGE + e.getMessage(), e);
-		}
-
-	}
-
-	public String getStringFromDocumentUsingNodeAndXPath(Node node, String xpathString) {
-		try {
-			XPathExpression expr;
-			expr = xpath.compile(xpathString);
-			return (String) expr.evaluate(node, XPathConstants.STRING);
-		} catch (XPathExpressionException e) {
-			throw ParseException
-					.withMessageAndException(XPATH_STRING_ERROR_MESSAGE + e.getMessage(), e);
-		}
-
-	}
-
 	public NodeList getNodeListFromDocumentUsingXPath(String xpathString) {
 		try {
 			XPathExpression expr = xpath.compile(xpathString);

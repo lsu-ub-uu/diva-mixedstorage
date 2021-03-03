@@ -53,6 +53,7 @@ import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.RecordStorageProvider;
+import se.uu.ub.cora.xmlutils.transformer.XsltTransformationFactory;
 
 public class DivaMixedRecordStorageProvider
 		implements RecordStorageProvider, MetadataStorageProvider {
@@ -152,9 +153,10 @@ public class DivaMixedRecordStorageProvider
 		String fedoraPassword = tryToGetInitParameter("fedoraPassword");
 
 		HttpHandlerFactory httpHandlerFactory = new HttpHandlerFactoryImp();
+		XsltTransformationFactory transformationFactory = new XsltTransformationFactory();
 
 		DivaFedoraConverterFactory converterFactory = DivaFedoraConverterFactoryImp
-				.usingFedoraURL(fedoraURL);
+				.usingFedoraURLAndTransformerFactory(fedoraURL, transformationFactory);
 
 		return DivaFedoraRecordStorage
 				.usingHttpHandlerFactoryAndConverterFactoryAndBaseURLAndUsernameAndPassword(

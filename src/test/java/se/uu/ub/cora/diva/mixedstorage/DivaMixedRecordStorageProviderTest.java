@@ -51,7 +51,6 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
-import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactory;
 import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraRecordStorage;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
@@ -63,6 +62,7 @@ import se.uu.ub.cora.sqldatabase.RecordReaderFactoryImp;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
+import se.uu.ub.cora.xmlutils.transformer.XsltTransformationFactory;
 
 public class DivaMixedRecordStorageProviderTest {
 	private Map<String, String> initInfo = new HashMap<>();
@@ -168,12 +168,12 @@ public class DivaMixedRecordStorageProviderTest {
 		DivaFedoraRecordStorage fedoraToCoraStorage = (DivaFedoraRecordStorage) fedoraStorage;
 		assertTrue(fedoraToCoraStorage.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
 
-		DivaFedoraConverterFactory divaFedoraConverterFactory = fedoraToCoraStorage
+		DivaFedoraConverterFactoryImp divaFedoraConverterFactory = (DivaFedoraConverterFactoryImp) fedoraToCoraStorage
 				.getDivaFedoraConverterFactory();
-		assertTrue(divaFedoraConverterFactory instanceof DivaFedoraConverterFactoryImp);
-		String fedoraURLInConverter = ((DivaFedoraConverterFactoryImp) divaFedoraConverterFactory)
-				.getFedoraURL();
+		String fedoraURLInConverter = divaFedoraConverterFactory.getFedoraURL();
 		assertEquals(fedoraURLInConverter, initInfo.get("fedoraURL"));
+		assertTrue(divaFedoraConverterFactory
+				.getCoraTransformerFactory() instanceof XsltTransformationFactory);
 
 		String baseURLInFedoraToCoraStorage = fedoraToCoraStorage.getBaseURL();
 		assertEquals(baseURLInFedoraToCoraStorage, initInfo.get("fedoraURL"));

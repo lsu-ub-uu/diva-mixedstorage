@@ -19,6 +19,8 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.BeforeMethod;
@@ -30,10 +32,13 @@ import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 public class DivaFedoraConverterFactoryTest {
 	private DivaFedoraConverterFactoryImp divaToCoraConverterFactoryImp;
 	private String fedoraURL = "someFedoraUrl";
+	private TransformationFactorySpy transformationFactory;
 
 	@BeforeMethod
 	public void beforeMethod() {
-		divaToCoraConverterFactoryImp = DivaFedoraConverterFactoryImp.usingFedoraURL(fedoraURL);
+		transformationFactory = new TransformationFactorySpy();
+		divaToCoraConverterFactoryImp = DivaFedoraConverterFactoryImp.usingFedoraURLAndTransformerFactory(fedoraURL,
+				transformationFactory);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -46,7 +51,13 @@ public class DivaFedoraConverterFactoryTest {
 	public void testFactoryPerson() throws Exception {
 		DivaFedoraToCoraConverter converter = divaToCoraConverterFactoryImp
 				.factorToCoraConverter("person");
-		assertTrue(converter instanceof DivaFedoraToCoraPersonConverter);
+		DivaFedoraToCoraPersonConverter personConverter = (DivaFedoraToCoraPersonConverter) converter;
+
+		assertNotNull(personConverter.getCoraTransformation());
+		assertSame(personConverter.getCoraTransformation(),
+				transformationFactory.transformationSpy);
+
+		assertEquals(transformationFactory.xsltPath, "person/coraPerson.xsl");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
