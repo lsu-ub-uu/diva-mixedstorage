@@ -102,10 +102,15 @@ public class DivaFedoraRecordStorageTest {
 
 		assertEquals(converterFactory.factoredConverters.size(), 1);
 		assertEquals(converterFactory.factoredTypes.get(0), "personDomainPart");
+
 		DivaFedoraToCoraConverterSpy divaToCoraConverter = (DivaFedoraToCoraConverterSpy) converterFactory.factoredConverters
 				.get(0);
+		assertTrue(divaToCoraConverter.fromXMLWithParametersWasCalled);
+
 		assertEquals(divaToCoraConverter.xml, httpHandlerFactory.responseText);
 		assertEquals(readPersonDomainPart, divaToCoraConverter.convertedDataGroup);
+		assertEquals(divaToCoraConverter.parameters.get("domain"), "uu");
+
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

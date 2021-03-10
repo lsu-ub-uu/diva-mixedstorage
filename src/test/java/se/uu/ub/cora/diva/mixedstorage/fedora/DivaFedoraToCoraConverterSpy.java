@@ -18,6 +18,8 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.Map;
+
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 
@@ -25,11 +27,22 @@ public class DivaFedoraToCoraConverterSpy implements DivaFedoraToCoraConverter {
 
 	public String xml;
 	public DataGroup convertedDataGroup;
+	public boolean fromXMLWithParametersWasCalled = false;
+	public Map<String, Object> parameters;
 
 	@Override
 	public DataGroup fromXML(String xml) {
 		this.xml = xml;
 		convertedDataGroup = new DataGroupSpy("Converted xml");
+		return convertedDataGroup;
+	}
+
+	@Override
+	public DataGroup fromXMLWithParameters(String xml, Map<String, Object> parameters) {
+		this.xml = xml;
+		this.parameters = parameters;
+		convertedDataGroup = new DataGroupSpy("Converted xml");
+		fromXMLWithParametersWasCalled = true;
 		return convertedDataGroup;
 	}
 

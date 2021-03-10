@@ -18,10 +18,14 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.Map;
+
 import se.uu.ub.cora.data.DataGroup;
 
 public interface DivaFedoraToCoraConverter {
 
 	DataGroup fromXML(String xml);
+
+	DataGroup fromXMLWithParameters(String xml, Map<String, Object> parameters);
 
 }

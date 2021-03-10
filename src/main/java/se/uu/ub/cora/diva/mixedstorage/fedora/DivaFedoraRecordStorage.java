@@ -22,7 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -90,12 +92,26 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 		HttpHandler httpHandler = createHttpHandlerForPerson(personIdPart);
 		DivaFedoraToCoraConverter toCoraConverter = converterFactory
 				.factorToCoraConverter("personDomainPart");
-		return toCoraConverter.fromXML(httpHandler.getResponseText());
+
+		Map<String, Object> parameters = createParameters(id);
+
+		return toCoraConverter.fromXMLWithParameters(httpHandler.getResponseText(), parameters);
 	}
 
 	private String extractPersonIdFromId(String id) {
 		int domainStartIndex = id.lastIndexOf(":");
 		return id.substring(0, domainStartIndex);
+	}
+
+	private Map<String, Object> createParameters(String id) {
+		Map<String, Object> parameters = new HashMap<>();
+		parameters.put("domain", extractDomainFromId(id));
+		return parameters;
+	}
+
+	private String extractDomainFromId(String id) {
+		int domainStartIndex = id.lastIndexOf(":");
+		return id.substring(domainStartIndex + 1);
 	}
 
 	@Override

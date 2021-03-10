@@ -60,6 +60,20 @@ public class DivaFedoraConverterFactoryTest {
 		assertEquals(transformationFactory.xsltPath, "person/coraPerson.xsl");
 	}
 
+	@Test
+	public void testFactoryPersonDomainPart() throws Exception {
+		DivaFedoraToCoraConverter converter = divaToCoraConverterFactoryImp
+				.factorToCoraConverter("personDomainPart");
+		assertTrue(converter instanceof DivaFedoraToCoraConverterImp);
+		DivaFedoraToCoraConverterImp personDomainPartConverter = (DivaFedoraToCoraConverterImp) converter;
+		//
+		assertNotNull(personDomainPartConverter.getCoraTransformation());
+		assertSame(personDomainPartConverter.getCoraTransformation(),
+				transformationFactory.transformationSpy);
+
+		assertEquals(transformationFactory.xsltPath, "person/coraPersonDomainPart.xsl");
+	}
+
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "No converter implemented for: someType")
 	public void factorToFedoraUnknownTypeThrowsException() throws Exception {
