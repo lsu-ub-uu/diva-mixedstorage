@@ -66,6 +66,9 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 		if (PERSON.equals(type)) {
 			return readAndConvertPersonFromFedora(id);
 		}
+		if ("personDomainPart".equals(type)) {
+			return readAndConvertPersonDomainPartFromFedora(id);
+		}
 		throw NotImplementedException.withMessage("read is not implemented for type: " + type);
 	}
 
@@ -80,6 +83,19 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 		HttpHandler httpHandler = httpHandlerFactory.factor(url);
 		httpHandler.setRequestMethod("GET");
 		return httpHandler;
+	}
+
+	private DataGroup readAndConvertPersonDomainPartFromFedora(String id) {
+		String personIdPart = extractPersonIdFromId(id);
+		HttpHandler httpHandler = createHttpHandlerForPerson(personIdPart);
+		DivaFedoraToCoraConverter toCoraConverter = converterFactory
+				.factorToCoraConverter("personDomainPart");
+		return toCoraConverter.fromXML(httpHandler.getResponseText());
+	}
+
+	private String extractPersonIdFromId(String id) {
+		int domainStartIndex = id.lastIndexOf(":");
+		return id.substring(0, domainStartIndex);
 	}
 
 	@Override

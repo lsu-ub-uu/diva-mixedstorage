@@ -89,6 +89,25 @@ public class DivaFedoraRecordStorageTest {
 		assertEquals(readPerson, divaToCoraConverter.convertedDataGroup);
 	}
 
+	@Test
+	public void readPersonDomainPartCallsFedoraAndReturnsConvertedResult() throws Exception {
+		httpHandlerFactory.responseText = "Dummy response text";
+		DataGroup readPersonDomainPart = divaToCoraRecordStorage.read("personDomainPart",
+				"authority-person:11685:uu");
+		assertEquals(httpHandlerFactory.urls.get(0),
+				baseURL + "objects/authority-person:11685/datastreams/METADATA/content");
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
+		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
+		assertEquals(httpHandler.requestMetod, "GET");
+
+		assertEquals(converterFactory.factoredConverters.size(), 1);
+		assertEquals(converterFactory.factoredTypes.get(0), "personDomainPart");
+		DivaFedoraToCoraConverterSpy divaToCoraConverter = (DivaFedoraToCoraConverterSpy) converterFactory.factoredConverters
+				.get(0);
+		assertEquals(divaToCoraConverter.xml, httpHandlerFactory.responseText);
+		assertEquals(readPersonDomainPart, divaToCoraConverter.convertedDataGroup);
+	}
+
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "create is not implemented")
 	public void createThrowsNotImplementedException() throws Exception {

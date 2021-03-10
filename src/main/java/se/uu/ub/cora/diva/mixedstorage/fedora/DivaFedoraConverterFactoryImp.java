@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -44,8 +44,9 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	@Override
 	public DivaFedoraToCoraConverter factorToCoraConverter(String type) {
 		if ("person".equals(type)) {
-			CoraTransformation coraTransformation = coraTransformationFactory.factor(PERSON_XSLT_PATH);
-			return new DivaFedoraToCoraPersonConverter(coraTransformation);
+			CoraTransformation coraTransformation = coraTransformationFactory
+					.factor(PERSON_XSLT_PATH);
+			return new DivaFedoraToCoraConverterImp(coraTransformation);
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}

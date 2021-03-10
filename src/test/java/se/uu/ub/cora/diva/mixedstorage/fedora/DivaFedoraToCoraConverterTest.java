@@ -29,7 +29,7 @@ import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerFactory;
 import se.uu.ub.cora.logger.LoggerProvider;
 
-public class DivaFedoraToCoraPersonConverterTest {
+public class DivaFedoraToCoraConverterTest {
 
 	private ConverterFactorySpy converterFactory;
 
@@ -45,7 +45,7 @@ public class DivaFedoraToCoraPersonConverterTest {
 	@Test
 	public void testFromXml() {
 		XsltTransformationSpy transformation = new XsltTransformationSpy();
-		DivaFedoraToCoraConverter personConverter = new DivaFedoraToCoraPersonConverter(
+		DivaFedoraToCoraConverter personConverter = new DivaFedoraToCoraConverterImp(
 				transformation);
 
 		String xml = "someXmlString";

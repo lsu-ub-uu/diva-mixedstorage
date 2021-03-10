@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -37,8 +37,8 @@ public class DivaFedoraConverterFactoryTest {
 	@BeforeMethod
 	public void beforeMethod() {
 		transformationFactory = new TransformationFactorySpy();
-		divaToCoraConverterFactoryImp = DivaFedoraConverterFactoryImp.usingFedoraURLAndTransformerFactory(fedoraURL,
-				transformationFactory);
+		divaToCoraConverterFactoryImp = DivaFedoraConverterFactoryImp
+				.usingFedoraURLAndTransformerFactory(fedoraURL, transformationFactory);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -51,7 +51,7 @@ public class DivaFedoraConverterFactoryTest {
 	public void testFactoryPerson() throws Exception {
 		DivaFedoraToCoraConverter converter = divaToCoraConverterFactoryImp
 				.factorToCoraConverter("person");
-		DivaFedoraToCoraPersonConverter personConverter = (DivaFedoraToCoraPersonConverter) converter;
+		DivaFedoraToCoraConverterImp personConverter = (DivaFedoraToCoraConverterImp) converter;
 
 		assertNotNull(personConverter.getCoraTransformation());
 		assertSame(personConverter.getCoraTransformation(),
@@ -74,7 +74,7 @@ public class DivaFedoraConverterFactoryTest {
 	}
 
 	@Test
-	public void testFactorToFedoraForPlaceHasCorrectDependencies() throws Exception {
+	public void testFactorToFedoraForPersonHasCorrectDependencies() throws Exception {
 		DivaCoraToFedoraPersonConverter converter = (DivaCoraToFedoraPersonConverter) divaToCoraConverterFactoryImp
 				.factorToFedoraConverter("person");
 		assertTrue(converter.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);

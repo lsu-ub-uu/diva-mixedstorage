@@ -23,11 +23,11 @@ import se.uu.ub.cora.converter.ConverterProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 
-public class DivaFedoraToCoraPersonConverter implements DivaFedoraToCoraConverter {
+public class DivaFedoraToCoraConverterImp implements DivaFedoraToCoraConverter {
 
 	private CoraTransformation transformation;
 
-	public DivaFedoraToCoraPersonConverter(CoraTransformation transformation) {
+	public DivaFedoraToCoraConverterImp(CoraTransformation transformation) {
 		this.transformation = transformation;
 	}
 
