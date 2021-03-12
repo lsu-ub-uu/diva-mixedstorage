@@ -77,7 +77,9 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	private DataGroup readAndConvertPersonFromFedora(String id) {
 		HttpHandler httpHandler = createHttpHandlerForPerson(id);
 		DivaFedoraToCoraConverter toCoraConverter = converterFactory.factorToCoraConverter(PERSON);
-		return toCoraConverter.fromXML(httpHandler.getResponseText());
+		// String responseText = ResourceReader.readResourceAsString("person/person_18076.xml");
+		String responseText = httpHandler.getResponseText();
+		return toCoraConverter.fromXML(responseText);
 	}
 
 	private HttpHandler createHttpHandlerForPerson(String id) {
@@ -94,8 +96,9 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 				.factorToCoraConverter("personDomainPart");
 
 		Map<String, Object> parameters = createParameters(id);
-
-		return toCoraConverter.fromXMLWithParameters(httpHandler.getResponseText(), parameters);
+		// String responseText = ResourceReader.readResourceAsString("person/person_18076.xml");
+		String responseText = httpHandler.getResponseText();
+		return toCoraConverter.fromXMLWithParameters(responseText, parameters);
 	}
 
 	private String extractPersonIdFromId(String id) {
