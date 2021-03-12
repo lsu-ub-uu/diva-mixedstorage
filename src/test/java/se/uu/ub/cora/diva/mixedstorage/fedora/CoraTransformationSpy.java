@@ -18,12 +18,20 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.Map;
+
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 
 public class CoraTransformationSpy implements CoraTransformation {
 
 	@Override
 	public String transform(String inputXml) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String transformWithParameters(String inputXml, Map<String, Object> parameters) {
 		// TODO Auto-generated method stub
 		return null;
 	}
