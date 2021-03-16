@@ -109,7 +109,7 @@ public class DivaFedoraRecordStorageTest {
 
 		assertEquals(divaToCoraConverter.xml, httpHandlerFactory.responseText);
 		assertEquals(readPersonDomainPart, divaToCoraConverter.convertedDataGroup);
-		assertEquals(divaToCoraConverter.parameters.get("domain"), "uu");
+		assertEquals(divaToCoraConverter.parameters.get("domainFilter"), "uu");
 
 	}
 

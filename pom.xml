@@ -43,7 +43,7 @@
 		<gatekeeper.version>3.5.0</gatekeeper.version>
 		<json.version>2.1.0</json.version>
 		<xmlutils.version>1.0-SNAPSHOT</xmlutils.version>
-		<xmlconverter.version>1.3.0</xmlconverter.version>
+		<xmlconverter.version>1.4-SNAPSHOT</xmlconverter.version>
 		<converter.version>1.3-SNAPSHOT</converter.version>
 	</properties>
 

@@ -41,7 +41,7 @@
                         </id>
                         <type>
                             <linkedRecordType>recordType</linkedRecordType>
-                            <linkRecordId>personDomainPart</linkRecordId>
+                            <linkedRecordId>personDomainPart</linkedRecordId>
                         </type>
                         <xsl:for-each select="../../../recordInfo/events/event[type = 'CREATE']">
                             <createdBy>

@@ -108,7 +108,7 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 
 	private Map<String, Object> createParameters(String id) {
 		Map<String, Object> parameters = new HashMap<>();
-		parameters.put("domain", extractDomainFromId(id));
+		parameters.put("domainFilter", extractDomainFromId(id));
 		return parameters;
 	}
 
