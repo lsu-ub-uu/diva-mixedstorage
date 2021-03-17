@@ -77,7 +77,6 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	private DataGroup readAndConvertPersonFromFedora(String id) {
 		HttpHandler httpHandler = createHttpHandlerForPerson(id);
 		DivaFedoraToCoraConverter toCoraConverter = converterFactory.factorToCoraConverter(PERSON);
-		// String responseText = ResourceReader.readResourceAsString("person/person_18076.xml");
 		String responseText = httpHandler.getResponseText();
 		return toCoraConverter.fromXML(responseText);
 	}
@@ -96,13 +95,12 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 				.factorToCoraConverter("personDomainPart");
 
 		Map<String, Object> parameters = createParameters(id);
-		// String responseText = ResourceReader.readResourceAsString("person/person_18076.xml");
 		String responseText = httpHandler.getResponseText();
 		return toCoraConverter.fromXMLWithParameters(responseText, parameters);
 	}
 
 	private String extractPersonIdFromId(String id) {
-		int domainStartIndex = id.lastIndexOf(":");
+		int domainStartIndex = id.lastIndexOf(':');
 		return id.substring(0, domainStartIndex);
 	}
 
@@ -113,7 +111,7 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	}
 
 	private String extractDomainFromId(String id) {
-		int domainStartIndex = id.lastIndexOf(":");
+		int domainStartIndex = id.lastIndexOf(':');
 		return id.substring(domainStartIndex + 1);
 	}
 
