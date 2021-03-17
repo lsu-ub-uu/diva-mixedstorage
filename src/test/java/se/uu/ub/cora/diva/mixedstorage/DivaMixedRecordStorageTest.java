@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -106,6 +106,21 @@ public class DivaMixedRecordStorageTest {
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = "person";
 		expectedData.id = "someId";
+		expectedData.answer = divaMixedRecordStorage.read(expectedData.type, expectedData.id);
+
+		expectedData.calledMethod = "read";
+		assertNoInteractionWithStorage(basicStorage);
+		assertExpectedDataSameAsInStorageSpy(divaFedoraToCoraStorage, expectedData);
+	}
+
+	@Test
+	public void readPersonDomainPartGoesToFedora() throws Exception {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+
+		RecordStorageSpyData expectedData = new RecordStorageSpyData();
+		expectedData.type = "personDomainPart";
+		expectedData.id = "authority-person:2:uu";
 		expectedData.answer = divaMixedRecordStorage.read(expectedData.type, expectedData.id);
 
 		expectedData.calledMethod = "read";

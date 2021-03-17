@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -27,6 +27,7 @@ import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory {
 
 	private static final String PERSON_XSLT_PATH = "person/coraPerson.xsl";
+	private static final String PERSON_DOMAIN_PART_XSLT_PATH = "person/coraPersonDomainPart.xsl";
 	private String fedoraURL;
 	private CoraTransformationFactory coraTransformationFactory;
 
@@ -44,10 +45,17 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	@Override
 	public DivaFedoraToCoraConverter factorToCoraConverter(String type) {
 		if ("person".equals(type)) {
-			CoraTransformation coraTransformation = coraTransformationFactory.factor(PERSON_XSLT_PATH);
-			return new DivaFedoraToCoraPersonConverter(coraTransformation);
+			return getFedoraToCoraConverterUsingPath(PERSON_XSLT_PATH);
+		}
+		if ("personDomainPart".equals(type)) {
+			return getFedoraToCoraConverterUsingPath(PERSON_DOMAIN_PART_XSLT_PATH);
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
+	}
+
+	private DivaFedoraToCoraConverter getFedoraToCoraConverterUsingPath(String personXsltPath) {
+		CoraTransformation coraTransformation = coraTransformationFactory.factor(personXsltPath);
+		return new DivaFedoraToCoraConverterImp(coraTransformation);
 	}
 
 	@Override

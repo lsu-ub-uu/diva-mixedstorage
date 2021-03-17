@@ -22,7 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -66,13 +68,18 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 		if (PERSON.equals(type)) {
 			return readAndConvertPersonFromFedora(id);
 		}
+		if ("personDomainPart".equals(type)) {
+			return readAndConvertPersonDomainPartFromFedora(id);
+		}
 		throw NotImplementedException.withMessage("read is not implemented for type: " + type);
 	}
 
 	private DataGroup readAndConvertPersonFromFedora(String id) {
 		HttpHandler httpHandler = createHttpHandlerForPerson(id);
 		DivaFedoraToCoraConverter toCoraConverter = converterFactory.factorToCoraConverter(PERSON);
-		return toCoraConverter.fromXML(httpHandler.getResponseText());
+		// String responseText = ResourceReader.readResourceAsString("person/person_18076.xml");
+		String responseText = httpHandler.getResponseText();
+		return toCoraConverter.fromXML(responseText);
 	}
 
 	private HttpHandler createHttpHandlerForPerson(String id) {
@@ -80,6 +87,34 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 		HttpHandler httpHandler = httpHandlerFactory.factor(url);
 		httpHandler.setRequestMethod("GET");
 		return httpHandler;
+	}
+
+	private DataGroup readAndConvertPersonDomainPartFromFedora(String id) {
+		String personIdPart = extractPersonIdFromId(id);
+		HttpHandler httpHandler = createHttpHandlerForPerson(personIdPart);
+		DivaFedoraToCoraConverter toCoraConverter = converterFactory
+				.factorToCoraConverter("personDomainPart");
+
+		Map<String, Object> parameters = createParameters(id);
+		// String responseText = ResourceReader.readResourceAsString("person/person_18076.xml");
+		String responseText = httpHandler.getResponseText();
+		return toCoraConverter.fromXMLWithParameters(responseText, parameters);
+	}
+
+	private String extractPersonIdFromId(String id) {
+		int domainStartIndex = id.lastIndexOf(":");
+		return id.substring(0, domainStartIndex);
+	}
+
+	private Map<String, Object> createParameters(String id) {
+		Map<String, Object> parameters = new HashMap<>();
+		parameters.put("domainFilter", extractDomainFromId(id));
+		return parameters;
+	}
+
+	private String extractDomainFromId(String id) {
+		int domainStartIndex = id.lastIndexOf(":");
+		return id.substring(domainStartIndex + 1);
 	}
 
 	@Override

@@ -47,6 +47,23 @@
             <xsl:apply-templates select="affiliations"/>
             <xsl:apply-templates select="identifiers"/>
             <xsl:apply-templates select="biographies"/>
+            <xsl:for-each select="affiliations/affiliation[string-length(domain) &gt; 0][generate-id(.)=generate-id(key('domain', domain))]/domain | identifiers/identifier[type = 'LOCAL'][generate-id(.)=generate-id(key('domain', domain))]/domain">
+                <xsl:sort/>
+                <xsl:variable name="repeat">
+                    <xsl:value-of select="position() - 1"></xsl:value-of>
+                </xsl:variable>
+                <personDomainPart>
+                    <xsl:attribute name="repeatId">
+                        <xsl:value-of select="$repeat"></xsl:value-of>
+                    </xsl:attribute>
+                    <linkedRecordType>personDomainPart</linkedRecordType>
+                    <linkedRecordId>
+                        <xsl:value-of select="../../../pid"/>
+                        <xsl:text>:</xsl:text>
+                        <xsl:value-of select="."/>
+                    </linkedRecordId>
+                </personDomainPart>
+            </xsl:for-each>
         </person>
     </xsl:template>
     <xsl:template match="recordInfo">
@@ -81,8 +98,7 @@
             <dataDivider>
                 <linkedRecordType>system</linkedRecordType>
                 <linkedRecordId>diva</linkedRecordId>
-            </dataDivider>
-            
+            </dataDivider>        
             <xsl:for-each select="events/event[type = 'UPDATE']">
                 <updated>
                     <xsl:attribute name="repeatId">
@@ -118,23 +134,6 @@
                     </xsl:choose>
                 </public>
             </xsl:for-each>
-            <!-- XSLT 2.0 version-->
-            <!--
-            <xsl:for-each-group select="../affiliations/affiliation | ../identifiers/identifier[type = 'LOCAL']" group-by="domain">
-                <xsl:variable name="repeat">
-                    <xsl:value-of select="position() - 1"></xsl:value-of>
-                </xsl:variable>
-                    <xsl:for-each select="distinct-values(current-group()/domain)">
-                        <domain>
-                            <xsl:attribute name="repeatId">
-                                <xsl:value-of select="$repeat"></xsl:value-of>
-                            </xsl:attribute>
-                            <xsl:value-of select="." />
-                        </domain>
-                    </xsl:for-each>
-            </xsl:for-each-group>
-             -->
-            <!-- XSLT 1.0 version-->
             <xsl:for-each select="../affiliations/affiliation[string-length(domain) &gt; 0][generate-id(.)=generate-id(key('domain', domain))]/domain | ../identifiers/identifier[type = 'LOCAL'][generate-id(.)=generate-id(key('domain', domain))]/domain">
                 <xsl:sort/>
                 <xsl:variable name="repeat">
@@ -144,7 +143,8 @@
                     <xsl:attribute name="repeatId">
                         <xsl:value-of select="$repeat"></xsl:value-of>
                     </xsl:attribute>
-                    <xsl:value-of select="."/></domain>
+                    <xsl:value-of select="."/>
+                </domain>
             </xsl:for-each>
         </recordInfo>
     </xsl:template>
@@ -208,29 +208,6 @@
         </xsl:for-each>      
     </xsl:template>
     <xsl:template match="affiliations">
-        <xsl:for-each select="affiliation[string-length(domain) &gt; 0]">
-            <affiliation>
-                <xsl:attribute name="repeatId">
-                    <xsl:value-of select="position() - 1"></xsl:value-of>
-                </xsl:attribute>
-                <organisationLink>
-                    <linkedRecordType>organisation</linkedRecordType>
-                    <linkedRecordId>
-                        <xsl:value-of select="organisationId"></xsl:value-of>  
-                    </linkedRecordId>     
-                </organisationLink>  
-                <xsl:if test="string-length(from) &gt; 0">
-                    <affiliationFromYear>
-                        <xsl:value-of select="from"></xsl:value-of>
-                    </affiliationFromYear>
-                </xsl:if>
-                <xsl:if test="string-length(until) &gt; 0">
-                    <affiliationUntilYear>
-                        <xsl:value-of select="until"></xsl:value-of>
-                    </affiliationUntilYear>
-                </xsl:if>   
-            </affiliation>
-        </xsl:for-each>
         <xsl:for-each select="affiliation[string-length(domain) = 0]">
             <otherAffiliation>
                 <xsl:attribute name="repeatId">
@@ -255,19 +232,6 @@
         </xsl:for-each>
     </xsl:template>
     <xsl:template match="identifiers">
-        <xsl:for-each select="identifier[type = 'LOCAL']">
-            <localIdentifier>
-                <xsl:attribute name="repeatId">
-                    <xsl:value-of select="position() - 1"></xsl:value-of>
-                </xsl:attribute>
-                <domain>
-                    <xsl:value-of select="domain"></xsl:value-of>
-                </domain>
-                <identifier>
-                    <xsl:value-of select="value"></xsl:value-of>
-                </identifier>
-            </localIdentifier>
-        </xsl:for-each>  
         <xsl:for-each select="identifier[type = 'ORCID']">
             <ORCID_ID>
                 <xsl:attribute name="repeatId">

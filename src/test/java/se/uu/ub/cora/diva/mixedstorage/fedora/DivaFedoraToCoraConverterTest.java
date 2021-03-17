@@ -19,6 +19,10 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -29,9 +33,11 @@ import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerFactory;
 import se.uu.ub.cora.logger.LoggerProvider;
 
-public class DivaFedoraToCoraPersonConverterTest {
+public class DivaFedoraToCoraConverterTest {
 
 	private ConverterFactorySpy converterFactory;
+	private XsltTransformationSpy transformation;
+	private DivaFedoraToCoraConverter converter;
 
 	@BeforeMethod
 	public void setUp() {
@@ -39,22 +45,38 @@ public class DivaFedoraToCoraPersonConverterTest {
 		LoggerProvider.setLoggerFactory(loggerFactory);
 		converterFactory = new ConverterFactorySpy();
 		ConverterProvider.setConverterFactory("xml", converterFactory);
-
+		transformation = new XsltTransformationSpy();
+		converter = new DivaFedoraToCoraConverterImp(transformation);
 	}
 
 	@Test
 	public void testFromXml() {
-		XsltTransformationSpy transformation = new XsltTransformationSpy();
-		DivaFedoraToCoraConverter personConverter = new DivaFedoraToCoraPersonConverter(
-				transformation);
 
 		String xml = "someXmlString";
-		DataGroup fromXML = personConverter.fromXML(xml);
+		DataGroup fromXML = converter.fromXML(xml);
 		assertEquals(transformation.inputXml, xml);
 
 		ConverterSpy factoredConverter = converterFactory.factoredConverter;
 		assertEquals(factoredConverter.dataString, transformation.stringToReturn);
 		assertEquals(fromXML, factoredConverter.dataGroupToReturn);
+	}
+
+	@Test
+	public void testFromXmlWithParameters() {
+		String xml = "someXmlString";
+		Map<String, Object> parameters = new HashMap<>();
+
+		parameters.put("domain", "uu");
+
+		DataGroup dataGroup = converter.fromXMLWithParameters(xml, parameters);
+		assertEquals(transformation.inputXml, xml);
+
+		ConverterSpy factoredConverter = converterFactory.factoredConverter;
+		assertEquals(factoredConverter.dataString, transformation.stringToReturn);
+		assertEquals(dataGroup, factoredConverter.dataGroupToReturn);
+
+		assertSame(transformation.parameters, parameters);
+
 	}
 
 }
