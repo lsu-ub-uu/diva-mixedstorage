@@ -149,6 +149,7 @@
         </recordInfo>
     </xsl:template>
     <xsl:template match="defaultName">
+     <xsl:if test="string-length(lastname) &gt; 0 or string-length(firstname) &gt; 0">
         <authorisedName>
             <xsl:if test="string-length(lastname) &gt; 0">
                 <familyName>
@@ -161,6 +162,7 @@
                 </givenName>
             </xsl:if>
         </authorisedName>
+       </xsl:if>
         <xsl:if test="string-length(addition) &gt; 0">
             <academicTitle>
                 <xsl:value-of select="addition"></xsl:value-of>
