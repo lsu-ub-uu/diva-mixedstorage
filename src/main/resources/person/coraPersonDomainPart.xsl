@@ -91,7 +91,7 @@
                         <domain>
                             <xsl:value-of select="."/>
                         </domain>
-                        <xsl:for-each select="../publicRecord">
+                        <xsl:for-each select="../../../publicRecord">
                 <public>
                     <xsl:choose>
                         <xsl:when test=". = 'true'">
