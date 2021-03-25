@@ -91,6 +91,18 @@
                         <domain>
                             <xsl:value-of select="."/>
                         </domain>
+                        <xsl:for-each select="../publicRecord">
+                <public>
+                    <xsl:choose>
+                        <xsl:when test=". = 'true'">
+                            <xsl:text>yes</xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text>no</xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </public>
+            </xsl:for-each>
                     </recordInfo>                   
                     <xsl:for-each select="../../../affiliations/affiliation[domain = $domain]">
                         <affiliation>
