@@ -31,15 +31,19 @@ import org.w3c.dom.NodeList;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.diva.mixedstorage.util.URLEncoder;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
+import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
 public final class DivaFedoraRecordStorage implements RecordStorage {
 
 	private static final int OK = 200;
+	private static final int NOT_FOUND = 404;
 	private static final String PERSON = "person";
+	private static final String PERSON_DOMAIN_PART = "personDomainPart";
 	private HttpHandlerFactory httpHandlerFactory;
 	private String baseURL;
 	private DivaFedoraConverterFactory converterFactory;
@@ -66,19 +70,63 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	@Override
 	public DataGroup read(String type, String id) {
 		if (PERSON.equals(type)) {
-			return readAndConvertPersonFromFedora(id);
+			return readOnePerson(id);
 		}
-		if ("personDomainPart".equals(type)) {
-			return readAndConvertPersonDomainPartFromFedora(id);
+		if (PERSON_DOMAIN_PART.equals(type)) {
+			return readOnePersonDomainPart(id);
 		}
 		throw NotImplementedException.withMessage("read is not implemented for type: " + type);
 	}
 
+	private DataGroup readOnePerson(String id) {
+		ensurePersonIsNotDeleted(id);
+		return readAndConvertPersonFromFedora(id);
+	}
+
+	private DataGroup readOnePersonDomainPart(String id) {
+		String personIdPart = extractPersonIdFromId(id);
+		ensurePersonIsNotDeleted(personIdPart);
+		return readAndConvertPersonDomainPartFromFedora(id);
+	}
+
+	private void ensurePersonIsNotDeleted(String id) {
+		String query = "state=A pid=" + id;
+		NodeList list = readPersonListFromFedora(query);
+		throwRecordNotFoundExceptionIfNoPersonsFound(id, list);
+	}
+
+	private NodeList readPersonListFromFedora(String query) {
+		String personListXML = getPersonListXMLFromFedora(query);
+		return extractNodeListWithPidsFromXML(personListXML);
+	}
+
+	private void throwRecordNotFoundExceptionIfNoPersonsFound(String id, NodeList list) {
+		if (0 == list.getLength()) {
+			throw new RecordNotFoundException("Record not found for type: person and id: " + id);
+		}
+	}
+
 	private DataGroup readAndConvertPersonFromFedora(String id) {
-		HttpHandler httpHandler = createHttpHandlerForPerson(id);
+		String responseText = tryToReadPersonFromFedora(id);
+		return convertPerson(responseText);
+	}
+
+	private DataGroup convertPerson(String responseText) {
 		DivaFedoraToCoraConverter toCoraConverter = converterFactory.factorToCoraConverter(PERSON);
-		String responseText = httpHandler.getResponseText();
 		return toCoraConverter.fromXML(responseText);
+	}
+
+	private String tryToReadPersonFromFedora(String id) {
+		HttpHandler httpHandler = createHttpHandlerForPerson(id);
+		int responseCode = httpHandler.getResponseCode();
+		throwErrorIfRecordNotFound(id, responseCode);
+		return httpHandler.getResponseText();
+	}
+
+	private void throwErrorIfRecordNotFound(String id, int responseCode) {
+		if (NOT_FOUND == responseCode) {
+			throw new RecordNotFoundException("Record not found for type: person and id: " + id);
+		}
 	}
 
 	private HttpHandler createHttpHandlerForPerson(String id) {
@@ -89,13 +137,21 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	}
 
 	private DataGroup readAndConvertPersonDomainPartFromFedora(String id) {
+		String responseText = readPersonDomainPart(id);
+		return convertPersonDomainPart(id, responseText);
+	}
+
+	private String readPersonDomainPart(String id) {
 		String personIdPart = extractPersonIdFromId(id);
 		HttpHandler httpHandler = createHttpHandlerForPerson(personIdPart);
-		DivaFedoraToCoraConverter toCoraConverter = converterFactory
-				.factorToCoraConverter("personDomainPart");
-
-		Map<String, Object> parameters = createParameters(id);
 		String responseText = httpHandler.getResponseText();
+		return responseText;
+	}
+
+	private DataGroup convertPersonDomainPart(String id, String responseText) {
+		DivaFedoraToCoraConverter toCoraConverter = converterFactory
+				.factorToCoraConverter(PERSON_DOMAIN_PART);
+		Map<String, Object> parameters = createParameters(id);
 		return toCoraConverter.fromXMLWithParameters(responseText, parameters);
 	}
 
@@ -218,22 +274,27 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	}
 
 	private Collection<DataGroup> tryReadAndConvertPersonListFromFedora() {
-		String personListXML = getPersonListXMLFromFedora();
-		NodeList list = extractNodeListWithPidsFromXML(personListXML);
+		String query = "state=A pid~authority-person:*";
+		NodeList list = readPersonListFromFedora(query);
 		return constructCollectionOfPersonFromFedora(list);
 	}
 
-	private String getPersonListXMLFromFedora() {
-		HttpHandler httpHandler = createHttpHandlerForPersonList();
+	private String getPersonListXMLFromFedora(String query) {
+		HttpHandler httpHandler = createHttpHandlerForPersonList(query);
 		return httpHandler.getResponseText();
 	}
 
-	private HttpHandler createHttpHandlerForPersonList() {
-		String url = baseURL
-				+ "objects?pid=true&maxResults=100&resultFormat=xml&query=pid%7Eauthority-person:*";
+	private HttpHandler createHttpHandlerForPersonList(String query) {
+		String url = createUrlForPersonList(query);
 		HttpHandler httpHandler = httpHandlerFactory.factor(url);
 		httpHandler.setRequestMethod("GET");
 		return httpHandler;
+	}
+
+	private String createUrlForPersonList(String query) {
+		String urlEncodedQuery = URLEncoder.encode(query);
+		return baseURL + "objects?pid=true&maxResults=100&resultFormat=xml&query="
+				+ urlEncodedQuery;
 	}
 
 	private NodeList extractNodeListWithPidsFromXML(String personListXML) {

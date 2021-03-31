@@ -10,16 +10,19 @@ import se.uu.ub.cora.httphandler.HttpMultiPartUploader;
 public class HttpHandlerFactorySpy implements HttpHandlerFactory {
 	public List<String> urls = new ArrayList<>();
 	public List<HttpHandlerSpy> factoredHttpHandlers = new ArrayList<>();
-	public String responseText = "";
-	public int responseCode = 200;
+	public List<Integer> responseCodes = new ArrayList<>();
+	public List<String> responseTexts = new ArrayList<>();
 
 	@Override
 	public HttpHandler factor(String url) {
 		urls.add(url);
 		HttpHandlerSpy httpHandlerSpy = new HttpHandlerSpy();
 		factoredHttpHandlers.add(httpHandlerSpy);
-		httpHandlerSpy.responseText = responseText;
-		httpHandlerSpy.responseCode = responseCode;
+
+		int numOfHandlersFactored = factoredHttpHandlers.size();
+
+		httpHandlerSpy.responseText = responseTexts.get(numOfHandlersFactored - 1);
+		httpHandlerSpy.responseCode = responseCodes.get(numOfHandlersFactored - 1);
 		return httpHandlerSpy;
 	}
 

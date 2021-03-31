@@ -33,7 +33,9 @@ public class DivaCoraToFedoraPersonConverterTest {
 	public void testConvertToFedoraXML() throws Exception {
 
 		HttpHandlerFactorySpy httpHandlerFactory = new HttpHandlerFactorySpy();
-		httpHandlerFactory.responseText = ResourceReader.readResourceAsString("person/11685.xml");
+		httpHandlerFactory.responseCodes.add(200);
+		httpHandlerFactory.responseTexts
+				.add(ResourceReader.readResourceAsString("person/11685.xml"));
 
 		String fedoraURL = "someFedoraURL";
 		DivaCoraToFedoraConverter converter = DivaCoraToFedoraPersonConverter
@@ -46,7 +48,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 				fedoraURL + "objects/authority-person:11685/datastreams/METADATA/content");
 
 		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandler.requestMetod, "GET");
+		assertEquals(httpHandler.requestMethod, "GET");
 
 		assertEquals(xml, ResourceReader.readResourceAsString("person/expectedUpdated11685.xml"));
 
