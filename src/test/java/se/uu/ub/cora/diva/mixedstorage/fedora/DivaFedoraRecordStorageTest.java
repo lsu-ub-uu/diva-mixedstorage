@@ -35,6 +35,7 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaFedoraRecordStorageTest {
@@ -67,38 +68,90 @@ public class DivaFedoraRecordStorageTest {
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "read is not implemented for type: null")
-	public void readThrowsNotImplementedException() throws Exception {
+	public void readThrowsNotImplementedExceptionForTypeNull() throws Exception {
 		divaToCoraRecordStorage.read(null, null);
 	}
 
 	@Test
 	public void readPersonCallsFedoraAndReturnsConvertedResult() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
+		simulateResponseWithAListOfPersonsFromFedora();
+		simulateResponseWithAPersonFromFedora();
+
 		DataGroup readPerson = divaToCoraRecordStorage.read("person", "authority-person:11685");
-		assertEquals(httpHandlerFactory.urls.get(0),
-				baseURL + "objects/authority-person:11685/datastreams/METADATA/content");
-		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
-		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandler.requestMetod, "GET");
+
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 2);
+
+		checkHttpCalls();
 
 		assertEquals(converterFactory.factoredConverters.size(), 1);
 		assertEquals(converterFactory.factoredTypes.get(0), "person");
 		DivaFedoraToCoraConverterSpy divaToCoraConverter = (DivaFedoraToCoraConverterSpy) converterFactory.factoredConverters
 				.get(0);
-		assertEquals(divaToCoraConverter.xml, httpHandlerFactory.responseText);
+		assertEquals(divaToCoraConverter.xml, "Some response text");
 		assertEquals(readPerson, divaToCoraConverter.convertedDataGroup);
+	}
+
+	private void simulateResponseWithAListOfPersonsFromFedora() {
+		httpHandlerFactory.responseCodes.add(200);
+		httpHandlerFactory.responseTexts.add(createXMLForPersonList());
+	}
+
+	private void simulateResponseWithAPersonFromFedora() {
+		httpHandlerFactory.responseTexts.add("Some response text");
+		httpHandlerFactory.responseCodes.add(200);
+	}
+
+	private void checkHttpCalls() {
+		assertEquals(httpHandlerFactory.urls.get(0),
+				baseURL + "objects?pid=true&maxResults=100&resultFormat=xml&"
+						+ "query=state%3DA+pid%3Dauthority-person%3A11685");
+		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
+		assertEquals(httpHandler.requestMethod, "GET");
+
+		assertEquals(httpHandlerFactory.urls.get(1),
+				baseURL + "objects/authority-person:11685/datastreams/METADATA/content");
+		HttpHandlerSpy httpHandler2 = httpHandlerFactory.factoredHttpHandlers.get(1);
+		assertEquals(httpHandler2.requestMethod, "GET");
+	}
+
+	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
+			+ "Record not found for type: person and id: authority-person:22")
+	public void testRecordNotFoundOrDeletedInStorage() throws Exception {
+		httpHandlerFactory.responseCodes.add(200);
+		httpHandlerFactory.responseTexts.add(createXMLForPlaceListNoRecordsFound());
+		divaToCoraRecordStorage.read("person", "authority-person:22");
+	}
+
+	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
+			+ "Record not found for type: person and id: authority-person:11685")
+	public void testRecordFoundWhenLookingForNonDeletedButThenDeletedBeforeWeCanReadIt()
+			throws Exception {
+		httpHandlerFactory.responseTexts.add(createXMLForPersonList());
+		httpHandlerFactory.responseCodes.add(200);
+		httpHandlerFactory.responseTexts.add("Dummy response text");
+		httpHandlerFactory.responseCodes.add(404);
+		divaToCoraRecordStorage.read("person", "authority-person:11685");
+	}
+
+	private String createXMLForPlaceListNoRecordsFound() {
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+				+ "<result xmlns=\"http://www.fedora.info/definitions/1/0/types/\" "
+				+ "xmlns:types=\"http://www.fedora.info/definitions/1/0/types/\" "
+				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+				+ "xsi:schemaLocation=\"http://www.fedora.info/definitions/1/0/types/ "
+				+ "http://localhost:8088/fedora/schema/findObjects.xsd\">\n" + "  <resultList>\n"
+				+ "  </resultList>\n" + "</result>";
 	}
 
 	@Test
 	public void readPersonDomainPartCallsFedoraAndReturnsConvertedResult() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
+		simulateResponseWithAListOfPersonsFromFedora();
+		simulateResponseWithAPersonFromFedora();
+
 		DataGroup readPersonDomainPart = divaToCoraRecordStorage.read("personDomainPart",
 				"authority-person:11685:uu");
-		assertEquals(httpHandlerFactory.urls.get(0),
-				baseURL + "objects/authority-person:11685/datastreams/METADATA/content");
-		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
-		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandler.requestMetod, "GET");
+
+		checkHttpCalls();
 
 		assertEquals(converterFactory.factoredConverters.size(), 1);
 		assertEquals(converterFactory.factoredTypes.get(0), "personDomainPart");
@@ -107,7 +160,7 @@ public class DivaFedoraRecordStorageTest {
 				.get(0);
 		assertTrue(divaToCoraConverter.fromXMLWithParametersWasCalled);
 
-		assertEquals(divaToCoraConverter.xml, httpHandlerFactory.responseText);
+		assertEquals(divaToCoraConverter.xml, "Some response text");
 		assertEquals(readPersonDomainPart, divaToCoraConverter.convertedDataGroup);
 		assertEquals(divaToCoraConverter.parameters.get("domainFilter"), "uu");
 
@@ -139,7 +192,7 @@ public class DivaFedoraRecordStorageTest {
 
 	@Test
 	public void updateUpdatesNameInRecordStorage() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
+		simulateResponseWithAPersonFromFedora();
 		DataGroup record = new DataGroupSpy("authority");
 
 		DataGroup collectedTerms = createCollectTermsWithRecordLabel();
@@ -156,7 +209,7 @@ public class DivaFedoraRecordStorageTest {
 						+ "&logMessage=coraWritten&checksumType=SHA-512");
 
 		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandler.requestMetod, "PUT");
+		assertEquals(httpHandler.requestMethod, "PUT");
 		String encoded = Base64.getEncoder().encodeToString(
 				(fedoraUsername + ":" + fedoraPassword).getBytes(StandardCharsets.UTF_8));
 		assertEquals(httpHandler.requestProperties.get("Authorization"), "Basic " + encoded);
@@ -189,8 +242,8 @@ public class DivaFedoraRecordStorageTest {
 	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
 			+ "update to fedora failed for record: diva-person:77")
 	public void updateIfNotOkFromFedoraThrowException() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
-		httpHandlerFactory.responseCode = 505;
+		httpHandlerFactory.responseCodes.add(505);
+		httpHandlerFactory.responseTexts.add("Some response text");
 
 		DataGroup record = new DataGroupSpy("authority");
 		DataGroup collectedTerms = createCollectTermsWithRecordLabel();
@@ -202,8 +255,8 @@ public class DivaFedoraRecordStorageTest {
 	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
 			+ "update to fedora failed for record: diva-person:23")
 	public void updateIfNotOkFromFedoraThrowExceptionOtherRecord() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
-		httpHandlerFactory.responseCode = 500;
+		httpHandlerFactory.responseCodes.add(505);
+		httpHandlerFactory.responseTexts.add("Some response text");
 
 		DataGroup record = new DataGroupSpy("authority");
 		DataGroup collectedTerms = createCollectTermsWithRecordLabel();
@@ -222,20 +275,25 @@ public class DivaFedoraRecordStorageTest {
 			+ "Unable to read list of persons: Can not read xml: "
 			+ "The element type \"someTag\" must be terminated by the matching end-tag \"</someTag>\".")
 	public void readListThrowsParseExceptionOnBrokenXML() throws Exception {
-		httpHandlerFactory.responseText = "<someTag></notSameTag>";
+		httpHandlerFactory.responseCodes.add(200);
+		httpHandlerFactory.responseTexts.add("<someTag></notSameTag>");
 		divaToCoraRecordStorage.readList("person", new DataGroupSpy("filter"));
 	}
 
 	@Test
 	public void readPersonListCallsFedoraAndReturnsConvertedResult() throws Exception {
-		httpHandlerFactory.responseText = createXMLForPersonList();
+		simulateResponseWithAListOfPersonsFromFedora();
+		simulateResponseWithAPersonFromFedora();
+		simulateResponseWithAPersonFromFedora();
+		simulateResponseWithAPersonFromFedora();
+
 		Collection<DataGroup> readPersonList = divaToCoraRecordStorage.readList("person",
 				new DataGroupSpy("filter")).listOfDataGroups;
 		assertEquals(httpHandlerFactory.urls.get(0), baseURL
-				+ "objects?pid=true&maxResults=100&resultFormat=xml&query=pid%7Eauthority-person:*");
+				+ "objects?pid=true&maxResults=100&resultFormat=xml&query=state%3DA+pid%7Eauthority-person%3A*");
 		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 4);
 		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandler.requestMetod, "GET");
+		assertEquals(httpHandler.requestMethod, "GET");
 
 		assertEquals(httpHandlerFactory.urls.get(1),
 				baseURL + "objects/authority-person:11685/datastreams/METADATA/content");
@@ -248,7 +306,7 @@ public class DivaFedoraRecordStorageTest {
 		assertEquals(converterFactory.factoredTypes.get(0), "person");
 		DivaFedoraToCoraConverterSpy divaToCoraConverter = (DivaFedoraToCoraConverterSpy) converterFactory.factoredConverters
 				.get(0);
-		assertEquals(divaToCoraConverter.xml, httpHandlerFactory.responseText);
+		assertEquals(divaToCoraConverter.xml, "Some response text");
 		assertEquals(readPersonList.size(), 3);
 		Iterator<DataGroup> readPersonIterator = readPersonList.iterator();
 		assertEquals(readPersonIterator.next(), divaToCoraConverter.convertedDataGroup);
