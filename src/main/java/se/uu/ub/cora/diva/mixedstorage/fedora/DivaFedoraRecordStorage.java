@@ -144,8 +144,7 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	private String readPersonDomainPart(String id) {
 		String personIdPart = extractPersonIdFromId(id);
 		HttpHandler httpHandler = createHttpHandlerForPerson(personIdPart);
-		String responseText = httpHandler.getResponseText();
-		return responseText;
+		return httpHandler.getResponseText();
 	}
 
 	private DataGroup convertPersonDomainPart(String id, String responseText) {
