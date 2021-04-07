@@ -29,11 +29,16 @@ public class DivaFedoraToCoraConverterSpy implements DivaFedoraToCoraConverter {
 	public DataGroup convertedDataGroup;
 	public boolean fromXMLWithParametersWasCalled = false;
 	public Map<String, Object> parameters;
+	public DataGroup dataGroupToReturn = null;
 
 	@Override
 	public DataGroup fromXML(String xml) {
 		this.xml = xml;
-		convertedDataGroup = new DataGroupSpy("Converted xml");
+		if (dataGroupToReturn == null) {
+			convertedDataGroup = new DataGroupSpy("Converted xml");
+		} else {
+			convertedDataGroup = dataGroupToReturn;
+		}
 		return convertedDataGroup;
 	}
 

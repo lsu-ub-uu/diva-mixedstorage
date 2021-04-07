@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -24,9 +24,11 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -321,6 +323,71 @@ public class DivaFedoraRecordStorageTest {
 				+ "  </objectFields>\n" + "  <objectFields>\n"
 				+ "      <pid>authority-person:13685</pid>\n" + "  </objectFields>\n"
 				+ "  </resultList>\n" + "</result>";
+	}
+
+	@Test
+	public void readPersonDomainPartListCallsFedoraAndReturnsConvertedResult() throws Exception {
+		setUpForListDomainPart();
+
+		Collection<DataGroup> readPersonDomainPartList = divaToCoraRecordStorage
+				.readList("personDomainPart", new DataGroupSpy("filter")).listOfDataGroups;
+		assertEquals(httpHandlerFactory.urls.get(0), baseURL
+				+ "objects?pid=true&maxResults=100&resultFormat=xml&query=state%3DA+pid%7Eauthority-person%3A*");
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 4);
+		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
+		assertEquals(httpHandler.requestMethod, "GET");
+
+		assertEquals(httpHandlerFactory.urls.get(1),
+				baseURL + "objects/authority-person:11685/datastreams/METADATA/content");
+		assertEquals(httpHandlerFactory.urls.get(2),
+				baseURL + "objects/authority-person:12685/datastreams/METADATA/content");
+		assertEquals(httpHandlerFactory.urls.get(3),
+				baseURL + "objects/authority-person:13685/datastreams/METADATA/content");
+
+		assertCorrectFactoredTypesForListDomainPart();
+		DivaFedoraToCoraConverterSpy domainPartConverter = (DivaFedoraToCoraConverterSpy) converterFactory.factoredConverters
+				.get(1);
+		assertEquals(domainPartConverter.parameters.get("domainFilter"), "uu");
+		DivaFedoraToCoraConverterSpy domainPartConverter2 = (DivaFedoraToCoraConverterSpy) converterFactory.factoredConverters
+				.get(3);
+		assertEquals(domainPartConverter2.parameters.get("domainFilter"), "test");
+		assertEquals(readPersonDomainPartList.size(), 2);
+	}
+
+	private void setUpForListDomainPart() {
+		simulateResponseWithAListOfPersonsFromFedora();
+		simulateResponseWithAPersonFromFedora();
+		simulateResponseWithAPersonFromFedora();
+		simulateResponseWithAPersonFromFedora();
+
+		setUpConvertToReturnDataGroup();
+	}
+
+	private void setUpConvertToReturnDataGroup() {
+		List<DataGroup> dataGroups = new ArrayList<>();
+		createAndAddGroupWithDomainPart(dataGroups, "authority-person:11685:uu");
+		createAndAddGroupWithDomainPart(dataGroups, "authority-person:12685:test");
+		dataGroups.add(new DataGroupSpy("person"));
+		converterFactory.dataGroupsToReturnFromConverter = dataGroups;
+	}
+
+	private void assertCorrectFactoredTypesForListDomainPart() {
+		assertEquals(converterFactory.factoredConverters.size(), 5);
+		assertEquals(converterFactory.factoredTypes.get(0), "person");
+		assertEquals(converterFactory.factoredTypes.get(1), "personDomainPart");
+		assertEquals(converterFactory.factoredTypes.get(2), "person");
+		assertEquals(converterFactory.factoredTypes.get(3), "personDomainPart");
+		assertEquals(converterFactory.factoredTypes.get(4), "person");
+	}
+
+	private void createAndAddGroupWithDomainPart(List<DataGroup> dataGroups,
+			String linkedRecordId) {
+		DataGroupSpy personGroup = new DataGroupSpy("person");
+		DataGroupSpy domainPart = new DataGroupSpy("personDomainPart");
+		domainPart.addChild(new DataAtomicSpy("linkedRecordId", linkedRecordId));
+		personGroup.addChild(domainPart);
+
+		dataGroups.add(personGroup);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

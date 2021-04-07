@@ -273,6 +273,22 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
+	public void readPersonDomainPartListGoesToFedoraToCoraStorage() throws Exception {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+
+		RecordStorageSpyData expectedData = new RecordStorageSpyData();
+		expectedData.type = "personDomainPart";
+		expectedData.filter = new DataGroupSpy("filter");
+		expectedData.answer = divaMixedRecordStorage.readList(expectedData.type,
+				expectedData.filter).listOfDataGroups;
+
+		expectedData.calledMethod = "readList";
+		assertNoInteractionWithStorage(basicStorage);
+		assertExpectedDataSameAsInStorageSpy(divaFedoraToCoraStorage, expectedData);
+	}
+
+	@Test
 	public void readOrganisationListGoesToDbToCoraStorage() throws Exception {
 		assertReadListGoesToDbForOrganisationType("organisation");
 	}
