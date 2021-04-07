@@ -21,17 +21,29 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 import java.util.ArrayList;
 import java.util.List;
 
+import se.uu.ub.cora.data.DataGroup;
+
 public class DivaFedoraConverterFactorySpy implements DivaFedoraConverterFactory {
 
 	List<DivaFedoraToCoraConverter> factoredConverters = new ArrayList<>();
 	List<String> factoredTypes = new ArrayList<>();
 	List<DivaCoraToFedoraConverter> factoredToFedoraConverters = new ArrayList<>();
 	public List<String> factoredToFedoraTypes = new ArrayList<>();
+	public List<DataGroup> dataGroupsToReturnFromConverter = new ArrayList<>();
+	private int returnedGroupsIndex = 0;
 
 	@Override
 	public DivaFedoraToCoraConverter factorToCoraConverter(String type) {
 		factoredTypes.add(type);
-		DivaFedoraToCoraConverter converter = new DivaFedoraToCoraConverterSpy();
+		DivaFedoraToCoraConverterSpy converter = new DivaFedoraToCoraConverterSpy();
+		if ("person".equals(type)) {
+
+			if (!dataGroupsToReturnFromConverter.isEmpty()) {
+				converter.dataGroupToReturn = dataGroupsToReturnFromConverter
+						.get(returnedGroupsIndex);
+				returnedGroupsIndex++;
+			}
+		}
 		factoredConverters.add(converter);
 		return converter;
 	}

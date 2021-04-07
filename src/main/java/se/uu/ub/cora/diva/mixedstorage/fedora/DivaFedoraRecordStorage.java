@@ -254,6 +254,9 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 		if (PERSON.equals(type)) {
 			return readAndConvertPersonListFromFedora();
 		}
+		if (PERSON_DOMAIN_PART.equals(type)) {
+			return readAndConvertDomainPartListFromFedora();
+		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
 	}
 
@@ -310,6 +313,45 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 			personList.add(readAndConvertPersonFromFedora(pid));
 		}
 		return personList;
+	}
+
+	private StorageReadResult readAndConvertDomainPartListFromFedora() {
+		String query = "state=A pid~authority-person:*";
+		NodeList list = readPersonListFromFedora(query);
+		List<DataGroup> domainPartList = new ArrayList<>(list.getLength());
+		for (int i = 0; i < list.getLength(); i++) {
+			readPersonAndPossiblyConvertDomainParts(list, i, domainPartList);
+		}
+		return createStorageResult(domainPartList);
+	}
+
+	private StorageReadResult createStorageResult(List<DataGroup> domainPartList) {
+		StorageReadResult storageReadResult = new StorageReadResult();
+		storageReadResult.listOfDataGroups = domainPartList;
+		return storageReadResult;
+	}
+
+	private void readPersonAndPossiblyConvertDomainParts(NodeList list, int index,
+			List<DataGroup> domainPartList) {
+		Node node = list.item(index);
+		String pid = node.getTextContent();
+		String responseText = tryToReadPersonFromFedora(pid);
+		DataGroup convertedPerson = convertPerson(responseText);
+		possiblyAddDomainPartsToList(responseText, convertedPerson, domainPartList);
+	}
+
+	private void possiblyAddDomainPartsToList(String responseText, DataGroup convertedPerson,
+			List<DataGroup> domainPartList) {
+		for (DataGroup dataGroup : convertedPerson.getAllGroupsWithNameInData(PERSON_DOMAIN_PART)) {
+			addDomainPartToList(responseText, dataGroup, domainPartList);
+		}
+	}
+
+	private void addDomainPartToList(String responseText, DataGroup dataGroup,
+			List<DataGroup> domainPartList) {
+		String id = dataGroup.getFirstAtomicValueWithNameInData("linkedRecordId");
+		DataGroup convertedPersonDomainPart = convertPersonDomainPart(id, responseText);
+		domainPartList.add(convertedPersonDomainPart);
 	}
 
 	@Override

@@ -116,6 +116,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (PERSON.equals(type)) {
 			return divaFedoraStorage.readList(type, filter);
 		}
+		if ("personDomainPart".equals(type)) {
+			return divaFedoraStorage.readList(type, filter);
+		}
 		if (isOrganisation(type)) {
 			return divaDbStorage.readList(type, filter);
 		}
