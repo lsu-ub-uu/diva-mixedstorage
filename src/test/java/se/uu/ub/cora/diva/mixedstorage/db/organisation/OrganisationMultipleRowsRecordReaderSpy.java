@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.ResultDelimiter;
 
 public class OrganisationMultipleRowsRecordReaderSpy implements RecordReader {
 
@@ -63,6 +64,13 @@ public class OrganisationMultipleRowsRecordReaderSpy implements RecordReader {
 
 	@Override
 	public Map<String, Object> readNextValueFromSequence(String sequenceName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Map<String, Object>> readAllFromTable(String tableName,
+			ResultDelimiter resultDelimiter) {
 		// TODO Auto-generated method stub
 		return null;
 	}

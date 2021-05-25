@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.ResultDelimiter;
 
 public class RecordReaderRelatedTableSpy implements RecordReader {
 
@@ -70,6 +71,13 @@ public class RecordReaderRelatedTableSpy implements RecordReader {
 		nextVal = new HashMap<>();
 		nextVal.put("nextval", 3);
 		return nextVal;
+	}
+
+	@Override
+	public List<Map<String, Object>> readAllFromTable(String tableName,
+			ResultDelimiter resultDelimiter) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

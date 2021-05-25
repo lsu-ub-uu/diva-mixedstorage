@@ -25,6 +25,7 @@ import java.util.Map;
 
 import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.ResultDelimiter;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
 
 public class RecordReaderUserSpy implements RecordReader {
@@ -78,6 +79,13 @@ public class RecordReaderUserSpy implements RecordReader {
 	public Map<String, Object> readNextValueFromSequence(String sequenceName) {
 		MCR.addCall("sequenceName", sequenceName);
 		MCR.addReturned(null);
+		return null;
+	}
+
+	@Override
+	public List<Map<String, Object>> readAllFromTable(String tableName,
+			ResultDelimiter resultDelimiter) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

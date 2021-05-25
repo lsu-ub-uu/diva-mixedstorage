@@ -37,7 +37,7 @@
 		<storage.version>3.8.0</storage.version>
 		<searchstorage.version>3.6.0</searchstorage.version>
 		<basicstorage.version>3.16.0</basicstorage.version>
-		<sqldatabase.version>2.6.0</sqldatabase.version>
+		<sqldatabase.version>2.7-SNAPSHOT</sqldatabase.version>
 		<httphandler.version>2.2.0</httphandler.version>
 		<apptokenstorage.version>2.2.0</apptokenstorage.version>
 		<gatekeeper.version>3.6.0</gatekeeper.version>

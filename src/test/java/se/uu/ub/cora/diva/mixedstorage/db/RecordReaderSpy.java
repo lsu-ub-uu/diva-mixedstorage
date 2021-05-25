@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.ResultDelimiter;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
 
 public class RecordReaderSpy implements RecordReader {
@@ -51,6 +52,7 @@ public class RecordReaderSpy implements RecordReader {
 
 	public Map<String, Object> responseToReadOneRowFromDbUsingTableAndConditions = null;
 	public Map<String, Object> responseToReadFromTableUsingConditions;
+	public ResultDelimiter resultDelimiter;
 
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName) {
@@ -142,6 +144,22 @@ public class RecordReaderSpy implements RecordReader {
 	@Override
 	public Map<String, Object> readNextValueFromSequence(String sequenceName) {
 		return null;
+	}
+
+	@Override
+	public List<Map<String, Object>> readAllFromTable(String tableName,
+			ResultDelimiter resultDelimiter) {
+		usedTableName = tableName;
+		usedTableNames.add(usedTableName);
+		this.resultDelimiter = resultDelimiter;
+
+		for (int i = 0; i < noOfRecordsToReturn; i++) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("someKey" + i, "someValue" + i);
+			returnedList.add(map);
+		}
+		returnedListCollection.add(returnedList);
+		return returnedList;
 	}
 
 }

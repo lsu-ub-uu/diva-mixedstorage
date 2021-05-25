@@ -196,6 +196,44 @@ public class DivaDbRecordStorageTest {
 		assertEquals(recordReader.usedTableName, "suborganisationview");
 	}
 
+	/**************************************************************************/
+	@Test
+	public void testReadOrganisationListWithFilter() throws Exception {
+		DataGroupSpy filter = new DataGroupSpy("filter");
+		filter.addChild(new DataAtomicSpy("fromNo", "10"));
+		filter.addChild(new DataAtomicSpy("toNo", "19"));
+		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.usedTableName, "organisationview");
+		assertEquals(recordReader.resultDelimiter.limit, Integer.valueOf(10));
+		assertEquals(recordReader.resultDelimiter.offset, Integer.valueOf(9));
+	}
+
+	@Test
+	public void testReadOrganisationListWithFilterNOFrom() throws Exception {
+		DataGroupSpy filter = new DataGroupSpy("filter");
+		filter.addChild(new DataAtomicSpy("toNo", "19"));
+		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.usedTableName, "organisationview");
+
+		assertEquals(recordReader.resultDelimiter.limit, Integer.valueOf(19));
+		assertEquals(recordReader.resultDelimiter.offset, null);
+	}
+
+	@Test
+	public void testReadOrganisationListWithFilterNOTo() throws Exception {
+		DataGroupSpy filter = new DataGroupSpy("filter");
+		filter.addChild(new DataAtomicSpy("fromNo", "15"));
+		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.usedTableName, "organisationview");
+
+		assertEquals(recordReader.resultDelimiter.limit, null);
+		assertEquals(recordReader.resultDelimiter.offset, Integer.valueOf(14));
+	}
+
+	/**************************************************************************/
 	@Test
 	public void testReadOrganisationListFactorMultipleParentReader() throws Exception {
 		divaRecordStorage.readList(ORGANISATION_TYPE, new DataGroupSpy("filter"));
@@ -469,5 +507,22 @@ public class DivaDbRecordStorageTest {
 				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("organisation",
 						"notAnInt");
 		assertFalse(organisationExists);
+	}
+
+	@Test
+	public void testFilter() {
+		DataGroupSpy filterDataGroup = new DataGroupSpy("filter");
+		createAndAddPart(filterDataGroup, "domain", "uu", "0");
+		createAndAddPart(filterDataGroup, "start", "0", "1");
+		createAndAddPart(filterDataGroup, "end", "200", "2");
+	}
+
+	private void createAndAddPart(DataGroupSpy filterDataGroup, String key, String value,
+			String repeatId) {
+		DataGroupSpy part = new DataGroupSpy("part");
+		part.addChild(new DataAtomicSpy("key", key));
+		part.addChild(new DataAtomicSpy("value", value));
+		part.setRepeatId(repeatId);
+		filterDataGroup.addChild(part);
 	}
 }

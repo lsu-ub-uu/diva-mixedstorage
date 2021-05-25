@@ -29,6 +29,7 @@ import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.ResultDelimiter;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -113,7 +114,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	public StorageReadResult readList(String type, DataGroup filter) {
 		if (isOrganisation(type)) {
 			String tableName = getTableName(type);
-			return readOrganisationList(type, tableName);
+			return readOrganisationList(type, tableName, filter);
 		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
 	}
@@ -135,8 +136,79 @@ public class DivaDbRecordStorage implements RecordStorage {
 				|| "subOrganisation".equals(type) || "topOrganisation".equals(type);
 	}
 
-	private StorageReadResult readOrganisationList(String type, String tableName) {
-		List<Map<String, Object>> rowsFromDb = readAllFromDb(tableName);
+	//
+	// {
+	// "name": "filter",
+	// "children": [
+	// {
+	// "name": "part",
+	// "children": [
+	// {
+	// "name": "key",
+	// "value": "domain"
+	// },
+	// {
+	// "name": "value",
+	// "value": "uu"
+	// }
+	// ],
+	// "repeatId": "0"
+	// },
+	// {
+	// "name": "part",
+	// "children": [
+	// {
+	// "name": "key",
+	// "value": "start"
+	// },
+	// {
+	// "name": "value",
+	// "value": "0"
+	// }
+	// ],
+	// "repeatId": "1"
+	// },{
+	// "name": "part",
+	// "children": [
+	// {
+	// "name": "key",
+	// "value": "end"
+	// },
+	// {
+	// "name": "value",
+	// "value": "200"
+	// }
+	// ],
+	// "repeatId": "2"
+	// }
+	// ]
+	// }
+	private StorageReadResult readOrganisationList(String type, String tableName,
+			DataGroup filter) {
+		// List<Map<String, Object>> rowsFromDb = readAllFromDb(tableName);
+		Integer fromNum = 0;
+		if (filter.containsChildWithNameInData("fromNo")) {
+			String fromNumString = filter.getFirstAtomicValueWithNameInData("fromNo");
+			fromNum = Integer.valueOf(fromNumString);
+
+		}
+		Integer toNum = null;
+		if (filter.containsChildWithNameInData("toNo")) {
+			String toNumString = filter.getFirstAtomicValueWithNameInData("toNo");
+			toNum = Integer.valueOf(toNumString);
+		}
+
+		Integer limit = null;
+		if (toNum != null) {
+			limit = fromNum != 0 ? (toNum - fromNum) + 1 : toNum;
+		}
+		Integer offset = fromNum != 0 ? fromNum - 1 : null;
+		ResultDelimiter resultDelimiter = new ResultDelimiter(limit, offset);
+
+		RecordReader recordReader = recordReaderFactory.factor();
+		List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable(tableName,
+				resultDelimiter);
+
 		List<DataGroup> convertedGroups = new ArrayList<>();
 		for (Map<String, Object> map : rowsFromDb) {
 			convertOrganisation(type, convertedGroups, map);
@@ -189,7 +261,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 			return readAndConvertUsers(type);
 		}
 		if (ORGANISATION.equals(type)) {
-			return readOrganisationList(type, "organisationview");
+			return readOrganisationList(type, "organisationview", filter);
 		} else {
 			throw NotImplementedException.withMessage("readAbstractList is not implemented");
 		}
