@@ -185,25 +185,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	// }
 	private StorageReadResult readOrganisationList(String type, String tableName,
 			DataGroup filter) {
-		// List<Map<String, Object>> rowsFromDb = readAllFromDb(tableName);
-		Integer fromNum = 0;
-		if (filter.containsChildWithNameInData("fromNo")) {
-			String fromNumString = filter.getFirstAtomicValueWithNameInData("fromNo");
-			fromNum = Integer.valueOf(fromNumString);
-
-		}
-		Integer toNum = null;
-		if (filter.containsChildWithNameInData("toNo")) {
-			String toNumString = filter.getFirstAtomicValueWithNameInData("toNo");
-			toNum = Integer.valueOf(toNumString);
-		}
-
-		Integer limit = null;
-		if (toNum != null) {
-			limit = fromNum != 0 ? (toNum - fromNum) + 1 : toNum;
-		}
-		Integer offset = fromNum != 0 ? fromNum - 1 : null;
-		ResultDelimiter resultDelimiter = new ResultDelimiter(limit, offset);
+		ResultDelimiter resultDelimiter = createResultDelimiter(filter);
 
 		RecordReader recordReader = recordReaderFactory.factor();
 		List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable(tableName,
@@ -215,6 +197,48 @@ public class DivaDbRecordStorage implements RecordStorage {
 		}
 		return createStorageReadResult(convertedGroups);
 	}
+
+	/**** Should all of this be calculated somewhere else?? *****/
+	private ResultDelimiter createResultDelimiter(DataGroup filter) {
+		Integer fromNum = calculateFromNum(filter);
+		Integer toNum = calculateToNum(filter);
+
+		Integer limit = calculateLimit(fromNum, toNum);
+		Integer offset = fromNum != 0 ? fromNum - 1 : null;
+		return new ResultDelimiter(limit, offset);
+	}
+
+	private Integer calculateFromNum(DataGroup filter) {
+		if (filter.containsChildWithNameInData("fromNo")) {
+			return getAtomicValueAsInteger(filter, "fromNo");
+		}
+		return 0;
+	}
+
+	private Integer getAtomicValueAsInteger(DataGroup filter, String nameInData) {
+		String atomicValue = filter.getFirstAtomicValueWithNameInData(nameInData);
+		return Integer.valueOf(atomicValue);
+	}
+
+	private Integer calculateToNum(DataGroup filter) {
+		if (filter.containsChildWithNameInData("toNo")) {
+			return getAtomicValueAsInteger(filter, "toNo");
+		}
+		return null;
+	}
+
+	private Integer calculateLimit(Integer fromNum, Integer toNum) {
+		if (toNum != null) {
+			return fromNum != 0 ? fromToDifferencePlusOne(fromNum, toNum) : toNum;
+		}
+		return null;
+	}
+
+	private int fromToDifferencePlusOne(Integer fromNum, Integer toNum) {
+		return (toNum - fromNum) + 1;
+	}
+
+	/*******************************************************/
 
 	private void convertOrganisation(String type, List<DataGroup> convertedGroups,
 			Map<String, Object> map) {

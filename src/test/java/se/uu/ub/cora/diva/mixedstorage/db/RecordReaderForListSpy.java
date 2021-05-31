@@ -67,8 +67,13 @@ public class RecordReaderForListSpy implements RecordReader {
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName,
 			ResultDelimiter resultDelimiter) {
-		// TODO Auto-generated method stub
-		return null;
+		for (int i = 0; i < noOfRecordsToReturn; i++) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("id", i);
+			returnedList.add(map);
+		}
+		returnedListCollection.add(returnedList);
+		return returnedList;
 	}
 
 }
