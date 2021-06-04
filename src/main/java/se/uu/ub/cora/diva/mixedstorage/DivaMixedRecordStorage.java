@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage;
 
 import java.util.Collection;
+import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.searchstorage.SearchStorage;
@@ -173,11 +174,6 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	}
 
 	@Override
-	public boolean recordsExistForRecordType(String type) {
-		return basicStorage.recordsExistForRecordType(type);
-	}
-
-	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
 		if (isOrganisation(type)) {
@@ -230,5 +226,17 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		// Needed for tests
 		return userStorage;
 
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		return divaDbStorage.getTotalNumberOfRecordsForType(type, filter);
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		return divaDbStorage.getTotalNumberOfRecordsForAbstractType(abstractType, implementingTypes,
+				filter);
 	}
 }

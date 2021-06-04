@@ -1,6 +1,7 @@
 package se.uu.ub.cora.diva.mixedstorage;
 
 import java.util.Collection;
+import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -74,11 +75,11 @@ public class DivaDbToCoraStorageSpy implements RecordStorage {
 		return true;
 	}
 
-	@Override
-	public boolean recordsExistForRecordType(String arg0) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	// @Override
+	// public boolean recordsExistForRecordType(String arg0) {
+	// // TODO Auto-generated method stub
+	// return false;
+	// }
 
 	@Override
 	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
@@ -91,6 +92,19 @@ public class DivaDbToCoraStorageSpy implements RecordStorage {
 		data.dataDivider = dataDivider;
 		data.calledMethod = "create";
 
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

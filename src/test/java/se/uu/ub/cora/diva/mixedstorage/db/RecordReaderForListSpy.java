@@ -76,4 +76,10 @@ public class RecordReaderForListSpy implements RecordReader {
 		return returnedList;
 	}
 
+	@Override
+	public int readNumberOfRows(String tableName, Map<String, Object> conditions) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

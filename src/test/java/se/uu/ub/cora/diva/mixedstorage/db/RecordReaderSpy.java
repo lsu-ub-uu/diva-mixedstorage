@@ -53,6 +53,7 @@ public class RecordReaderSpy implements RecordReader {
 	public Map<String, Object> responseToReadOneRowFromDbUsingTableAndConditions = null;
 	public Map<String, Object> responseToReadFromTableUsingConditions;
 	public ResultDelimiter resultDelimiter;
+	public int numberToReturn;
 
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName) {
@@ -160,6 +161,16 @@ public class RecordReaderSpy implements RecordReader {
 		}
 		returnedListCollection.add(returnedList);
 		return returnedList;
+	}
+
+	@Override
+	public int readNumberOfRows(String tableName, Map<String, Object> conditions) {
+		usedTableName = tableName;
+		usedTableNames.add(usedTableName);
+		usedConditions = conditions;
+		usedConditionsList.add(usedConditions);
+		numberToReturn = 5687;
+		return numberToReturn;
 	}
 
 }

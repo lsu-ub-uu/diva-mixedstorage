@@ -419,12 +419,6 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
-			+ "recordsExistForRecordType is not implemented")
-	public void recordsExistForRecordTypeThrowsNotImplementedException() throws Exception {
-		divaRecordStorage.recordsExistForRecordType(null);
-	}
-
-	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented")
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdThrowsNotImplementedException()
 			throws Exception {
@@ -509,6 +503,8 @@ public class DivaDbRecordStorageTest {
 		assertFalse(organisationExists);
 	}
 
+	// This is probably wrong - start and end outside parts? and fromNo/toNo instead of
+	// start/end
 	@Test
 	public void testFilter() {
 		DataGroupSpy filterDataGroup = new DataGroupSpy("filter");
@@ -524,5 +520,18 @@ public class DivaDbRecordStorageTest {
 		part.addChild(new DataAtomicSpy("value", value));
 		part.setRepeatId(repeatId);
 		filterDataGroup.addChild(part);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForTypeEmptyFilter() {
+		DataGroupSpy filterDataGroup = new DataGroupSpy("filter");
+		long totalNumberOfRecordsForType = divaRecordStorage
+				.getTotalNumberOfRecordsForType("subOrganisation", filterDataGroup);
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.usedTableName, "subOrganisation");
+		Map<String, Object> usedConditions = recordReader.usedConditions;
+		assertTrue(usedConditions.isEmpty());
+		assertEquals(totalNumberOfRecordsForType, recordReader.numberToReturn);
+
 	}
 }

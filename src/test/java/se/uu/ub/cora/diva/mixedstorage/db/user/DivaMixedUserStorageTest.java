@@ -679,11 +679,12 @@ public class DivaMixedUserStorageTest {
 		recordStorage.generateLinkCollectionPointingToRecord(null, null);
 	}
 
-	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
-			+ "recordsExistForRecordType is not implemented for user")
-	public void recordsExistForRecordTypeNotImplementedForUser() throws Exception {
-		recordStorage.recordsExistForRecordType(null);
-	}
+	// @Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp =
+	// ""
+	// + "recordsExistForRecordType is not implemented for user")
+	// public void recordsExistForRecordTypeNotImplementedForUser() throws Exception {
+	// recordStorage.recordsExistForRecordType(null);
+	// }
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented for user")

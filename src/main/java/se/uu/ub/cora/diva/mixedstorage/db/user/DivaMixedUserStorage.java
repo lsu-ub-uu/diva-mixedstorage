@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -341,11 +341,11 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 				.withMessage("generateLinkCollectionPointingToRecord is not implemented for user");
 	}
 
-	@Override
-	public boolean recordsExistForRecordType(String type) {
-		throw NotImplementedException
-				.withMessage("recordsExistForRecordType is not implemented for user");
-	}
+	// @Override
+	// public boolean recordsExistForRecordType(String type) {
+	// throw NotImplementedException
+	// .withMessage("recordsExistForRecordType is not implemented for user");
+	// }
 
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
@@ -384,5 +384,18 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	public DataGroupRoleReferenceCreator getDataGroupRoleReferenceCreator() {
 		// needed for test
 		return dataGroupRoleReferenceCreator;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

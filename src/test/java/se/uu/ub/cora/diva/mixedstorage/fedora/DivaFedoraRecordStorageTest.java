@@ -408,12 +408,13 @@ public class DivaFedoraRecordStorageTest {
 			throws Exception {
 		divaToCoraRecordStorage.generateLinkCollectionPointingToRecord(null, null);
 	}
-
-	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
-			+ "recordsExistForRecordType is not implemented")
-	public void recordsExistForRecordTypeThrowsNotImplementedException() throws Exception {
-		divaToCoraRecordStorage.recordsExistForRecordType(null);
-	}
+	//
+	// @Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp =
+	// ""
+	// + "recordsExistForRecordType is not implemented")
+	// public void recordsExistForRecordTypeThrowsNotImplementedException() throws Exception {
+	// divaToCoraRecordStorage.recordsExistForRecordType(null);
+	// }
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented")

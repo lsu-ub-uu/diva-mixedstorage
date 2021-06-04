@@ -324,11 +324,6 @@ public class DivaDbRecordStorage implements RecordStorage {
 	}
 
 	@Override
-	public boolean recordsExistForRecordType(String type) {
-		throw NotImplementedException.withMessage("recordsExistForRecordType is not implemented");
-	}
-
-	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
 		if (isOrganisation(type)) {
@@ -376,6 +371,21 @@ public class DivaDbRecordStorage implements RecordStorage {
 	public DivaDbToCoraConverterFactory getConverterFactory() {
 		// needed for test
 		return converterFactory;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		RecordReader recordReader = recordReaderFactory.factor();
+		// filter is not implemented yet -- need to decide how filter should be structured
+		Map<String, Object> conditions = new HashMap<>();
+		return recordReader.readNumberOfRows(type, conditions);
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
