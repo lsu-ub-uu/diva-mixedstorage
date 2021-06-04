@@ -24,6 +24,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -503,35 +504,63 @@ public class DivaDbRecordStorageTest {
 		assertFalse(organisationExists);
 	}
 
-	// This is probably wrong - start and end outside parts? and fromNo/toNo instead of
-	// start/end
 	@Test
-	public void testFilter() {
-		DataGroupSpy filterDataGroup = new DataGroupSpy("filter");
-		createAndAddPart(filterDataGroup, "domain", "uu", "0");
-		createAndAddPart(filterDataGroup, "start", "0", "1");
-		createAndAddPart(filterDataGroup, "end", "200", "2");
+	public void testGetTotalNumberOfRecordsForTypeSubOrganisation() {
+		testGetTotalNumberOfRecordsForType("subOrganisation", "suborganisationview");
+
 	}
 
-	private void createAndAddPart(DataGroupSpy filterDataGroup, String key, String value,
-			String repeatId) {
-		DataGroupSpy part = new DataGroupSpy("part");
-		part.addChild(new DataAtomicSpy("key", key));
-		part.addChild(new DataAtomicSpy("value", value));
-		part.setRepeatId(repeatId);
-		filterDataGroup.addChild(part);
-	}
-
-	@Test
-	public void testGetTotalNumberOfRecordsForTypeEmptyFilter() {
+	private void testGetTotalNumberOfRecordsForType(String type, String tableName) {
 		DataGroupSpy filterDataGroup = new DataGroupSpy("filter");
-		long totalNumberOfRecordsForType = divaRecordStorage
-				.getTotalNumberOfRecordsForType("subOrganisation", filterDataGroup);
+		long totalNumberOfRecordsForType = divaRecordStorage.getTotalNumberOfRecordsForType(type,
+				filterDataGroup);
+
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "subOrganisation");
+		assertEquals(recordReader.usedTableName, tableName);
 		Map<String, Object> usedConditions = recordReader.usedConditions;
 		assertTrue(usedConditions.isEmpty());
 		assertEquals(totalNumberOfRecordsForType, recordReader.numberToReturn);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForTypeTopOrganisation() {
+		testGetTotalNumberOfRecordsForType("topOrganisation", "toporganisationview");
+
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForTypeRootOrganisation() {
+		testGetTotalNumberOfRecordsForType("rootOrganisation", "rootorganisationview");
+
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class)
+	public void testGetTotalNumberOfRecordsForTypeNotImplemented() {
+		divaRecordStorage.getTotalNumberOfRecordsForType("typeNotImplemented",
+				new DataGroupSpy("filter"));
+
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForAbstractTypeOrganisation() {
+		DataGroupSpy filterDataGroup = new DataGroupSpy("filter");
+		List<String> implementingTypes = new ArrayList<>();
+		implementingTypes.add("subOrganisation");
+
+		long totalNumberOfRecordsForType = divaRecordStorage.getTotalNumberOfRecordsForAbstractType(
+				"organisation", implementingTypes, filterDataGroup);
+
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.usedTableName, "organisationview");
+		Map<String, Object> usedConditions = recordReader.usedConditions;
+		assertTrue(usedConditions.isEmpty());
+		assertEquals(totalNumberOfRecordsForType, recordReader.numberToReturn);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class)
+	public void testGetTotalNumberOfAbstractRecordsForTypeNotImplemented() {
+		divaRecordStorage.getTotalNumberOfRecordsForAbstractType("typeNotImplemented",
+				new ArrayList<>(), new DataGroupSpy("filter"));
 
 	}
 }
