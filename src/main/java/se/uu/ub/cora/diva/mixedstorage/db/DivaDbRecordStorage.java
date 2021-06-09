@@ -42,6 +42,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	private DivaDbFactory divaDbFactory;
 	private DivaDbUpdaterFactory divaDbUpdaterFactory;
 	private DivaDbToCoraConverterFactory converterFactory;
+	private FilterToResultDelimiterConverterFactory resultDelimiterConverterFactory;
 
 	private DivaDbRecordStorage(RecordReaderFactory recordReaderFactory,
 			DivaDbFactory divaDbReaderFactory, DivaDbUpdaterFactory divaDbUpdaterFactory,
@@ -50,7 +51,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 		this.divaDbFactory = divaDbReaderFactory;
 		this.divaDbUpdaterFactory = divaDbUpdaterFactory;
 		this.converterFactory = converterFactory;
-
+		resultDelimiterConverterFactory = new FilterToResultDelimiterConverterFactoryImp();
 	}
 
 	public static DivaDbRecordStorage usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(
@@ -136,53 +137,6 @@ public class DivaDbRecordStorage implements RecordStorage {
 				|| "subOrganisation".equals(type) || "topOrganisation".equals(type);
 	}
 
-	//
-	// {
-	// "name": "filter",
-	// "children": [
-	// {
-	// "name": "part",
-	// "children": [
-	// {
-	// "name": "key",
-	// "value": "domain"
-	// },
-	// {
-	// "name": "value",
-	// "value": "uu"
-	// }
-	// ],
-	// "repeatId": "0"
-	// },
-	// {
-	// "name": "part",
-	// "children": [
-	// {
-	// "name": "key",
-	// "value": "start"
-	// },
-	// {
-	// "name": "value",
-	// "value": "0"
-	// }
-	// ],
-	// "repeatId": "1"
-	// },{
-	// "name": "part",
-	// "children": [
-	// {
-	// "name": "key",
-	// "value": "end"
-	// },
-	// {
-	// "name": "value",
-	// "value": "200"
-	// }
-	// ],
-	// "repeatId": "2"
-	// }
-	// ]
-	// }
 	private StorageReadResult readOrganisationList(String type, String tableName,
 			DataGroup filter) {
 		ResultDelimiter resultDelimiter = createResultDelimiter(filter);
@@ -198,47 +152,11 @@ public class DivaDbRecordStorage implements RecordStorage {
 		return createStorageReadResult(convertedGroups);
 	}
 
-	/**** Should all of this be calculated somewhere else?? *****/
 	private ResultDelimiter createResultDelimiter(DataGroup filter) {
-		Integer fromNum = calculateFromNum(filter);
-		Integer toNum = calculateToNum(filter);
-
-		Integer limit = calculateLimit(fromNum, toNum);
-		Integer offset = fromNum != 0 ? fromNum - 1 : null;
-		return new ResultDelimiter(limit, offset);
+		FilterToResultDelimiterConverter delimiterConverter = resultDelimiterConverterFactory
+				.factor();
+		return delimiterConverter.convert(filter);
 	}
-
-	private Integer calculateFromNum(DataGroup filter) {
-		if (filter.containsChildWithNameInData("fromNo")) {
-			return getAtomicValueAsInteger(filter, "fromNo");
-		}
-		return 0;
-	}
-
-	private Integer getAtomicValueAsInteger(DataGroup filter, String nameInData) {
-		String atomicValue = filter.getFirstAtomicValueWithNameInData(nameInData);
-		return Integer.valueOf(atomicValue);
-	}
-
-	private Integer calculateToNum(DataGroup filter) {
-		if (filter.containsChildWithNameInData("toNo")) {
-			return getAtomicValueAsInteger(filter, "toNo");
-		}
-		return null;
-	}
-
-	private Integer calculateLimit(Integer fromNum, Integer toNum) {
-		if (toNum != null) {
-			return fromNum != 0 ? fromToDifferencePlusOne(fromNum, toNum) : toNum;
-		}
-		return null;
-	}
-
-	private int fromToDifferencePlusOne(Integer fromNum, Integer toNum) {
-		return (toNum - fromNum) + 1;
-	}
-
-	/*******************************************************/
 
 	private void convertOrganisation(String type, List<DataGroup> convertedGroups,
 			Map<String, Object> map) {
@@ -396,6 +314,15 @@ public class DivaDbRecordStorage implements RecordStorage {
 			List<String> implementingTypes, DataGroup filter) {
 		throwNotImplementedErrorIfNotOrganisation(abstractType);
 		return getTotalNumberOfRecordsForType(abstractType, filter);
+	}
+
+	FilterToResultDelimiterConverterFactory getFilterToResultDelimiterConverterFactory() {
+		return resultDelimiterConverterFactory;
+	}
+
+	void setFilterToResultDelimiterConverterFactory(
+			FilterToResultDelimiterConverterFactory resultDelimiterConverterFactory) {
+		this.resultDelimiterConverterFactory = resultDelimiterConverterFactory;
 	}
 
 }

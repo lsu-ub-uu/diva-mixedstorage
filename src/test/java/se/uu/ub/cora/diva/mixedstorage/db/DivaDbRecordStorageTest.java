@@ -45,6 +45,7 @@ public class DivaDbRecordStorageTest {
 	private RecordReaderFactorySpy recordReaderFactorySpy;
 	private DivaDbFactorySpy divaDbFactorySpy;
 	private DivaDbUpdaterFactorySpy divaDbUpdaterFactorySpy;
+	private FilterToResultDelimiterConverterFactorySpy resultDelimiterConverterFactory;
 
 	@BeforeMethod
 	public void BeforeMethod() {
@@ -55,11 +56,20 @@ public class DivaDbRecordStorageTest {
 		divaRecordStorage = DivaDbRecordStorage
 				.usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(recordReaderFactorySpy,
 						divaDbFactorySpy, divaDbUpdaterFactorySpy, converterFactorySpy);
+		resultDelimiterConverterFactory = new FilterToResultDelimiterConverterFactorySpy();
+		divaRecordStorage
+				.setFilterToResultDelimiterConverterFactory(resultDelimiterConverterFactory);
 	}
 
 	@Test
 	public void testInit() throws Exception {
+		divaRecordStorage = DivaDbRecordStorage
+				.usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(recordReaderFactorySpy,
+						divaDbFactorySpy, divaDbUpdaterFactorySpy, converterFactorySpy);
+
 		assertNotNull(divaRecordStorage);
+		assertTrue(divaRecordStorage
+				.getFilterToResultDelimiterConverterFactory() instanceof FilterToResultDelimiterConverterFactoryImp);
 	}
 
 	@Test
@@ -197,7 +207,6 @@ public class DivaDbRecordStorageTest {
 		assertEquals(recordReader.usedTableName, "suborganisationview");
 	}
 
-	/**************************************************************************/
 	@Test
 	public void testReadOrganisationListWithFilter() throws Exception {
 		DataGroupSpy filter = new DataGroupSpy("filter");
@@ -206,35 +215,12 @@ public class DivaDbRecordStorageTest {
 		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
 		assertEquals(recordReader.usedTableName, "organisationview");
-		assertEquals(recordReader.resultDelimiter.limit, Integer.valueOf(10));
-		assertEquals(recordReader.resultDelimiter.offset, Integer.valueOf(9));
+
+		FilterToResultDelimiterConverterSpy returnedConverter = (FilterToResultDelimiterConverterSpy) resultDelimiterConverterFactory.returnedConverter;
+		assertSame(returnedConverter.filter, filter);
+		assertSame(recordReader.resultDelimiter, returnedConverter.resultDelimiter);
 	}
 
-	@Test
-	public void testReadOrganisationListWithFilterNOFrom() throws Exception {
-		DataGroupSpy filter = new DataGroupSpy("filter");
-		filter.addChild(new DataAtomicSpy("toNo", "19"));
-		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "organisationview");
-
-		assertEquals(recordReader.resultDelimiter.limit, Integer.valueOf(19));
-		assertEquals(recordReader.resultDelimiter.offset, null);
-	}
-
-	@Test
-	public void testReadOrganisationListWithFilterNOTo() throws Exception {
-		DataGroupSpy filter = new DataGroupSpy("filter");
-		filter.addChild(new DataAtomicSpy("fromNo", "15"));
-		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "organisationview");
-
-		assertEquals(recordReader.resultDelimiter.limit, null);
-		assertEquals(recordReader.resultDelimiter.offset, Integer.valueOf(14));
-	}
-
-	/**************************************************************************/
 	@Test
 	public void testReadOrganisationListFactorMultipleParentReader() throws Exception {
 		divaRecordStorage.readList(ORGANISATION_TYPE, new DataGroupSpy("filter"));

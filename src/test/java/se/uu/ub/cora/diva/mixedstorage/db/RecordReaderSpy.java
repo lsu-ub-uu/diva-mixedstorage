@@ -1,9 +1,5 @@
 /*
-DataGroup userRoleOuter = DataGroupProvider.getDataGroupUsingNameInData("userRole");
-DataGroup innerUserRole = DataGroupProvider
-.getDataGroupAsLinkUsingNameInDataTypeAndId("userRole", "permissionRole",
-"divaDomainAdminRole");
-userRoleOuter.addChild(innerUserRole); * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *

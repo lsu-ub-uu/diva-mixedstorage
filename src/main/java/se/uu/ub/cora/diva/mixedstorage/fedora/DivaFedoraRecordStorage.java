@@ -370,11 +370,6 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 				.withMessage("generateLinkCollectionPointingToRecord is not implemented");
 	}
 
-	// @Override
-	// public boolean recordsExistForRecordType(String type) {
-	// throw NotImplementedException.withMessage("recordsExistForRecordType is not implemented");
-	// }
-
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
@@ -409,15 +404,15 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 
 	@Override
 	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
-		// TODO Auto-generated method stub
-		return 0;
+		throw NotImplementedException
+				.withMessage("getTotalNumberOfRecordsForType is not implemented");
 	}
 
 	@Override
 	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
 			List<String> implementingTypes, DataGroup filter) {
-		// TODO Auto-generated method stub
-		return 0;
+		throw NotImplementedException
+				.withMessage("getTotalNumberOfRecordsForAbstractType is not implemented");
 	}
 
 }

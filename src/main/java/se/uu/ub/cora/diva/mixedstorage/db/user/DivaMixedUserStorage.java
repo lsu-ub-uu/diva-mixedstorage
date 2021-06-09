@@ -341,12 +341,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 				.withMessage("generateLinkCollectionPointingToRecord is not implemented for user");
 	}
 
-	// @Override
-	// public boolean recordsExistForRecordType(String type) {
-	// throw NotImplementedException
-	// .withMessage("recordsExistForRecordType is not implemented for user");
-	// }
-
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
@@ -388,14 +382,14 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	@Override
 	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
-		// TODO Auto-generated method stub
-		return 0;
+		throw NotImplementedException
+				.withMessage("getTotalNumberOfRecordsForType is not implemented for user");
 	}
 
 	@Override
 	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
 			List<String> implementingTypes, DataGroup filter) {
-		// TODO Auto-generated method stub
-		return 0;
+		throw NotImplementedException
+				.withMessage("getTotalNumberOfRecordsForAbstractType is not implemented for user");
 	}
 }

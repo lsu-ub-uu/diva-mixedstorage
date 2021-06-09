@@ -25,6 +25,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -679,17 +680,23 @@ public class DivaMixedUserStorageTest {
 		recordStorage.generateLinkCollectionPointingToRecord(null, null);
 	}
 
-	// @Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp =
-	// ""
-	// + "recordsExistForRecordType is not implemented for user")
-	// public void recordsExistForRecordTypeNotImplementedForUser() throws Exception {
-	// recordStorage.recordsExistForRecordType(null);
-	// }
-
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented for user")
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdNotImplementedForUser()
 			throws Exception {
 		recordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(null, null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "getTotalNumberOfRecordsForType is not implemented for user")
+	public void getTotalNumberOfRecordsForTypeNotImplementedForUser() throws Exception {
+		recordStorage.getTotalNumberOfRecordsForType("anyType", new DataGroupSpy("filter"));
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "getTotalNumberOfRecordsForAbstractType is not implemented for user")
+	public void getTotalNumberOfRecordsForAbstractTypeNotImplementedForUser() throws Exception {
+		recordStorage.getTotalNumberOfRecordsForAbstractType("anyType", Collections.emptyList(),
+				new DataGroupSpy("filter"));
 	}
 }
