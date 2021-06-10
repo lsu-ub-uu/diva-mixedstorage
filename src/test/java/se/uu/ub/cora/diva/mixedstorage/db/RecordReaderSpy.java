@@ -160,7 +160,7 @@ public class RecordReaderSpy implements RecordReader {
 	}
 
 	@Override
-	public int readNumberOfRows(String tableName, Map<String, Object> conditions) {
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {
 		usedTableName = tableName;
 		usedTableNames.add(usedTableName);
 		usedConditions = conditions;

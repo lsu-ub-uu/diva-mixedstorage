@@ -76,7 +76,7 @@ public class OrganisationMultipleRowsRecordReaderSpy implements RecordReader {
 	}
 
 	@Override
-	public int readNumberOfRows(String tableName, Map<String, Object> conditions) {
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
