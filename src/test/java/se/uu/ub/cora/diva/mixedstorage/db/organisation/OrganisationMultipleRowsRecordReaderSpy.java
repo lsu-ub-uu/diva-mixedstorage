@@ -81,4 +81,11 @@ public class OrganisationMultipleRowsRecordReaderSpy implements RecordReader {
 		return 0;
 	}
 
+	@Override
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions, Integer fromNo,
+			Integer toNo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

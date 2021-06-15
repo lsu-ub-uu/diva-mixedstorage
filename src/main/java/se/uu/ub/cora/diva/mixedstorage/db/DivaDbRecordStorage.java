@@ -298,8 +298,33 @@ public class DivaDbRecordStorage implements RecordStorage {
 		// filter is not implemented yet -- need to decide how filter should be structured
 		Map<String, Object> conditions = new HashMap<>();
 		String tableName = getTableName(type);
+		Integer fromNo = calculateFromNumber(filter);
+		Integer toNo = calculateToNumber(filter);
 
-		return recordReader.readNumberOfRows(tableName, conditions);
+		return recordReader.readNumberOfRows(tableName, conditions, fromNo, toNo);
+	}
+
+	private Integer calculateFromNumber(DataGroup filter) {
+		if (filterContainsValue(filter, "fromNo")) {
+			return extractAtomicValueAsInteger(filter, "fromNo");
+		}
+		return 1;
+	}
+
+	private boolean filterContainsValue(DataGroup filter, String nameInData) {
+		return filter.containsChildWithNameInData(nameInData);
+	}
+
+	private Integer extractAtomicValueAsInteger(DataGroup filter, String nameInData) {
+		String atomicValue = filter.getFirstAtomicValueWithNameInData(nameInData);
+		return Integer.valueOf(atomicValue);
+	}
+
+	private Integer calculateToNumber(DataGroup filter) {
+		if (filterContainsValue(filter, "toNo")) {
+			return extractAtomicValueAsInteger(filter, "toNo");
+		}
+		return null;
 	}
 
 	private void throwNotImplementedErrorIfNotOrganisation(String type) {

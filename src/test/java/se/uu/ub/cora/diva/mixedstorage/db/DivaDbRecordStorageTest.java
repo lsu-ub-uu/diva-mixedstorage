@@ -21,6 +21,7 @@ package se.uu.ub.cora.diva.mixedstorage.db;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
@@ -492,11 +493,11 @@ public class DivaDbRecordStorageTest {
 
 	@Test
 	public void testGetTotalNumberOfRecordsForTypeSubOrganisation() {
-		testGetTotalNumberOfRecordsForType("subOrganisation", "suborganisationview");
+		testGetTotalNumberOfRecordsForTypeEmptyFilter("subOrganisation", "suborganisationview");
 
 	}
 
-	private void testGetTotalNumberOfRecordsForType(String type, String tableName) {
+	private void testGetTotalNumberOfRecordsForTypeEmptyFilter(String type, String tableName) {
 		DataGroupSpy filterDataGroup = new DataGroupSpy("filter");
 		long totalNumberOfRecordsForType = divaRecordStorage.getTotalNumberOfRecordsForType(type,
 				filterDataGroup);
@@ -510,13 +511,13 @@ public class DivaDbRecordStorageTest {
 
 	@Test
 	public void testGetTotalNumberOfRecordsForTypeTopOrganisation() {
-		testGetTotalNumberOfRecordsForType("topOrganisation", "toporganisationview");
+		testGetTotalNumberOfRecordsForTypeEmptyFilter("topOrganisation", "toporganisationview");
 
 	}
 
 	@Test
 	public void testGetTotalNumberOfRecordsForTypeRootOrganisation() {
-		testGetTotalNumberOfRecordsForType("rootOrganisation", "rootorganisationview");
+		testGetTotalNumberOfRecordsForTypeEmptyFilter("rootOrganisation", "rootorganisationview");
 
 	}
 
@@ -525,6 +526,46 @@ public class DivaDbRecordStorageTest {
 		divaRecordStorage.getTotalNumberOfRecordsForType("typeNotImplemented",
 				new DataGroupSpy("filter"));
 
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsWithFromNoTo() {
+		DataGroupSpy filterDataGroup = new DataGroupSpy("filter");
+		filterDataGroup.addChild(new DataAtomicSpy("fromNo", "4"));
+		long totalNumberOfRecordsForType = divaRecordStorage
+				.getTotalNumberOfRecordsForType("topOrganisation", filterDataGroup);
+
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.usedTableName, "toporganisationview");
+		assertTrue(recordReader.usedConditions.isEmpty());
+		assertEquals(recordReader.fromNo, Integer.valueOf(4));
+		assertNull(recordReader.toNo);
+		assertEquals(totalNumberOfRecordsForType, recordReader.numberToReturn);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsWithNoFromButTo() {
+		DataGroupSpy filterDataGroup = new DataGroupSpy("filter");
+		filterDataGroup.addChild(new DataAtomicSpy("toNo", "4"));
+
+		divaRecordStorage.getTotalNumberOfRecordsForType("topOrganisation", filterDataGroup);
+
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.fromNo, Integer.valueOf(1));
+		assertEquals(recordReader.toNo, Integer.valueOf(4));
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsWithFromAndTo() {
+		DataGroupSpy filterDataGroup = new DataGroupSpy("filter");
+		filterDataGroup.addChild(new DataAtomicSpy("fromNo", "4"));
+		filterDataGroup.addChild(new DataAtomicSpy("toNo", "9"));
+
+		divaRecordStorage.getTotalNumberOfRecordsForType("topOrganisation", filterDataGroup);
+
+		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		assertEquals(recordReader.fromNo, Integer.valueOf(4));
+		assertEquals(recordReader.toNo, Integer.valueOf(9));
 	}
 
 	@Test
