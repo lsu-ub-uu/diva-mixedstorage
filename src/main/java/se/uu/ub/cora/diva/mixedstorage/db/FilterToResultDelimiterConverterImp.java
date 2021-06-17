@@ -63,7 +63,7 @@ public class FilterToResultDelimiterConverterImp implements FilterToResultDelimi
 		return null;
 	}
 
-	private int fromToDifferencePlusOne(Integer fromNum, Integer toNum) {
+	private int fromToDifferencePlusOne(int fromNum, int toNum) {
 		return (toNum - fromNum) + 1;
 	}
 
