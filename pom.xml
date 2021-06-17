@@ -33,11 +33,11 @@
 
 	<properties>
 		<logger.version>2.2.0</logger.version>
-		<coradata.version>4.0.0</coradata.version>
+		<coradata.version>4.1-SNAPSHOT</coradata.version>
 		<storage.version>4.0.0</storage.version>
 		<searchstorage.version>3.6.0</searchstorage.version>
 		<basicstorage.version>4.0.0</basicstorage.version>
-		<sqldatabase.version>3.1-SNAPSHOT</sqldatabase.version>
+		<sqldatabase.version>3.1.0</sqldatabase.version>
 		<httphandler.version>2.2.0</httphandler.version>
 		<apptokenstorage.version>2.2.0</apptokenstorage.version>
 		<gatekeeper.version>3.6.0</gatekeeper.version>
