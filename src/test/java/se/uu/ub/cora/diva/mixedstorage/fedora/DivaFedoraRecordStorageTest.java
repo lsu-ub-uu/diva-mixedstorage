@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -410,16 +411,25 @@ public class DivaFedoraRecordStorageTest {
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
-			+ "recordsExistForRecordType is not implemented")
-	public void recordsExistForRecordTypeThrowsNotImplementedException() throws Exception {
-		divaToCoraRecordStorage.recordsExistForRecordType(null);
-	}
-
-	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented")
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdThrowsNotImplementedException()
 			throws Exception {
 		divaToCoraRecordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(null,
 				null);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "getTotalNumberOfRecordsForType is not implemented")
+	public void getTotalNumberOfRecordsForTypeThrowsNotImplementedException() throws Exception {
+		divaToCoraRecordStorage.getTotalNumberOfRecordsForType("anyType",
+				new DataGroupSpy("filter"));
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "getTotalNumberOfRecordsForAbstractType is not implemented")
+	public void getTotalNumberOfRecordsForAbstractTypeThrowsNotImplementedException()
+			throws Exception {
+		divaToCoraRecordStorage.getTotalNumberOfRecordsForAbstractType("anyType",
+				Collections.emptyList(), new DataGroupSpy("filter"));
 	}
 }

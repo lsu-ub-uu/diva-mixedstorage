@@ -47,7 +47,7 @@ import se.uu.ub.cora.sqldatabase.DataReaderImp;
 import se.uu.ub.cora.sqldatabase.RecordReaderImp;
 
 public class DivaMixedUserStorageProviderTest {
-	private String basePath = "/tmp/recordStorageOnDiskTemp/";
+	private String basePath = "/tmp/divaMixedUserRecordStorageOnDiskTemp/";
 	private LoggerFactorySpy loggerFactorySpy;
 	private DataGroupFactory dataGroupFactory;
 	private DivaMixedUserStorageProvider divaUserStorageProvider;

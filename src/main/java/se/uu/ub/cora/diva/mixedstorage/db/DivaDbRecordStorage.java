@@ -29,6 +29,7 @@ import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.ResultDelimiter;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -41,6 +42,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	private DivaDbFactory divaDbFactory;
 	private DivaDbUpdaterFactory divaDbUpdaterFactory;
 	private DivaDbToCoraConverterFactory converterFactory;
+	private FilterToResultDelimiterConverterFactory resultDelimiterConverterFactory;
 
 	private DivaDbRecordStorage(RecordReaderFactory recordReaderFactory,
 			DivaDbFactory divaDbReaderFactory, DivaDbUpdaterFactory divaDbUpdaterFactory,
@@ -49,7 +51,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 		this.divaDbFactory = divaDbReaderFactory;
 		this.divaDbUpdaterFactory = divaDbUpdaterFactory;
 		this.converterFactory = converterFactory;
-
+		resultDelimiterConverterFactory = new FilterToResultDelimiterConverterFactoryImp();
 	}
 
 	public static DivaDbRecordStorage usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(
@@ -113,7 +115,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	public StorageReadResult readList(String type, DataGroup filter) {
 		if (isOrganisation(type)) {
 			String tableName = getTableName(type);
-			return readOrganisationList(type, tableName);
+			return readOrganisationList(type, tableName, filter);
 		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
 	}
@@ -135,13 +137,25 @@ public class DivaDbRecordStorage implements RecordStorage {
 				|| "subOrganisation".equals(type) || "topOrganisation".equals(type);
 	}
 
-	private StorageReadResult readOrganisationList(String type, String tableName) {
-		List<Map<String, Object>> rowsFromDb = readAllFromDb(tableName);
+	private StorageReadResult readOrganisationList(String type, String tableName,
+			DataGroup filter) {
+		ResultDelimiter resultDelimiter = createResultDelimiter(filter);
+
+		RecordReader recordReader = recordReaderFactory.factor();
+		List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable(tableName,
+				resultDelimiter);
+
 		List<DataGroup> convertedGroups = new ArrayList<>();
 		for (Map<String, Object> map : rowsFromDb) {
 			convertOrganisation(type, convertedGroups, map);
 		}
 		return createStorageReadResult(convertedGroups);
+	}
+
+	private ResultDelimiter createResultDelimiter(DataGroup filter) {
+		FilterToResultDelimiterConverter delimiterConverter = resultDelimiterConverterFactory
+				.factor();
+		return delimiterConverter.convert(filter);
 	}
 
 	private void convertOrganisation(String type, List<DataGroup> convertedGroups,
@@ -189,7 +203,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 			return readAndConvertUsers(type);
 		}
 		if (ORGANISATION.equals(type)) {
-			return readOrganisationList(type, "organisationview");
+			return readOrganisationList(type, "organisationview", filter);
 		} else {
 			throw NotImplementedException.withMessage("readAbstractList is not implemented");
 		}
@@ -225,11 +239,6 @@ public class DivaDbRecordStorage implements RecordStorage {
 	public Collection<DataGroup> generateLinkCollectionPointingToRecord(String type, String id) {
 		throw NotImplementedException
 				.withMessage("generateLinkCollectionPointingToRecord is not implemented");
-	}
-
-	@Override
-	public boolean recordsExistForRecordType(String type) {
-		throw NotImplementedException.withMessage("recordsExistForRecordType is not implemented");
 	}
 
 	@Override
@@ -280,6 +289,65 @@ public class DivaDbRecordStorage implements RecordStorage {
 	public DivaDbToCoraConverterFactory getConverterFactory() {
 		// needed for test
 		return converterFactory;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		throwNotImplementedErrorIfNotOrganisation(type);
+		RecordReader recordReader = recordReaderFactory.factor();
+		// filter is not implemented yet -- need to decide how filter should be structured
+		Map<String, Object> conditions = new HashMap<>();
+		String tableName = getTableName(type);
+		Integer fromNo = calculateFromNumber(filter);
+		Integer toNo = calculateToNumber(filter);
+
+		return recordReader.readNumberOfRows(tableName, conditions, fromNo, toNo);
+	}
+
+	private Integer calculateFromNumber(DataGroup filter) {
+		if (filterContainsValue(filter, "fromNo")) {
+			return extractAtomicValueAsInteger(filter, "fromNo");
+		}
+		return 1;
+	}
+
+	private boolean filterContainsValue(DataGroup filter, String nameInData) {
+		return filter.containsChildWithNameInData(nameInData);
+	}
+
+	private Integer extractAtomicValueAsInteger(DataGroup filter, String nameInData) {
+		String atomicValue = filter.getFirstAtomicValueWithNameInData(nameInData);
+		return Integer.valueOf(atomicValue);
+	}
+
+	private Integer calculateToNumber(DataGroup filter) {
+		if (filterContainsValue(filter, "toNo")) {
+			return extractAtomicValueAsInteger(filter, "toNo");
+		}
+		return null;
+	}
+
+	private void throwNotImplementedErrorIfNotOrganisation(String type) {
+		if (!isOrganisation(type)) {
+			throw NotImplementedException.withMessage(
+					"getTotalNumberOfRecordsForType is not implemented for type: " + type);
+		}
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		throwNotImplementedErrorIfNotOrganisation(abstractType);
+		return getTotalNumberOfRecordsForType(abstractType, filter);
+	}
+
+	FilterToResultDelimiterConverterFactory getFilterToResultDelimiterConverterFactory() {
+		return resultDelimiterConverterFactory;
+	}
+
+	void setFilterToResultDelimiterConverterFactory(
+			FilterToResultDelimiterConverterFactory resultDelimiterConverterFactory) {
+		this.resultDelimiterConverterFactory = resultDelimiterConverterFactory;
 	}
 
 }

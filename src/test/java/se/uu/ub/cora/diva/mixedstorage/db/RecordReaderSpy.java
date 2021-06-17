@@ -1,9 +1,5 @@
 /*
-DataGroup userRoleOuter = DataGroupProvider.getDataGroupUsingNameInData("userRole");
-DataGroup innerUserRole = DataGroupProvider
-.getDataGroupAsLinkUsingNameInDataTypeAndId("userRole", "permissionRole",
-"divaDomainAdminRole");
-userRoleOuter.addChild(innerUserRole); * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -29,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.ResultDelimiter;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
 
 public class RecordReaderSpy implements RecordReader {
@@ -51,6 +48,10 @@ public class RecordReaderSpy implements RecordReader {
 
 	public Map<String, Object> responseToReadOneRowFromDbUsingTableAndConditions = null;
 	public Map<String, Object> responseToReadFromTableUsingConditions;
+	public ResultDelimiter resultDelimiter;
+	public int numberToReturn;
+	public Integer fromNo;
+	public Integer toNo;
 
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName) {
@@ -142,6 +143,45 @@ public class RecordReaderSpy implements RecordReader {
 	@Override
 	public Map<String, Object> readNextValueFromSequence(String sequenceName) {
 		return null;
+	}
+
+	@Override
+	public List<Map<String, Object>> readAllFromTable(String tableName,
+			ResultDelimiter resultDelimiter) {
+		usedTableName = tableName;
+		usedTableNames.add(usedTableName);
+		this.resultDelimiter = resultDelimiter;
+
+		for (int i = 0; i < noOfRecordsToReturn; i++) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("someKey" + i, "someValue" + i);
+			returnedList.add(map);
+		}
+		returnedListCollection.add(returnedList);
+		return returnedList;
+	}
+
+	@Override
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {
+		usedTableName = tableName;
+		usedTableNames.add(usedTableName);
+		usedConditions = conditions;
+		usedConditionsList.add(usedConditions);
+		numberToReturn = 5687;
+		return numberToReturn;
+	}
+
+	@Override
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions, Integer fromNo,
+			Integer toNo) {
+		this.fromNo = fromNo;
+		this.toNo = toNo;
+		usedTableName = tableName;
+		usedTableNames.add(usedTableName);
+		usedConditions = conditions;
+		usedConditionsList.add(usedConditions);
+		numberToReturn = 356;
+		return numberToReturn;
 	}
 
 }

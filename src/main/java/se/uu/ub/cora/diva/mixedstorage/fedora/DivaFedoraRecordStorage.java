@@ -371,11 +371,6 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	}
 
 	@Override
-	public boolean recordsExistForRecordType(String type) {
-		throw NotImplementedException.withMessage("recordsExistForRecordType is not implemented");
-	}
-
-	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
 		throw NotImplementedException.withMessage(
@@ -405,6 +400,19 @@ public final class DivaFedoraRecordStorage implements RecordStorage {
 	public String getFedoraPassword() {
 		// needed for test
 		return password;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		throw NotImplementedException
+				.withMessage("getTotalNumberOfRecordsForType is not implemented");
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		throw NotImplementedException
+				.withMessage("getTotalNumberOfRecordsForAbstractType is not implemented");
 	}
 
 }

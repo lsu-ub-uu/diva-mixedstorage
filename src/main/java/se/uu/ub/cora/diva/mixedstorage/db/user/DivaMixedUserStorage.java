@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -342,12 +342,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	}
 
 	@Override
-	public boolean recordsExistForRecordType(String type) {
-		throw NotImplementedException
-				.withMessage("recordsExistForRecordType is not implemented for user");
-	}
-
-	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
 			String id) {
 		if ("user".equals(type) || "coraUser".equals(type)) {
@@ -384,5 +378,18 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	public DataGroupRoleReferenceCreator getDataGroupRoleReferenceCreator() {
 		// needed for test
 		return dataGroupRoleReferenceCreator;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		throw NotImplementedException
+				.withMessage("getTotalNumberOfRecordsForType is not implemented for user");
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		throw NotImplementedException
+				.withMessage("getTotalNumberOfRecordsForAbstractType is not implemented for user");
 	}
 }

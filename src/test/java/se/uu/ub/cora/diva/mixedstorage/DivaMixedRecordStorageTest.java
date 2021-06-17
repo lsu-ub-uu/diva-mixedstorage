@@ -25,7 +25,9 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -607,19 +609,20 @@ public class DivaMixedRecordStorageTest {
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 	}
 
-	@Test
-	public void recordsExistForRecordTypeGoesToBasicStorage() throws Exception {
-		assertNoInteractionWithStorage(basicStorage);
-		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
-
-		RecordStorageSpyData expectedData = new RecordStorageSpyData();
-		expectedData.type = "someType";
-		expectedData.answer = divaMixedRecordStorage.recordsExistForRecordType(expectedData.type);
-
-		expectedData.calledMethod = "recordsExistForRecordType";
-		assertExpectedDataSameAsInStorageSpy(basicStorage, expectedData);
-		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
-	}
+	// @Test
+	// public void recordsExistForRecordTypeGoesToBasicStorage() throws Exception {
+	// assertNoInteractionWithStorage(basicStorage);
+	// assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+	//
+	// RecordStorageSpyData expectedData = new RecordStorageSpyData();
+	// expectedData.type = "someType";
+	// expectedData.answer = ((DivaMixedRecordStorage) divaMixedRecordStorage)
+	// .recordsExistForRecordType(expectedData.type);
+	//
+	// expectedData.calledMethod = "recordsExistForRecordType";
+	// assertExpectedDataSameAsInStorageSpy(basicStorage, expectedData);
+	// assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+	// }
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdGoesToBasicStorage()
@@ -794,6 +797,100 @@ public class DivaMixedRecordStorageTest {
 				.getCollectIndexTerm("someIndexTermId");
 		assertEquals(basicStorage.indexTermId, "someIndexTermId");
 		assertSame(searchTerm, basicStorage.returnedIndexTerm);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForTypeSubOrganisation() {
+		String type = "subOrganisation";
+		testGetTotalNumberOfRecordsForType(type);
+	}
+
+	private void testGetTotalNumberOfRecordsForType(String type) {
+		DataGroup filter = new DataGroupSpy("filter");
+		long totalNumberOfRecords = divaMixedRecordStorage.getTotalNumberOfRecordsForType(type,
+				filter);
+		RecordStorageSpyData data = divaDbToCoraStorage.data;
+		assertEquals(data.type, type);
+		assertSame(data.filter, filter);
+		assertEquals(totalNumberOfRecords, data.answer);
+
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(basicStorage);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForTypeTopOrganisation() {
+		testGetTotalNumberOfRecordsForType("topOrganisation");
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForTypeRootOrganisation() {
+		testGetTotalNumberOfRecordsForType("rootOrganisation");
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForOtherType() {
+		DataGroup filter = new DataGroupSpy("filter");
+		long totalNumberOfRecords = divaMixedRecordStorage
+				.getTotalNumberOfRecordsForType("otherType", filter);
+		RecordStorageSpyData data = basicStorage.data;
+		assertEquals(data.type, "otherType");
+		assertSame(data.filter, filter);
+		assertEquals(totalNumberOfRecords, data.answer);
+
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForAbstractTypeOrganisation() {
+		DataGroup filter = new DataGroupSpy("filter");
+		List<String> implementingTypes = createImplementingTypes();
+
+		long totalNumberOfRecords = divaMixedRecordStorage
+				.getTotalNumberOfRecordsForAbstractType("organisation", implementingTypes, filter);
+		assertDataSentToDbStorage(filter, implementingTypes, totalNumberOfRecords);
+	}
+
+	private void assertDataSentToDbStorage(DataGroup filter, List<String> implementingTypes,
+			long totalNumberOfRecords) {
+		RecordStorageSpyData data = divaDbToCoraStorage.data;
+		assertEquals(data.type, "organisation");
+		assertSame(data.filter, filter);
+		assertSame(divaDbToCoraStorage.implementingTypes, implementingTypes);
+
+		assertEquals(totalNumberOfRecords, data.answer);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(basicStorage);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForAbstractTypeOther() {
+		DataGroup filter = new DataGroupSpy("filter");
+		List<String> implementingTypes = createImplementingTypes();
+
+		long totalNumberOfRecords = divaMixedRecordStorage
+				.getTotalNumberOfRecordsForAbstractType("otherType", implementingTypes, filter);
+		assertDataSentToBasicStorage(filter, implementingTypes, totalNumberOfRecords);
+	}
+
+	private void assertDataSentToBasicStorage(DataGroup filter, List<String> implementingTypes,
+			long totalNumberOfRecords) {
+		RecordStorageSpyData data = basicStorage.data;
+		assertEquals(data.type, "otherType");
+		assertSame(data.filter, filter);
+		assertSame(basicStorage.implementingTypes, implementingTypes);
+
+		assertEquals(totalNumberOfRecords, data.answer);
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+	}
+
+	private List<String> createImplementingTypes() {
+		List<String> implementingTypes = new ArrayList<>();
+		implementingTypes.add("topOrganisation");
+		implementingTypes.add("subOrganisation");
+		return implementingTypes;
 	}
 
 }

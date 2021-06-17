@@ -38,6 +38,7 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 	public StorageReadResult storageReadResult;
 	public boolean linkExistsInStorage = false;
 	public boolean existsInStorage = true;
+	public List<String> implementingTypes;
 
 	public RecordStorageSpy() {
 		this.storageType = "basicStorage";
@@ -158,14 +159,14 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 		data.answer = generatedList;
 		return generatedList;
 	}
-
-	@Override
-	public boolean recordsExistForRecordType(String type) {
-		data.type = type;
-		data.calledMethod = "recordsExistForRecordType";
-		data.answer = false;
-		return false;
-	}
+	//
+	// @Override
+	// public boolean recordsExistForRecordType(String type) {
+	// data.type = type;
+	// data.calledMethod = "recordsExistForRecordType";
+	// data.answer = false;
+	// return false;
+	// }
 
 	@Override
 	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String type,
@@ -187,6 +188,27 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 	public DataGroup getCollectIndexTerm(String collectIndexTermId) {
 		indexTermId = collectIndexTermId;
 		return returnedIndexTerm;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		data.type = type;
+		data.filter = filter;
+		data.calledMethod = "getTotalNumberOfRecordsForType";
+
+		data.answer = 234L;
+		return (long) data.answer;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		data.type = abstractType;
+		this.implementingTypes = implementingTypes;
+		data.filter = filter;
+		data.calledMethod = "getTotalNumberOfRecordsForAbstractType";
+		data.answer = 567L;
+		return (long) data.answer;
 	}
 
 }

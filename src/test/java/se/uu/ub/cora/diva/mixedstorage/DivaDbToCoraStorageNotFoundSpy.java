@@ -1,6 +1,7 @@
 package se.uu.ub.cora.diva.mixedstorage;
 
 import java.util.Collection;
+import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.storage.RecordNotFoundException;
@@ -70,18 +71,31 @@ public class DivaDbToCoraStorageNotFoundSpy implements RecordStorage {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-	@Override
-	public boolean recordsExistForRecordType(String arg0) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	//
+	// @Override
+	// public boolean recordsExistForRecordType(String arg0) {
+	// // TODO Auto-generated method stub
+	// return false;
+	// }
 
 	@Override
 	public void update(String arg0, String arg1, DataGroup arg2, DataGroup arg3, DataGroup arg4,
 			String arg5) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
