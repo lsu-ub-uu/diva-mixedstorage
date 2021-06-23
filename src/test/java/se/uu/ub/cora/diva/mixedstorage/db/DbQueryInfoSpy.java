@@ -22,6 +22,8 @@ import se.uu.ub.cora.sqldatabase.DbQueryInfo;
 
 public class DbQueryInfoSpy implements DbQueryInfo {
 
+	public String orderBy;
+
 	@Override
 	public Integer getOffset() {
 		// TODO Auto-generated method stub
@@ -56,6 +58,18 @@ public class DbQueryInfoSpy implements DbQueryInfo {
 	public boolean delimiterIsPresent() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void setOrderBy(String orderBy) {
+		this.orderBy = orderBy;
+
+	}
+
+	@Override
+	public String getOrderByPartOfQuery() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -44,7 +44,6 @@ public class DivaDbRecordStorage implements RecordStorage {
 	private DivaDbFactory divaDbFactory;
 	private DivaDbUpdaterFactory divaDbUpdaterFactory;
 	private DivaDbToCoraConverterFactory converterFactory;
-	private FilterToResultDelimiterConverterFactory resultDelimiterConverterFactory;
 	private DbQueryInfoFactory dbQueryInfoFactory;
 
 	private DivaDbRecordStorage(RecordReaderFactory recordReaderFactory,
@@ -54,7 +53,6 @@ public class DivaDbRecordStorage implements RecordStorage {
 		this.divaDbFactory = divaDbReaderFactory;
 		this.divaDbUpdaterFactory = divaDbUpdaterFactory;
 		this.converterFactory = converterFactory;
-		resultDelimiterConverterFactory = new FilterToResultDelimiterConverterFactoryImp();
 		dbQueryInfoFactory = new DbQueryInfoFactoryImp();
 	}
 
@@ -143,13 +141,8 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	private StorageReadResult readOrganisationList(String type, String tableName,
 			DataGroup filter) {
-
-		// ResultDelimiter resultDelimiter = createResultDelimiter(filter);
 		DbQueryInfo dbQueryInfo = createDbQueryInfo(filter);
-
 		RecordReader recordReader = recordReaderFactory.factor();
-		// List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable(tableName,
-		// resultDelimiter);
 		List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable(tableName,
 				dbQueryInfo);
 
@@ -161,12 +154,12 @@ public class DivaDbRecordStorage implements RecordStorage {
 	}
 
 	private DbQueryInfo createDbQueryInfo(DataGroup filter) {
-		// FilterToResultDelimiterConverter delimiterConverter = resultDelimiterConverterFactory
-		// .factor();
 		Integer fromNo = getAtomicValueAsIntegerIfExists(filter, "fromNo");
 		Integer toNo = getAtomicValueAsIntegerIfExists(filter, "toNo");
 
-		return dbQueryInfoFactory.factorUsingFromNoAndToNo(fromNo, toNo);
+		DbQueryInfo dbQueryInfo = dbQueryInfoFactory.factorUsingFromNoAndToNo(fromNo, toNo);
+		dbQueryInfo.setOrderBy("id");
+		return dbQueryInfo;
 	}
 
 	private Integer getAtomicValueAsIntegerIfExists(DataGroup filter, String nameInData) {
@@ -317,34 +310,13 @@ public class DivaDbRecordStorage implements RecordStorage {
 		Map<String, Object> conditions = new HashMap<>();
 		String tableName = getTableName(type);
 		DbQueryInfo dbQueryInfo = createDbQueryInfo(filter);
-		// Integer fromNo = calculateFromNumber(filter);
-		// Integer toNo = calculateToNumber(filter);
 
-		// return recordReader.readNumberOfRows(tableName, conditions, fromNo, toNo);
 		return recordReader.readNumberOfRows(tableName, conditions, dbQueryInfo);
-	}
-
-	private Integer calculateFromNumber(DataGroup filter) {
-		if (filterContainsValue(filter, "fromNo")) {
-			return extractAtomicValueAsInteger(filter, "fromNo");
-		}
-		return 1;
-	}
-
-	private boolean filterContainsValue(DataGroup filter, String nameInData) {
-		return filter.containsChildWithNameInData(nameInData);
 	}
 
 	private Integer extractAtomicValueAsInteger(DataGroup filter, String nameInData) {
 		String atomicValue = filter.getFirstAtomicValueWithNameInData(nameInData);
 		return Integer.valueOf(atomicValue);
-	}
-
-	private Integer calculateToNumber(DataGroup filter) {
-		if (filterContainsValue(filter, "toNo")) {
-			return extractAtomicValueAsInteger(filter, "toNo");
-		}
-		return null;
 	}
 
 	private void throwNotImplementedErrorIfNotOrganisation(String type) {
@@ -361,20 +333,11 @@ public class DivaDbRecordStorage implements RecordStorage {
 		return getTotalNumberOfRecordsForType(abstractType, filter);
 	}
 
-	FilterToResultDelimiterConverterFactory getFilterToResultDelimiterConverterFactory() {
-		return resultDelimiterConverterFactory;
-	}
-
-	void setFilterToResultDelimiterConverterFactory(
-			FilterToResultDelimiterConverterFactory resultDelimiterConverterFactory) {
-		this.resultDelimiterConverterFactory = resultDelimiterConverterFactory;
-	}
-
 	public DbQueryInfoFactory getDbQueryInfoFactory() {
 		return dbQueryInfoFactory;
 	}
 
-	public void setDbQueryInfoFactory(DbQueryInfoFactory dbQueryInfoFactory) {
+	void setDbQueryInfoFactory(DbQueryInfoFactory dbQueryInfoFactory) {
 		this.dbQueryInfoFactory = dbQueryInfoFactory;
 	}
 

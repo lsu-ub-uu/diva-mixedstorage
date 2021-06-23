@@ -47,7 +47,6 @@ public class DivaDbRecordStorageTest {
 	private RecordReaderFactorySpy recordReaderFactorySpy;
 	private DivaDbFactorySpy divaDbFactorySpy;
 	private DivaDbUpdaterFactorySpy divaDbUpdaterFactorySpy;
-	private FilterToResultDelimiterConverterFactorySpy resultDelimiterConverterFactory;
 	private DbQueryInfoFactorySpy dbQueryInfoFactory = new DbQueryInfoFactorySpy();
 
 	@BeforeMethod
@@ -59,9 +58,6 @@ public class DivaDbRecordStorageTest {
 		divaRecordStorage = DivaDbRecordStorage
 				.usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(recordReaderFactorySpy,
 						divaDbFactorySpy, divaDbUpdaterFactorySpy, converterFactorySpy);
-		resultDelimiterConverterFactory = new FilterToResultDelimiterConverterFactorySpy();
-		divaRecordStorage
-				.setFilterToResultDelimiterConverterFactory(resultDelimiterConverterFactory);
 		dbQueryInfoFactory = new DbQueryInfoFactorySpy();
 		divaRecordStorage.setDbQueryInfoFactory(dbQueryInfoFactory);
 	}
@@ -73,8 +69,6 @@ public class DivaDbRecordStorageTest {
 						divaDbFactorySpy, divaDbUpdaterFactorySpy, converterFactorySpy);
 
 		assertNotNull(divaRecordStorage);
-		assertTrue(divaRecordStorage
-				.getFilterToResultDelimiterConverterFactory() instanceof FilterToResultDelimiterConverterFactoryImp);
 		assertTrue(divaRecordStorage.getDbQueryInfoFactory() instanceof DbQueryInfoFactoryImp);
 	}
 
@@ -225,6 +219,7 @@ public class DivaDbRecordStorageTest {
 		assertEquals(recordReader.usedTableName, "organisationview");
 
 		DbQueryInfoSpy factoredInfo = dbQueryInfoFactory.factoredInfo;
+		assertEquals(factoredInfo.orderBy, "id");
 		assertEquals(dbQueryInfoFactory.fromNo, Integer.valueOf(10));
 		assertEquals(dbQueryInfoFactory.toNo, Integer.valueOf(19));
 		assertNotNull(factoredInfo);
@@ -237,6 +232,8 @@ public class DivaDbRecordStorageTest {
 
 		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
 
+		DbQueryInfoSpy factoredInfo = dbQueryInfoFactory.factoredInfo;
+		assertEquals(factoredInfo.orderBy, "id");
 		assertEquals(dbQueryInfoFactory.fromNo, null);
 		assertEquals(dbQueryInfoFactory.toNo, null);
 	}
