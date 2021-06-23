@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import se.uu.ub.cora.sqldatabase.DbQueryInfo;
 import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.ResultDelimiter;
 
 public class RecordReaderForListSpy implements RecordReader {
 
@@ -65,8 +65,7 @@ public class RecordReaderForListSpy implements RecordReader {
 	}
 
 	@Override
-	public List<Map<String, Object>> readAllFromTable(String tableName,
-			ResultDelimiter resultDelimiter) {
+	public List<Map<String, Object>> readAllFromTable(String tableName, DbQueryInfo dbQueryInfo) {
 		for (int i = 0; i < noOfRecordsToReturn; i++) {
 			Map<String, Object> map = new HashMap<>();
 			map.put("id", i);
@@ -77,14 +76,8 @@ public class RecordReaderForListSpy implements RecordReader {
 	}
 
 	@Override
-	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long readNumberOfRows(String tableName, Map<String, Object> conditions, Integer fromNo,
-			Integer toNo) {
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions,
+			DbQueryInfo dbQueryInfo) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

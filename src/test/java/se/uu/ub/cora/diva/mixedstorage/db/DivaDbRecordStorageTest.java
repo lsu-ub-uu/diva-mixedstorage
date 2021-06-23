@@ -36,6 +36,7 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.sqldatabase.DbQueryInfoFactoryImp;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
@@ -47,6 +48,7 @@ public class DivaDbRecordStorageTest {
 	private DivaDbFactorySpy divaDbFactorySpy;
 	private DivaDbUpdaterFactorySpy divaDbUpdaterFactorySpy;
 	private FilterToResultDelimiterConverterFactorySpy resultDelimiterConverterFactory;
+	private DbQueryInfoFactorySpy dbQueryInfoFactory = new DbQueryInfoFactorySpy();
 
 	@BeforeMethod
 	public void BeforeMethod() {
@@ -60,6 +62,8 @@ public class DivaDbRecordStorageTest {
 		resultDelimiterConverterFactory = new FilterToResultDelimiterConverterFactorySpy();
 		divaRecordStorage
 				.setFilterToResultDelimiterConverterFactory(resultDelimiterConverterFactory);
+		dbQueryInfoFactory = new DbQueryInfoFactorySpy();
+		divaRecordStorage.setDbQueryInfoFactory(dbQueryInfoFactory);
 	}
 
 	@Test
@@ -71,6 +75,7 @@ public class DivaDbRecordStorageTest {
 		assertNotNull(divaRecordStorage);
 		assertTrue(divaRecordStorage
 				.getFilterToResultDelimiterConverterFactory() instanceof FilterToResultDelimiterConverterFactoryImp);
+		assertTrue(divaRecordStorage.getDbQueryInfoFactory() instanceof DbQueryInfoFactoryImp);
 	}
 
 	@Test
@@ -209,17 +214,31 @@ public class DivaDbRecordStorageTest {
 	}
 
 	@Test
-	public void testReadOrganisationListWithFilter() throws Exception {
+	public void testReadOrganisationListWithFilterWithFromAndTo() throws Exception {
 		DataGroupSpy filter = new DataGroupSpy("filter");
 		filter.addChild(new DataAtomicSpy("fromNo", "10"));
 		filter.addChild(new DataAtomicSpy("toNo", "19"));
+
 		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
+
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
 		assertEquals(recordReader.usedTableName, "organisationview");
 
-		FilterToResultDelimiterConverterSpy returnedConverter = (FilterToResultDelimiterConverterSpy) resultDelimiterConverterFactory.returnedConverter;
-		assertSame(returnedConverter.filter, filter);
-		assertSame(recordReader.resultDelimiter, returnedConverter.resultDelimiter);
+		DbQueryInfoSpy factoredInfo = dbQueryInfoFactory.factoredInfo;
+		assertEquals(dbQueryInfoFactory.fromNo, Integer.valueOf(10));
+		assertEquals(dbQueryInfoFactory.toNo, Integer.valueOf(19));
+		assertNotNull(factoredInfo);
+		assertSame(recordReader.queryInfo, factoredInfo);
+	}
+
+	@Test
+	public void testReadOrganisationListWithFilterWithNoFromAndNoTo() throws Exception {
+		DataGroupSpy filter = new DataGroupSpy("filter");
+
+		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
+
+		assertEquals(dbQueryInfoFactory.fromNo, null);
+		assertEquals(dbQueryInfoFactory.toNo, null);
 	}
 
 	@Test
@@ -538,8 +557,10 @@ public class DivaDbRecordStorageTest {
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
 		assertEquals(recordReader.usedTableName, "toporganisationview");
 		assertTrue(recordReader.usedConditions.isEmpty());
-		assertEquals(recordReader.fromNo, Integer.valueOf(4));
-		assertNull(recordReader.toNo);
+		DbQueryInfoSpy factoredQueryInfo = dbQueryInfoFactory.factoredInfo;
+		assertEquals(dbQueryInfoFactory.fromNo, Integer.valueOf(4));
+		assertNull(dbQueryInfoFactory.toNo);
+		assertSame(recordReader.queryInfo, factoredQueryInfo);
 		assertEquals(totalNumberOfRecordsForType, recordReader.numberToReturn);
 	}
 
@@ -551,8 +572,10 @@ public class DivaDbRecordStorageTest {
 		divaRecordStorage.getTotalNumberOfRecordsForType("topOrganisation", filterDataGroup);
 
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.fromNo, Integer.valueOf(1));
-		assertEquals(recordReader.toNo, Integer.valueOf(4));
+		DbQueryInfoSpy factoredQueryInfo = dbQueryInfoFactory.factoredInfo;
+		assertNull(dbQueryInfoFactory.fromNo);
+		assertEquals(dbQueryInfoFactory.toNo, Integer.valueOf(4));
+		assertSame(recordReader.queryInfo, factoredQueryInfo);
 	}
 
 	@Test
@@ -564,8 +587,10 @@ public class DivaDbRecordStorageTest {
 		divaRecordStorage.getTotalNumberOfRecordsForType("topOrganisation", filterDataGroup);
 
 		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.fromNo, Integer.valueOf(4));
-		assertEquals(recordReader.toNo, Integer.valueOf(9));
+		DbQueryInfoSpy factoredQueryInfo = dbQueryInfoFactory.factoredInfo;
+		assertEquals(dbQueryInfoFactory.fromNo, Integer.valueOf(4));
+		assertEquals(dbQueryInfoFactory.toNo, Integer.valueOf(9));
+		assertSame(recordReader.queryInfo, factoredQueryInfo);
 	}
 
 	@Test
@@ -582,6 +607,11 @@ public class DivaDbRecordStorageTest {
 		Map<String, Object> usedConditions = recordReader.usedConditions;
 		assertTrue(usedConditions.isEmpty());
 		assertEquals(totalNumberOfRecordsForType, recordReader.numberToReturn);
+
+		assertSame(dbQueryInfoFactory.factoredInfo, recordReader.queryInfo);
+		assertNull(dbQueryInfoFactory.fromNo);
+		assertNull(dbQueryInfoFactory.toNo);
+
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class)
