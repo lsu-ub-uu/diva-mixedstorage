@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage.db;
 
 import se.uu.ub.cora.sqldatabase.DbQueryInfo;
+import se.uu.ub.cora.sqldatabase.SortOrder;
 
 public class DbQueryInfoSpy implements DbQueryInfo {
 
@@ -70,6 +71,12 @@ public class DbQueryInfoSpy implements DbQueryInfo {
 	public String getOrderByPartOfQuery() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void setSortOrder(SortOrder sortOrder) {
+		// TODO Auto-generated method stub
+
 	}
 
 }
