@@ -18,17 +18,21 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db;
 
-import static org.testng.Assert.assertTrue;
+import se.uu.ub.cora.sqldatabase.DbQueryInfo;
+import se.uu.ub.cora.sqldatabase.DbQueryInfoFactory;
 
-import org.testng.annotations.Test;
+public class DbQueryInfoFactorySpy implements DbQueryInfoFactory {
 
-public class FilterToResultDelimiterConverterFactoryTest {
+	public Integer fromNo;
+	public Integer toNo;
+	public DbQueryInfoSpy factoredInfo;
 
-	@Test
-	public void testInit() {
-		FilterToResultDelimiterConverterFactory converterFactory = new FilterToResultDelimiterConverterFactoryImp();
-		FilterToResultDelimiterConverter converter = converterFactory.factor();
-		assertTrue(converter instanceof FilterToResultDelimiterConverterImp);
+	@Override
+	public DbQueryInfo factorUsingFromNoAndToNo(Integer fromNo, Integer toNo) {
+		this.fromNo = fromNo;
+		this.toNo = toNo;
+		factoredInfo = new DbQueryInfoSpy();
+		return factoredInfo;
 	}
 
 }

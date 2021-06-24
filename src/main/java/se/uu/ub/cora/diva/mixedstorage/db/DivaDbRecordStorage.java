@@ -27,9 +27,11 @@ import java.util.Map;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
+import se.uu.ub.cora.sqldatabase.DbQueryInfo;
+import se.uu.ub.cora.sqldatabase.DbQueryInfoFactory;
+import se.uu.ub.cora.sqldatabase.DbQueryInfoFactoryImp;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
-import se.uu.ub.cora.sqldatabase.ResultDelimiter;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -42,7 +44,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	private DivaDbFactory divaDbFactory;
 	private DivaDbUpdaterFactory divaDbUpdaterFactory;
 	private DivaDbToCoraConverterFactory converterFactory;
-	private FilterToResultDelimiterConverterFactory resultDelimiterConverterFactory;
+	private DbQueryInfoFactory dbQueryInfoFactory;
 
 	private DivaDbRecordStorage(RecordReaderFactory recordReaderFactory,
 			DivaDbFactory divaDbReaderFactory, DivaDbUpdaterFactory divaDbUpdaterFactory,
@@ -51,7 +53,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 		this.divaDbFactory = divaDbReaderFactory;
 		this.divaDbUpdaterFactory = divaDbUpdaterFactory;
 		this.converterFactory = converterFactory;
-		resultDelimiterConverterFactory = new FilterToResultDelimiterConverterFactoryImp();
+		dbQueryInfoFactory = new DbQueryInfoFactoryImp();
 	}
 
 	public static DivaDbRecordStorage usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(
@@ -139,11 +141,10 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	private StorageReadResult readOrganisationList(String type, String tableName,
 			DataGroup filter) {
-		ResultDelimiter resultDelimiter = createResultDelimiter(filter);
-
+		DbQueryInfo dbQueryInfo = createDbQueryInfo(filter);
 		RecordReader recordReader = recordReaderFactory.factor();
 		List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable(tableName,
-				resultDelimiter);
+				dbQueryInfo);
 
 		List<DataGroup> convertedGroups = new ArrayList<>();
 		for (Map<String, Object> map : rowsFromDb) {
@@ -152,10 +153,20 @@ public class DivaDbRecordStorage implements RecordStorage {
 		return createStorageReadResult(convertedGroups);
 	}
 
-	private ResultDelimiter createResultDelimiter(DataGroup filter) {
-		FilterToResultDelimiterConverter delimiterConverter = resultDelimiterConverterFactory
-				.factor();
-		return delimiterConverter.convert(filter);
+	private DbQueryInfo createDbQueryInfo(DataGroup filter) {
+		Integer fromNo = getAtomicValueAsIntegerIfExists(filter, "fromNo");
+		Integer toNo = getAtomicValueAsIntegerIfExists(filter, "toNo");
+
+		DbQueryInfo dbQueryInfo = dbQueryInfoFactory.factorUsingFromNoAndToNo(fromNo, toNo);
+		dbQueryInfo.setOrderBy("id");
+		return dbQueryInfo;
+	}
+
+	private Integer getAtomicValueAsIntegerIfExists(DataGroup filter, String nameInData) {
+		if (filter.containsChildWithNameInData(nameInData)) {
+			return extractAtomicValueAsInteger(filter, nameInData);
+		}
+		return null;
 	}
 
 	private void convertOrganisation(String type, List<DataGroup> convertedGroups,
@@ -298,33 +309,14 @@ public class DivaDbRecordStorage implements RecordStorage {
 		// filter is not implemented yet -- need to decide how filter should be structured
 		Map<String, Object> conditions = new HashMap<>();
 		String tableName = getTableName(type);
-		Integer fromNo = calculateFromNumber(filter);
-		Integer toNo = calculateToNumber(filter);
+		DbQueryInfo dbQueryInfo = createDbQueryInfo(filter);
 
-		return recordReader.readNumberOfRows(tableName, conditions, fromNo, toNo);
-	}
-
-	private Integer calculateFromNumber(DataGroup filter) {
-		if (filterContainsValue(filter, "fromNo")) {
-			return extractAtomicValueAsInteger(filter, "fromNo");
-		}
-		return 1;
-	}
-
-	private boolean filterContainsValue(DataGroup filter, String nameInData) {
-		return filter.containsChildWithNameInData(nameInData);
+		return recordReader.readNumberOfRows(tableName, conditions, dbQueryInfo);
 	}
 
 	private Integer extractAtomicValueAsInteger(DataGroup filter, String nameInData) {
 		String atomicValue = filter.getFirstAtomicValueWithNameInData(nameInData);
 		return Integer.valueOf(atomicValue);
-	}
-
-	private Integer calculateToNumber(DataGroup filter) {
-		if (filterContainsValue(filter, "toNo")) {
-			return extractAtomicValueAsInteger(filter, "toNo");
-		}
-		return null;
 	}
 
 	private void throwNotImplementedErrorIfNotOrganisation(String type) {
@@ -341,13 +333,12 @@ public class DivaDbRecordStorage implements RecordStorage {
 		return getTotalNumberOfRecordsForType(abstractType, filter);
 	}
 
-	FilterToResultDelimiterConverterFactory getFilterToResultDelimiterConverterFactory() {
-		return resultDelimiterConverterFactory;
+	public DbQueryInfoFactory getDbQueryInfoFactory() {
+		return dbQueryInfoFactory;
 	}
 
-	void setFilterToResultDelimiterConverterFactory(
-			FilterToResultDelimiterConverterFactory resultDelimiterConverterFactory) {
-		this.resultDelimiterConverterFactory = resultDelimiterConverterFactory;
+	void setDbQueryInfoFactory(DbQueryInfoFactory dbQueryInfoFactory) {
+		this.dbQueryInfoFactory = dbQueryInfoFactory;
 	}
 
 }

@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import se.uu.ub.cora.sqldatabase.DbQueryInfo;
 import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.ResultDelimiter;
 
 public class OrganisationMultipleRowsRecordReaderSpy implements RecordReader {
 
@@ -69,21 +69,14 @@ public class OrganisationMultipleRowsRecordReaderSpy implements RecordReader {
 	}
 
 	@Override
-	public List<Map<String, Object>> readAllFromTable(String tableName,
-			ResultDelimiter resultDelimiter) {
+	public List<Map<String, Object>> readAllFromTable(String tableName, DbQueryInfo dbQueryInfo) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long readNumberOfRows(String tableName, Map<String, Object> conditions, Integer fromNo,
-			Integer toNo) {
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions,
+			DbQueryInfo dbQueryInfo) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
