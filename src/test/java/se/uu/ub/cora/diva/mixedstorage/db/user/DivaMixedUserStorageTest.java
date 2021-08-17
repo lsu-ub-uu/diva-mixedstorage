@@ -20,6 +20,7 @@ package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
@@ -161,6 +162,21 @@ public class DivaMixedUserStorageTest {
 		}
 		assertEquals(loggerFactorySpy.getErrorLogMessageUsingClassNameAndNo(testedClassName, 0),
 				"Unrecognized format of userIdFromLogin: userId@somedomainorg");
+	}
+
+	@Test(expectedExceptions = DbException.class, expectedExceptionsMessageRegExp = ""
+			+ "Unrecognized format of userIdFromLogin: userId@one.two.three.four.five.six.seven.eight.nine.ten.eleven")
+	public void testUnexpectedFormatOfUserIdFromLoginMoreThen10WordsInDomain() {
+		userStorage.getUserByIdFromLogin(
+				"userId@one.two.three.four.five.six.seven.eight.nine.ten.eleven");
+	}
+
+	@Test
+	public void testIfUserFormatIsOkWithLongLoginLessThan10Words() {
+		DataGroup userByIdFromLogin = userStorage
+				.getUserByIdFromLogin("userId@one.two.three.four.five.six.seven.eight.nine.ten");
+
+		assertNotNull(userByIdFromLogin);
 	}
 
 	@Test

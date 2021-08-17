@@ -99,7 +99,7 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	}
 
 	private boolean wrongFormatForIdFromLogin(String idFromLogin) {
-		return !idFromLogin.matches("^\\w+@(\\w+\\.){1,}\\w+$");
+		return !idFromLogin.matches("^\\w+@(\\w+\\.){1,9}\\w+$");
 	}
 
 	private Map<String, Object> createConditions(String idFromLogin) {
