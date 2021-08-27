@@ -41,11 +41,11 @@ import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterSpy;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 
 public class DivaMixedUserStorageTest {
 

@@ -22,7 +22,7 @@ import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
-import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 
 public class DataGroupRoleReferenceCreatorSpy implements DataGroupRoleReferenceCreator {
 	public MethodCallRecorder methodCallRecorder = new MethodCallRecorder();

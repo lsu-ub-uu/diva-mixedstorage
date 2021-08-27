@@ -1,22 +1,16 @@
-<!--
-  ~ Copyright 2018, 2019 Uppsala University Library
-  ~
-  ~ This file is part of Cora.
-  ~
-  ~     Cora is free software: you can redistribute it and/or modify
-  ~     it under the terms of the GNU General Public License as published by
-  ~     the Free Software Foundation, either version 3 of the License, or
-  ~     (at your option) any later version.
-  ~
-  ~     Cora is distributed in the hope that it will be useful,
-  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~     GNU General Public License for more details.
-  ~
-  ~     You should have received a copy of the GNU General Public License
-  ~     along with Cora.  If not, see <http://www.gnu.org/licenses />.
-  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!-- ~ Copyright 2018, 2019 Uppsala University Library ~ ~ This file is part 
+	of Cora. ~ ~ Cora is free software: you can redistribute it and/or modify 
+	~ it under the terms of the GNU General Public License as published by ~ 
+	the Free Software Foundation, either version 3 of the License, or ~ (at your 
+	option) any later version. ~ ~ Cora is distributed in the hope that it will 
+	be useful, ~ but WITHOUT ANY WARRANTY; without even the implied warranty 
+	of ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the ~ GNU General 
+	Public License for more details. ~ ~ You should have received a copy of the 
+	GNU General Public License ~ along with Cora. If not, see <http://www.gnu.org/licenses 
+	/>. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -45,14 +39,15 @@
 		<xmlutils.version>1.1.0</xmlutils.version>
 		<xmlconverter.version>1.6.0</xmlconverter.version>
 		<converter.version>1.5.0</converter.version>
+		<testutils.version>1.1.0</testutils.version>
 	</properties>
 
 	<scm>
 		<connection>scm:git:https://github.com/lsu-ub-uu/diva-mixedstorage.git</connection>
 		<developerConnection>scm:git:https://github.com/lsu-ub-uu/diva-mixedstorage.git</developerConnection>
 		<url>https://github.com/lsu-ub-uu/diva-mixedstorage.git</url>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<dependencies>
 		<dependency>
@@ -105,7 +100,7 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>gatekeeper</artifactId>
 			<version>${gatekeeper.version}</version>
- 			<scope>provided</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
@@ -135,6 +130,12 @@
 			<version>${testng.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>testutils</artifactId>
+			<version>${testutils.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-	
+
 </project>

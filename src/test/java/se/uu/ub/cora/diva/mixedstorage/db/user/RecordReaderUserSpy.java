@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import se.uu.ub.cora.diva.mixedstorage.spy.MethodCallRecorder;
 import se.uu.ub.cora.sqldatabase.DbQueryInfo;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.SqlStorageException;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 
 public class RecordReaderUserSpy implements RecordReader {
 	public MethodCallRecorder MCR = new MethodCallRecorder();
