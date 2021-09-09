@@ -37,20 +37,22 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private RecordStorage divaFedoraStorage;
 	private RecordStorage divaDbStorage;
 	private RecordStorage userStorage;
+	private RecordStorage databaseStorage;
 
 	public static RecordStorage usingBasicFedoraAndDbStorageAndStorageFactory(
 			RecordStorage basicStorage, RecordStorage divaFedoraStorage,
-			RecordStorage divaDbStorage, RecordStorage userStorage) {
+			RecordStorage divaDbStorage, RecordStorage userStorage, RecordStorage databaseStorage) {
 		return new DivaMixedRecordStorage(basicStorage, divaFedoraStorage, divaDbStorage,
-				userStorage);
+				userStorage, databaseStorage);
 	}
 
 	private DivaMixedRecordStorage(RecordStorage basicStorage, RecordStorage divaFedoraStorage,
-			RecordStorage divaDbStorage, RecordStorage userStorage) {
+			RecordStorage divaDbStorage, RecordStorage userStorage, RecordStorage databaseStorage) {
 		this.basicStorage = basicStorage;
 		this.divaFedoraStorage = divaFedoraStorage;
 		this.divaDbStorage = divaDbStorage;
 		this.userStorage = userStorage;
+		this.databaseStorage = databaseStorage;
 	}
 
 	@Override
@@ -245,5 +247,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		}
 		return basicStorage.getTotalNumberOfRecordsForAbstractType(abstractType, implementingTypes,
 				filter);
+	}
+
+	public RecordStorage getDatabaseStorage() {
+		return databaseStorage;
 	}
 }

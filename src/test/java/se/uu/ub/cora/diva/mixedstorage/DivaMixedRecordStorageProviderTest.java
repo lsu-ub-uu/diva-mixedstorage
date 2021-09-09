@@ -20,6 +20,7 @@ package se.uu.ub.cora.diva.mixedstorage;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
@@ -59,6 +60,7 @@ import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.RecordCreatorFactoryImp;
 import se.uu.ub.cora.sqldatabase.RecordDeleterFactoryImp;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactoryImp;
+import se.uu.ub.cora.sqlstorage.DatabaseRecordStorage;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -75,10 +77,24 @@ public class DivaMixedRecordStorageProviderTest {
 
 	@BeforeMethod
 	public void beforeMethod() throws Exception {
+		setUpFactories();
+		setUpDefaultInitInfo();
+
+		makeSureBasePathExistsAndIsEmpty();
+		divaMixedRecordStorageProvider = new DivaMixedRecordStorageProvider();
+		userStorageProvider = new UserStorageProviderSpy();
+		divaMixedRecordStorageProvider.setUserStorageProvider(userStorageProvider);
+		RecordStorageInstance.setInstance(null);
+	}
+
+	private void setUpFactories() {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		dataGroupFactory = new DataGroupFactorySpy();
 		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
+	}
+
+	private void setUpDefaultInitInfo() {
 		initInfo = new HashMap<>();
 		initInfo.put("storageType", "memory");
 		initInfo.put("storageOnDiskBasePath", basePath);
@@ -86,13 +102,6 @@ public class DivaMixedRecordStorageProviderTest {
 		initInfo.put("fedoraUsername", "fedoraUser");
 		initInfo.put("fedoraPassword", "fedoraPass");
 		initInfo.put("databaseLookupName", "java:/comp/env/jdbc/postgres");
-
-		makeSureBasePathExistsAndIsEmpty();
-		divaMixedRecordStorageProvider = new DivaMixedRecordStorageProvider();
-
-		userStorageProvider = new UserStorageProviderSpy();
-		divaMixedRecordStorageProvider.setUserStorageProvider(userStorageProvider);
-		RecordStorageInstance.setInstance(null);
 	}
 
 	public void makeSureBasePathExistsAndIsEmpty() throws IOException {
@@ -135,21 +144,25 @@ public class DivaMixedRecordStorageProviderTest {
 
 	@Test
 	public void testDivaMixedRecordStorageContainsCorrectBasicStorageinMemory() {
-		divaMixedRecordStorageProvider.startUsingInitInfo(initInfo);
-		DivaMixedRecordStorage recordStorage = (DivaMixedRecordStorage) divaMixedRecordStorageProvider
-				.getRecordStorage();
+		DivaMixedRecordStorage recordStorage = startRecordStorage();
 		RecordStorage basicStorage = recordStorage.getBasicStorage();
 		assertTrue(basicStorage instanceof RecordStorageInMemoryReadFromDisk);
 		assertEquals(((RecordStorageInMemoryReadFromDisk) basicStorage).getBasePath(),
 				initInfo.get("storageOnDiskBasePath"));
 	}
 
-	@Test
-	public void testDivaMixedRecordStorageContainsCorrectBasicStorageOnDisk() {
-		initInfo.put("storageType", "disk");
+	private DivaMixedRecordStorage startRecordStorage() {
 		divaMixedRecordStorageProvider.startUsingInitInfo(initInfo);
 		DivaMixedRecordStorage recordStorage = (DivaMixedRecordStorage) divaMixedRecordStorageProvider
 				.getRecordStorage();
+		return recordStorage;
+	}
+
+	@Test
+	public void testDivaMixedRecordStorageContainsCorrectBasicStorageOnDisk() {
+		initInfo.put("storageType", "disk");
+		DivaMixedRecordStorage recordStorage = startRecordStorage();
+
 		RecordStorage basicStorage = recordStorage.getBasicStorage();
 		assertTrue(basicStorage instanceof RecordStorageOnDisk);
 		assertFalse(basicStorage instanceof RecordStorageInMemoryReadFromDisk);
@@ -159,9 +172,8 @@ public class DivaMixedRecordStorageProviderTest {
 
 	@Test
 	public void testDivaMixedRecordStorageContainsCorrectFedoraStorage() {
-		divaMixedRecordStorageProvider.startUsingInitInfo(initInfo);
-		DivaMixedRecordStorage recordStorage = (DivaMixedRecordStorage) divaMixedRecordStorageProvider
-				.getRecordStorage();
+		DivaMixedRecordStorage recordStorage = startRecordStorage();
+
 		RecordStorage fedoraStorage = recordStorage.getFedoraStorage();
 		assertTrue(fedoraStorage instanceof DivaFedoraRecordStorage);
 
@@ -187,13 +199,12 @@ public class DivaMixedRecordStorageProviderTest {
 
 	@Test
 	public void testDivaMixedRecordStorageContainsCorrectDbStorage() {
-		divaMixedRecordStorageProvider.startUsingInitInfo(initInfo);
-		DivaMixedRecordStorage recordStorage = (DivaMixedRecordStorage) divaMixedRecordStorageProvider
-				.getRecordStorage();
-		RecordStorage dbStorageInRecordStorage = recordStorage.getDbStorage();
-		assertTrue(dbStorageInRecordStorage instanceof DivaDbRecordStorage);
+		DivaMixedRecordStorage recordStorage = startRecordStorage();
 
-		DivaDbRecordStorage dbStorage = (DivaDbRecordStorage) dbStorageInRecordStorage;
+		RecordStorage classicDbStorage = recordStorage.getDbStorage();
+		assertTrue(classicDbStorage instanceof DivaDbRecordStorage);
+
+		DivaDbRecordStorage dbStorage = (DivaDbRecordStorage) classicDbStorage;
 
 		RecordReaderFactoryImp recordReaderFactory = assertCorrectRecordReaderFactory(dbStorage);
 
@@ -218,7 +229,7 @@ public class DivaMixedRecordStorageProviderTest {
 
 		ContextConnectionProviderImp connectionProvider = (ContextConnectionProviderImp) recordStorageForOneTypeFactory
 				.getSqlConnectionProvider();
-		assertCorrectSqlConnectionProvider(connectionProvider);
+		assertCorrectSqlConnectionProvider(connectionProvider, "databaseLookupName");
 		assertTrue(recordStorageForOneTypeFactory
 				.getRecordReaderFactory() instanceof RecordReaderFactoryImp);
 		assertCorrectRelatedTableFactory(recordStorageForOneTypeFactory);
@@ -244,14 +255,38 @@ public class DivaMixedRecordStorageProviderTest {
 		ContextConnectionProviderImp readerConnectionProvider = (ContextConnectionProviderImp) recordReaderFactory
 				.getSqlConnectionProvider();
 
-		assertCorrectSqlConnectionProvider(readerConnectionProvider);
+		assertCorrectSqlConnectionProvider(readerConnectionProvider, "databaseLookupName");
 		return recordReaderFactory;
 	}
 
-	private void assertCorrectSqlConnectionProvider(
-			ContextConnectionProviderImp connectionProvider) {
-		assertEquals(connectionProvider.getName(), initInfo.get("databaseLookupName"));
+	private void assertCorrectSqlConnectionProvider(ContextConnectionProviderImp connectionProvider,
+			String name) {
+		assertEquals(connectionProvider.getName(), initInfo.get(name));
 		assertTrue(connectionProvider.getContext() instanceof InitialContext);
+	}
+
+	@Test
+	public void testDivaMixedRecordStorageContainsCorrectGenericDbStorage() {
+		DivaMixedRecordStorage recordStorage = startRecordStorage();
+
+		DatabaseRecordStorage databaseStorage = (DatabaseRecordStorage) recordStorage
+				.getDatabaseStorage();
+
+		RecordReaderFactoryImp recordReaderFactory = (RecordReaderFactoryImp) databaseStorage
+				.getRecordReaderFactory();
+		assertNotNull(recordReaderFactory.getSqlConnectionProvider());
+
+		// DivaDbRecordStorage dbStorage = (DivaDbRecordStorage) classicDbStorage;
+		//
+		// RecordReaderFactoryImp recordReaderFactory = assertCorrectRecordReaderFactory(dbStorage);
+		//
+		// assertTrue(dbStorage.getConverterFactory() instanceof DivaDbToCoraConverterFactoryImp);
+		// assertCorrectRecordStorageForOneTypeFactory(dbStorage);
+		//
+		// DivaDbFactoryImp divaDbToCoraFactory = (DivaDbFactoryImp) dbStorage
+		// .getDivaDbToCoraFactory();
+		// assertSame(divaDbToCoraFactory.getReaderFactory(), recordReaderFactory);
+		// assertSame(divaDbToCoraFactory.getConverterFactory(), dbStorage.getConverterFactory());
 	}
 
 	@Test

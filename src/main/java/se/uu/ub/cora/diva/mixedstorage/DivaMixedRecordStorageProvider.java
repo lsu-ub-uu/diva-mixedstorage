@@ -49,6 +49,7 @@ import se.uu.ub.cora.sqldatabase.RecordDeleterFactory;
 import se.uu.ub.cora.sqldatabase.RecordDeleterFactoryImp;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactoryImp;
+import se.uu.ub.cora.sqlstorage.DatabaseRecordStorage;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -100,12 +101,19 @@ public class DivaMixedRecordStorageProvider
 	private void initializeAndStartMixedRecordStorage() {
 		RecordStorage basicStorage = createBasicStorage();
 		DivaFedoraRecordStorage fedoraStorage = createFedoraStorage();
-		DivaDbRecordStorage dbStorage = createDbStorage(recordReaderFactory);
+		DivaDbRecordStorage classicDbStorage = createDbStorage(recordReaderFactory);
 		RecordStorage userStorage = createUserStorage();
+
+		SqlConnectionProvider connectionProvider = ContextConnectionProviderImp
+				.usingInitialContextAndName(null, "");
+
+		RecordReaderFactory readerFactory = RecordReaderFactoryImp
+				.usingSqlConnectionProvider(connectionProvider);
+		RecordStorage databaseStorage = new DatabaseRecordStorage(readerFactory);
 
 		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage, fedoraStorage,
-						dbStorage, userStorage);
+						classicDbStorage, userStorage, databaseStorage);
 		setStaticInstance(mixedRecordStorage);
 	}
 
