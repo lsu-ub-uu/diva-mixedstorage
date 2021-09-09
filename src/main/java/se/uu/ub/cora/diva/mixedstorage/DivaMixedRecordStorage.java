@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -34,23 +34,21 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private static final String PERSON = "person";
 	private static final String ORGANISATION = "organisation";
 	private RecordStorage basicStorage;
-	private RecordStorage divaFedoraStorage;
-	private RecordStorage divaDbStorage;
+	private RecordStorage divaClassicDbStorage;
 	private RecordStorage userStorage;
 	private RecordStorage databaseStorage;
 
-	public static RecordStorage usingBasicFedoraAndDbStorageAndStorageFactory(
-			RecordStorage basicStorage, RecordStorage divaFedoraStorage,
-			RecordStorage divaDbStorage, RecordStorage userStorage, RecordStorage databaseStorage) {
-		return new DivaMixedRecordStorage(basicStorage, divaFedoraStorage, divaDbStorage,
-				userStorage, databaseStorage);
+	public static RecordStorage usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(
+			RecordStorage basicStorage, RecordStorage divaDbStorage, RecordStorage userStorage,
+			RecordStorage databaseStorage) {
+		return new DivaMixedRecordStorage(basicStorage, divaDbStorage, userStorage,
+				databaseStorage);
 	}
 
-	private DivaMixedRecordStorage(RecordStorage basicStorage, RecordStorage divaFedoraStorage,
-			RecordStorage divaDbStorage, RecordStorage userStorage, RecordStorage databaseStorage) {
+	private DivaMixedRecordStorage(RecordStorage basicStorage, RecordStorage divaDbStorage,
+			RecordStorage userStorage, RecordStorage databaseStorage) {
 		this.basicStorage = basicStorage;
-		this.divaFedoraStorage = divaFedoraStorage;
-		this.divaDbStorage = divaDbStorage;
+		this.divaClassicDbStorage = divaDbStorage;
 		this.userStorage = userStorage;
 		this.databaseStorage = databaseStorage;
 	}
@@ -58,13 +56,13 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	@Override
 	public DataGroup read(String type, String id) {
 		if (PERSON.equals(type)) {
-			return divaFedoraStorage.read(type, id);
+			return databaseStorage.read(type, id);
 		}
 		if ("personDomainPart".equals(type)) {
-			return divaFedoraStorage.read(type, id);
+			return databaseStorage.read(type, id);
 		}
 		if (isOrganisation(type)) {
-			return divaDbStorage.read(type, id);
+			return divaClassicDbStorage.read(type, id);
 		}
 		if (USER.equals(type) || CORA_USER.equals(type)) {
 			return handleUserStorage(type, id);
@@ -103,27 +101,28 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	}
 
 	@Override
-	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
+	public void update(String type, String id, DataGroup dataRecord, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
-			divaFedoraStorage.update(type, id, record, collectedTerms, linkList, dataDivider);
+			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 		} else if (isOrganisation(type)) {
-			divaDbStorage.update(type, id, record, collectedTerms, linkList, dataDivider);
+			divaClassicDbStorage.update(type, id, dataRecord, collectedTerms, linkList,
+					dataDivider);
 		} else {
-			basicStorage.update(type, id, record, collectedTerms, linkList, dataDivider);
+			basicStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 		}
 	}
 
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
 		if (PERSON.equals(type)) {
-			return divaFedoraStorage.readList(type, filter);
+			return databaseStorage.readList(type, filter);
 		}
 		if ("personDomainPart".equals(type)) {
-			return divaFedoraStorage.readList(type, filter);
+			return databaseStorage.readList(type, filter);
 		}
 		if (isOrganisation(type)) {
-			return divaDbStorage.readList(type, filter);
+			return divaClassicDbStorage.readList(type, filter);
 		}
 		if (CORA_USER.equals(type)) {
 			return readListOfUsersFromUserStorageAndBasicStorage(type, filter);
@@ -152,14 +151,14 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			return readAbstractListOfUsersFromUserStorageAndBasicStorage(type, filter);
 		}
 		if (ORGANISATION.equals(type)) {
-			return divaDbStorage.readAbstractList(type, filter);
+			return divaClassicDbStorage.readAbstractList(type, filter);
 		}
 		return basicStorage.readAbstractList(type, filter);
 	}
 
 	private StorageReadResult readAbstractListOfUsersFromUserStorageAndBasicStorage(String type,
 			DataGroup filter) {
-		StorageReadResult dbUsers = divaDbStorage.readAbstractList(type, filter);
+		StorageReadResult dbUsers = divaClassicDbStorage.readAbstractList(type, filter);
 		StorageReadResult basicStorageUsers = basicStorage.readAbstractList(type, filter);
 		addResultFromSecondResultToFirst(basicStorageUsers, dbUsers);
 		return dbUsers;
@@ -188,7 +187,8 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	}
 
 	private boolean linkExistInDbStorage(String type, String id) {
-		return divaDbStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
+		return divaClassicDbStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type,
+				id);
 	}
 
 	private boolean linkExistInUserStorage(String type, String id) {
@@ -204,14 +204,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		return basicStorage;
 	}
 
-	RecordStorage getFedoraStorage() {
+	RecordStorage getClassicDbStorage() {
 		// needed for test
-		return divaFedoraStorage;
-	}
-
-	RecordStorage getDbStorage() {
-		// needed for test
-		return divaDbStorage;
+		return divaClassicDbStorage;
 	}
 
 	@Override
@@ -233,7 +228,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	@Override
 	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
 		if (isOrganisation(type)) {
-			return divaDbStorage.getTotalNumberOfRecordsForType(type, filter);
+			return divaClassicDbStorage.getTotalNumberOfRecordsForType(type, filter);
 		}
 		return basicStorage.getTotalNumberOfRecordsForType(type, filter);
 	}
@@ -242,7 +237,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
 			List<String> implementingTypes, DataGroup filter) {
 		if (isOrganisation(abstractType)) {
-			return divaDbStorage.getTotalNumberOfRecordsForAbstractType(abstractType,
+			return divaClassicDbStorage.getTotalNumberOfRecordsForAbstractType(abstractType,
 					implementingTypes, filter);
 		}
 		return basicStorage.getTotalNumberOfRecordsForAbstractType(abstractType, implementingTypes,

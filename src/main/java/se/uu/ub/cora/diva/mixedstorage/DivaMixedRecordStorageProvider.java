@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -35,13 +35,8 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
-import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactory;
-import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactoryImp;
-import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraRecordStorage;
 import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.gatekeeper.user.UserStorageProvider;
-import se.uu.ub.cora.httphandler.HttpHandlerFactory;
-import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.RecordCreatorFactoryImp;
@@ -54,7 +49,6 @@ import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.RecordStorageProvider;
-import se.uu.ub.cora.xmlutils.transformer.XsltTransformationFactory;
 
 public class DivaMixedRecordStorageProvider
 		implements RecordStorageProvider, MetadataStorageProvider {
@@ -100,25 +94,24 @@ public class DivaMixedRecordStorageProvider
 
 	private void initializeAndStartMixedRecordStorage() {
 		RecordStorage basicStorage = createBasicStorage();
-		DivaFedoraRecordStorage fedoraStorage = createFedoraStorage();
 		DivaDbRecordStorage classicDbStorage = createDbStorage(recordReaderFactory);
 		RecordStorage userStorage = createUserStorage();
 
-		SqlConnectionProvider connectionProvider = ContextConnectionProviderImp
-				.usingInitialContextAndName(null, "");
+		SqlConnectionProvider connectionProvider = tryToCreateConnectionProvider(
+				"coraDatabaseLookupName");
 
 		RecordReaderFactory readerFactory = RecordReaderFactoryImp
 				.usingSqlConnectionProvider(connectionProvider);
 		RecordStorage databaseStorage = new DatabaseRecordStorage(readerFactory);
 
 		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
-				.usingBasicFedoraAndDbStorageAndStorageFactory(basicStorage, fedoraStorage,
-						classicDbStorage, userStorage, databaseStorage);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, classicDbStorage,
+						userStorage, databaseStorage);
 		setStaticInstance(mixedRecordStorage);
 	}
 
 	private void setUpResources() {
-		sqlConnectionProvider = tryToCreateConnectionProvider();
+		sqlConnectionProvider = tryToCreateConnectionProvider("databaseLookupName");
 		recordReaderFactory = createRecordReaderFactory();
 	}
 
@@ -155,23 +148,6 @@ public class DivaMixedRecordStorageProvider
 		return divaStorageFactory == null;
 	}
 
-	private DivaFedoraRecordStorage createFedoraStorage() {
-		String fedoraURL = tryToGetInitParameterLogIfFound("fedoraURL");
-		String fedoraUsername = tryToGetInitParameter("fedoraUsername");
-		String fedoraPassword = tryToGetInitParameter("fedoraPassword");
-
-		HttpHandlerFactory httpHandlerFactory = new HttpHandlerFactoryImp();
-		XsltTransformationFactory transformationFactory = new XsltTransformationFactory();
-
-		DivaFedoraConverterFactory converterFactory = DivaFedoraConverterFactoryImp
-				.usingFedoraURLAndTransformerFactory(fedoraURL, transformationFactory);
-
-		return DivaFedoraRecordStorage
-				.usingHttpHandlerFactoryAndConverterFactoryAndBaseURLAndUsernameAndPassword(
-						httpHandlerFactory, converterFactory, fedoraURL, fedoraUsername,
-						fedoraPassword);
-	}
-
 	private DivaDbRecordStorage createDbStorage(RecordReaderFactory recordReaderFactory) {
 		DivaDbToCoraConverterFactoryImp divaDbToCoraConverterFactory = new DivaDbToCoraConverterFactoryImp();
 		DivaDbFactoryImp divaDbToCoraFactory = new DivaDbFactoryImp(recordReaderFactory,
@@ -183,10 +159,10 @@ public class DivaMixedRecordStorageProvider
 				divaDbToCoraConverterFactory);
 	}
 
-	private SqlConnectionProvider tryToCreateConnectionProvider() {
+	private SqlConnectionProvider tryToCreateConnectionProvider(String name) {
 		try {
 			InitialContext context = new InitialContext();
-			String databaseLookupName = tryToGetInitParameterLogIfFound("databaseLookupName");
+			String databaseLookupName = tryToGetInitParameterLogIfFound(name);
 			return ContextConnectionProviderImp.usingInitialContextAndName(context,
 					databaseLookupName);
 		} catch (Exception e) {

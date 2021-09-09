@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -52,10 +52,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
-import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraConverterFactoryImp;
-import se.uu.ub.cora.diva.mixedstorage.fedora.DivaFedoraRecordStorage;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
-import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.RecordCreatorFactoryImp;
 import se.uu.ub.cora.sqldatabase.RecordDeleterFactoryImp;
@@ -64,7 +61,6 @@ import se.uu.ub.cora.sqlstorage.DatabaseRecordStorage;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
-import se.uu.ub.cora.xmlutils.transformer.XsltTransformationFactory;
 
 public class DivaMixedRecordStorageProviderTest {
 	private Map<String, String> initInfo = new HashMap<>();
@@ -98,10 +94,8 @@ public class DivaMixedRecordStorageProviderTest {
 		initInfo = new HashMap<>();
 		initInfo.put("storageType", "memory");
 		initInfo.put("storageOnDiskBasePath", basePath);
-		initInfo.put("fedoraURL", "http://diva-cora-fedora:8088/fedora/");
-		initInfo.put("fedoraUsername", "fedoraUser");
-		initInfo.put("fedoraPassword", "fedoraPass");
 		initInfo.put("databaseLookupName", "java:/comp/env/jdbc/postgres");
+		initInfo.put("coraDatabaseLookupName", "java:/comp/env/jdbc/coraPostgres");
 	}
 
 	public void makeSureBasePathExistsAndIsEmpty() throws IOException {
@@ -171,37 +165,10 @@ public class DivaMixedRecordStorageProviderTest {
 	}
 
 	@Test
-	public void testDivaMixedRecordStorageContainsCorrectFedoraStorage() {
-		DivaMixedRecordStorage recordStorage = startRecordStorage();
-
-		RecordStorage fedoraStorage = recordStorage.getFedoraStorage();
-		assertTrue(fedoraStorage instanceof DivaFedoraRecordStorage);
-
-		DivaFedoraRecordStorage fedoraToCoraStorage = (DivaFedoraRecordStorage) fedoraStorage;
-		assertTrue(fedoraToCoraStorage.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
-
-		DivaFedoraConverterFactoryImp divaFedoraConverterFactory = (DivaFedoraConverterFactoryImp) fedoraToCoraStorage
-				.getDivaFedoraConverterFactory();
-		String fedoraURLInConverter = divaFedoraConverterFactory.getFedoraURL();
-		assertEquals(fedoraURLInConverter, initInfo.get("fedoraURL"));
-		assertTrue(divaFedoraConverterFactory
-				.getCoraTransformerFactory() instanceof XsltTransformationFactory);
-
-		String baseURLInFedoraToCoraStorage = fedoraToCoraStorage.getBaseURL();
-		assertEquals(baseURLInFedoraToCoraStorage, initInfo.get("fedoraURL"));
-
-		String fedoraUsername = fedoraToCoraStorage.getFedoraUsername();
-		assertEquals(fedoraUsername, initInfo.get("fedoraUsername"));
-
-		String fedoraPassword = fedoraToCoraStorage.getFedoraPassword();
-		assertEquals(fedoraPassword, initInfo.get("fedoraPassword"));
-	}
-
-	@Test
 	public void testDivaMixedRecordStorageContainsCorrectDbStorage() {
 		DivaMixedRecordStorage recordStorage = startRecordStorage();
 
-		RecordStorage classicDbStorage = recordStorage.getDbStorage();
+		RecordStorage classicDbStorage = recordStorage.getClassicDbStorage();
 		assertTrue(classicDbStorage instanceof DivaDbRecordStorage);
 
 		DivaDbRecordStorage dbStorage = (DivaDbRecordStorage) classicDbStorage;
@@ -276,17 +243,10 @@ public class DivaMixedRecordStorageProviderTest {
 				.getRecordReaderFactory();
 		assertNotNull(recordReaderFactory.getSqlConnectionProvider());
 
-		// DivaDbRecordStorage dbStorage = (DivaDbRecordStorage) classicDbStorage;
-		//
-		// RecordReaderFactoryImp recordReaderFactory = assertCorrectRecordReaderFactory(dbStorage);
-		//
-		// assertTrue(dbStorage.getConverterFactory() instanceof DivaDbToCoraConverterFactoryImp);
-		// assertCorrectRecordStorageForOneTypeFactory(dbStorage);
-		//
-		// DivaDbFactoryImp divaDbToCoraFactory = (DivaDbFactoryImp) dbStorage
-		// .getDivaDbToCoraFactory();
-		// assertSame(divaDbToCoraFactory.getReaderFactory(), recordReaderFactory);
-		// assertSame(divaDbToCoraFactory.getConverterFactory(), dbStorage.getConverterFactory());
+		ContextConnectionProviderImp connectionProvider = (ContextConnectionProviderImp) recordReaderFactory
+				.getSqlConnectionProvider();
+		assertCorrectSqlConnectionProvider(connectionProvider, "coraDatabaseLookupName");
+
 	}
 
 	@Test
@@ -351,12 +311,9 @@ public class DivaMixedRecordStorageProviderTest {
 		assertTrue(loggerFactorySpy.infoLogMessageUsingClassNameExists(testedClassName,
 				"Found memory as storageType"));
 		assertTrue(loggerFactorySpy.infoLogMessageUsingClassNameExists(testedClassName,
-				"Found http://diva-cora-fedora:8088/fedora/ as fedoraURL"));
-		assertTrue(loggerFactorySpy.infoLogMessageUsingClassNameExists(testedClassName,
 				"Found java:/comp/env/jdbc/postgres as databaseLookupName"));
 		assertTrue(loggerFactorySpy.infoLogMessageUsingClassNameExists(testedClassName,
 				"DivaMixedRecordStorageProvider started DivaMixedRecordStorage"));
-		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 6);
 	}
 
 	@Test
@@ -403,37 +360,6 @@ public class DivaMixedRecordStorageProviderTest {
 		assertEquals(loggerFactorySpy.getFatalLogMessageUsingClassNameAndNo(testedClassName, 0),
 				"InitInfo must contain storageOnDiskBasePath");
 		assertEquals(loggerFactorySpy.getNoOfFatalLogMessagesUsingClassName(testedClassName), 1);
-	}
-
-	@Test
-	public void testLoggingAndErrorIfMissingStartParameterFedoraURL() {
-		assertCorrectErrorAndLogOnMissingParameter("fedoraURL");
-	}
-
-	private void assertCorrectErrorAndLogOnMissingParameter(String parameter) {
-		initInfo.remove(parameter);
-		String errorMessage = "InitInfo must contain " + parameter;
-		try {
-			divaMixedRecordStorageProvider.startUsingInitInfo(initInfo);
-		} catch (Exception e) {
-			assertTrue(e instanceof DataStorageException);
-			assertEquals(e.getMessage(), errorMessage);
-		}
-		assertTrue(loggerFactorySpy.infoLogMessageUsingClassNameExists(testedClassName,
-				"DivaMixedRecordStorageProvider starting DivaMixedRecordStorage..."));
-		assertTrue(loggerFactorySpy.fatalLogMessageUsingClassNameExists(testedClassName,
-				errorMessage));
-		assertEquals(loggerFactorySpy.getNoOfFatalLogMessagesUsingClassName(testedClassName), 1);
-	}
-
-	@Test
-	public void testLoggingAndErrorIfMissingStartParameterFedoraUsername() {
-		assertCorrectErrorAndLogOnMissingParameter("fedoraUsername");
-	}
-
-	@Test
-	public void testLoggingAndErrorIfMissingStartParameterFedoraPassword() {
-		assertCorrectErrorAndLogOnMissingParameter("fedoraPassword");
 	}
 
 	@Test
