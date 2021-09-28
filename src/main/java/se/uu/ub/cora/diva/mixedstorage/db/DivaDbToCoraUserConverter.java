@@ -18,20 +18,19 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db;
 
-import java.util.Map;
-
 import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 
 	private static final String CORA_USER = "coraUser";
-	private Map<String, Object> dbRow;
+	private Row dbRow;
 
 	@Override
-	public DataGroup fromMap(Map<String, Object> dbRow) {
+	public DataGroup fromMap(Row dbRow) {
 		this.dbRow = dbRow;
 		throwErrorIfNoId();
 		DataGroup user = createBasicActiveUserWithRecordInfo(dbRow);
@@ -47,7 +46,7 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 		}
 	}
 
-	private DataGroup createBasicActiveUserWithRecordInfo(Map<String, Object> dbRow) {
+	private DataGroup createBasicActiveUserWithRecordInfo(Row dbRow) {
 		DataGroup user = DataGroupProvider.getDataGroupUsingNameInData("user");
 		user.addAttributeByIdWithValue("type", CORA_USER);
 		DataGroup recordInfo = createRecordInfo(dbRow);
@@ -57,7 +56,7 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 		return user;
 	}
 
-	private DataGroup createRecordInfo(Map<String, Object> map) {
+	private DataGroup createRecordInfo(Row map) {
 		DataGroup recordInfo = createRecordInfoGroupWithId(map);
 		createAndAddType(recordInfo);
 		createAndAddDataDivider(recordInfo);
@@ -65,10 +64,10 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 		return recordInfo;
 	}
 
-	private DataGroup createRecordInfoGroupWithId(Map<String, Object> map) {
+	private DataGroup createRecordInfoGroupWithId(Row map) {
 		DataGroup recordInfo = DataGroupProvider.getDataGroupUsingNameInData("recordInfo");
 		DataAtomic id = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("id",
-				String.valueOf(map.get("db_id")));
+				String.valueOf(map.getValueByColumn("db_id")));
 		recordInfo.addChild(id);
 		return recordInfo;
 	}
@@ -119,23 +118,23 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 				linkedRecordType, linkedRecordId);
 	}
 
-	private void possiblyAddFirstName(Map<String, Object> dbRow, DataGroup user) {
+	private void possiblyAddFirstName(Row dbRow, DataGroup user) {
 		if (!valueIsEmpty("first_name")) {
 			DataAtomic firstName = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(
-					"userFirstname", (String) dbRow.get("first_name"));
+					"userFirstname", (String) dbRow.getValueByColumn("first_name"));
 			user.addChild(firstName);
 		}
 	}
 
 	private boolean valueIsEmpty(String key) {
-		Object valueForKey = dbRow.get(key);
+		Object valueForKey = dbRow.getValueByColumn(key);
 		return valueForKey == null || "".equals(valueForKey);
 	}
 
-	private void possiblyAddLastname(Map<String, Object> dbRow, DataGroup user) {
+	private void possiblyAddLastname(Row dbRow, DataGroup user) {
 		if (!valueIsEmpty("last_name")) {
 			DataAtomic lastName = DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(
-					"userLastname", (String) dbRow.get("last_name"));
+					"userLastname", (String) dbRow.getValueByColumn("last_name"));
 			user.addChild(lastName);
 		}
 	}

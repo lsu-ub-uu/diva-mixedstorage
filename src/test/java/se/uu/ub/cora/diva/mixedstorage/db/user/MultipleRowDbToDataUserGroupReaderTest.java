@@ -48,7 +48,7 @@ public class MultipleRowDbToDataUserGroupReaderTest {
 	public void testInit() {
 		DivaMultipleRowDbToDataReaderImp userGroupReader = new MultipleRowDbToDataUserGroupReader(
 				readerFactory, converterFactory);
-		assertSame(userGroupReader.getRecordReaderFactory(), readerFactory);
+		assertSame(userGroupReader.getSqlDatabaseFactory(), readerFactory);
 	}
 
 	@Test

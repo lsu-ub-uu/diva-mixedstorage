@@ -18,18 +18,17 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
-import java.util.Map;
-
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter {
 
 	private static final String ORGANISATION_ID = "id";
-	private Map<String, Object> dbRow;
+	private Row dbRow;
 	private DataGroup organisation;
 	private DefaultConverterFactory defaultConverterFactory;
 
@@ -38,7 +37,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	@Override
-	public DataGroup fromMap(Map<String, Object> dbRow) {
+	public DataGroup fromMap(Row dbRow) {
 		this.dbRow = dbRow;
 		if (organisationIsEmpty()) {
 			throw ConversionException.withMessageAndException(
@@ -50,7 +49,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private boolean organisationIsEmpty() {
-		Object organisationId = dbRow.get(ORGANISATION_ID);
+		Object organisationId = dbRow.getValueByColumn(ORGANISATION_ID);
 		return organisationId == null || "".equals(organisationId);
 	}
 
@@ -63,7 +62,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private void possiblyAddMoreData() {
-		String typeCode = (String) dbRow.get("type_code");
+		String typeCode = (String) dbRow.getValueByColumn("type_code");
 		if (notRootOrganisation(typeCode)) {
 			addCommonDataForSubAndTopOrganisation();
 			possiblyAddDataForTopOrganisation();
@@ -89,11 +88,11 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private boolean isTopLevel() {
-		return (boolean) dbRow.get("top_level");
+		return (boolean) dbRow.getValueByColumn("top_level");
 	}
 
 	private void createAndAddOrganisationType() {
-		String typeCode = (String) dbRow.get("type_code");
+		String typeCode = (String) dbRow.getValueByColumn("type_code");
 		organisation.addChild(DataAtomicProvider
 				.getDataAtomicUsingNameInDataAndValue("organisationType", typeCode));
 	}
@@ -122,7 +121,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	private void possiblyCreateAtomicValueUsingKeyAndNameInData(DataGroup dataGroup, String key,
 			String nameInData) {
 		if (valueExistsForKey(key)) {
-			String value = (String) dbRow.get(key);
+			String value = (String) dbRow.getValueByColumn(key);
 			dataGroup.addChild(
 					DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(nameInData, value));
 		}
@@ -131,14 +130,14 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	private void possiblyAddAtomicValueUsingKeyAndNameInDataToDefault(String key,
 			String nameInData) {
 		if (valueExistsForKey(key)) {
-			String value = (String) dbRow.get(key);
+			String value = (String) dbRow.getValueByColumn(key);
 			organisation.addChild(
 					DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(nameInData, value));
 		}
 	}
 
 	private boolean valueExistsForKey(String key) {
-		Object value = dbRow.get(key);
+		Object value = dbRow.getValueByColumn(key);
 		return value != null && !"".equals(value);
 	}
 
@@ -149,7 +148,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private void addCountryConvertedToUpperCase(DataGroup dataGroup) {
-		String uppercaseValue = ((String) dbRow.get("country_code")).toUpperCase();
+		String uppercaseValue = ((String) dbRow.getValueByColumn("country_code")).toUpperCase();
 		dataGroup.addChild(
 				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("country", uppercaseValue));
 	}
@@ -168,7 +167,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private void possiblyCreateAndAddDoctoralDegreeGrantor() {
-		Object booleanValue = dbRow.get("show_in_defence");
+		Object booleanValue = dbRow.getValueByColumn("show_in_defence");
 		if (booleanValue != null) {
 			createAndAddBooleanValue((boolean) booleanValue, "doctoralDegreeGrantor");
 		}

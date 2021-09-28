@@ -240,7 +240,7 @@ public class DivaMixedRecordStorageProviderTest {
 				.getDatabaseStorage();
 
 		RecordReaderFactoryImp recordReaderFactory = (RecordReaderFactoryImp) databaseStorage
-				.getRecordReaderFactory();
+				.getSqlDatabaseFactory();
 		assertNotNull(recordReaderFactory.getSqlConnectionProvider());
 
 		ContextConnectionProviderImp connectionProvider = (ContextConnectionProviderImp) recordReaderFactory

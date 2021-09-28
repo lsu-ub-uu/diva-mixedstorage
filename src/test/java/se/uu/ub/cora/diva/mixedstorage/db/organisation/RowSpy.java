@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -20,30 +20,37 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
-import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.DatabaseNull;
+import se.uu.ub.cora.sqldatabase.Row;
 
-public class MultipleRowDbToDataParentReader extends DivaMultipleRowDbToDataReaderImp
-		implements MultipleRowDbToDataReader {
+public class RowSpy implements Row {
+	public Map<String, Object> columnValues = new HashMap<>();
 
-	public MultipleRowDbToDataParentReader(SqlDatabaseFactory sqlDatabaseFactory,
-			DivaDbToCoraConverterFactory converterFactory) {
-		this.sqlDatabaseFactory = sqlDatabaseFactory;
-		this.converterFactory = converterFactory;
-		this.tableFacade = sqlDatabaseFactory.factorTableFacade();
+	public void addColumnWithValue(String columnName, Object object) {
+		if (object == null) {
+			columnValues.put(columnName, new DatabaseNull());
+		} else {
+			columnValues.put(columnName, object);
+		}
 	}
 
 	@Override
-	protected Map<String, Object> getConditions(String id) {
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("organisation_id", Integer.valueOf(id));
-		return conditions;
+	public Object getValueByColumn(String columnName) {
+		return columnValues.get(columnName);
 	}
 
 	@Override
-	protected String getTableName() {
-		return "divaOrganisationParent";
+	public Set<String> columnSet() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean hasColumn(String columnName) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

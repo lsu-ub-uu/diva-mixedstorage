@@ -31,7 +31,7 @@
 		<storage.version>4.2.0</storage.version>
 		<searchstorage.version>3.7.0</searchstorage.version>
 		<basicstorage.version>5.1.0</basicstorage.version>
-		<sqldatabase.version>4.1.0</sqldatabase.version>
+		<sqldatabase.version>5.0-SNAPSHOT</sqldatabase.version>
 		<sqlstorage.version>0.4.0-SNAPSHOT</sqlstorage.version>
 		<httphandler.version>2.3.0</httphandler.version>
 		<apptokenstorage.version>2.3.0</apptokenstorage.version>

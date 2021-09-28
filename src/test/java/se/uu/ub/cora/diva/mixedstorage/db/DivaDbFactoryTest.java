@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2020 Uppsala University Library
+ * Copyright 2019, 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -30,18 +30,19 @@ import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbOrganisationReader;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaMultipleRowDbToDataReaderImp;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataParentReader;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataPredecessorReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public class DivaDbFactoryTest {
 	private DivaDbFactoryImp divaDbToCoraFactoryImp;
-	private RecordReaderFactory readerFactory;
+	private SqlDatabaseFactory databaseFactory;
 	private DivaDbToCoraConverterFactory converterFactory;
 
 	@BeforeMethod
 	public void beforeMethod() {
-		readerFactory = new RecordReaderFactorySpy();
+		databaseFactory = new SqlDatabaseFactorySpy();
 		converterFactory = new DivaDbToCoraConverterFactorySpy();
-		divaDbToCoraFactoryImp = new DivaDbFactoryImp(readerFactory, converterFactory);
+		divaDbToCoraFactoryImp = new DivaDbFactoryImp(databaseFactory, converterFactory);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -84,7 +85,7 @@ public class DivaDbFactoryTest {
 				.factor(type);
 		DivaDbFactoryImp dbFactory = (DivaDbFactoryImp) factored.getDbFactory();
 		assertSame(dbFactory.getConverterFactory(), converterFactory);
-		assertSame(dbFactory.getReaderFactory(), readerFactory);
+		assertSame(dbFactory.getSqlDatabaseFactory(), databaseFactory);
 	}
 
 	@Test
@@ -105,7 +106,7 @@ public class DivaDbFactoryTest {
 	private void assertCorrectFactoriesSentToImplementationForOrganisationType(String type) {
 		DivaDbOrganisationReader factored = (DivaDbOrganisationReader) divaDbToCoraFactoryImp
 				.factor(type);
-		assertSame(factored.getRecordReaderFactory(), readerFactory);
+		assertSame(factored.getSqlDatabaseFactory(), databaseFactory);
 		assertSame(factored.getConverterFactory(), converterFactory);
 	}
 
@@ -136,7 +137,7 @@ public class DivaDbFactoryTest {
 		DivaMultipleRowDbToDataReaderImp multipleRowDbReader = (DivaMultipleRowDbToDataReaderImp) divaDbToCoraFactoryImp
 				.factorMultipleReader("divaOrganisationParent");
 		assertTrue(multipleRowDbReader instanceof MultipleRowDbToDataParentReader);
-		assertEquals(multipleRowDbReader.getRecordReaderFactory(), readerFactory);
+		assertEquals(multipleRowDbReader.getSqlDatabaseFactory(), databaseFactory);
 		assertEquals(multipleRowDbReader.getConverterFactory(), converterFactory);
 	}
 
@@ -145,13 +146,13 @@ public class DivaDbFactoryTest {
 		DivaMultipleRowDbToDataReaderImp multipleRowDbReader = (DivaMultipleRowDbToDataReaderImp) divaDbToCoraFactoryImp
 				.factorMultipleReader("divaOrganisationPredecessor");
 		assertTrue(multipleRowDbReader instanceof MultipleRowDbToDataPredecessorReader);
-		assertEquals(multipleRowDbReader.getRecordReaderFactory(), readerFactory);
+		assertEquals(multipleRowDbReader.getSqlDatabaseFactory(), databaseFactory);
 		assertEquals(multipleRowDbReader.getConverterFactory(), converterFactory);
 	}
 
 	@Test
 	public void testGetReaderFactory() {
-		assertSame(divaDbToCoraFactoryImp.getReaderFactory(), readerFactory);
+		assertSame(divaDbToCoraFactoryImp.getSqlDatabaseFactory(), databaseFactory);
 	}
 
 	@Test
