@@ -90,8 +90,8 @@ public class MultipleRowDbToDataParentReaderTest {
 		parentReader.read(TABLE_NAME, "567");
 		OrganisationMultipleRowsRecordReaderSpy recordReader = recordReaderFactory.factored;
 		DivaDbToCoraConverterSpy divaDbToCoraConverter = converterFactory.factoredConverters.get(0);
-		assertNotNull(divaDbToCoraConverter.mapToConvert);
-		assertEquals(recordReader.returnedList.get(0), divaDbToCoraConverter.mapToConvert);
+		assertNotNull(divaDbToCoraConverter.rowToConvert);
+		assertEquals(recordReader.returnedList.get(0), divaDbToCoraConverter.rowToConvert);
 	}
 
 	@Test
@@ -102,10 +102,10 @@ public class MultipleRowDbToDataParentReaderTest {
 		OrganisationMultipleRowsRecordReaderSpy recordReader = recordReaderFactory.factored;
 		List<DivaDbToCoraConverterSpy> factoredConverters = converterFactory.factoredConverters;
 		DivaDbToCoraConverterSpy divaDbToCoraConverter = factoredConverters.get(0);
-		assertNotNull(divaDbToCoraConverter.mapToConvert);
-		assertEquals(recordReader.returnedList.get(0), factoredConverters.get(0).mapToConvert);
-		assertEquals(recordReader.returnedList.get(1), factoredConverters.get(1).mapToConvert);
-		assertEquals(recordReader.returnedList.get(2), factoredConverters.get(2).mapToConvert);
+		assertNotNull(divaDbToCoraConverter.rowToConvert);
+		assertEquals(recordReader.returnedList.get(0), factoredConverters.get(0).rowToConvert);
+		assertEquals(recordReader.returnedList.get(1), factoredConverters.get(1).rowToConvert);
+		assertEquals(recordReader.returnedList.get(2), factoredConverters.get(2).rowToConvert);
 	}
 
 	@Test
@@ -149,7 +149,7 @@ public class MultipleRowDbToDataParentReaderTest {
 		List<Map<String, Object>> returnedList = factoredRecordReader.returnedList;
 		Map<String, Object> firstRowFromReader = returnedList.get(index);
 
-		Map<String, Object> firstMapSentToConverter = divaDbToCoraConverter.mapToConvert;
+		Map<String, Object> firstMapSentToConverter = divaDbToCoraConverter.rowToConvert;
 		assertEquals(firstRowFromReader, firstMapSentToConverter);
 
 		DataGroup dataGroupReturnedFromConverter = divaDbToCoraConverter.convertedDbDataGroup;

@@ -338,7 +338,7 @@ public class DivaDbRecordStorageTest {
 		Map<String, Object> readRow = recordReader.returnedList.get(index);
 		DivaDbToCoraConverterSpy factoredConverter = converterFactorySpy.factoredConverters
 				.get(index);
-		assertSame(readRow, factoredConverter.mapToConvert);
+		assertSame(readRow, factoredConverter.rowToConvert);
 	}
 
 	private void assertConvertedRowIsAddedToResultUsingIndex(StorageReadResult readList,
@@ -380,7 +380,7 @@ public class DivaDbRecordStorageTest {
 		DivaDbToCoraConverterSpy converter = converterFactorySpy.factoredConverters.get(index);
 
 		Map<String, Object> rowFromDb = returnedList.get(index);
-		Map<String, Object> rowSentToConverter = converter.mapToConvert;
+		Map<String, Object> rowSentToConverter = converter.rowToConvert;
 		assertEquals(rowFromDb, rowSentToConverter);
 
 		DataGroup dataGroupInReturnedResult = result.listOfDataGroups.get(index);

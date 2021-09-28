@@ -137,7 +137,7 @@ public class DivaMixedUserStorageTest {
 		Object responseFromDB = recordReader.MCR
 				.getReturnValue("readOneRowFromDbUsingTableAndConditions", 0);
 
-		assertEquals(userConverter.mapToConvert, responseFromDB);
+		assertEquals(userConverter.rowToConvert, responseFromDB);
 		assertSame(user, userConverter.convertedDbDataGroup);
 	}
 
@@ -658,8 +658,8 @@ public class DivaMixedUserStorageTest {
 		StorageReadResult result = recordStorage.readList("user", new DataGroupSpy(""));
 		recordReader.MCR.assertMethodWasCalled("readAllFromTable");
 		recordReader.MCR.assertParameter("readAllFromTable", 0, "tableName", "public.user");
-		assertSame(userConverter.mapsToConvert.get(0), userRows.get(0));
-		assertSame(userConverter.mapsToConvert.get(1), userRows.get(1));
+		assertSame(userConverter.rowsToConvert.get(0), userRows.get(0));
+		assertSame(userConverter.rowsToConvert.get(1), userRows.get(1));
 		assertSame(result.listOfDataGroups.get(0), userConverter.convertedDataGroups.get(0));
 		assertEquals(result.start, 0);
 		assertEquals(result.totalNumberOfMatches, result.listOfDataGroups.size());
