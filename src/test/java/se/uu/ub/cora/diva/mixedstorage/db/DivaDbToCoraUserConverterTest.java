@@ -48,7 +48,6 @@ public class DivaDbToCoraUserConverterTest {
 		DataGroupProvider.setDataGroupFactory(dataGroupFactorySpy);
 		dataAtomicFactorySpy = new DataAtomicFactorySpy();
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactorySpy);
-		// rowFromDb = new HashMap<>();
 		rowFromDb = new RowSpy();
 		rowFromDb.addColumnWithValue("db_id", 678);
 		converter = new DivaDbToCoraUserConverter();

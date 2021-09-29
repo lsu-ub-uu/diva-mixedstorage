@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -185,7 +185,7 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	}
 
 	private Object getTypeCodeForOrganisationType() {
-		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("organisation_type");
+		TableQuery tableQuery = getSqlDatabaseFactory().factorTableQuery("organisation_type");
 		tableQuery.addCondition("organisation_type_code",
 				dataGroup.getFirstAtomicValueWithNameInData("organisationType"));
 		Row readRow = tableFacade.readOneRowForQuery(tableQuery);
@@ -200,5 +200,9 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	@Override
 	public Map<String, Object> getValues() {
 		return values;
+	}
+
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
 }

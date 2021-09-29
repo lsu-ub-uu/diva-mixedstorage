@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -27,16 +27,17 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationAlternativeNameDataToDbTranslater;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationDataToDbTranslater;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
 
 public class DataToDbTranslaterFactoryTest {
 
-	private RecordReaderFactorySpy recordReaderFactory;
 	private DataToDbTranslaterFactory factory;
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		recordReaderFactory = new RecordReaderFactorySpy();
-		factory = new DivaDataToDbTranslaterFactoryImp(recordReaderFactory);
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
+		factory = new DivaDataToDbTranslaterFactoryImp(sqlDatabaseFactory);
 	}
 
 	@Test
@@ -54,7 +55,7 @@ public class DataToDbTranslaterFactoryTest {
 		OrganisationDataToDbTranslater translater = (OrganisationDataToDbTranslater) factory
 				.factorForTableName("organisation");
 		assertTrue(translater instanceof OrganisationDataToDbTranslater);
-		assertSame(recordReaderFactory.factored, translater.getRecordReader());
+		assertSame(translater.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test

@@ -30,8 +30,8 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class OrganisationAddressRelatedTable implements RelatedTable {
 
@@ -40,11 +40,13 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 	private static final String STREET = "street";
 	private static final String ORGANISATION_ADDRESS = "organisation_address";
 	private static final String ADDRESS_ID = "address_id";
-	private RecordReaderFactory recordReaderFactory;
+	private SqlDatabaseFactory sqlDatabaseFactory;
 	private int organisationId;
+	private TableFacade tableFacade;
 
-	public OrganisationAddressRelatedTable(RecordReaderFactory recordReaderFactory) {
-		this.recordReaderFactory = recordReaderFactory;
+	public OrganisationAddressRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
+		tableFacade = sqlDatabaseFactory.factorTableFacade();
 	}
 
 	@Override
@@ -181,7 +183,8 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 	private void possiblyInsertAddress(List<DbStatement> dbStatements, DataGroup organisation) {
 		if (organisationDataGroupContainsAddress(organisation)) {
 
-			RecordReader sequenceReader = recordReaderFactory.factor();
+			// RecordReader sequenceReader = recordReaderFactory.factor();
+			// tableFacade.nextValueFromSequence("");
 			Map<String, Object> nextValue = sequenceReader
 					.readNextValueFromSequence("address_sequence");
 			createInsertForAddress(dbStatements, organisation, nextValue.get("nextval"));
@@ -206,9 +209,13 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 		valuesForInsert.put(ADDRESS_ID, object);
 		return valuesForInsert;
 	}
+	//
+	// public RecordReaderFactory getRecordReaderFactory() {
+	// // needed for test
+	// return recordReaderFactory;
+	// }
 
-	public RecordReaderFactory getRecordReaderFactory() {
-		// needed for test
-		return recordReaderFactory;
+	public TableFacade getTableFacade() {
+		return tableFacade;
 	}
 }

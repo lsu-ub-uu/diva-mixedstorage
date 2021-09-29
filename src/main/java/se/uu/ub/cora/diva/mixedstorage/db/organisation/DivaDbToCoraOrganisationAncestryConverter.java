@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,15 +18,15 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
-import java.util.Map;
-
 import se.uu.ub.cora.data.DataRecordLink;
 import se.uu.ub.cora.data.DataRecordLinkProvider;
+import se.uu.ub.cora.sqldatabase.DatabaseNull;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public class DivaDbToCoraOrganisationAncestryConverter {
 	protected static final String PREDECESSOR_ID = "organisation_predecessor_id";
 	protected static final String ORGANISATION_ID = "organisation_id";
-	protected Map<String, Object> dbRow;
+	protected Row dbRow;
 
 	protected boolean mandatoryValuesAreMissing() {
 		return organisationIdIsMissing() || predecessorIdIsMissing();
@@ -37,8 +37,8 @@ public class DivaDbToCoraOrganisationAncestryConverter {
 	}
 
 	protected boolean dbRowHasValueForKey(String key) {
-		Object value = dbRow.get(key);
-		return value != null && !"".equals(value);
+		Object value = dbRow.getValueByColumn(key);
+		return value != null && !(value instanceof DatabaseNull) && !"".equals(value);
 	}
 
 	private boolean predecessorIdIsMissing() {

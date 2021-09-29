@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -33,19 +34,20 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
-import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 
 public class OrganisationAddressRelatedTableTest {
 
 	private RecordReaderRelatedTableFactorySpy recordReaderFactory;
-	private RelatedTable address;
+	private OrganisationAddressRelatedTable address;
 	private List<Map<String, Object>> organisationRows;
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		recordReaderFactory = new RecordReaderRelatedTableFactorySpy();
+		// recordReaderFactory = new RecordReaderRelatedTableFactorySpy();
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 		initOrganisationRows();
-		address = new OrganisationAddressRelatedTable(recordReaderFactory);
+		address = new OrganisationAddressRelatedTable(sqlDatabaseFactory);
 
 	}
 
@@ -56,6 +58,11 @@ public class OrganisationAddressRelatedTableTest {
 		organisationRow.put("address_id", 4);
 		organisationRow.put("country_code", "se");
 		organisationRows.add(organisationRow);
+	}
+
+	@Test
+	public void testInit() {
+		assertSame(address.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
 	}
 
 	@Test
