@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -34,18 +35,17 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
-import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 
 public class OrganisationParentRelatedTableTest {
 
-	private RecordReaderRelatedTableSpy recordReader;
-	private RelatedTable parent;
+	private OrganisationParentRelatedTable parent;
 	private List<Map<String, Object>> parentRows;
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		recordReader = new RecordReaderRelatedTableSpy();
-		parent = new OrganisationParentRelatedTable(recordReader);
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
+		parent = new OrganisationParentRelatedTable(sqlDatabaseFactory);
 		initParentRows();
 	}
 
@@ -63,6 +63,11 @@ public class OrganisationParentRelatedTableTest {
 		recordInfo.addChild(new DataAtomicSpy("id", id));
 		dataGroup.addChild(recordInfo);
 		return dataGroup;
+	}
+
+	@Test
+	public void testGetSqlDatabaseFactory() {
+		assertSame(parent.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test

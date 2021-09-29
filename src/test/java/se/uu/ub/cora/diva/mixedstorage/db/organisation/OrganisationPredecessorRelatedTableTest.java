@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.sql.Timestamp;
@@ -36,19 +37,20 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
-import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 
 public class OrganisationPredecessorRelatedTableTest {
 
 	private RecordReaderRelatedTableSpy recordReader;
-	private RelatedTable predecessor;
+	private OrganisationPredecessorRelatedTable predecessor;
 	private List<Map<String, Object>> predecessorRows;
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		recordReader = new RecordReaderRelatedTableSpy();
+		// recordReader = new RecordReaderRelatedTableSpy();
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 		initPredecessorRows();
-		predecessor = new OrganisationPredecessorRelatedTable(recordReader);
+		predecessor = new OrganisationPredecessorRelatedTable(sqlDatabaseFactory);
 	}
 
 	private void initPredecessorRows() {
@@ -66,6 +68,12 @@ public class OrganisationPredecessorRelatedTableTest {
 		recordInfo.addChild(new DataAtomicSpy("id", id));
 		dataGroup.addChild(recordInfo);
 		return dataGroup;
+	}
+
+	@Test
+	public void testInit() {
+		assertSame(predecessor.getSqlDatabaseFactory(), sqlDatabaseFactory);
+		assertSame(predecessor.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
 	}
 
 	@Test
@@ -238,33 +246,30 @@ public class OrganisationPredecessorRelatedTableTest {
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
 				Collections.emptyList());
+
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertEquals(tableFacade.sequenceName, "organisation_predecessor_description_sequence");
+
 		assertEquals(dbStatements.size(), 2);
 		assertCorrectPredecessorInsert(dbStatements.get(0), 678, 234);
-		DbStatement createStatement = dbStatements.get(1);
-		int organisationId = 678;
-		int predecessorId = 234;
-		String description = "some description";
-
-		assertCorrectPredecessorDescriptionInsert(createStatement, organisationId, predecessorId,
-				description);
+		assertCorrectPredecessorDescriptionInsert(dbStatements.get(1), 678, 234, "some description",
+				tableFacade);
 
 	}
 
 	private void assertCorrectPredecessorDescriptionInsert(DbStatement createStatement,
-			int organisationId, int predecessorId, String description) {
+			int organisationId, int predecessorId, String description, TableFacadeSpy tableFacade) {
 		assertEquals(createStatement.getOperation(), "insert");
 		assertEquals(createStatement.getTableName(), "organisation_predecessor_description");
 
 		Map<String, Object> values = createStatement.getValues();
-		assertEquals(values.get("organisation_predecessor_id"),
-				recordReader.nextVal.get("nextval"));
+		assertEquals(values.get("organisation_predecessor_id"), tableFacade.nextVal);
 		assertEquals(values.get("organisation_id"), organisationId);
 		assertEquals(values.get("predecessor_id"), predecessorId);
 		assertEquals(values.get("description"), description);
 
 		assertLastUpdatedIsInCorrectFormat(values);
 
-		assertEquals(recordReader.sequenceName, "organisation_predecessor_description_sequence");
 		assertTrue(createStatement.getConditions().isEmpty());
 	}
 
@@ -326,10 +331,14 @@ public class OrganisationPredecessorRelatedTableTest {
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
 				predecessorRows);
+
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertEquals(tableFacade.sequenceName, "organisation_predecessor_description_sequence");
+
 		assertEquals(dbStatements.size(), 2);
 		assertCorrectDeleteForPredecessorDescription(dbStatements.get(0), 678, 234);
-		assertCorrectPredecessorDescriptionInsert(dbStatements.get(1), 678, 234,
-				"some description");
+		assertCorrectPredecessorDescriptionInsert(dbStatements.get(1), 678, 234, "some description",
+				tableFacade);
 
 	}
 
@@ -355,9 +364,13 @@ public class OrganisationPredecessorRelatedTableTest {
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
 				predecessorRows);
+
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertEquals(tableFacade.sequenceName, "organisation_predecessor_description_sequence");
+
 		assertEquals(dbStatements.size(), 1);
-		assertCorrectPredecessorDescriptionInsert(dbStatements.get(0), 678, 234,
-				"some description");
+		assertCorrectPredecessorDescriptionInsert(dbStatements.get(0), 678, 234, "some description",
+				tableFacade);
 	}
 
 	@Test
@@ -372,10 +385,14 @@ public class OrganisationPredecessorRelatedTableTest {
 
 		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
 				predecessorRows);
+
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertEquals(tableFacade.sequenceName, "organisation_predecessor_description_sequence");
+
 		assertEquals(dbStatements.size(), 2);
 		assertCorrectPredecessorInsert(dbStatements.get(0), 678, 22234);
 		assertCorrectPredecessorDescriptionInsert(dbStatements.get(1), 678, 22234,
-				"some description");
+				"some description", tableFacade);
 
 	}
 

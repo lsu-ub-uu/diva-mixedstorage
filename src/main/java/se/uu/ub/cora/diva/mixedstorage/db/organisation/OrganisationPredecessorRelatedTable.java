@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -29,7 +29,8 @@ import java.util.Set;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
-import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTable
 		implements RelatedTable {
@@ -45,9 +46,11 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	private static final String ORGANISATION_PREDECESSOR = "organisation_predecessor";
 	private Map<String, DataGroup> predecessorsInDataGroup;
 	private Map<Integer, Map<String, Object>> mapWithPredecessorAsKey;
+	private TableFacade tableFacade;
 
-	public OrganisationPredecessorRelatedTable(RecordReader recordReader) {
-		this.recordReader = recordReader;
+	public OrganisationPredecessorRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
+		tableFacade = sqlDatabaseFactory.factorTableFacade();
 	}
 
 	@Override
@@ -185,10 +188,9 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 			String comment) {
 		Map<String, Object> descriptionValues = createConditionsForPredecessorDescription(
 				predecessorId);
-		Map<String, Object> nextValue = recordReader
-				.readNextValueFromSequence("organisation_predecessor_description_sequence");
-
-		descriptionValues.put(ORGANISATION_PREDECESSOR_ID, nextValue.get("nextval"));
+		long nextVal = tableFacade
+				.nextValueFromSequence("organisation_predecessor_description_sequence");
+		descriptionValues.put(ORGANISATION_PREDECESSOR_ID, nextVal);
 		descriptionValues.put("last_updated", getCurrentTimestamp());
 		descriptionValues.put(DESCRIPTION, comment);
 		return descriptionValues;
@@ -241,8 +243,7 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	private void handleDeleteAndCreatedForDescription(List<DbStatement> dbStatements, String id,
 			DataGroup dataGroup, Map<String, Object> conditions,
 			Map<String, Object> readDescription) {
-		String descriptionInDataGroup = dataGroup
-				.getFirstAtomicValueWithNameInData(INTERNAL_NOTE);
+		String descriptionInDataGroup = dataGroup.getFirstAtomicValueWithNameInData(INTERNAL_NOTE);
 		if (!predecessorHasDescription(readDescription)) {
 			createNewDescriptionInDb(dbStatements, id, descriptionInDataGroup);
 		} else {
@@ -285,8 +286,12 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 		return conditions;
 	}
 
-	public RecordReader getRecordReader() {
-		return recordReader;
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
+	}
+
+	public TableFacade getTableFacade() {
+		return tableFacade;
 	}
 
 }

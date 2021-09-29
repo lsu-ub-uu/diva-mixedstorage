@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -31,18 +31,21 @@ import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
-import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 
 	private static final String ORGANISATION_NAME_ID = "organisation_name_id";
 	private static final String ORGANISATION_NAME = "organisation_name";
 	private static final String ALTERNATIVE_NAME = "organisationAlternativeName";
-	private RecordReader recordReader;
+	private SqlDatabaseFactory sqlDatabaseFactory;
 	private Map<String, Object> alternativeNameRow;
+	private TableFacade tableFacade;
 
-	public OrganisationAlternativeNameRelatedTable(RecordReader recordReader) {
-		this.recordReader = recordReader;
+	public OrganisationAlternativeNameRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
+		tableFacade = sqlDatabaseFactory.factorTableFacade();
 	}
 
 	@Override
@@ -160,12 +163,15 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 	}
 
 	private void addOrganisationNameIdNextValue(Map<String, Object> values) {
-		Map<String, Object> nextValue = recordReader.readNextValueFromSequence("name_sequence");
-		values.put(ORGANISATION_NAME_ID, nextValue.get("nextval"));
+		long nextValue = tableFacade.nextValueFromSequence("name_sequence");
+		values.put(ORGANISATION_NAME_ID, nextValue);
 	}
 
-	RecordReader getRecordReader() {
-		// Only needed for test
-		return recordReader;
+	public TableFacade getTableFacade() {
+		return tableFacade;
+	}
+
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
 }

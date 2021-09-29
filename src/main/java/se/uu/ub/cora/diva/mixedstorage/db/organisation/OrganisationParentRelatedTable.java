@@ -29,7 +29,7 @@ import java.util.Set;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
-import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 		implements RelatedTable {
@@ -38,8 +38,8 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 	private static final String ORGANISATION_PARENT_ID = "organisation_parent_id";
 	private static final String ORGANISATION_ID = "organisation_id";
 
-	public OrganisationParentRelatedTable(RecordReader recordReader) {
-		this.recordReader = recordReader;
+	public OrganisationParentRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 	}
 
 	@Override
@@ -149,9 +149,8 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 		}
 	}
 
-	public RecordReader getRecordReader() {
-		// needed for test
-		return recordReader;
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
 
 }

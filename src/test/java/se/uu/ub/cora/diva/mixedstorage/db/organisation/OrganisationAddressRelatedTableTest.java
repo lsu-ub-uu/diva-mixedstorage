@@ -37,14 +37,12 @@ import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 
 public class OrganisationAddressRelatedTableTest {
 
-	private RecordReaderRelatedTableFactorySpy recordReaderFactory;
 	private OrganisationAddressRelatedTable address;
 	private List<Map<String, Object>> organisationRows;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		// recordReaderFactory = new RecordReaderRelatedTableFactorySpy();
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 		initOrganisationRows();
 		address = new OrganisationAddressRelatedTable(sqlDatabaseFactory);
@@ -62,6 +60,7 @@ public class OrganisationAddressRelatedTableTest {
 
 	@Test
 	public void testInit() {
+		assertSame(address.getSqlDatabaseFactory(), sqlDatabaseFactory);
 		assertSame(address.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
 	}
 
@@ -273,17 +272,14 @@ public class OrganisationAddressRelatedTableTest {
 				organisationRows);
 		assertEquals(dbStatements.size(), 2);
 
-		RecordReaderAddressSpy sequenceReader = recordReaderFactory.factoredReaders.get(0);
-		int generatedAddressKey = (int) sequenceReader.nextVal.get("nextval");
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertEquals(tableFacade.sequenceName, "address_sequence");
 
-		assertEquals(sequenceReader.sequenceName, "address_sequence");
 		assertCorrectDataForAddressInsert(organisation, dbStatements.get(0), 4,
-				generatedAddressKey);
+				tableFacade.nextVal);
 
 		DbStatement orgUpdateStatement = dbStatements.get(1);
 		assertCorrectOperationTableAndConditionForUpdateOrg(organisationId, orgUpdateStatement);
-		Map<String, Object> values = orgUpdateStatement.getValues();
-		assertEquals(values.get("address_id"), generatedAddressKey);
 
 	}
 
@@ -294,11 +290,11 @@ public class OrganisationAddressRelatedTableTest {
 	}
 
 	private void assertCorrectDataForAddressInsert(DataGroup organisation, DbStatement dbStatement,
-			int addressId, int generatedAddressKey) {
+			int addressId, long nextVal) {
 		assertEquals(dbStatement.getOperation(), "insert");
 		Map<String, Object> values = dbStatement.getValues();
 
-		assertEquals(values.get("address_id"), generatedAddressKey);
+		assertEquals(values.get("address_id"), nextVal);
 		assertCorrectCommonValuesForUpdateAndInsert(organisation, dbStatement);
 	}
 }

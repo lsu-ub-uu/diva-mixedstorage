@@ -32,6 +32,8 @@ public class TableFacadeSpy implements TableFacade {
 	public List<Row> returnedRows = new ArrayList<>();
 	public int numToReturn;
 	public RowSpy rowToReturn = new RowSpy();
+	public long nextVal;
+	public String sequenceName;
 
 	@Override
 	public void insertRowUsingQuery(TableQuery tableQuery) {
@@ -77,8 +79,9 @@ public class TableFacadeSpy implements TableFacade {
 
 	@Override
 	public long nextValueFromSequence(String sequenceName) {
-		// TODO Auto-generated method stub
-		return 0;
+		this.sequenceName = sequenceName;
+		nextVal = 4;
+		return nextVal;
 	}
 
 	@Override

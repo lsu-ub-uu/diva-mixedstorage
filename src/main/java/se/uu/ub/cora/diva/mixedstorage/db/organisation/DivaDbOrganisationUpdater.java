@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslater;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
@@ -36,7 +35,8 @@ import se.uu.ub.cora.diva.mixedstorage.db.StatementExecutor;
 import se.uu.ub.cora.sqldatabase.DataReader;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
-import se.uu.ub.cora.sqldatabase.SqlStorageException;
+import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
+import se.uu.ub.cora.sqlstorage.SqlStorageException;
 
 public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
@@ -169,6 +169,9 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	private void updateDatabaseWithGivenDbStatementsUsingConnection(List<DbStatement> dbStatements,
 			Connection connection) throws SQLException {
+		// tableFacade.startTransaction();
+		// tableFacade.
+
 		connection.setAutoCommit(false);
 		statementExecutor.executeDbStatmentUsingConnection(dbStatements, connection);
 		connection.commit();

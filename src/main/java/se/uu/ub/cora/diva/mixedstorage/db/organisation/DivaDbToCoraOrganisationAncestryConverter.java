@@ -20,7 +20,7 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import se.uu.ub.cora.data.DataRecordLink;
 import se.uu.ub.cora.data.DataRecordLinkProvider;
-import se.uu.ub.cora.sqldatabase.DatabaseNull;
+import se.uu.ub.cora.sqldatabase.DatabaseValues;
 import se.uu.ub.cora.sqldatabase.Row;
 
 public class DivaDbToCoraOrganisationAncestryConverter {
@@ -38,7 +38,7 @@ public class DivaDbToCoraOrganisationAncestryConverter {
 
 	protected boolean dbRowHasValueForKey(String key) {
 		Object value = dbRow.getValueByColumn(key);
-		return value != null && !(value instanceof DatabaseNull) && !"".equals(value);
+		return value != null && !(value.equals(DatabaseValues.NULL)) && !"".equals(value);
 	}
 
 	private boolean predecessorIdIsMissing() {

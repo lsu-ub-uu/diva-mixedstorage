@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -182,16 +182,10 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 
 	private void possiblyInsertAddress(List<DbStatement> dbStatements, DataGroup organisation) {
 		if (organisationDataGroupContainsAddress(organisation)) {
-
-			// RecordReader sequenceReader = recordReaderFactory.factor();
-			// tableFacade.nextValueFromSequence("");
-			Map<String, Object> nextValue = sequenceReader
-					.readNextValueFromSequence("address_sequence");
-			createInsertForAddress(dbStatements, organisation, nextValue.get("nextval"));
-
+			long nextValueFromSequence = tableFacade.nextValueFromSequence("address_sequence");
+			createInsertForAddress(dbStatements, organisation, nextValueFromSequence);
 			Map<String, Object> values = new HashMap<>();
-			values.put(ADDRESS_ID, nextValue.get("nextval"));
-
+			values.put(ADDRESS_ID, nextValueFromSequence);
 			updateAddressColumnInOrganisation(dbStatements, values,
 					createConditionsWithOrganisationId());
 		}
@@ -209,13 +203,12 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 		valuesForInsert.put(ADDRESS_ID, object);
 		return valuesForInsert;
 	}
-	//
-	// public RecordReaderFactory getRecordReaderFactory() {
-	// // needed for test
-	// return recordReaderFactory;
-	// }
 
 	public TableFacade getTableFacade() {
 		return tableFacade;
+	}
+
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
 }

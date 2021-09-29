@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.sql.Timestamp;
@@ -37,19 +38,18 @@ import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
-import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 
 public class OrganisationAlternativeNameRelatedTableTest {
 
-	private RecordReaderRelatedTableSpy recordReader;
-	private RelatedTable alternativeName;
+	private OrganisationAlternativeNameRelatedTable alternativeName;
 	private List<Map<String, Object>> alternativeNameRows;
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		recordReader = new RecordReaderRelatedTableSpy();
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 		initAlternativeNameRows();
-		alternativeName = new OrganisationAlternativeNameRelatedTable(recordReader);
+		alternativeName = new OrganisationAlternativeNameRelatedTable(sqlDatabaseFactory);
 	}
 
 	private void initAlternativeNameRows() {
@@ -60,6 +60,16 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		alternativeNameRow.put("organisation_name", "some english name");
 		alternativeNameRow.put("locale", "en");
 		alternativeNameRows.add(alternativeNameRow);
+	}
+
+	@Test
+	public void testInit() {
+		assertSame(alternativeName.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
+	}
+
+	@Test
+	public void testGetSqlDatabaseFactory() {
+		assertSame(alternativeName.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test(expectedExceptions = DbException.class, expectedExceptionsMessageRegExp = ""
@@ -151,7 +161,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 
 	@Test
 	public void testNoNameInDbButNameInDataGroup() {
-		alternativeName = new OrganisationAlternativeNameRelatedTable(recordReader);
+		alternativeName = new OrganisationAlternativeNameRelatedTable(sqlDatabaseFactory);
 
 		DataGroup organisation = createDataGroupWithId("678");
 		DataGroupSpy alternativeNameGroup = new DataGroupSpy("organisationAlternativeName");
@@ -163,6 +173,9 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		List<DbStatement> dbStatements = alternativeName.handleDbForDataGroup(organisation,
 				Collections.emptyList());
 
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertEquals(tableFacade.sequenceName, "name_sequence");
+
 		assertEquals(dbStatements.size(), 1);
 		DbStatement dbStatement = dbStatements.get(0);
 		assertEquals(dbStatement.getOperation(), "insert");
@@ -170,7 +183,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 
 		Map<String, Object> values = dbStatement.getValues();
 
-		assertEquals(values.get("organisation_name_id"), recordReader.nextVal.get("nextval"));
+		assertEquals(values.get("organisation_name_id"), tableFacade.nextVal);
 
 		assertEquals(values.get("locale"), "en");
 		assertEquals(values.get("organisation_id"), 678);

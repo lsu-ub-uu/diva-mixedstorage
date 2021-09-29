@@ -27,12 +27,12 @@ import java.util.Set;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
-import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public abstract class OrganisationRelatedTable {
 
 	protected int organisationId;
-	protected RecordReader recordReader;
+	protected SqlDatabaseFactory sqlDatabaseFactory;
 
 	protected void setIdAsInt(DataGroup organisation) {
 		String organisationIdAsString = DataToDbHelper.extractIdFromDataGroup(organisation);
