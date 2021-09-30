@@ -25,8 +25,6 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.sql.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -45,7 +43,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
 public class DefaultOrganisationConverterTest {
 
 	private DefaultConverter converter;
-	private Map<String, Object> rowFromDb;
+	private RowSpy rowFromDb;
 	private DataGroupFactorySpy dataGroupFactorySpy;
 	private DataAtomicFactorySpy dataAtomicFactorySpy;
 	private DataRecordLinkFactorySpy dataRecordLinkFactorySpy;
@@ -58,18 +56,18 @@ public class DefaultOrganisationConverterTest {
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactorySpy);
 		dataRecordLinkFactorySpy = new DataRecordLinkFactorySpy();
 		DataRecordLinkProvider.setDataRecordLinkFactory(dataRecordLinkFactorySpy);
-		rowFromDb = new HashMap<>();
-		rowFromDb.put("id", 57);
-		rowFromDb.put("type_code", "root");
-		rowFromDb.put("not_eligible", true);
-		rowFromDb.put("domain", "someDomain");
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("id", 57);
+		rowFromDb.addColumnWithValue("type_code", "root");
+		rowFromDb.addColumnWithValue("not_eligible", true);
+		rowFromDb.addColumnWithValue("domain", "someDomain");
 		converter = new DefaultOrganisationConverter();
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting organisation to Cora organisation: Map does not contain value for id")
 	public void testEmptyMap() {
-		rowFromDb = new HashMap<>();
+		rowFromDb = new RowSpy();
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertNull(organisation);
 	}
@@ -77,25 +75,25 @@ public class DefaultOrganisationConverterTest {
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting organisation to Cora organisation: Map does not contain value for id")
 	public void testMapWithEmptyValueThrowsError() {
-		rowFromDb = new HashMap<>();
-		rowFromDb.put("id", "");
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("id", "");
 		converter.fromMap(rowFromDb);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting organisation to Cora organisation: Map does not contain value for id")
 	public void testMapWithNonEmptyValueANDEmptyValueThrowsError() {
-		Map<String, Object> rowFromDb = new HashMap<>();
-		rowFromDb.put("defaultname", "someName");
-		rowFromDb.put("id", "");
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("defaultname", "someName");
+		rowFromDb.addColumnWithValue("id", "");
 		converter.fromMap(rowFromDb);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting organisation to Cora organisation: Map does not contain value for id")
 	public void mapDoesNotContainOrganisationIdValue() {
-		rowFromDb = new HashMap<>();
-		rowFromDb.put("defaultname", "someName");
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("defaultname", "someName");
 		converter.fromMap(rowFromDb);
 	}
 
@@ -148,7 +146,7 @@ public class DefaultOrganisationConverterTest {
 
 	@Test
 	public void testMinimalValuesReturnsDataGroupWithCorrectRecordInfoWithSelectableTrue() {
-		rowFromDb.put("not_eligible", false);
+		rowFromDb.addColumnWithValue("not_eligible", false);
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertEquals(organisation.getNameInData(), "organisation");
 		assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "rootOrganisation");
@@ -161,7 +159,7 @@ public class DefaultOrganisationConverterTest {
 
 	@Test
 	public void testCorrectRecordTypeWhenOrganisationTypeIsRoot() {
-		rowFromDb.put("type_code", "root");
+		rowFromDb.addColumnWithValue("type_code", "root");
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertEquals(organisation.getNameInData(), "organisation");
 		assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "rootOrganisation");
@@ -170,8 +168,8 @@ public class DefaultOrganisationConverterTest {
 
 	@Test
 	public void testCorrectRecordTypeWhenOrganisationTypeIsTopLevel() {
-		rowFromDb.put("type_code", "university");
-		rowFromDb.put("top_level", true);
+		rowFromDb.addColumnWithValue("type_code", "university");
+		rowFromDb.addColumnWithValue("top_level", true);
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertEquals(organisation.getNameInData(), "organisation");
 		assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "topOrganisation");
@@ -180,8 +178,8 @@ public class DefaultOrganisationConverterTest {
 
 	@Test
 	public void testCorrectRecordTypeWhenOrganisationTypeIsSubLevel() {
-		rowFromDb.put("type_code", "unit");
-		rowFromDb.put("top_level", false);
+		rowFromDb.addColumnWithValue("type_code", "unit");
+		rowFromDb.addColumnWithValue("top_level", false);
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertEquals(organisation.getNameInData(), "organisation");
 		assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "subOrganisation");
@@ -190,8 +188,8 @@ public class DefaultOrganisationConverterTest {
 
 	@Test
 	public void testOrganisationName() {
-		rowFromDb.put("defaultname", "Java-fakulteten");
-		rowFromDb.put("organisation_name_locale", "sv");
+		rowFromDb.addColumnWithValue("defaultname", "Java-fakulteten");
+		rowFromDb.addColumnWithValue("organisation_name_locale", "sv");
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertEquals(organisation.getNameInData(), "organisation");
 
@@ -213,7 +211,7 @@ public class DefaultOrganisationConverterTest {
 
 	@Test
 	public void testAlternativeName() {
-		rowFromDb.put("alternative_name", "Java Faculty");
+		rowFromDb.addColumnWithValue("alternative_name", "Java Faculty");
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		DataGroup alternativeName = organisation
 				.getFirstGroupWithNameInData("organisationAlternativeName");
@@ -252,14 +250,14 @@ public class DefaultOrganisationConverterTest {
 
 	@Test
 	public void testOrganisationClosedDateIsnull() {
-		rowFromDb.put("closed_date", null);
+		rowFromDb.addColumnWithValue("closed_date", null);
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertFalse(organisation.containsChildWithNameInData("closedDate"));
 	}
 
 	@Test
 	public void testOrganisationClosedDateIsEmpty() {
-		rowFromDb.put("closed_date", "");
+		rowFromDb.addColumnWithValue("closed_date", "");
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertFalse(organisation.containsChildWithNameInData("closedDate"));
 	}
@@ -267,7 +265,7 @@ public class DefaultOrganisationConverterTest {
 	@Test
 	public void testOrganisationClosedDate() {
 		Date date = Date.valueOf("2018-12-31");
-		rowFromDb.put("closed_date", date);
+		rowFromDb.addColumnWithValue("closed_date", date);
 		DataGroup organisation = converter.fromMap(rowFromDb);
 		assertEquals(organisation.getFirstAtomicValueWithNameInData("closedDate"), "2018-12-31");
 	}

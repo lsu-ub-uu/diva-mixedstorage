@@ -18,41 +18,35 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
 
-import se.uu.ub.cora.sqldatabase.SqlStorageException;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 
 public class PreparedStatementExecutorImp implements StatementExecutor {
 
 	@Override
-	public void executeDbStatmentUsingConnection(List<DbStatement> dbStatements,
-			Connection connection) {
+	public void executeDbStatmentUsingDatabaseFacade(List<DbStatement> dbStatements,
+			DatabaseFacade databaseFacade) {
 		for (DbStatement dbStatement : dbStatements) {
 			StringBuilder sql = createSql(dbStatement);
-			try {
-				tryToExecuteUsingPreparedStatement(dbStatement, sql, connection);
-			} catch (SQLException e) {
-				throw SqlStorageException
-						.withMessageAndException("Error executing statement: " + sql, e);
-			}
+			// try {
+			tryToExecuteUsingPreparedStatement(dbStatement, sql, databaseFacade);
+			// } catch (SQLException e) {
+			// throw SqlStorageException
+			// .withMessageAndException("Error executing statement: " + sql, e);
+			// }
 		}
+
 	}
 
 	private void tryToExecuteUsingPreparedStatement(DbStatement dbStatement, StringBuilder sql,
-			Connection connection) throws SQLException {
+			DatabaseFacade databaseFacade) {
 		List<Object> parameterValues = getAllValuesAndConditions(dbStatement);
-		try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());) {
-			addParameterValuesToPreparedStatement(parameterValues, preparedStatement);
-			preparedStatement.executeUpdate();
-		}
+		databaseFacade.executeSqlWithValues(sql.toString(), parameterValues);
 
 	}
 
@@ -147,19 +141,6 @@ public class PreparedStatementExecutorImp implements StatementExecutor {
 		List<String> allConditionNames = getAllConditionNames(conditions);
 		appendConditionsToWherePart(sql, allConditionNames);
 		return sql;
-	}
-
-	private void addParameterValuesToPreparedStatement(List<Object> values,
-			PreparedStatement preparedStatement) throws SQLException {
-		int position = 1;
-		for (Object value : values) {
-			if (value instanceof Timestamp) {
-				preparedStatement.setTimestamp(position, (Timestamp) value);
-			} else {
-				preparedStatement.setObject(position, value);
-			}
-			position++;
-		}
 	}
 
 	private StringBuilder createSqlForInsert(String tableName,

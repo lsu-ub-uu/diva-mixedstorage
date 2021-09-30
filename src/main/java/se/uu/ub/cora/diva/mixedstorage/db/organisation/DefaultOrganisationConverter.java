@@ -21,7 +21,6 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Map;
 
 import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataAtomicProvider;
@@ -29,17 +28,19 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.data.DataRecordLinkProvider;
 import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
+import se.uu.ub.cora.sqldatabase.DatabaseValues;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public class DefaultOrganisationConverter implements DefaultConverter {
 
 	private static final String ORGANISATION_ID = "id";
 	private static final String ALTERNATIVE_NAME = "alternative_name";
-	protected Map<String, Object> dbRow;
+	protected Row dbRow;
 	protected DataGroup organisation;
 	private String recordType;
 
 	@Override
-	public DataGroup fromMap(Map<String, Object> dbRow) {
+	public DataGroup fromMap(Row dbRow) {
 		this.dbRow = dbRow;
 		if (organisationIsEmpty()) {
 			throw ConversionException.withMessageAndException(
@@ -57,7 +58,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 	}
 
 	private void possiblyChangeRecordType() {
-		String typeCode = (String) dbRow.get("type_code");
+		String typeCode = (String) dbRow.getValueByColumn("type_code");
 		if ("root".equals(typeCode)) {
 			recordType = "rootOrganisation";
 		} else {
@@ -66,14 +67,14 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 	}
 
 	private void possiblySetRecordTypeToTopLevel() {
-		boolean topLevel = (boolean) dbRow.get("top_level");
+		boolean topLevel = (boolean) dbRow.getValueByColumn("top_level");
 		if (topLevel) {
 			recordType = "topOrganisation";
 		}
 	}
 
 	private boolean organisationIsEmpty() {
-		Object organisationId = dbRow.get(ORGANISATION_ID);
+		Object organisationId = dbRow.getValueByColumn(ORGANISATION_ID);
 		return organisationId == null || "".equals(organisationId);
 	}
 
@@ -87,7 +88,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 
 	private void createAndAddOrganisationWithRecordInfo() {
 		organisation = DataGroupProvider.getDataGroupUsingNameInData("organisation");
-		String id = String.valueOf(dbRow.get(ORGANISATION_ID));
+		String id = String.valueOf(dbRow.getValueByColumn(ORGANISATION_ID));
 		DataGroup recordInfo = createRecordInfo(recordType, id);
 		organisation.addChild(recordInfo);
 	}
@@ -161,7 +162,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 	}
 
 	private String getSelectableValue() {
-		Object notEligable = dbRow.get("not_eligible");
+		Object notEligable = dbRow.getValueByColumn("not_eligible");
 		return isSelectable(notEligable) ? "yes" : "no";
 	}
 
@@ -170,7 +171,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 	}
 
 	private void createAndAddDomain(DataGroup recordInfo) {
-		String domain = (String) dbRow.get("domain");
+		String domain = (String) dbRow.getValueByColumn("domain");
 		recordInfo.addChild(
 				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("domain", domain));
 	}
@@ -179,7 +180,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 		DataGroup nameGroup = DataGroupProvider.getDataGroupUsingNameInData("organisationName");
 		DataAtomic name = createAtomicDataUsingColumnNameAndNameInData("defaultname", "name");
 		nameGroup.addChild(name);
-		String nameLanguage = (String) dbRow.get("organisation_name_locale");
+		String nameLanguage = (String) dbRow.getValueByColumn("organisation_name_locale");
 		nameGroup.addChild(
 				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("language", nameLanguage));
 		organisation.addChild(nameGroup);
@@ -187,7 +188,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 
 	private DataAtomic createAtomicDataUsingColumnNameAndNameInData(String columnName,
 			String nameInData) {
-		String divaOrganisationName = (String) dbRow.get(columnName);
+		String divaOrganisationName = (String) dbRow.getValueByColumn(columnName);
 		return DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(nameInData,
 				divaOrganisationName);
 	}
@@ -197,7 +198,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 				.getDataGroupUsingNameInData("organisationAlternativeName");
 		alternativeNameDataGroup.addChild(
 				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("language", "en"));
-		String alternativeName = (String) dbRow.get(ALTERNATIVE_NAME);
+		String alternativeName = (String) dbRow.getValueByColumn(ALTERNATIVE_NAME);
 		alternativeNameDataGroup.addChild(
 				DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("name", alternativeName));
 		organisation.addChild(alternativeNameDataGroup);
@@ -216,14 +217,14 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 	}
 
 	private String getDateAsString() {
-		Date dbClosedDate = (Date) dbRow.get("closed_date");
+		Date dbClosedDate = (Date) dbRow.getValueByColumn("closed_date");
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		return dateFormat.format(dbClosedDate);
 	}
 
 	protected boolean valueExistsForKey(String key) {
-		Object value = dbRow.get(key);
-		return value != null && !"".equals(value);
+		Object value = dbRow.getValueByColumn(key);
+		return value != null && !(value.equals(DatabaseValues.NULL)) && !"".equals(value);
 	}
 
 }

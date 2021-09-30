@@ -40,14 +40,12 @@ import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 
 public class OrganisationPredecessorRelatedTableTest {
 
-	private RecordReaderRelatedTableSpy recordReader;
 	private OrganisationPredecessorRelatedTable predecessor;
 	private List<Map<String, Object>> predecessorRows;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		// recordReader = new RecordReaderRelatedTableSpy();
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 		initPredecessorRows();
 		predecessor = new OrganisationPredecessorRelatedTable(sqlDatabaseFactory);

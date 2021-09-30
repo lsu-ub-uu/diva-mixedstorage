@@ -32,36 +32,35 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdater;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.StatementExecutor;
-import se.uu.ub.cora.sqldatabase.DataReader;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
-import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
-import se.uu.ub.cora.sqlstorage.SqlStorageException;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	private static final String ORGANISATION_ID = "organisation_id";
 	private DataToDbTranslater organisationToDbTranslater;
 	private RelatedTableFactory relatedTableFactory;
-	private RecordReaderFactory recordReaderFactory;
-	private RecordReader recordReader;
-	private SqlConnectionProvider connectionProvider;
+	// private RecordReaderFactory recordReaderFactory;
+	// private RecordReader recordReader;
+	// private SqlConnectionProvider connectionProvider;
 	private StatementExecutor statementExecutor;
 	private Map<String, Object> organisationConditions;
 	private Map<String, Object> organisationValues;
-	private DataReader dataReader;
+	private SqlDatabaseFactory sqlDatabaseFactory;
+	// private DataReader dataReader;
+	private TableFacade tableFacade;
+	private DatabaseFacade databaseFacade;
 
 	public DivaDbOrganisationUpdater(DataToDbTranslater dataTranslater,
-			RecordReaderFactory recordReaderFactory, RelatedTableFactory relatedTableFactory,
-			SqlConnectionProvider connectionProvider, StatementExecutor preparedStatementCreator,
-			DataReader dataReader) {
+			SqlDatabaseFactory sqlDatabaseFactory, RelatedTableFactory relatedTableFactory,
+			StatementExecutor preparedStatementCreator) {
 		this.organisationToDbTranslater = dataTranslater;
-		this.recordReaderFactory = recordReaderFactory;
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 		this.relatedTableFactory = relatedTableFactory;
-		this.connectionProvider = connectionProvider;
 		this.statementExecutor = preparedStatementCreator;
-		this.dataReader = dataReader;
-
+		this.tableFacade = sqlDatabaseFactory.factorTableFacade();
+		this.databaseFacade = sqlDatabaseFactory.factorDatabaseFacade();
 	}
 
 	@Override
@@ -69,7 +68,7 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		organisationToDbTranslater.translate(dataGroup);
 		organisationConditions = organisationToDbTranslater.getConditions();
 		organisationValues = organisationToDbTranslater.getValues();
-		recordReader = recordReaderFactory.factor();
+		// recordReader = recordReaderFactory.factor();
 		updateOrganisation(dataGroup);
 
 	}
@@ -84,8 +83,9 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	private List<Map<String, Object>> readExistingOrganisationRow() {
 		Map<String, Object> readConditionsForOrganisation = generateReadConditions();
-		return recordReader.readFromTableUsingConditions("organisationview",
-				readConditionsForOrganisation);
+		return null;
+		// return recordReader.readFromTableUsingConditions("organisationview",
+		// readConditionsForOrganisation);
 	}
 
 	private Map<String, Object> generateReadConditions() {
@@ -132,27 +132,29 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	private List<DbStatement> generateDbStatementsForParents(DataGroup dataGroup,
 			Map<String, Object> readConditions) {
-		List<Map<String, Object>> dbParents = recordReader
-				.readFromTableUsingConditions("organisation_parent", readConditions);
+		List<Map<String, Object>> dbParents = null;
+		// recordReader
+		// .readFromTableUsingConditions("organisation_parent", readConditions);
 		RelatedTable parent = relatedTableFactory.factor("organisationParent");
 		return parent.handleDbForDataGroup(dataGroup, dbParents);
 	}
 
 	private List<DbStatement> generateDbStatementsForPredecessors(DataGroup dataGroup,
 			Map<String, Object> readConditions) {
-		List<Map<String, Object>> dbPredecessors = recordReader
-				.readFromTableUsingConditions("divaorganisationpredecessor", readConditions);
+		List<Map<String, Object>> dbPredecessors = null;
+		// recordReader
+		// .readFromTableUsingConditions("divaorganisationpredecessor", readConditions);
 		RelatedTable predecessor = relatedTableFactory.factor("organisationPredecessor");
 		return predecessor.handleDbForDataGroup(dataGroup, dbPredecessors);
 	}
 
 	private void tryUpdateDatabaseWithGivenDbStatements(List<DbStatement> dbStatements) {
-		try (Connection connection = connectionProvider.getConnection();) {
-			tryUpdateDatabaseWithGivenDbStatementsUsingConnection(dbStatements, connection);
-		} catch (Exception e) {
-			throw SqlStorageException.withMessageAndException(
-					"Error executing prepared statement: " + e.getMessage(), e);
-		}
+		// try (Connection connection = connectionProvider.getConnection();) {
+		// tryUpdateDatabaseWithGivenDbStatementsUsingConnection(dbStatements, connection);
+		// } catch (Exception e) {
+		// throw SqlStorageException.withMessageAndException(
+		// "Error executing prepared statement: " + e.getMessage(), e);
+		// }
 	}
 
 	private void tryUpdateDatabaseWithGivenDbStatementsUsingConnection(
@@ -170,11 +172,11 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	private void updateDatabaseWithGivenDbStatementsUsingConnection(List<DbStatement> dbStatements,
 			Connection connection) throws SQLException {
 		// tableFacade.startTransaction();
-		// tableFacade.
+		// databaseFacade.
 
-		connection.setAutoCommit(false);
-		statementExecutor.executeDbStatmentUsingConnection(dbStatements, connection);
-		connection.commit();
+		// connection.setACutoCommit(false);
+		// statementExecutor.executeDbStatmentUsingDatabaseFacade(dbStatements, connection);
+		// connection.commit();
 	}
 
 	public DataToDbTranslater getDataToDbTranslater() {
@@ -187,24 +189,36 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		return relatedTableFactory;
 	}
 
-	public RecordReaderFactory getRecordReaderFactory() {
-		// needed for test
-		return recordReaderFactory;
-	}
-
-	public SqlConnectionProvider getSqlConnectionProvider() {
-		// needed for test
-		return connectionProvider;
-	}
+	// public RecordReaderFactory getRecordReaderFactory() {
+	// // needed for test
+	// return recordReaderFactory;
+	// }
+	//
+	// public SqlConnectionProvider getSqlConnectionProvider() {
+	// // needed for test
+	// return connectionProvider;
+	// }
 
 	public StatementExecutor getPreparedStatementCreator() {
 		// needed for test
 		return statementExecutor;
 	}
 
-	public DataReader getDataReader() {
-		// needed for test
-		return dataReader;
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
+
+	public TableFacade getTableFacade() {
+		return tableFacade;
+	}
+
+	public DatabaseFacade getDatabaseFacade() {
+		return databaseFacade;
+	}
+
+	// public DataReader getDataReader() {
+	// // needed for test
+	// return dataReader;
+	// }
 
 }

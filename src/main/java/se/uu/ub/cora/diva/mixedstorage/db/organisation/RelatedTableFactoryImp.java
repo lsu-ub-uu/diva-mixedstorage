@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,62 +21,49 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableFactory;
-import se.uu.ub.cora.sqldatabase.RecordCreatorFactory;
-import se.uu.ub.cora.sqldatabase.RecordDeleterFactory;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class RelatedTableFactoryImp implements RelatedTableFactory {
 
-	private RecordReaderFactory recordReaderFactory;
-	private RecordDeleterFactory recordDeleterFactory;
-	private RecordCreatorFactory recordCreatorFactory;
+	private SqlDatabaseFactory sqlDatabaseFactory;
+	private TableFacade tableFacade;
 
 	public static RelatedTableFactoryImp usingReaderDeleterAndCreator(
-			RecordReaderFactory recordReaderFactory, RecordDeleterFactory recordDeleterFactory,
-			RecordCreatorFactory recordCreatorFactory) {
-		return new RelatedTableFactoryImp(recordReaderFactory, recordDeleterFactory,
-				recordCreatorFactory);
+			SqlDatabaseFactory sqlDatabaseFactory) {
+		return new RelatedTableFactoryImp(sqlDatabaseFactory);
 	}
 
-	private RelatedTableFactoryImp(RecordReaderFactory recordReader,
-			RecordDeleterFactory recordDeleter, RecordCreatorFactory recordCreator) {
-		this.recordReaderFactory = recordReader;
-		this.recordDeleterFactory = recordDeleter;
-		this.recordCreatorFactory = recordCreator;
+	private RelatedTableFactoryImp(SqlDatabaseFactory sqlDatabaseFactory) {
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 	}
 
 	@Override
 	public RelatedTable factor(String relatedTableName) {
-		RecordReader recordReader = recordReaderFactory.factor();
 		if ("organisationAlternativeName".equals(relatedTableName)) {
-			return new OrganisationAlternativeNameRelatedTable(recordReader);
+			return new OrganisationAlternativeNameRelatedTable(sqlDatabaseFactory);
 		}
 		if ("organisationAddress".equals(relatedTableName)) {
-			return new OrganisationAddressRelatedTable(recordReaderFactory);
+			return new OrganisationAddressRelatedTable(sqlDatabaseFactory);
 		}
 
 		if ("organisationParent".equals(relatedTableName)) {
-			return new OrganisationParentRelatedTable(recordReader);
+			return new OrganisationParentRelatedTable(sqlDatabaseFactory);
 		}
 		if ("organisationPredecessor".equals(relatedTableName)) {
-			return new OrganisationPredecessorRelatedTable(recordReader);
+			return new OrganisationPredecessorRelatedTable(sqlDatabaseFactory);
 		}
 
 		throw NotImplementedException
 				.withMessage("Related table not implemented for " + relatedTableName);
 	}
 
-	public RecordReaderFactory getRecordReaderFactory() {
-		return recordReaderFactory;
+	public TableFacade getTableFacade() {
+		return tableFacade;
 	}
 
-	public RecordDeleterFactory getRecordDeleterFactory() {
-		return recordDeleterFactory;
-	}
-
-	public RecordCreatorFactory getRecordCreatorFactory() {
-		return recordCreatorFactory;
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
 
 }

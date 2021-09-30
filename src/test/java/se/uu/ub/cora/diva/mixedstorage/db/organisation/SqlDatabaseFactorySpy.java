@@ -30,11 +30,12 @@ public class SqlDatabaseFactorySpy implements SqlDatabaseFactory {
 	public TableFacadeSpy factoredTableFacade;
 	public int numToReturn = 3;
 	public RowSpy rowToReturn = null;
+	public DatabaseFacadeSpy factoredDatabaseFacade;
 
 	@Override
 	public DatabaseFacade factorDatabaseFacade() {
-		// TODO Auto-generated method stub
-		return null;
+		factoredDatabaseFacade = new DatabaseFacadeSpy();
+		return factoredDatabaseFacade;
 	}
 
 	@Override

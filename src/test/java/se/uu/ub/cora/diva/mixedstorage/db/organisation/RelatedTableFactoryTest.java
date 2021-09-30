@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -27,51 +27,53 @@ import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.RecordCreatorFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.RecordDeleterFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableFactory;
 
 public class RelatedTableFactoryTest {
 
 	private RecordReaderFactorySpy recordReaderFactory;
 	private RecordDeleterFactorySpy recordDeleterFactory;
 	private RecordCreatorFactorySpy recordCreatorFactory;
-	private RelatedTableFactory factory;
+	private RelatedTableFactoryImp factory;
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		recordReaderFactory = new RecordReaderFactorySpy();
-		recordDeleterFactory = new RecordDeleterFactorySpy();
-		recordCreatorFactory = new RecordCreatorFactorySpy();
-		factory = RelatedTableFactoryImp.usingReaderDeleterAndCreator(recordReaderFactory,
-				recordDeleterFactory, recordCreatorFactory);
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
+		factory = RelatedTableFactoryImp.usingReaderDeleterAndCreator(sqlDatabaseFactory);
+	}
 
+	@Test
+	public void testInit() {
+		assertSame(factory.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
+		assertSame(factory.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test
 	public void testFactorOrganisationAlternativeName() {
 		OrganisationAlternativeNameRelatedTable factoredTable = (OrganisationAlternativeNameRelatedTable) factory
 				.factor("organisationAlternativeName");
-		assertSame(factoredTable.getRecordReader(), recordReaderFactory.factored);
+		assertSame(factoredTable.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test
 	public void testFactorOrganisationAddress() {
 		OrganisationAddressRelatedTable factoredTable = (OrganisationAddressRelatedTable) factory
 				.factor("organisationAddress");
-		assertSame(factoredTable.getRecordReaderFactory(), recordReaderFactory);
+		assertSame(factoredTable.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test
 	public void testFactorOrganisationParent() {
 		OrganisationParentRelatedTable factoredTable = (OrganisationParentRelatedTable) factory
 				.factor("organisationParent");
-		assertSame(factoredTable.getRecordReader(), recordReaderFactory.factored);
+		assertSame(factoredTable.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test
 	public void testFactorOrganisationPredecessor() {
 		OrganisationPredecessorRelatedTable factoredTable = (OrganisationPredecessorRelatedTable) factory
 				.factor("organisationPredecessor");
-		assertSame(factoredTable.getRecordReader(), recordReaderFactory.factored);
+		assertSame(factoredTable.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
