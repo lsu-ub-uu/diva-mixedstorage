@@ -19,7 +19,11 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -29,7 +33,6 @@ import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataReaderSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslaterSpy;
-import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 
 public class DivaDbOrganisationUpdaterTest {
 
@@ -45,7 +48,7 @@ public class DivaDbOrganisationUpdaterTest {
 
 	@BeforeMethod
 	public void setUp() {
-		createDefultDataGroup();
+		createDefaultDataGroup();
 		dataTranslater = new DataToDbTranslaterSpy();
 		relatedTableFactory = new RelatedTableFactorySpy();
 		preparedStatementCreator = new PreparedStatementExecutorSpy();
@@ -54,7 +57,7 @@ public class DivaDbOrganisationUpdaterTest {
 				relatedTableFactory, preparedStatementCreator);
 	}
 
-	private void createDefultDataGroup() {
+	private void createDefaultDataGroup() {
 		dataGroup = new DataGroupSpy("organisation");
 		DataGroupSpy recordInfo = new DataGroupSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("id", "4567"));
@@ -74,11 +77,29 @@ public class DivaDbOrganisationUpdaterTest {
 		organisationUpdater.update(dataGroup);
 		assertEquals(dataTranslater.dataGroup, dataGroup);
 
-		DbStatement organisationDbStatement = preparedStatementCreator.dbStatements.get(0);
-		assertEquals(organisationDbStatement.getOperation(), "update");
-		assertEquals(organisationDbStatement.getTableName(), "organisation");
-		assertSame(organisationDbStatement.getValues(), dataTranslater.getValues());
-		assertSame(organisationDbStatement.getConditions(), dataTranslater.getConditions());
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+
+		/***/
+		assertTrue(tableFacade.readOneRowForQueryWasCalled);
+
+		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQuery;
+		assertNotNull(tableQuery);
+		assertSame(tableFacade.tableQuery, sqlDatabaseFactory.factoredTableQuery);
+
+		Map<String, Object> conditions = dataTranslater.getConditions();
+		assertEquals(sqlDatabaseFactory.tableName, "organisationview");
+		assertEquals(tableQuery.conditions.get("organisation_id"),
+				conditions.get("organisation_id"));
+
+		// Map<String, Object> values = dataTranslater.getValues();
+		// /***/
+		//
+		// DbStatement organisationDbStatement = preparedStatementCreator.dbStatements.get(0);
+		// assertEquals(organisationDbStatement.getOperation(), "update");
+		// assertEquals(organisationDbStatement.getTableName(), "organisation");
+		// assertSame(organisationDbStatement.getValues(), dataTranslater.getValues());
+		// assertSame(organisationDbStatement.getConditions(), dataTranslater.getConditions());
+
 	}
 
 	// @Test

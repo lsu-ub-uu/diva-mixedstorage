@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -33,8 +33,10 @@ import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.StatementExecutor;
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
+import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
 public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
@@ -74,26 +76,36 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private void updateOrganisation(DataGroup dataGroup) {
-		List<Map<String, Object>> existingDbOrganisation = readExistingOrganisationRow();
+		List<Row> existingDbOrganisation = readExistingOrganisationRow();
 		Map<String, Object> readConditionsRelatedTables = generateReadConditionsForRelatedTables();
 		List<DbStatement> dbStatements = generateDbStatements(dataGroup,
 				readConditionsRelatedTables, existingDbOrganisation);
 		tryUpdateDatabaseWithGivenDbStatements(dbStatements);
 	}
 
-	private List<Map<String, Object>> readExistingOrganisationRow() {
-		Map<String, Object> readConditionsForOrganisation = generateReadConditions();
-		return null;
+	private List<Row> readExistingOrganisationRow() {
+		// Map<String, Object> readConditionsForOrganisation = generateReadConditions();
+		TableQuery tableQuery = createTableQueryForReadOrganisation();
+
+		List<Row> rows = tableFacade.readRowsForQuery(tableQuery);
+		return rows;
 		// return recordReader.readFromTableUsingConditions("organisationview",
 		// readConditionsForOrganisation);
 	}
 
-	private Map<String, Object> generateReadConditions() {
-		Map<String, Object> readConditions = new HashMap<>();
+	private TableQuery createTableQueryForReadOrganisation() {
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("organisationview");
 		int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
-		readConditions.put("id", organisationsId);
-		return readConditions;
+		tableQuery.addCondition(ORGANISATION_ID, organisationsId);
+		return tableQuery;
 	}
+	//
+	// private Map<String, Object> generateReadConditions() {
+	// Map<String, Object> readConditions = new HashMap<>();
+	// int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
+	// readConditions.put("id", organisationsId);
+	// return readConditions;
+	// }
 
 	private Map<String, Object> generateReadConditionsForRelatedTables() {
 		Map<String, Object> readConditions = new HashMap<>();
@@ -103,11 +115,12 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private List<DbStatement> generateDbStatements(DataGroup dataGroup,
-			Map<String, Object> readConditions, List<Map<String, Object>> dbOrganisation) {
+			Map<String, Object> readConditions, List<Row> organisationRowsFromDb) {
 		List<DbStatement> dbStatements = new ArrayList<>();
 		dbStatements.add(createDbStatementForOrganisationUpdate());
-		dbStatements.addAll(generateDbStatementsForAlternativeName(dataGroup, dbOrganisation));
-		dbStatements.addAll(generateDbStatementsForAddress(dataGroup, dbOrganisation));
+		dbStatements
+				.addAll(generateDbStatementsForAlternativeName(dataGroup, organisationRowsFromDb));
+		dbStatements.addAll(generateDbStatementsForAddress(dataGroup, organisationRowsFromDb));
 		dbStatements.addAll(generateDbStatementsForParents(dataGroup, readConditions));
 		dbStatements.addAll(generateDbStatementsForPredecessors(dataGroup, readConditions));
 		return dbStatements;
@@ -119,20 +132,20 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private List<DbStatement> generateDbStatementsForAlternativeName(DataGroup dataGroup,
-			List<Map<String, Object>> dbOrganisation) {
+			List<Row> organisationRowsFromDb) {
 		RelatedTable alternativeName = relatedTableFactory.factor("organisationAlternativeName");
-		return alternativeName.handleDbForDataGroup(dataGroup, dbOrganisation);
+		return alternativeName.handleDbForDataGroup(dataGroup, organisationRowsFromDb);
 	}
 
 	private List<DbStatement> generateDbStatementsForAddress(DataGroup dataGroup,
-			List<Map<String, Object>> dbOrganisation) {
+			List<Row> organisationRowsFromDb) {
 		RelatedTable addressTable = relatedTableFactory.factor("organisationAddress");
-		return addressTable.handleDbForDataGroup(dataGroup, dbOrganisation);
+		return addressTable.handleDbForDataGroup(dataGroup, organisationRowsFromDb);
 	}
 
 	private List<DbStatement> generateDbStatementsForParents(DataGroup dataGroup,
 			Map<String, Object> readConditions) {
-		List<Map<String, Object>> dbParents = null;
+		List<Row> dbParents = null;
 		// recordReader
 		// .readFromTableUsingConditions("organisation_parent", readConditions);
 		RelatedTable parent = relatedTableFactory.factor("organisationParent");
@@ -141,7 +154,7 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	private List<DbStatement> generateDbStatementsForPredecessors(DataGroup dataGroup,
 			Map<String, Object> readConditions) {
-		List<Map<String, Object>> dbPredecessors = null;
+		List<Row> dbPredecessors = null;
 		// recordReader
 		// .readFromTableUsingConditions("divaorganisationpredecessor", readConditions);
 		RelatedTable predecessor = relatedTableFactory.factor("organisationPredecessor");

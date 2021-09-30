@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -26,7 +26,7 @@ import java.util.List;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.PreparedStatementSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.StatementExecutor;
-import se.uu.ub.cora.sqldatabase.SqlStorageException;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 
 public class PreparedStatementExecutorSpy implements StatementExecutor {
 
@@ -35,26 +35,26 @@ public class PreparedStatementExecutorSpy implements StatementExecutor {
 	public List<PreparedStatement> preparedStatements;
 	public boolean throwErrorFromPreparedStatement = false;
 	public Connection connection;
-	public List<Connection> connections = new ArrayList<>();
+	// public List<Connection> connections = new ArrayList<>();
 	public boolean throwExceptionOnGenerateStatement = false;
+	public DatabaseFacade databaseFacade;
 
 	@Override
-	public void executeDbStatmentUsingConnection(List<DbStatement> dbStatements,
-			Connection connection) {
-		if (throwExceptionOnGenerateStatement) {
-			throw SqlStorageException.withMessageAndException(
-					"Error executing statement: error from spy", new Exception());
-		} else {
-			this.dbStatements = dbStatements;
-			this.connection = connection;
-			connections.add(connection);
-			createWasCalled = true;
-			preparedStatements = new ArrayList<>();
-			for (int i = 0; i < dbStatements.size(); i++) {
-				PreparedStatementSpy preparedStatementSpy = new PreparedStatementSpy();
-				preparedStatements.add(preparedStatementSpy);
-			}
+	public void executeDbStatmentUsingDatabaseFacade(List<DbStatement> dbStatements,
+			DatabaseFacade databaseFacade) {
+		// if (throwExceptionOnGenerateStatement) {
+		// throw SqlStorageException.withMessageAndException(
+		// "Error executing statement: error from spy", new Exception());
+		// } else {
+		this.dbStatements = dbStatements;
+		this.databaseFacade = databaseFacade;
+		// connections.add(connection);
+		createWasCalled = true;
+		preparedStatements = new ArrayList<>();
+		for (int i = 0; i < dbStatements.size(); i++) {
+			PreparedStatementSpy preparedStatementSpy = new PreparedStatementSpy();
+			preparedStatements.add(preparedStatementSpy);
 		}
+		// }
 	}
-
 }

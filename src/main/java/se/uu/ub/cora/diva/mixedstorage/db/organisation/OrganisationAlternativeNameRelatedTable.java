@@ -31,6 +31,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
@@ -40,7 +41,7 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 	private static final String ORGANISATION_NAME = "organisation_name";
 	private static final String ALTERNATIVE_NAME = "organisationAlternativeName";
 	private SqlDatabaseFactory sqlDatabaseFactory;
-	private Map<String, Object> alternativeNameRow;
+	private Row alternativeNameRow;
 	private TableFacade tableFacade;
 
 	public OrganisationAlternativeNameRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
@@ -50,7 +51,7 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 
 	@Override
 	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
-			List<Map<String, Object>> alternativeNameRows) {
+			List<Row> alternativeNameRows) {
 		throwExceptionIfAlternativeNameIsMissing(organisation);
 		throwErrorIfMoreThanOneAlternativeNameInDb(alternativeNameRows);
 		alternativeNameRow = getRowIfOnlyOneOrEmptyMap(alternativeNameRows);
@@ -79,16 +80,16 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 		return alternativeNameGroup.containsChildWithNameInData("name");
 	}
 
-	private void throwErrorIfMoreThanOneAlternativeNameInDb(
-			List<Map<String, Object>> alternativeNameRows) {
+	private void throwErrorIfMoreThanOneAlternativeNameInDb(List<Row> alternativeNameRows) {
 		if (alternativeNameRows.size() > 1) {
 			throw DbException
 					.withMessage("Organisation can not have more than one alternative name");
 		}
 	}
 
-	private Map<String, Object> getRowIfOnlyOneOrEmptyMap(List<Map<String, Object>> readRows) {
-		return readRows.size() == 1 ? readRows.get(0) : Collections.emptyMap();
+	private Row getRowIfOnlyOneOrEmptyMap(List<Row> readRows) {
+		// TODO:something else but null?
+		return readRows.size() == 1 ? readRows.get(0) : null;
 	}
 
 	private String getOrganisationId(DataGroup organisation) {
@@ -107,22 +108,23 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 		}
 	}
 
-	private boolean alternativeNameExistsInDatabase(Map<String, Object> readRow) {
-		return !readRow.isEmpty();
+	private boolean alternativeNameExistsInDatabase(Row readRow) {
+		return readRow != null;
 	}
 
 	private void handleUpdate(DataGroup organisation, String organisationId,
 			List<DbStatement> dbStatements) {
 		boolean nameInDataGroupDiffersFromNameInDb = nameInDbNotSameAsNameInDataGroup(organisation);
 		if (nameInDataGroupDiffersFromNameInDb) {
-			int nameId = (int) alternativeNameRow.get(ORGANISATION_NAME_ID);
+			int nameId = (int) alternativeNameRow.getValueByColumn(ORGANISATION_NAME_ID);
 			updateAlternativeName(dbStatements, organisation, organisationId, nameId);
 		}
 	}
 
 	private boolean nameInDbNotSameAsNameInDataGroup(DataGroup organisation) {
 		String nameOfOrganisation = getAlternativeNameFromOrganisation(organisation);
-		String organisationNameInDb = (String) alternativeNameRow.get(ORGANISATION_NAME);
+		String organisationNameInDb = (String) alternativeNameRow
+				.getValueByColumn(ORGANISATION_NAME);
 		return !nameOfOrganisation.equals(organisationNameInDb);
 	}
 

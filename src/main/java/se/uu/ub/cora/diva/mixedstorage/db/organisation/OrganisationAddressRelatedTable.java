@@ -30,6 +30,7 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
@@ -51,12 +52,12 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 
 	@Override
 	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
-			List<Map<String, Object>> organisationsFromDb) {
+			List<Row> organisationsFromDb) {
 		setIdAsInt(organisation);
 
 		List<DbStatement> dbStatements = new ArrayList<>();
 
-		Object addressIdInOrganisation = organisationsFromDb.get(0).get(ADDRESS_ID);
+		Object addressIdInOrganisation = organisationsFromDb.get(0).getValueByColumn(ADDRESS_ID);
 		if (addressExistsInDatabase(addressIdInOrganisation)) {
 			deleteOrUpdateAddress(dbStatements, organisation, addressIdInOrganisation);
 		} else {
@@ -211,4 +212,5 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 	public SqlDatabaseFactory getSqlDatabaseFactory() {
 		return sqlDatabaseFactory;
 	}
+
 }

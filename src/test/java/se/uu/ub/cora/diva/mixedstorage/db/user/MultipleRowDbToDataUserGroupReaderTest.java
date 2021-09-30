@@ -19,27 +19,28 @@
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaMultipleRowDbToDataReaderImp;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.TableFacadeSpy;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.TableQuerySpy;
 
 public class MultipleRowDbToDataUserGroupReaderTest {
 
 	private RecordReaderFactorySpy readerFactory;
 	private DivaDbToCoraConverterFactorySpy converterFactory;
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		readerFactory = new RecordReaderFactorySpy();
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 		converterFactory = new DivaDbToCoraConverterFactorySpy();
 
 	}
@@ -47,22 +48,25 @@ public class MultipleRowDbToDataUserGroupReaderTest {
 	@Test
 	public void testInit() {
 		DivaMultipleRowDbToDataReaderImp userGroupReader = new MultipleRowDbToDataUserGroupReader(
-				readerFactory, converterFactory);
-		assertSame(userGroupReader.getSqlDatabaseFactory(), readerFactory);
+				sqlDatabaseFactory, converterFactory);
+		assertSame(userGroupReader.getSqlDatabaseFactory(), sqlDatabaseFactory);
+		assertNotNull(userGroupReader.getTableFacade());
+		assertSame(userGroupReader.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
+
 	}
 
 	@Test
 	public void testRead() {
 		DivaMultipleRowDbToDataReaderImp userGroupReader = new MultipleRowDbToDataUserGroupReader(
-				readerFactory, converterFactory);
+				sqlDatabaseFactory, converterFactory);
 		userGroupReader.read("", "67");
-		RecordReaderSpy factoredReader = readerFactory.factored;
-		assertEquals(factoredReader.usedTableName, "groupsforuser");
 
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("db_id", 67);
+		TableFacadeSpy tableFacade = (TableFacadeSpy) userGroupReader.getTableFacade();
+		assertEquals(sqlDatabaseFactory.tableName, "groupsforuser");
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQuery;
+		assertSame(tableFacade.tableQuery, tableQuery);
 
-		assertEquals(factoredReader.usedConditions, conditions);
+		assertEquals(tableQuery.conditions.get("db_id"), 67);
 	}
 
 }

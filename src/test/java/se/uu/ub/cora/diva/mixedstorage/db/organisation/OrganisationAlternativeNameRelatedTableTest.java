@@ -26,7 +26,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,12 +37,14 @@ import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public class OrganisationAlternativeNameRelatedTableTest {
 
 	private OrganisationAlternativeNameRelatedTable alternativeName;
-	private List<Map<String, Object>> alternativeNameRows;
+	// private List<Map<String, Object>> alternativeNameRows;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
+	private List<Row> rowsFromDb;
 
 	@BeforeMethod
 	public void setUp() {
@@ -53,13 +54,21 @@ public class OrganisationAlternativeNameRelatedTableTest {
 	}
 
 	private void initAlternativeNameRows() {
-		alternativeNameRows = new ArrayList<>();
-		Map<String, Object> alternativeNameRow = new HashMap<>();
-		alternativeNameRow.put("organisation_name_id", 234);
-		alternativeNameRow.put("organisation_id", 678);
-		alternativeNameRow.put("organisation_name", "some english name");
-		alternativeNameRow.put("locale", "en");
-		alternativeNameRows.add(alternativeNameRow);
+		rowsFromDb = new ArrayList<>();
+		RowSpy row = new RowSpy();
+		row.addColumnWithValue("organisation_name_id", 234);
+		row.addColumnWithValue("organisation_id", 678);
+		row.addColumnWithValue("organisation_name", "some english name");
+		row.addColumnWithValue("locale", "en");
+		rowsFromDb.add(row);
+
+		// alternativeNameRows = new ArrayList<>();
+		// Map<String, Object> alternativeNameRow = new HashMap<>();
+		// alternativeNameRow.put("organisation_name_id", 234);
+		// alternativeNameRow.put("organisation_id", 678);
+		// alternativeNameRow.put("organisation_name", "some english name");
+		// alternativeNameRow.put("locale", "en");
+		// alternativeNameRows.add(alternativeNameRow);
 	}
 
 	@Test
@@ -76,7 +85,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 			+ "Organisation must have alternative name")
 	public void testNoNameInDataGroupThrowsException() {
 		DataGroup organisation = createDataGroupWithId("678");
-		alternativeName.handleDbForDataGroup(organisation, alternativeNameRows);
+		alternativeName.handleDbForDataGroup(organisation, rowsFromDb);
 	}
 
 	private DataGroup createDataGroupWithId(String id) {
@@ -94,7 +103,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		DataGroupSpy alternativeNameGroup = new DataGroupSpy("organisationAlternativeName");
 		organisation.addChild(alternativeNameGroup);
 
-		alternativeName.handleDbForDataGroup(organisation, alternativeNameRows);
+		alternativeName.handleDbForDataGroup(organisation, rowsFromDb);
 	}
 
 	@Test(expectedExceptions = DbException.class, expectedExceptionsMessageRegExp = ""
@@ -102,10 +111,13 @@ public class OrganisationAlternativeNameRelatedTableTest {
 	public void testMoreThanOneNameInDbRows() {
 		DataGroup organisation = createDataGroupWithId("678");
 		addAlternativeName(organisation, "some english name");
-		Map<String, Object> secondNameRow = new HashMap<>();
-		secondNameRow.put("organisation_name_id", 234234);
-		alternativeNameRows.add(secondNameRow);
-		alternativeName.handleDbForDataGroup(organisation, alternativeNameRows);
+		// Map<String, Object> secondNameRow = new HashMap<>();
+		RowSpy secondRow = new RowSpy();
+		secondRow.addColumnWithValue("organisation_name_id", 234234);
+		rowsFromDb.add(secondRow);
+		// secondNameRow.put("organisation_name_id", 234234);
+		// alternativeNameRows.add(secondNameRow);
+		alternativeName.handleDbForDataGroup(organisation, rowsFromDb);
 	}
 
 	@Test
@@ -114,7 +126,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		addAlternativeName(organisation, "some english name");
 
 		List<DbStatement> dbStatments = alternativeName.handleDbForDataGroup(organisation,
-				alternativeNameRows);
+				rowsFromDb);
 		assertEquals(dbStatments.size(), 0);
 	}
 
@@ -125,7 +137,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		addAlternativeName(organisation, newAlternativeName);
 
 		List<DbStatement> dbStatements = alternativeName.handleDbForDataGroup(organisation,
-				alternativeNameRows);
+				rowsFromDb);
 		assertEquals(dbStatements.size(), 1);
 		DbStatement dbStatement = dbStatements.get(0);
 		assertEquals(dbStatement.getOperation(), "update");

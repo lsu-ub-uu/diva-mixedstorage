@@ -52,7 +52,7 @@ public class DivaDbOrganisationReaderTest {
 	private DataGroupFactory dataGroupFactory;
 	private DivaDbFactorySpy divaDbFactorySpy;
 	private TableFacadeSpy tableFacade;
-	private SqlDatabaseFactorySpy databaseFactory;
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void BeforeMethod() {
@@ -61,17 +61,17 @@ public class DivaDbOrganisationReaderTest {
 		converterFactory = new DivaDbToCoraConverterFactorySpy();
 		// recordReaderFactory = new RecordReaderFactorySpy();
 		divaDbFactorySpy = new DivaDbFactorySpy();
-		databaseFactory = new SqlDatabaseFactorySpy();
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 
 		divaDbOrganisationReader = DivaDbOrganisationReader
 				.usingRecordReaderFactoryAndConverterFactory(converterFactory, divaDbFactorySpy,
-						databaseFactory);
+						sqlDatabaseFactory);
 		tableFacade = (TableFacadeSpy) divaDbOrganisationReader.getTableFacade();
 	}
 
 	@Test
 	public void testInit() {
-		assertSame(divaDbOrganisationReader.getTableFacade(), databaseFactory.factoredTableFacade);
+		assertSame(divaDbOrganisationReader.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
 	}
 
 	@Test
@@ -81,9 +81,9 @@ public class DivaDbOrganisationReaderTest {
 		assertTrue(tableFacade.readOneRowForQueryWasCalled);
 
 		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQuery;
-		assertSame(tableFacade.tableQuery, databaseFactory.factoredTableQuery);
+		assertSame(tableFacade.tableQuery, sqlDatabaseFactory.factoredTableQuery);
 
-		assertEquals(databaseFactory.tableName, "organisationview");
+		assertEquals(sqlDatabaseFactory.tableName, "organisationview");
 		assertEquals(tableQuery.conditions.get("id"), 567);
 
 	}
@@ -95,9 +95,9 @@ public class DivaDbOrganisationReaderTest {
 		assertTrue(tableFacade.readOneRowForQueryWasCalled);
 
 		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQuery;
-		assertSame(tableFacade.tableQuery, databaseFactory.factoredTableQuery);
+		assertSame(tableFacade.tableQuery, sqlDatabaseFactory.factoredTableQuery);
 
-		assertEquals(databaseFactory.tableName, "rootorganisationview");
+		assertEquals(sqlDatabaseFactory.tableName, "rootorganisationview");
 		assertEquals(tableQuery.conditions.get("id"), 567);
 
 	}
@@ -109,9 +109,9 @@ public class DivaDbOrganisationReaderTest {
 		assertTrue(tableFacade.readOneRowForQueryWasCalled);
 
 		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQuery;
-		assertSame(tableQuery, databaseFactory.factoredTableQuery);
+		assertSame(tableQuery, sqlDatabaseFactory.factoredTableQuery);
 
-		assertEquals(databaseFactory.tableName, "toporganisationview");
+		assertEquals(sqlDatabaseFactory.tableName, "toporganisationview");
 		assertEquals(tableQuery.conditions.get("id"), 567);
 	}
 
@@ -121,9 +121,9 @@ public class DivaDbOrganisationReaderTest {
 		assertTrue(tableFacade.readOneRowForQueryWasCalled);
 
 		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQuery;
-		assertSame(tableQuery, databaseFactory.factoredTableQuery);
+		assertSame(tableQuery, sqlDatabaseFactory.factoredTableQuery);
 
-		assertEquals(databaseFactory.tableName, "suborganisationview");
+		assertEquals(sqlDatabaseFactory.tableName, "suborganisationview");
 		assertEquals(tableQuery.conditions.get("id"), 567);
 	}
 

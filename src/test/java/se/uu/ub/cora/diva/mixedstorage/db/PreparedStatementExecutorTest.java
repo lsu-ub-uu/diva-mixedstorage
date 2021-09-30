@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -38,12 +38,10 @@ public class PreparedStatementExecutorTest {
 	private DbStatement updateDbStatement;
 	private DbStatement deleteDbStatement;
 	private DbStatement insertDbStatement;
-	private ConnectionSpy connectionSpy;
 	private DatabaseFacadeSpy databaseFacade;
 
 	@BeforeMethod
 	public void setUp() {
-		connectionSpy = new ConnectionSpy();
 		statementExecutor = new PreparedStatementExecutorImp();
 		databaseFacade = new DatabaseFacadeSpy();
 		setUpDefaultValuesAndConditions();
@@ -78,39 +76,6 @@ public class PreparedStatementExecutorTest {
 
 	}
 
-	// @Test
-	// public void testPreparedStatementIsExecutedAndClosed() throws Exception {
-	// List<DbStatement> dbStatements = List.of(updateDbStatement);
-	// statementExecutor.executeDbStatmentUsingDatabaseFacade(dbStatements, databaseFacade);
-	// var firstStatement = connectionSpy.createdPreparedStatements.get(0);
-	// assertTrue(firstStatement.executeWasCalled);
-	// assertTrue(firstStatement.closedWasCalled);
-	// }
-
-	// @Test
-	// public void testPreparedStatementIsClosedOnSQLException() throws Exception {
-	// List<DbStatement> dbStatements = List.of(updateDbStatement);
-	// connectionSpy.throwExceptionOnPreparedStatementExecute = true;
-	// try {
-	// statementExecutor.executeDbStatmentUsingDatabaseFacade(dbStatements, databaseFacade);
-	// } catch (Exception e) {
-	// }
-	// var firstStatement = connectionSpy.createdPreparedStatements.get(0);
-	// assertTrue(firstStatement.closedWasCalled);
-	// }
-
-	// @Test
-	// public void testValuesAreSetOnPreparedStatementBeforeSQLExecute() throws Exception {
-	// List<DbStatement> dbStatements = List.of(updateDbStatement);
-	// connectionSpy.throwExceptionOnPreparedStatementExecute = true;
-	// try {
-	// statementExecutor.executeDbStatmentUsingDatabaseFacade(dbStatements, connectionSpy);
-	// } catch (Exception e) {
-	// }
-	// var firstStatement = connectionSpy.createdPreparedStatements.get(0);
-	// assertEquals(firstStatement.usedSetObjects.get("1"), "someName");
-	// }
-	//
 	@Test
 	public void testUpdateWithConditions() {
 		conditions.put("id", 35);
@@ -144,33 +109,10 @@ public class PreparedStatementExecutorTest {
 		assertEquals(values.get(3), 35);
 	}
 
-	// @Test
-	// public void testSetTimestampPreparedStatement() throws Exception {
-	//
-	// Date today = new Date();
-	// long time = today.getTime();
-	// Timestamp timestamp = new Timestamp(time);
-	// values.put("lastupdated", timestamp);
-	// List<DbStatement> dbStatements = List.of(updateDbStatement);
-	// statementExecutor.executeDbStatmentUsingDatabaseFacade(dbStatements, connectionSpy);
-	// List<PreparedStatementSpy> preparedStatements = connectionSpy.createdPreparedStatements;
-	// PreparedStatementSpy preparedStatement = preparedStatements.get(0);
-	// assertSame(connectionSpy.preparedStatementSpy, preparedStatement);
-	// assertEquals(preparedStatement.usedSetObjects.get("1"), "someName");
-	// assertTrue(preparedStatement.usedSetTimestamps.get("2") instanceof Timestamp);
-	// }
+	/*****************************************
+	 * DELETE
+	 ********************************************/
 
-	// @Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
-	// + "Error executing statement: UPDATE organisation SET name = \\?")
-	// public void testSQlException() {
-	// List<DbStatement> dbStatements = List.of(updateDbStatement);
-	// connectionSpy.throwException = true;
-	// statementExecutor.executeDbStatmentUsingDatabaseFacade(dbStatements, connectionSpy);
-	// }
-	//
-	// /***************************************** DELETE
-	// ********************************************/
-	//
 	@Test
 	public void testDeleteWithOneCondition() {
 		conditions.put("id", 35);
@@ -206,15 +148,6 @@ public class PreparedStatementExecutorTest {
 	/*****************************************
 	 * INSERT
 	 ********************************************/
-
-	// @Test
-	// public void testInsertWithOneValue() throws Exception {
-	// PreparedStatementSpy preparedStatement = (PreparedStatementSpy) statementExecutor
-	// .createFromDbStatment(insertDbStatement);
-	// assertSame(connection.preparedStatementSpy, preparedStatement);
-	// assertEquals(connection.sql, "INSERT INTO null(column) VALUES(values)");
-	//
-	// }
 
 	@Test
 	public void testInsertWithOneValue() throws Exception {

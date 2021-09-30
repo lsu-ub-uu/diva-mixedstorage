@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,27 +18,21 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db;
 
-import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbOrganisationUpdater;
-import se.uu.ub.cora.sqldatabase.DataReader;
-import se.uu.ub.cora.sqldatabase.DataReaderImp;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public class DivaDbUpdaterFactoryImp implements DivaDbUpdaterFactory {
 
 	private DataToDbTranslaterFactory translaterFactory;
 	private RelatedTableFactory relatedTableFactory;
-	private RecordReaderFactory recordReaderFactory;
-	private SqlConnectionProvider sqlConnectionProvider;
+	private SqlDatabaseFactory sqlDatabaseFactory;
 
 	public DivaDbUpdaterFactoryImp(DataToDbTranslaterFactory translaterFactory,
-			RecordReaderFactory recordReaderFactory, RelatedTableFactory relatedTableFactory,
-			SqlConnectionProvider sqlConnectionProvider) {
+			SqlDatabaseFactory sqlDatabaseFactory, RelatedTableFactory relatedTableFactory) {
 		this.translaterFactory = translaterFactory;
-		this.recordReaderFactory = recordReaderFactory;
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 		this.relatedTableFactory = relatedTableFactory;
-		this.sqlConnectionProvider = sqlConnectionProvider;
 	}
 
 	@Override
@@ -56,10 +50,10 @@ public class DivaDbUpdaterFactoryImp implements DivaDbUpdaterFactory {
 
 	private DivaDbUpdater factorForOrganisation() {
 		StatementExecutor preparedStatementCreator = new PreparedStatementExecutorImp();
-		DataReader dataReader = DataReaderImp.usingSqlConnectionProvider(sqlConnectionProvider);
 		DataToDbTranslater translater = translaterFactory.factorForTableName("organisation");
-		return new DivaDbOrganisationUpdater(translater, recordReaderFactory, relatedTableFactory,
-				sqlConnectionProvider, preparedStatementCreator, dataReader);
+
+		return new DivaDbOrganisationUpdater(translater, sqlDatabaseFactory, relatedTableFactory,
+				preparedStatementCreator);
 	}
 
 	public DataToDbTranslaterFactory getTranslaterFactory() {
@@ -71,15 +65,4 @@ public class DivaDbUpdaterFactoryImp implements DivaDbUpdaterFactory {
 		// needed for test
 		return relatedTableFactory;
 	}
-
-	public SqlConnectionProvider getSqlConnectionProvider() {
-		// needed for test
-		return sqlConnectionProvider;
-	}
-
-	public RecordReaderFactory getRecordReaderFactory() {
-		// needed for test
-		return recordReaderFactory;
-	}
-
 }

@@ -24,15 +24,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.diva.mixedstorage.db.RecordCreatorFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.db.RecordDeleterFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderFactorySpy;
 
 public class RelatedTableFactoryTest {
 
-	private RecordReaderFactorySpy recordReaderFactory;
-	private RecordDeleterFactorySpy recordDeleterFactory;
-	private RecordCreatorFactorySpy recordCreatorFactory;
 	private RelatedTableFactoryImp factory;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 

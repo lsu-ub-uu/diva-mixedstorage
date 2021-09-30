@@ -77,7 +77,7 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 	private Row readOneRowFromDbUsingTypeAndId(String type, String id) {
 		throwDbExceptionIfIdNotAnIntegerValue(id);
 
-		TableQuery tableQuery = getSqlDatabaseFactory().factorTableQuery(type);
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(type);
 		tableQuery.addCondition("id", Integer.valueOf(id));
 		return tableFacade.readOneRowForQuery(tableQuery);
 	}
