@@ -61,13 +61,6 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		row.addColumnWithValue("organisation_name", "some english name");
 		row.addColumnWithValue("locale", "en");
 		rowsFromDb.add(row);
-
-		// alternativeNameRows = new ArrayList<>();
-		// Map<String, Object> alternativeNameRow = new HashMap<>();
-		// alternativeNameRow.put("organisation_name_id", 234);
-		// alternativeNameRow.put("organisation_id", 678);
-		// alternativeNameRow.put("organisation_name", "some english name");
-		// alternativeNameRow.put("locale", "en");
 		// alternativeNameRows.add(alternativeNameRow);
 	}
 

@@ -21,12 +21,12 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public abstract class OrganisationRelatedTable {
@@ -41,7 +41,7 @@ public abstract class OrganisationRelatedTable {
 	}
 
 	protected void handleDeleteAndCreate(List<DbStatement> dbStatements,
-			List<Map<String, Object>> allCurrentRowsInDb, Set<String> idsFromDataGroup) {
+			List<Row> allCurrentRowsInDb, Set<String> idsFromDataGroup) {
 		Set<String> idsInDatabase = getIdsForCurrentRowsInDatabase(allCurrentRowsInDb);
 
 		if (idsInDatabase.isEmpty()) {
@@ -69,7 +69,6 @@ public abstract class OrganisationRelatedTable {
 
 	protected abstract void addToDb(List<DbStatement> dbStatements, Set<String> idsFromDataGroup);
 
-	protected abstract Set<String> getIdsForCurrentRowsInDatabase(
-			List<Map<String, Object>> allCurrentRowsInDb);
+	protected abstract Set<String> getIdsForCurrentRowsInDatabase(List<Row> allCurrentRowsInDb);
 
 }
