@@ -62,7 +62,7 @@ public class MultipleRowDbToDataParentReaderTest {
 		TableFacadeSpy tableFacade = (TableFacadeSpy) parentReader.getTableFacade();
 		assertEquals(sqlDatabaseFactory.tableName, TABLE_NAME);
 		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQuery;
-		assertSame(tableFacade.tableQuery, tableQuery);
+		assertSame(tableFacade.tableQueries.get(0), tableQuery);
 	}
 
 	@Test

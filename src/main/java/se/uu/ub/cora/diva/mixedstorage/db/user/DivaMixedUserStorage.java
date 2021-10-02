@@ -70,7 +70,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		this.guestUserStorage = guestUserStorage;
 		this.sqlDatabaseFactory = sqlDatabaseFactory;
 		tableFacade = sqlDatabaseFactory.factorTableFacade();
-		// this.recordReader = recordReader;
 		this.userConverter = userConverter;
 		this.dataGroupRoleReferenceCreator = dataGroupRoleReferenceCreator;
 	}
@@ -135,13 +134,9 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	}
 
 	private List<Row> readGroupsFromDb(Row userDataFromDb) {
-		// Map<String, Object> conditionsForGroupsForUser = calculateUserForGroupsConditions(
-		// userDataFromDb);
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("public.groupsforuser");
 		tableQuery.addCondition(DB_ID, userDataFromDb.getValueByColumn(DB_ID));
 		return tableFacade.readRowsForQuery(tableQuery);
-		// return recordReader.readFromTableUsingConditions("public.groupsforuser",
-		// conditionsForGroupsForUser);
 	}
 
 	private List<DataGroup> convertClassicGroupsToCoraRoles(List<Row> groupRowsFromDb) {
@@ -248,7 +243,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	private Row createConditionsAndTryToRead(String id) {
 		throwDbExceptionIfIdNotAnIntegerValue(id);
-		// Map<String, Object> conditions = createConditionsForId(id);
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(PUBLIC_USER);
 		tableQuery.addCondition(DB_ID, Integer.valueOf(id));
 		return tryToReadUser(id, tableQuery);
@@ -267,7 +261,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 			DataGroup user = userConverter.fromRow(userRowFromDb);
 			readAndPossiblyAddRoles(userRowFromDb, user);
 			return user;
-			// } catch (SqlStorageException sqle) {
 		} catch (SqlDatabaseException sqle) {
 			throw new RecordNotFoundException("Error when reading roles for user: " + id, sqle);
 		}
@@ -276,9 +269,7 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	private Row tryToReadUser(String id, TableQuery tableQuery) {
 		try {
 			return tableFacade.readOneRowForQuery(tableQuery);
-			// return recordReader.readOneRowFromDbUsingTableAndConditions(PUBLIC_USER, conditions);
 		} catch (SqlDatabaseException s) {
-			// } catch (SqlStorageException s) {
 			throw new RecordNotFoundException("Record not found for type: user and id: " + id, s);
 		}
 	}
@@ -316,7 +307,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	public StorageReadResult readList(String type, DataGroup filter) {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(PUBLIC_USER);
 		List<Row> rowsFromDb = tableFacade.readRowsForQuery(tableQuery);
-		// List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable(PUBLIC_USER);
 		List<DataGroup> dataGroups = convertUserGroupsAndAddToList(rowsFromDb);
 		return createStorageResult(dataGroups);
 	}
@@ -377,11 +367,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		// needed for test
 		return guestUserStorage;
 	}
-
-	// public RecordReader getRecordReader() {
-	// // needed for test
-	// return recordReader;
-	// }
 
 	public DivaDbToCoraConverter getDbToCoraUserConverter() {
 		// needed for test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,7 +21,6 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Map;
 
@@ -33,15 +32,15 @@ import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataReaderSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslaterSpy;
+import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderSpy;
+import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableSpy;
 
 public class DivaDbOrganisationUpdaterTest {
 
 	private DivaDbOrganisationUpdater organisationUpdater;
 	private DataToDbTranslaterSpy dataTranslater;
 	private RelatedTableFactorySpy relatedTableFactory;
-	// private RecordReaderFactorySpy recordReaderFactory;
 	private DataGroup dataGroup;
-	// private SqlConnectionProviderSpy connectionProvider;
 	private PreparedStatementExecutorSpy preparedStatementCreator;
 	private DataReaderSpy dataReader;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
@@ -73,52 +72,40 @@ public class DivaDbOrganisationUpdaterTest {
 	}
 
 	@Test
-	public void testTranslaterAndDbStatmentForOrganisation() {
+	public void testTranslaterConditionsUsedWhenReadingOrganisation() {
 		organisationUpdater.update(dataGroup);
 		assertEquals(dataTranslater.dataGroup, dataGroup);
 
 		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
-		/***/
-		assertTrue(tableFacade.readOneRowForQueryWasCalled);
-
-		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQuery;
+		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQueries.get(0);
 		assertNotNull(tableQuery);
-		assertSame(tableFacade.tableQuery, sqlDatabaseFactory.factoredTableQuery);
+		assertSame(tableFacade.tableQueries.get(0), sqlDatabaseFactory.factoredTableQuery);
+
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), "organisationview");
 
 		Map<String, Object> conditions = dataTranslater.getConditions();
-		assertEquals(sqlDatabaseFactory.tableName, "organisationview");
 		assertEquals(tableQuery.conditions.get("organisation_id"),
 				conditions.get("organisation_id"));
 
-		// Map<String, Object> values = dataTranslater.getValues();
-		// /***/
-		//
-		// DbStatement organisationDbStatement = preparedStatementCreator.dbStatements.get(0);
-		// assertEquals(organisationDbStatement.getOperation(), "update");
-		// assertEquals(organisationDbStatement.getTableName(), "organisation");
-		// assertSame(organisationDbStatement.getValues(), dataTranslater.getValues());
-		// assertSame(organisationDbStatement.getConditions(), dataTranslater.getConditions());
-
 	}
 
-	// @Test
-	// public void testAlternativeName() {
-	// organisationUpdater.update(dataGroup);
-	//
-	// RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
-	// assertEquals(factoredReader.usedTableNames.get(0), "organisationview");
-	// assertEquals(factoredReader.usedConditionsList.get(0).get("id"), 4567);
-	//
-	// assertEquals(relatedTableFactory.relatedTableNames.get(0), "organisationAlternativeName");
-	// RelatedTableSpy firstRelatedTable = (RelatedTableSpy)
-	// relatedTableFactory.factoredRelatedTables
-	// .get(0);
-	//
-	// assertSame(firstRelatedTable.dataGroup, dataGroup);
-	// assertEquals(firstRelatedTable.dbRows, factoredReader.returnedListCollection.get(0));
-	//
-	// }
+	@Test
+	public void testAlternativeName() {
+		organisationUpdater.update(dataGroup);
+
+		RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
+		assertEquals(factoredReader.usedTableNames.get(0), "organisationview");
+		assertEquals(factoredReader.usedConditionsList.get(0).get("id"), 4567);
+
+		assertEquals(relatedTableFactory.relatedTableNames.get(0), "organisationAlternativeName");
+		RelatedTableSpy firstRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
+				.get(0);
+
+		assertSame(firstRelatedTable.dataGroup, dataGroup);
+		assertEquals(firstRelatedTable.dbRows, factoredReader.returnedListCollection.get(0));
+
+	}
 
 	// @Test
 	// public void testAddress() {

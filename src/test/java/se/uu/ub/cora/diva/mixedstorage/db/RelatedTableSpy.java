@@ -21,20 +21,17 @@ package se.uu.ub.cora.diva.mixedstorage.db;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public class RelatedTableSpy implements RelatedTable {
 
-	public DataGroup dataGroup;
-	public List<Map<String, Object>> dbRows;
+	public List<Row> dbRows;
 	private List<DbStatement> dbStatements;
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(DataGroup dataGroup,
-			List<Map<String, Object>> dbRows) {
-		this.dataGroup = dataGroup;
+	public List<DbStatement> handleDbForDataGroup(DataGroup organisation, List<Row> dbRows) {
 		this.dbRows = dbRows;
 		dbStatements = new ArrayList<>();
 		DbStatement dbStatement = new DbStatement("operationFromSpy", "spyTableName",

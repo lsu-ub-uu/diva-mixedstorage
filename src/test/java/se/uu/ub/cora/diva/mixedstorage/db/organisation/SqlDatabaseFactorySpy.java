@@ -37,7 +37,7 @@ public class SqlDatabaseFactorySpy implements SqlDatabaseFactory {
 	public int numToReturn = 3;
 	public RowSpy rowToReturn = null;
 	public DatabaseFacadeSpy factoredDatabaseFacade;
-	public List<Row> rowsToReturn;
+	public List<Row> rowsToReturn = new ArrayList<>();
 	public List<String> tablesToThrowExceptionFor = new ArrayList<>();
 
 	@Override
@@ -69,6 +69,13 @@ public class SqlDatabaseFactorySpy implements SqlDatabaseFactory {
 		}
 		factoredTableQueries.add(factoredTableQuery);
 		return factoredTableQuery;
+	}
+
+	public RowSpy createAndAddRowToReturn(String columnName, Object columnValue) {
+		RowSpy rowToReturn = new RowSpy();
+		rowToReturn.addColumnWithValue(columnName, columnValue);
+		rowsToReturn.add(rowToReturn);
+		return rowToReturn;
 	}
 
 }

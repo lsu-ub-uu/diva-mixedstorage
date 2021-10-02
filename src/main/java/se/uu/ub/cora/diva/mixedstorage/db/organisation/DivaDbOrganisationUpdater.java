@@ -50,7 +50,6 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	private Map<String, Object> organisationConditions;
 	private Map<String, Object> organisationValues;
 	private SqlDatabaseFactory sqlDatabaseFactory;
-	// private DataReader dataReader;
 	private TableFacade tableFacade;
 	private DatabaseFacade databaseFacade;
 
@@ -87,8 +86,7 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		// Map<String, Object> readConditionsForOrganisation = generateReadConditions();
 		TableQuery tableQuery = createTableQueryForReadOrganisation();
 
-		List<Row> rows = tableFacade.readRowsForQuery(tableQuery);
-		return rows;
+		return tableFacade.readRowsForQuery(tableQuery);
 		// return recordReader.readFromTableUsingConditions("organisationview",
 		// readConditionsForOrganisation);
 	}

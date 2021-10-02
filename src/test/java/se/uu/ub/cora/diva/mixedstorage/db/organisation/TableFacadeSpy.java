@@ -30,13 +30,13 @@ public class TableFacadeSpy implements TableFacade {
 
 	public boolean readOneRowForQueryWasCalled = false;
 	public List<TableQuery> tableQueries = new ArrayList<>();
-	public TableQuerySpy tableQuery;
 	public List<Row> returnedRows = new ArrayList<>();
 	public int numToReturn;
 	public RowSpy rowToReturn = new RowSpy();
+	public List<Row> rowsToReturn;
+
 	public long nextVal;
 	public String sequenceName;
-	public List<Row> rowsToReturn;
 
 	@Override
 	public void insertRowUsingQuery(TableQuery tableQuery) {
@@ -45,10 +45,9 @@ public class TableFacadeSpy implements TableFacade {
 	}
 
 	@Override
-	public List<Row> readRowsForQuery(TableQuery tableQueryIn) {
-		tableQuery = (TableQuerySpy) tableQueryIn;
-		tableQueries.add(tableQueryIn);
-		possiblyThrowException();
+	public List<Row> readRowsForQuery(TableQuery tableQuery) {
+		tableQueries.add(tableQuery);
+		possiblyThrowException(tableQuery);
 
 		if (rowsToReturn != null) {
 			return rowsToReturn;
@@ -59,21 +58,24 @@ public class TableFacadeSpy implements TableFacade {
 		return returnedRows;
 	}
 
-	private void possiblyThrowException() {
-		if (tableQuery.throwException) {
+	private void possiblyThrowException(TableQuery tableQuery) {
+		TableQuerySpy tableQuerySpy = (TableQuerySpy) tableQuery;
+		if (tableQuerySpy.throwException) {
 			throw SqlDatabaseException
-					.withMessage("Error from spy for table " + tableQuery.tableName);
+					.withMessage("Error from spy for table " + tableQuerySpy.tableName);
 		}
 	}
 
 	@Override
-	public Row readOneRowForQuery(TableQuery tableQueryIn) {
+	public Row readOneRowForQuery(TableQuery tableQuery) {
 		readOneRowForQueryWasCalled = true;
-		tableQuery = (TableQuerySpy) tableQueryIn;
-		possiblyThrowException();
-		tableQueries.add(tableQueryIn);
-		returnedRows.add(rowToReturn);
-		return rowToReturn;
+		possiblyThrowException(tableQuery);
+		tableQueries.add(tableQuery);
+		if (rowsToReturn.isEmpty()) {
+			rowsToReturn.add(new RowSpy());
+		}
+		returnedRows.add(rowsToReturn.get(0));
+		return rowsToReturn.get(0);
 	}
 
 	@Override

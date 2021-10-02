@@ -65,7 +65,7 @@ public class MultipleRowDbToDataPredecessorReaderTest {
 
 		assertEquals(sqlDatabaseFactory.tableName, TABLE_NAME);
 		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQuery;
-		assertSame(tableFacade.tableQuery, tableQuery);
+		assertSame(tableFacade.tableQueries.get(0), tableQuery);
 	}
 
 	@Test
