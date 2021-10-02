@@ -37,7 +37,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	@Override
-	public DataGroup fromMap(Row dbRow) {
+	public DataGroup fromRow(Row dbRow) {
 		this.dbRow = dbRow;
 		if (organisationIsEmpty()) {
 			throw ConversionException.withMessageAndException(
@@ -49,6 +49,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private boolean organisationIsEmpty() {
+		// TODO: DatabaseNull??
 		Object organisationId = dbRow.getValueByColumn(ORGANISATION_ID);
 		return organisationId == null || "".equals(organisationId);
 	}

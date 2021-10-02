@@ -92,7 +92,7 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 
 	private DataGroup convertOneMapFromDbToDataGroup(String type, Row readRow) {
 		DivaDbToCoraConverter dbToCoraConverter = converterFactory.factor(type);
-		return dbToCoraConverter.fromMap(readRow);
+		return dbToCoraConverter.fromRow(readRow);
 	}
 
 	private void tryToReadAndConvertParents(String organisationType, String id,

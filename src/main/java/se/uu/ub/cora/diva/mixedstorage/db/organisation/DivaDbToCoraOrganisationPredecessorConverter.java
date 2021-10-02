@@ -31,7 +31,7 @@ public class DivaDbToCoraOrganisationPredecessorConverter
 	private static final String DESCRIPTION = "description";
 
 	@Override
-	public DataGroup fromMap(Row dbRow) {
+	public DataGroup fromRow(Row dbRow) {
 		this.dbRow = dbRow;
 		if (mandatoryValuesAreMissing()) {
 			throw ConversionException.withMessageAndException(

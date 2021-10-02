@@ -26,8 +26,6 @@ import se.uu.ub.cora.basicstorage.DataStorageException;
 import se.uu.ub.cora.basicstorage.RecordStorageInMemoryReadFromDisk;
 import se.uu.ub.cora.basicstorage.RecordStorageInstance;
 import se.uu.ub.cora.basicstorage.RecordStorageOnDisk;
-import se.uu.ub.cora.connection.ContextConnectionProviderImp;
-import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDataToDbTranslaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
@@ -44,6 +42,8 @@ import se.uu.ub.cora.sqldatabase.RecordDeleterFactory;
 import se.uu.ub.cora.sqldatabase.RecordDeleterFactoryImp;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactoryImp;
+import se.uu.ub.cora.sqldatabase.connection.ContextConnectionProviderImp;
+import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqlstorage.DatabaseRecordStorage;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
@@ -105,8 +105,8 @@ public class DivaMixedRecordStorageProvider
 		RecordStorage databaseStorage = new DatabaseRecordStorage(readerFactory);
 
 		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, classicDbStorage,
-						userStorage, databaseStorage);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
+						classicDbStorage, userStorage, databaseStorage);
 		setStaticInstance(mixedRecordStorage);
 	}
 

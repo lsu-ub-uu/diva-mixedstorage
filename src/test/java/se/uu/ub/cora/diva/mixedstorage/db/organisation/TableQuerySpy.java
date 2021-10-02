@@ -27,6 +27,12 @@ import se.uu.ub.cora.sqldatabase.table.TableQuery;
 public class TableQuerySpy implements TableQuery {
 
 	public Map<String, Object> conditions = new HashMap();
+	public boolean throwException = false;
+	public String tableName;
+
+	public TableQuerySpy(String tableName) {
+		this.tableName = tableName;
+	}
 
 	@Override
 	public void addParameter(String name, Object value) {

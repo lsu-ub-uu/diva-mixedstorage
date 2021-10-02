@@ -28,7 +28,7 @@ public class DivaDbToCoraOrganisationParentConverter
 		extends DivaDbToCoraOrganisationAncestryConverter implements DivaDbToCoraConverter {
 
 	@Override
-	public DataGroup fromMap(Row dbRow) {
+	public DataGroup fromRow(Row dbRow) {
 		this.dbRow = dbRow;
 		if (mandatoryValuesAreMissing()) {
 			throw ConversionException.withMessageAndException(

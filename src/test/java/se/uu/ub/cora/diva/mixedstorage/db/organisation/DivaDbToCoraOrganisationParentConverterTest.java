@@ -63,7 +63,7 @@ public class DivaDbToCoraOrganisationParentConverterTest {
 			+ "Error converting organisation parent to Cora organisation parent: Map does not contain mandatory values for organisation id and parent id")
 	public void testEmptyMap() {
 		rowFromDb = new RowSpy();
-		DataGroup organisation = converter.fromMap(rowFromDb);
+		DataGroup organisation = converter.fromRow(rowFromDb);
 		assertNull(organisation);
 	}
 
@@ -73,7 +73,7 @@ public class DivaDbToCoraOrganisationParentConverterTest {
 	public void testMapWithEmptyValueForOrganisationIdThrowsError() {
 		rowFromDb = new RowSpy();
 		rowFromDb.addColumnWithValue("organisation_id", "");
-		converter.fromMap(rowFromDb);
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
@@ -82,7 +82,7 @@ public class DivaDbToCoraOrganisationParentConverterTest {
 	public void testMapWithMissingParentIdThrowsError() {
 		rowFromDb = new RowSpy();
 		rowFromDb.addColumnWithValue("organisation_id", "someOrgId");
-		converter.fromMap(rowFromDb);
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
@@ -92,12 +92,12 @@ public class DivaDbToCoraOrganisationParentConverterTest {
 		rowFromDb = new RowSpy();
 		rowFromDb.addColumnWithValue("organisation_id", "someOrgId");
 		rowFromDb.addColumnWithValue("organisation_parent_id", "");
-		converter.fromMap(rowFromDb);
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test
 	public void testMinimalValuesReturnsDataGroupWithCorrectStructure() {
-		DataGroup parent = converter.fromMap(rowFromDb);
+		DataGroup parent = converter.fromRow(rowFromDb);
 		assertEquals(parent.getNameInData(), "parentOrganisation");
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) parent
 				.getFirstGroupWithNameInData("organisationLink");
@@ -109,7 +109,7 @@ public class DivaDbToCoraOrganisationParentConverterTest {
 	@Test
 	public void testCoraOrganisationTypeTopOrganisation() {
 		rowFromDb.addColumnWithValue("coraorganisationtype", "topOrganisation");
-		DataGroup parent = converter.fromMap(rowFromDb);
+		DataGroup parent = converter.fromRow(rowFromDb);
 		assertEquals(parent.getNameInData(), "parentOrganisation");
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) parent
 				.getFirstGroupWithNameInData("organisationLink");

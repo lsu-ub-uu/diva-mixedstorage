@@ -18,7 +18,9 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +29,7 @@ import se.uu.ub.cora.sqldatabase.Row;
 
 public class RowSpy implements Row {
 	public Map<String, Object> columnValues = new HashMap<>();
+	public List<String> reuqestedColumnNames = new ArrayList<>();
 
 	public void addColumnWithValue(String columnName, Object object) {
 		if (object == null) {
@@ -38,6 +41,7 @@ public class RowSpy implements Row {
 
 	@Override
 	public Object getValueByColumn(String columnName) {
+		reuqestedColumnNames.add(columnName);
 		return columnValues.get(columnName);
 	}
 
@@ -49,6 +53,12 @@ public class RowSpy implements Row {
 
 	@Override
 	public boolean hasColumn(String columnName) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean hasColumnWithNonEmptyValue(String columnName) {
 		// TODO Auto-generated method stub
 		return false;
 	}

@@ -60,7 +60,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 			+ "Error converting organisation to Cora organisation: Map does not contain value for id")
 	public void testEmptyMap() {
 		rowFromDb = new RowSpy();
-		DataGroup organisation = converter.fromMap(rowFromDb);
+		DataGroup organisation = converter.fromRow(rowFromDb);
 		assertNull(organisation);
 	}
 
@@ -70,7 +70,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb = new RowSpy();
 		rowFromDb.addColumnWithValue("id", "");
 		// rowFromDb.put("id", "");
-		converter.fromMap(rowFromDb);
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
@@ -79,7 +79,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb = new RowSpy();
 		rowFromDb.addColumnWithValue("defaultname", "someName");
 		rowFromDb.addColumnWithValue("id", "");
-		converter.fromMap(rowFromDb);
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
@@ -87,12 +87,12 @@ public class DivaDbToCoraOrganisationConverterTest {
 	public void mapDoesNotContainOrganisationIdValue() {
 		rowFromDb = new RowSpy();
 		rowFromDb.addColumnWithValue("defaultname", "someName");
-		converter.fromMap(rowFromDb);
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test
 	public void testConverterIsFactored() {
-		DataGroup organisation = converter.fromMap(rowFromDb);
+		DataGroup organisation = converter.fromRow(rowFromDb);
 
 		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
 		assertSame(factoredConverter.rowFromDb, rowFromDb);
@@ -108,7 +108,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb.addColumnWithValue("show_in_defence", true);
 		rowFromDb.addColumnWithValue("orgnumber", "33445566");
 		rowFromDb.addColumnWithValue("not_eligible", true);
-		DataGroup organisation = converter.fromMap(rowFromDb);
+		DataGroup organisation = converter.fromRow(rowFromDb);
 		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
 		assertSame(organisation, factoredConverter.returnedDataGroup);
 
@@ -136,7 +136,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb.addColumnWithValue("postnumber", "345 34");
 		rowFromDb.addColumnWithValue("not_eligible", false);
 		rowFromDb.addColumnWithValue("type_code", "university");
-		DataGroup organisation = converter.fromMap(rowFromDb);
+		DataGroup organisation = converter.fromRow(rowFromDb);
 		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
 		assertSame(organisation, factoredConverter.returnedDataGroup);
 
@@ -174,7 +174,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb.addColumnWithValue("show_in_defence", true);
 		rowFromDb.addColumnWithValue("orgnumber", "33445566");
 		rowFromDb.addColumnWithValue("street", "");
-		DataGroup organisation = converter.fromMap(rowFromDb);
+		DataGroup organisation = converter.fromRow(rowFromDb);
 		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
 		assertSame(organisation, factoredConverter.returnedDataGroup);
 
@@ -186,7 +186,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 	public void testTopLevelDoesNotIncludeChildrenNotPresentInDb() {
 		rowFromDb.addColumnWithValue("type_code", "university");
 		rowFromDb.addColumnWithValue("top_level", true);
-		DataGroup organisation = converter.fromMap(rowFromDb);
+		DataGroup organisation = converter.fromRow(rowFromDb);
 		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
 		assertSame(organisation, factoredConverter.returnedDataGroup);
 
@@ -206,7 +206,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb.addColumnWithValue("show_in_defence", false);
 		rowFromDb.addColumnWithValue("orgnumber", "33445566");
 		rowFromDb.addColumnWithValue("not_eligible", false);
-		DataGroup organisation = converter.fromMap(rowFromDb);
+		DataGroup organisation = converter.fromRow(rowFromDb);
 		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
 		assertSame(organisation, factoredConverter.returnedDataGroup);
 
@@ -228,7 +228,7 @@ public class DivaDbToCoraOrganisationConverterTest {
 		rowFromDb.addColumnWithValue("postbox", "Box5435");
 		rowFromDb.addColumnWithValue("postnumber", "345 34");
 		rowFromDb.addColumnWithValue("not_eligible", false);
-		DataGroup organisation = converter.fromMap(rowFromDb);
+		DataGroup organisation = converter.fromRow(rowFromDb);
 		DefaultConverterSpy factoredConverter = (DefaultConverterSpy) converterFactory.factoredConverter;
 		assertSame(organisation, factoredConverter.returnedDataGroup);
 

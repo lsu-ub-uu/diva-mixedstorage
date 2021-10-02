@@ -32,7 +32,7 @@
 		<searchstorage.version>3.7.0</searchstorage.version>
 		<basicstorage.version>5.1.0</basicstorage.version>
 		<sqldatabase.version>5.0-SNAPSHOT</sqldatabase.version>
-		<sqlstorage.version>0.4.0-SNAPSHOT</sqlstorage.version>
+		<sqlstorage.version>1.0-SNAPSHOT</sqlstorage.version>
 		<httphandler.version>2.3.0</httphandler.version>
 		<apptokenstorage.version>2.3.0</apptokenstorage.version>
 		<gatekeeper.version>3.7.0</gatekeeper.version>

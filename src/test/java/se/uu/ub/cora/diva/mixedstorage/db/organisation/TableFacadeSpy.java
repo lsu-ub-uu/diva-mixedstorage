@@ -22,18 +22,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
 public class TableFacadeSpy implements TableFacade {
 
 	public boolean readOneRowForQueryWasCalled = false;
-	public TableQuery tableQuery;
+	public List<TableQuery> tableQueries = new ArrayList<>();
+	public TableQuerySpy tableQuery;
 	public List<Row> returnedRows = new ArrayList<>();
 	public int numToReturn;
 	public RowSpy rowToReturn = new RowSpy();
 	public long nextVal;
 	public String sequenceName;
+	public List<Row> rowsToReturn;
 
 	@Override
 	public void insertRowUsingQuery(TableQuery tableQuery) {
@@ -42,19 +45,33 @@ public class TableFacadeSpy implements TableFacade {
 	}
 
 	@Override
-	public List<Row> readRowsForQuery(TableQuery tableQuery) {
-		this.tableQuery = tableQuery;
+	public List<Row> readRowsForQuery(TableQuery tableQueryIn) {
+		tableQuery = (TableQuerySpy) tableQueryIn;
+		tableQueries.add(tableQueryIn);
+		possiblyThrowException();
+
+		if (rowsToReturn != null) {
+			return rowsToReturn;
+		}
 		for (int i = 0; i < numToReturn; i++) {
-			returnedRows.add(new RowSpy());
+			returnedRows.add(rowToReturn);
 		}
 		return returnedRows;
 	}
 
+	private void possiblyThrowException() {
+		if (tableQuery.throwException) {
+			throw SqlDatabaseException
+					.withMessage("Error from spy for table " + tableQuery.tableName);
+		}
+	}
+
 	@Override
-	public Row readOneRowForQuery(TableQuery tableQuery) {
+	public Row readOneRowForQuery(TableQuery tableQueryIn) {
 		readOneRowForQueryWasCalled = true;
-		this.tableQuery = tableQuery;
-		// Row rowToReturn = new RowSpy();
+		tableQuery = (TableQuerySpy) tableQueryIn;
+		possiblyThrowException();
+		tableQueries.add(tableQueryIn);
 		returnedRows.add(rowToReturn);
 		return rowToReturn;
 	}

@@ -50,7 +50,7 @@ public abstract class DivaMultipleRowDbToDataReaderImp implements MultipleRowDbT
 
 	private DataGroup convertToDataGroup(int repeatId, Row readRow) {
 		DivaDbToCoraConverter converter = converterFactory.factor(getTableName());
-		DataGroup parent = converter.fromMap(readRow);
+		DataGroup parent = converter.fromRow(readRow);
 		parent.setRepeatId(String.valueOf(repeatId));
 		return parent;
 	}

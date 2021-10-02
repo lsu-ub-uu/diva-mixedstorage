@@ -30,7 +30,7 @@ public class DivaDbToCoraUserConverter implements DivaDbToCoraConverter {
 	private Row dbRow;
 
 	@Override
-	public DataGroup fromMap(Row dbRow) {
+	public DataGroup fromRow(Row dbRow) {
 		this.dbRow = dbRow;
 		throwErrorIfNoId();
 		DataGroup user = createBasicActiveUserWithRecordInfo(dbRow);

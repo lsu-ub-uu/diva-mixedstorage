@@ -14,7 +14,7 @@ public class DivaDbToCoraConverterSpy implements DivaDbToCoraConverter {
 	public List<Row> rowsToConvert = new ArrayList<>();
 
 	@Override
-	public DataGroup fromMap(Row row) {
+	public DataGroup fromRow(Row row) {
 		rowsToConvert.add(row);
 		rowToConvert = row;
 

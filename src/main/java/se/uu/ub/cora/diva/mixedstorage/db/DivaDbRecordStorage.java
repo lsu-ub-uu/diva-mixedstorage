@@ -110,7 +110,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	private DataGroup convertOneMapFromDbToDataGroup(String type, Map<String, Object> readRow) {
 		DivaDbToCoraConverter dbToCoraConverter = converterFactory.factor(type);
-		return dbToCoraConverter.fromMap(readRow);
+		return dbToCoraConverter.fromRow(readRow);
 	}
 
 	@Override
@@ -238,7 +238,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	private DataGroup convertRowToDataGroup(String type, Map<String, Object> rowFromDb) {
 		DivaDbToCoraConverter converter = converterFactory.factor(type);
-		return converter.fromMap(rowFromDb);
+		return converter.fromRow(rowFromDb);
 	}
 
 	@Override

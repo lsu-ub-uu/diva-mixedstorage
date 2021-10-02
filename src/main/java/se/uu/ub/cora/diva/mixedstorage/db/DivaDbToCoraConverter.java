@@ -22,6 +22,6 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.sqldatabase.Row;
 
 public interface DivaDbToCoraConverter {
-	DataGroup fromMap(Row readRow);
+	DataGroup fromRow(Row readRow);
 
 }

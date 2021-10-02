@@ -18,19 +18,27 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
 public class SqlDatabaseFactorySpy implements SqlDatabaseFactory {
 
+	public List<TableQuerySpy> factoredTableQueries = new ArrayList<>();
 	public TableQuerySpy factoredTableQuery;
+	public List<String> tableNames = new ArrayList<>();
 	public String tableName;
 	public TableFacadeSpy factoredTableFacade;
 	public int numToReturn = 3;
 	public RowSpy rowToReturn = null;
 	public DatabaseFacadeSpy factoredDatabaseFacade;
+	public List<Row> rowsToReturn;
+	public List<String> tablesToThrowExceptionFor = new ArrayList<>();
 
 	@Override
 	public DatabaseFacade factorDatabaseFacade() {
@@ -41,6 +49,9 @@ public class SqlDatabaseFactorySpy implements SqlDatabaseFactory {
 	@Override
 	public TableFacade factorTableFacade() {
 		factoredTableFacade = new TableFacadeSpy();
+		if (rowsToReturn != null) {
+			factoredTableFacade.rowsToReturn = rowsToReturn;
+		}
 		if (rowToReturn != null) {
 			factoredTableFacade.rowToReturn = rowToReturn;
 		}
@@ -51,7 +62,12 @@ public class SqlDatabaseFactorySpy implements SqlDatabaseFactory {
 	@Override
 	public TableQuery factorTableQuery(String tableName) {
 		this.tableName = tableName;
-		factoredTableQuery = new TableQuerySpy();
+		tableNames.add(tableName);
+		factoredTableQuery = new TableQuerySpy(tableName);
+		if (tablesToThrowExceptionFor.contains(tableName)) {
+			factoredTableQuery.throwException = true;
+		}
+		factoredTableQueries.add(factoredTableQuery);
 		return factoredTableQuery;
 	}
 

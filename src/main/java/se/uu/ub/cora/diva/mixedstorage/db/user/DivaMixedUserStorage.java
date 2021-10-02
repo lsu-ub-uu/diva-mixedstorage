@@ -32,8 +32,11 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
 import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.SqlStorageException;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
+import se.uu.ub.cora.sqldatabase.table.TableQuery;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
@@ -47,24 +50,27 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	private static final String SYSTEM_ADMIN = "systemAdmin";
 	private static final String DB_ID = "db_id";
 	private UserStorage guestUserStorage;
-	private RecordReader recordReader;
 	private Logger log = LoggerProvider.getLoggerForClass(DivaMixedUserStorage.class);
 	private DivaDbToCoraConverter userConverter;
 	private DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator;
+	private SqlDatabaseFactory sqlDatabaseFactory;
+	private TableFacade tableFacade;
 
 	public static DivaMixedUserStorage usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(
-			UserStorage guestUserStorage, RecordReader recordReader,
+			UserStorage guestUserStorage, SqlDatabaseFactory sqlDatabaseFactory,
 			DivaDbToCoraConverter userConverter,
 			DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator) {
-		return new DivaMixedUserStorage(guestUserStorage, recordReader, userConverter,
+		return new DivaMixedUserStorage(guestUserStorage, sqlDatabaseFactory, userConverter,
 				dataGroupRoleReferenceCreator);
 	}
 
-	private DivaMixedUserStorage(UserStorage guestUserStorage, RecordReader recordReader,
-			DivaDbToCoraConverter userConverter,
+	private DivaMixedUserStorage(UserStorage guestUserStorage,
+			SqlDatabaseFactory sqlDatabaseFactory, DivaDbToCoraConverter userConverter,
 			DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator) {
 		this.guestUserStorage = guestUserStorage;
-		this.recordReader = recordReader;
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
+		tableFacade = sqlDatabaseFactory.factorTableFacade();
+		// this.recordReader = recordReader;
 		this.userConverter = userConverter;
 		this.dataGroupRoleReferenceCreator = dataGroupRoleReferenceCreator;
 	}
@@ -81,10 +87,11 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	private DataGroup readUserByUserId(String idFromLogin) {
 		logAndThrowExceptionIfUnexpectedFormatOf(idFromLogin);
-		Map<String, Object> conditions = createConditions(idFromLogin);
-		Map<String, Object> userRowFromDb = recordReader
-				.readOneRowFromDbUsingTableAndConditions(PUBLIC_USER, conditions);
-		DataGroup user = userConverter.fromMap(userRowFromDb);
+
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(PUBLIC_USER);
+		addConditionsToQuery(idFromLogin, tableQuery);
+		Row userRowFromDb = tableFacade.readOneRowForQuery(tableQuery);
+		DataGroup user = userConverter.fromRow(userRowFromDb);
 		readAndPossiblyAddRoles(userRowFromDb, user);
 
 		return user;
@@ -102,43 +109,42 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		return !idFromLogin.matches("^\\w+@(\\w+\\.){1,9}\\w+$");
 	}
 
-	private Map<String, Object> createConditions(String idFromLogin) {
-		Map<String, Object> conditions = new HashMap<>();
-		addUserId(idFromLogin, conditions);
-		addDomain(idFromLogin, conditions);
-		return conditions;
+	private void addConditionsToQuery(String idFromLogin, TableQuery tableQuery) {
+		addUserId(idFromLogin, tableQuery);
+		addDomain(idFromLogin, tableQuery);
 	}
 
-	private void addUserId(String idFromLogin, Map<String, Object> conditions) {
+	private void addUserId(String idFromLogin, TableQuery tableQuery) {
 		String userId = getUserIdFromIdFromLogin(idFromLogin);
-		conditions.put(USER_ID, userId);
+		tableQuery.addCondition(USER_ID, userId);
 	}
 
-	private void addDomain(String idFromLogin, Map<String, Object> conditions) {
+	private void addDomain(String idFromLogin, TableQuery tableQuery) {
 		String userDomain = getDomainFromLogin(idFromLogin);
-		conditions.put(DOMAIN, userDomain);
+		tableQuery.addCondition(DOMAIN, userDomain);
 	}
 
-	private void readAndPossiblyAddRoles(Map<String, Object> userRowFromDb, DataGroup user) {
+	private void readAndPossiblyAddRoles(Row userRowFromDb, DataGroup user) {
 		List<DataGroup> rolesList = readAndConvertClassicGroupsToCoraRoles(userRowFromDb);
 		possiblyAddRoles(rolesList, user);
 	}
 
-	private List<DataGroup> readAndConvertClassicGroupsToCoraRoles(
-			Map<String, Object> userRowFromDb) {
-		List<Map<String, Object>> groupRowsFromDb = readGroupsFromDb(userRowFromDb);
+	private List<DataGroup> readAndConvertClassicGroupsToCoraRoles(Row userRowFromDb) {
+		List<Row> groupRowsFromDb = readGroupsFromDb(userRowFromDb);
 		return convertClassicGroupsToCoraRoles(groupRowsFromDb);
 	}
 
-	private List<Map<String, Object>> readGroupsFromDb(Map<String, Object> userDataFromDb) {
-		Map<String, Object> conditionsForGroupsForUser = calculateUserForGroupsConditions(
-				userDataFromDb);
-		return recordReader.readFromTableUsingConditions("public.groupsforuser",
-				conditionsForGroupsForUser);
+	private List<Row> readGroupsFromDb(Row userDataFromDb) {
+		// Map<String, Object> conditionsForGroupsForUser = calculateUserForGroupsConditions(
+		// userDataFromDb);
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("public.groupsforuser");
+		tableQuery.addCondition(DB_ID, userDataFromDb.getValueByColumn(DB_ID));
+		return tableFacade.readRowsForQuery(tableQuery);
+		// return recordReader.readFromTableUsingConditions("public.groupsforuser",
+		// conditionsForGroupsForUser);
 	}
 
-	private List<DataGroup> convertClassicGroupsToCoraRoles(
-			List<Map<String, Object>> groupRowsFromDb) {
+	private List<DataGroup> convertClassicGroupsToCoraRoles(List<Row> groupRowsFromDb) {
 		String groupType = getUsersGroupTypeWithMostPermissions(groupRowsFromDb);
 		if (SYSTEM_ADMIN.equals(groupType)) {
 			return createSystemAdminRole();
@@ -149,9 +155,9 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		return createNoRolesForAllOtherGroupTypes();
 	}
 
-	private String getUsersGroupTypeWithMostPermissions(List<Map<String, Object>> groupRowsFromDb) {
+	private String getUsersGroupTypeWithMostPermissions(List<Row> groupRowsFromDb) {
 		String groupType = "other";
-		for (Map<String, Object> group : groupRowsFromDb) {
+		for (Row group : groupRowsFromDb) {
 			if (groupTypeIsSystemAdmin(group)) {
 				return SYSTEM_ADMIN;
 			} else if (groupTypeIsDomainAdminRole(group)) {
@@ -161,12 +167,12 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		return groupType;
 	}
 
-	private boolean groupTypeIsSystemAdmin(Map<String, Object> group) {
-		return SYSTEM_ADMIN.equals(group.get("group_type"));
+	private boolean groupTypeIsSystemAdmin(Row group) {
+		return SYSTEM_ADMIN.equals(group.getValueByColumn("group_type"));
 	}
 
-	private boolean groupTypeIsDomainAdminRole(Map<String, Object> group) {
-		return DOMAIN_ADMIN.equals(group.get("group_type"));
+	private boolean groupTypeIsDomainAdminRole(Row group) {
+		return DOMAIN_ADMIN.equals(group.getValueByColumn("group_type"));
 	}
 
 	private List<DataGroup> createSystemAdminRole() {
@@ -174,18 +180,18 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		return Collections.singletonList(systemAdmin);
 	}
 
-	private List<DataGroup> createDomainAdminRole(List<Map<String, Object>> groupRowsFromDb) {
+	private List<DataGroup> createDomainAdminRole(List<Row> groupRowsFromDb) {
 		List<String> domains = readDomainsForDomainAdminRoles(groupRowsFromDb);
 		DataGroup domainAdmin = dataGroupRoleReferenceCreator
 				.createRoleReferenceForDomainAdminUsingDomains(domains);
 		return Collections.singletonList(domainAdmin);
 	}
 
-	private List<String> readDomainsForDomainAdminRoles(List<Map<String, Object>> groupRowsFromDb) {
+	private List<String> readDomainsForDomainAdminRoles(List<Row> groupRowsFromDb) {
 		List<String> domains = new ArrayList<>();
-		for (Map<String, Object> group : groupRowsFromDb) {
+		for (Row group : groupRowsFromDb) {
 			if (groupTypeIsDomainAdminRole(group)) {
-				domains.add((String) group.get(DOMAIN));
+				domains.add((String) group.getValueByColumn(DOMAIN));
 			}
 		}
 		return domains;
@@ -214,9 +220,9 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		}
 	}
 
-	private Map<String, Object> calculateUserForGroupsConditions(Map<String, Object> readRow) {
+	private Map<String, Object> calculateUserForGroupsConditions(Row readRow) {
 		Map<String, Object> groupConditions = new HashMap<>();
-		groupConditions.put(DB_ID, readRow.get(DB_ID));
+		groupConditions.put(DB_ID, readRow.getValueByColumn(DB_ID));
 		return groupConditions;
 	}
 
@@ -236,14 +242,16 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	@Override
 	public DataGroup read(String type, String id) {
-		Map<String, Object> userRowFromDb = createConditionsAndTryToRead(id);
+		Row userRowFromDb = createConditionsAndTryToRead(id);
 		return tryToConvertUserAndAddRoles(id, userRowFromDb);
 	}
 
-	private Map<String, Object> createConditionsAndTryToRead(String id) {
+	private Row createConditionsAndTryToRead(String id) {
 		throwDbExceptionIfIdNotAnIntegerValue(id);
-		Map<String, Object> conditions = createConditionsForId(id);
-		return tryToReadUser(id, conditions);
+		// Map<String, Object> conditions = createConditionsForId(id);
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(PUBLIC_USER);
+		tableQuery.addCondition(DB_ID, Integer.valueOf(id));
+		return tryToReadUser(id, tableQuery);
 	}
 
 	private void throwDbExceptionIfIdNotAnIntegerValue(String id) {
@@ -254,20 +262,23 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		}
 	}
 
-	private DataGroup tryToConvertUserAndAddRoles(String id, Map<String, Object> userRowFromDb) {
+	private DataGroup tryToConvertUserAndAddRoles(String id, Row userRowFromDb) {
 		try {
-			DataGroup user = userConverter.fromMap(userRowFromDb);
+			DataGroup user = userConverter.fromRow(userRowFromDb);
 			readAndPossiblyAddRoles(userRowFromDb, user);
 			return user;
-		} catch (SqlStorageException sqle) {
+			// } catch (SqlStorageException sqle) {
+		} catch (SqlDatabaseException sqle) {
 			throw new RecordNotFoundException("Error when reading roles for user: " + id, sqle);
 		}
 	}
 
-	private Map<String, Object> tryToReadUser(String id, Map<String, Object> conditions) {
+	private Row tryToReadUser(String id, TableQuery tableQuery) {
 		try {
-			return recordReader.readOneRowFromDbUsingTableAndConditions(PUBLIC_USER, conditions);
-		} catch (SqlStorageException s) {
+			return tableFacade.readOneRowForQuery(tableQuery);
+			// return recordReader.readOneRowFromDbUsingTableAndConditions(PUBLIC_USER, conditions);
+		} catch (SqlDatabaseException s) {
+			// } catch (SqlStorageException s) {
 			throw new RecordNotFoundException("Record not found for type: user and id: " + id, s);
 		}
 	}
@@ -303,15 +314,17 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
-		List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable(PUBLIC_USER);
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(PUBLIC_USER);
+		List<Row> rowsFromDb = tableFacade.readRowsForQuery(tableQuery);
+		// List<Map<String, Object>> rowsFromDb = recordReader.readAllFromTable(PUBLIC_USER);
 		List<DataGroup> dataGroups = convertUserGroupsAndAddToList(rowsFromDb);
 		return createStorageResult(dataGroups);
 	}
 
-	private List<DataGroup> convertUserGroupsAndAddToList(List<Map<String, Object>> rowsFromDb) {
+	private List<DataGroup> convertUserGroupsAndAddToList(List<Row> rowsFromDb) {
 		List<DataGroup> dataGroups = new ArrayList<>(rowsFromDb.size());
-		for (Map<String, Object> row : rowsFromDb) {
-			DataGroup convertedUser = userConverter.fromMap(row);
+		for (Row row : rowsFromDb) {
+			DataGroup convertedUser = userConverter.fromRow(row);
 			dataGroups.add(convertedUser);
 		}
 		return dataGroups;
@@ -365,10 +378,10 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		return guestUserStorage;
 	}
 
-	public RecordReader getRecordReader() {
-		// needed for test
-		return recordReader;
-	}
+	// public RecordReader getRecordReader() {
+	// // needed for test
+	// return recordReader;
+	// }
 
 	public DivaDbToCoraConverter getDbToCoraUserConverter() {
 		// needed for test
@@ -391,5 +404,13 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 			List<String> implementingTypes, DataGroup filter) {
 		throw NotImplementedException
 				.withMessage("getTotalNumberOfRecordsForAbstractType is not implemented for user");
+	}
+
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
+	}
+
+	public TableFacade getTableFacade() {
+		return tableFacade;
 	}
 }
