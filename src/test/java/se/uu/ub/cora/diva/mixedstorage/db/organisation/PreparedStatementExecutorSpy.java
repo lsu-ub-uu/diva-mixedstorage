@@ -27,6 +27,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.PreparedStatementSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.StatementExecutor;
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
 public class PreparedStatementExecutorSpy implements StatementExecutor {
 
@@ -42,12 +43,13 @@ public class PreparedStatementExecutorSpy implements StatementExecutor {
 	@Override
 	public void executeDbStatmentUsingDatabaseFacade(List<DbStatement> dbStatements,
 			DatabaseFacade databaseFacade) {
-		// if (throwExceptionOnGenerateStatement) {
-		// throw SqlStorageException.withMessageAndException(
-		// "Error executing statement: error from spy", new Exception());
-		// } else {
 		this.dbStatements = dbStatements;
 		this.databaseFacade = databaseFacade;
+		if (throwExceptionOnGenerateStatement) {
+			throw SqlDatabaseException.withMessageAndException(
+					"Error executing statement: error from spy", new Exception());
+		}
+		// else {
 		// connections.add(connection);
 		createWasCalled = true;
 		preparedStatements = new ArrayList<>();

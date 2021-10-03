@@ -29,9 +29,11 @@ public class RelatedTableSpy implements RelatedTable {
 
 	public List<Row> dbRows;
 	private List<DbStatement> dbStatements;
+	public DataGroup dataGroup;
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(DataGroup organisation, List<Row> dbRows) {
+	public List<DbStatement> handleDbForDataGroup(DataGroup dataGroup, List<Row> dbRows) {
+		this.dataGroup = dataGroup;
 		this.dbRows = dbRows;
 		dbStatements = new ArrayList<>();
 		DbStatement dbStatement = new DbStatement("operationFromSpy", "spyTableName",

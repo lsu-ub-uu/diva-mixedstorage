@@ -18,10 +18,7 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +31,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.StatementExecutor;
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
@@ -43,9 +41,6 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	private static final String ORGANISATION_ID = "organisation_id";
 	private DataToDbTranslater organisationToDbTranslater;
 	private RelatedTableFactory relatedTableFactory;
-	// private RecordReaderFactory recordReaderFactory;
-	// private RecordReader recordReader;
-	// private SqlConnectionProvider connectionProvider;
 	private StatementExecutor statementExecutor;
 	private Map<String, Object> organisationConditions;
 	private Map<String, Object> organisationValues;
@@ -69,58 +64,41 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		organisationToDbTranslater.translate(dataGroup);
 		organisationConditions = organisationToDbTranslater.getConditions();
 		organisationValues = organisationToDbTranslater.getValues();
-		// recordReader = recordReaderFactory.factor();
 		updateOrganisation(dataGroup);
 
 	}
 
 	private void updateOrganisation(DataGroup dataGroup) {
 		List<Row> existingDbOrganisation = readExistingOrganisationRow();
-		Map<String, Object> readConditionsRelatedTables = generateReadConditionsForRelatedTables();
-		List<DbStatement> dbStatements = generateDbStatements(dataGroup,
-				readConditionsRelatedTables, existingDbOrganisation);
+		List<DbStatement> dbStatements = generateDbStatements(dataGroup, existingDbOrganisation);
 		tryUpdateDatabaseWithGivenDbStatements(dbStatements);
 	}
 
 	private List<Row> readExistingOrganisationRow() {
-		// Map<String, Object> readConditionsForOrganisation = generateReadConditions();
 		TableQuery tableQuery = createTableQueryForReadOrganisation();
-
 		return tableFacade.readRowsForQuery(tableQuery);
-		// return recordReader.readFromTableUsingConditions("organisationview",
-		// readConditionsForOrganisation);
 	}
 
 	private TableQuery createTableQueryForReadOrganisation() {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("organisationview");
-		int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
-		tableQuery.addCondition(ORGANISATION_ID, organisationsId);
+		addConditionForRead(tableQuery);
 		return tableQuery;
 	}
-	//
-	// private Map<String, Object> generateReadConditions() {
-	// Map<String, Object> readConditions = new HashMap<>();
-	// int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
-	// readConditions.put("id", organisationsId);
-	// return readConditions;
-	// }
 
-	private Map<String, Object> generateReadConditionsForRelatedTables() {
-		Map<String, Object> readConditions = new HashMap<>();
+	private void addConditionForRead(TableQuery tableQuery) {
 		int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
-		readConditions.put(ORGANISATION_ID, organisationsId);
-		return readConditions;
+		tableQuery.addCondition(ORGANISATION_ID, organisationsId);
 	}
 
 	private List<DbStatement> generateDbStatements(DataGroup dataGroup,
-			Map<String, Object> readConditions, List<Row> organisationRowsFromDb) {
+			List<Row> organisationRowsFromDb) {
 		List<DbStatement> dbStatements = new ArrayList<>();
 		dbStatements.add(createDbStatementForOrganisationUpdate());
 		dbStatements
 				.addAll(generateDbStatementsForAlternativeName(dataGroup, organisationRowsFromDb));
 		dbStatements.addAll(generateDbStatementsForAddress(dataGroup, organisationRowsFromDb));
-		dbStatements.addAll(generateDbStatementsForParents(dataGroup, readConditions));
-		dbStatements.addAll(generateDbStatementsForPredecessors(dataGroup, readConditions));
+		dbStatements.addAll(generateDbStatementsForParents(dataGroup));
+		dbStatements.addAll(generateDbStatementsForPredecessors(dataGroup));
 		return dbStatements;
 	}
 
@@ -141,53 +119,48 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		return addressTable.handleDbForDataGroup(dataGroup, organisationRowsFromDb);
 	}
 
-	private List<DbStatement> generateDbStatementsForParents(DataGroup dataGroup,
-			Map<String, Object> readConditions) {
-		List<Row> dbParents = null;
-		// recordReader
-		// .readFromTableUsingConditions("organisation_parent", readConditions);
+	private List<DbStatement> generateDbStatementsForParents(DataGroup dataGroup) {
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("organisation_parent");
+		addConditionForRead(tableQuery);
+		List<Row> dbParents = tableFacade.readRowsForQuery(tableQuery);
 		RelatedTable parent = relatedTableFactory.factor("organisationParent");
 		return parent.handleDbForDataGroup(dataGroup, dbParents);
 	}
 
-	private List<DbStatement> generateDbStatementsForPredecessors(DataGroup dataGroup,
-			Map<String, Object> readConditions) {
-		List<Row> dbPredecessors = null;
-		// recordReader
-		// .readFromTableUsingConditions("divaorganisationpredecessor", readConditions);
+	private List<DbStatement> generateDbStatementsForPredecessors(DataGroup dataGroup) {
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("divaorganisationpredecessor");
+		addConditionForRead(tableQuery);
+		List<Row> dbPredecessors = tableFacade.readRowsForQuery(tableQuery);
 		RelatedTable predecessor = relatedTableFactory.factor("organisationPredecessor");
 		return predecessor.handleDbForDataGroup(dataGroup, dbPredecessors);
 	}
 
 	private void tryUpdateDatabaseWithGivenDbStatements(List<DbStatement> dbStatements) {
-		// try (Connection connection = connectionProvider.getConnection();) {
-		// tryUpdateDatabaseWithGivenDbStatementsUsingConnection(dbStatements, connection);
-		// } catch (Exception e) {
-		// throw SqlStorageException.withMessageAndException(
-		// "Error executing prepared statement: " + e.getMessage(), e);
-		// }
-	}
-
-	private void tryUpdateDatabaseWithGivenDbStatementsUsingConnection(
-			List<DbStatement> dbStatements, Connection connection) throws SQLException {
 		try {
-			updateDatabaseWithGivenDbStatementsUsingConnection(dbStatements, connection);
-		} catch (Exception innerException) {
-			connection.rollback();
-			throw innerException;
-		} finally {
-			connection.setAutoCommit(true);
+			tryUpdateDatabaseWithGivenDbStatementsUsingConnection(dbStatements);
+		} catch (Exception e) {
+			throw SqlDatabaseException.withMessageAndException(
+					"Error executing prepared statement: " + e.getMessage(), e);
 		}
 	}
 
-	private void updateDatabaseWithGivenDbStatementsUsingConnection(List<DbStatement> dbStatements,
-			Connection connection) throws SQLException {
-		// tableFacade.startTransaction();
-		// databaseFacade.
+	private void tryUpdateDatabaseWithGivenDbStatementsUsingConnection(
+			List<DbStatement> dbStatements) {
+		try {
+			updateDatabaseWithGivenDbStatementsUsingConnection(dbStatements);
+		} catch (Exception innerException) {
+			databaseFacade.rollback();
+			throw innerException;
+		} finally {
+			databaseFacade.endTransaction();
+		}
+	}
 
-		// connection.setACutoCommit(false);
-		// statementExecutor.executeDbStatmentUsingDatabaseFacade(dbStatements, connection);
-		// connection.commit();
+	private void updateDatabaseWithGivenDbStatementsUsingConnection(
+			List<DbStatement> dbStatements) {
+		databaseFacade.startTransaction();
+		statementExecutor.executeDbStatmentUsingDatabaseFacade(dbStatements, databaseFacade);
+		databaseFacade.endTransaction();
 	}
 
 	public DataToDbTranslater getDataToDbTranslater() {
@@ -199,16 +172,6 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		// needed for test
 		return relatedTableFactory;
 	}
-
-	// public RecordReaderFactory getRecordReaderFactory() {
-	// // needed for test
-	// return recordReaderFactory;
-	// }
-	//
-	// public SqlConnectionProvider getSqlConnectionProvider() {
-	// // needed for test
-	// return connectionProvider;
-	// }
 
 	public StatementExecutor getPreparedStatementCreator() {
 		// needed for test
@@ -226,10 +189,5 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	public DatabaseFacade getDatabaseFacade() {
 		return databaseFacade;
 	}
-
-	// public DataReader getDataReader() {
-	// // needed for test
-	// return dataReader;
-	// }
 
 }

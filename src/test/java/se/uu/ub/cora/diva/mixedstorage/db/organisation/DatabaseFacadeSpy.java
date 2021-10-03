@@ -23,11 +23,16 @@ import java.util.List;
 
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
 public class DatabaseFacadeSpy implements DatabaseFacade {
 
 	public List<String> sqls = new ArrayList<>();
 	public List<List<Object>> valuesList = new ArrayList<>();
+	public boolean startTransactionWasCalled = false;
+	public boolean endTransactionWasCalled = false;
+	public boolean throwErrorInDatabaseFacade = false;
+	public boolean rollbackWasCalled = false;
 
 	@Override
 	public List<Row> readUsingSqlAndValues(String sql, List<Object> values) {
@@ -45,24 +50,26 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 	public int executeSqlWithValues(String sql, List<Object> values) {
 		valuesList.add(values);
 		sqls.add(sql);
+
+		if (throwErrorInDatabaseFacade) {
+			throw SqlDatabaseException.withMessage("Error from databaseFacadeSpy");
+		}
 		return 0;
 	}
 
 	@Override
 	public void startTransaction() {
-		// TODO Auto-generated method stub
-
+		startTransactionWasCalled = true;
 	}
 
 	@Override
 	public void endTransaction() {
-		// TODO Auto-generated method stub
-
+		endTransactionWasCalled = true;
 	}
 
 	@Override
 	public void rollback() {
-		// TODO Auto-generated method stub
+		rollbackWasCalled = true;
 
 	}
 

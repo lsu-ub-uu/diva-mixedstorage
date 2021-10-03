@@ -39,10 +39,12 @@ public class SqlDatabaseFactorySpy implements SqlDatabaseFactory {
 	public DatabaseFacadeSpy factoredDatabaseFacade;
 	public List<Row> rowsToReturn = new ArrayList<>();
 	public List<String> tablesToThrowExceptionFor = new ArrayList<>();
+	public boolean throwErrorInDatabaseFacade = false;
 
 	@Override
 	public DatabaseFacade factorDatabaseFacade() {
 		factoredDatabaseFacade = new DatabaseFacadeSpy();
+		factoredDatabaseFacade.throwErrorInDatabaseFacade = throwErrorInDatabaseFacade;
 		return factoredDatabaseFacade;
 	}
 

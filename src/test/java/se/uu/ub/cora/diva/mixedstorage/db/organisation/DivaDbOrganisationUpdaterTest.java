@@ -21,6 +21,7 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Map;
 
@@ -32,8 +33,8 @@ import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataReaderSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslaterSpy;
-import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableSpy;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
 public class DivaDbOrganisationUpdaterTest {
 
@@ -76,13 +77,12 @@ public class DivaDbOrganisationUpdaterTest {
 		organisationUpdater.update(dataGroup);
 		assertEquals(dataTranslater.dataGroup, dataGroup);
 
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), "organisationview");
 		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
 		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQueries.get(0);
 		assertNotNull(tableQuery);
-		assertSame(tableFacade.tableQueries.get(0), sqlDatabaseFactory.factoredTableQuery);
-
-		assertEquals(sqlDatabaseFactory.tableNames.get(0), "organisationview");
+		assertSame(tableFacade.tableQueries.get(0), sqlDatabaseFactory.factoredTableQueries.get(0));
 
 		Map<String, Object> conditions = dataTranslater.getConditions();
 		assertEquals(tableQuery.conditions.get("organisation_id"),
@@ -94,123 +94,121 @@ public class DivaDbOrganisationUpdaterTest {
 	public void testAlternativeName() {
 		organisationUpdater.update(dataGroup);
 
-		RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
-		assertEquals(factoredReader.usedTableNames.get(0), "organisationview");
-		assertEquals(factoredReader.usedConditionsList.get(0).get("id"), 4567);
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), "organisationview");
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+
+		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQueries.get(0);
+		assertSame(tableFacade.tableQueries.get(0), sqlDatabaseFactory.factoredTableQueries.get(0));
+
+		Map<String, Object> conditions = dataTranslater.getConditions();
+		assertEquals(tableQuery.conditions.get("organisation_id"),
+				conditions.get("organisation_id"));
 
 		assertEquals(relatedTableFactory.relatedTableNames.get(0), "organisationAlternativeName");
 		RelatedTableSpy firstRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
 				.get(0);
 
 		assertSame(firstRelatedTable.dataGroup, dataGroup);
-		assertEquals(firstRelatedTable.dbRows, factoredReader.returnedListCollection.get(0));
+		assertEquals(firstRelatedTable.dbRows, tableFacade.rowsToReturn);
 
 	}
 
-	// @Test
-	// public void testAddress() {
-	// organisationUpdater.update(dataGroup);
-	//
-	// RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
-	// assertEquals(relatedTableFactory.relatedTableNames.get(1), "organisationAddress");
-	// RelatedTableSpy addressTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
-	// .get(1);
-	// assertSame(addressTable.dataGroup, dataGroup);
-	// assertEquals(addressTable.dbRows, factoredReader.returnedListCollection.get(0));
-	// }
+	@Test
+	public void testAddress() {
+		organisationUpdater.update(dataGroup);
 
-	// @Test
-	// public void testParent() {
-	// organisationUpdater.update(dataGroup);
-	//
-	// RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
-	// assertEquals(factoredReader.usedTableNames.get(1), "organisation_parent");
-	// assertEquals(factoredReader.usedConditionsList.get(1).get("organisation_id"), 4567);
-	//
-	// assertEquals(relatedTableFactory.relatedTableNames.get(2), "organisationParent");
-	// RelatedTableSpy secondRelatedTable = (RelatedTableSpy)
-	// relatedTableFactory.factoredRelatedTables
-	// .get(2);
-	// assertSame(secondRelatedTable.dataGroup, dataGroup);
-	// assertEquals(secondRelatedTable.dbRows, factoredReader.returnedListCollection.get(1));
-	//
-	// }
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
-	// @Test
-	// public void testPredecessor() {
-	// organisationUpdater.update(dataGroup);
-	// RecordReaderSpy factoredReader = recordReaderFactory.factoredReaders.get(0);
-	// assertEquals(factoredReader.usedTableNames.get(2), "divaorganisationpredecessor");
-	// assertEquals(factoredReader.usedConditionsList.get(2).get("organisation_id"), 4567);
-	//
-	// assertEquals(relatedTableFactory.relatedTableNames.get(3), "organisationPredecessor");
-	// RelatedTableSpy thirdRelatedTable = (RelatedTableSpy)
-	// relatedTableFactory.factoredRelatedTables
-	// .get(3);
-	// assertSame(thirdRelatedTable.dataGroup, dataGroup);
-	// assertEquals(thirdRelatedTable.dbRows, factoredReader.returnedListCollection.get(2));
-	//
-	// }
+		assertSame(tableFacade.tableQueries.get(0), sqlDatabaseFactory.factoredTableQueries.get(0));
 
-	// @Test
-	// public void testConnectionAutoCommitIsFirstSetToFalseAndThenTrueOnException() {
-	// preparedStatementCreator.throwExceptionOnGenerateStatement = true;
-	// try {
-	// organisationUpdater.update(dataGroup);
-	// } catch (Exception sqlException) {
-	// }
-	// ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
-	// assertFalse(factoredConnection.autoCommitChanges.get(0));
-	// assertTrue(factoredConnection.autoCommitChanges.get(1));
-	// }
+		assertEquals(relatedTableFactory.relatedTableNames.get(1), "organisationAddress");
+		RelatedTableSpy addressTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
+				.get(1);
+		assertSame(addressTable.dataGroup, dataGroup);
+		assertEquals(addressTable.dbRows, tableFacade.rowsToReturn);
+	}
 
-	// @Test
-	// public void testSQLConnectionConfiguration() {
-	// organisationUpdater.update(dataGroup);
-	// assertTrue(connectionProvider.getConnectionHasBeenCalled);
-	// ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
-	// assertFalse(factoredConnection.autoCommitChanges.get(0));
-	// assertTrue(factoredConnection.autoCommitChanges.get(1));
-	// assertTrue(factoredConnection.commitWasCalled);
-	// assertTrue(factoredConnection.closeWasCalled);
-	// }
+	@Test
+	public void testParent() {
+		organisationUpdater.update(dataGroup);
 
-	// @Test
-	// public void testConnectionClosedOnSQLException() throws Exception {
-	// preparedStatementCreator.throwExceptionOnGenerateStatement = true;
-	// try {
-	// organisationUpdater.update(dataGroup);
-	// } catch (Exception sqlException) {
-	// }
-	// ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
-	// assertTrue(factoredConnection.closeWasCalled);
-	// }
+		assertEquals(sqlDatabaseFactory.tableNames.get(1), "organisation_parent");
 
-	// @Test
-	// public void testConnectionRollbackOnSQLException() throws Exception {
-	// preparedStatementCreator.throwExceptionOnGenerateStatement = true;
-	// try {
-	// organisationUpdater.update(dataGroup);
-	// } catch (Exception sqlException) {
-	// }
-	// ConnectionSpy factoredConnection = connectionProvider.factoredConnection;
-	// assertTrue(factoredConnection.rollbackWasCalled);
-	// }
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
-	// @Test
-	// public void testPreparedStatements() {
-	// organisationUpdater.update(dataGroup);
-	// assertTrue(preparedStatementCreator.createWasCalled);
-	// assertSame(preparedStatementCreator.connection, connectionProvider.factoredConnection);
-	// int orgStatementAndStatmentsFromSpy = 5;
-	// assertEquals(preparedStatementCreator.dbStatements.size(), orgStatementAndStatmentsFromSpy);
-	//
-	// }
+		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQueries.get(1);
+		assertSame(tableQuery, sqlDatabaseFactory.factoredTableQueries.get(1));
+		assertEquals(tableQuery.conditions.get("organisation_id"), 4567);
 
-	// @Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
-	// + "Error executing prepared statement: Error executing statement: error from spy")
-	// public void testPreparedStatementThrowsException() {
-	// preparedStatementCreator.throwExceptionOnGenerateStatement = true;
-	// organisationUpdater.update(dataGroup);
-	// }
+		RelatedTableSpy secondRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
+				.get(2);
+		assertSame(secondRelatedTable.dataGroup, dataGroup);
+		assertEquals(secondRelatedTable.dbRows, tableFacade.rowsToReturn);
+
+	}
+
+	@Test
+	public void testPredecessor() {
+		organisationUpdater.update(dataGroup);
+		assertEquals(sqlDatabaseFactory.tableNames.get(2), "divaorganisationpredecessor");
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+
+		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQueries.get(2);
+		assertSame(tableQuery, sqlDatabaseFactory.factoredTableQueries.get(2));
+		assertEquals(tableQuery.conditions.get("organisation_id"), 4567);
+
+		assertEquals(relatedTableFactory.relatedTableNames.get(3), "organisationPredecessor");
+		RelatedTableSpy thirdRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
+				.get(3);
+		assertSame(thirdRelatedTable.dataGroup, dataGroup);
+		assertEquals(thirdRelatedTable.dbRows, tableFacade.rowsToReturn);
+	}
+
+	@Test
+	public void testSQLConnectionConfiguration() {
+		organisationUpdater.update(dataGroup);
+		DatabaseFacadeSpy databaseFacade = sqlDatabaseFactory.factoredDatabaseFacade;
+		assertTrue(databaseFacade.startTransactionWasCalled);
+		assertTrue(databaseFacade.endTransactionWasCalled);
+	}
+
+	@Test
+	public void testConnectionClosedOnSQLException() throws Exception {
+		preparedStatementCreator.throwExceptionOnGenerateStatement = true;
+		try {
+			organisationUpdater.update(dataGroup);
+		} catch (Exception sqlException) {
+		}
+		DatabaseFacadeSpy databaseFacade = sqlDatabaseFactory.factoredDatabaseFacade;
+		assertTrue(databaseFacade.endTransactionWasCalled);
+	}
+
+	@Test
+	public void testRollbackOnSQLException() throws Exception {
+		preparedStatementCreator.throwExceptionOnGenerateStatement = true;
+		try {
+			organisationUpdater.update(dataGroup);
+		} catch (Exception sqlException) {
+		}
+		DatabaseFacadeSpy databaseFacade = sqlDatabaseFactory.factoredDatabaseFacade;
+		assertTrue(databaseFacade.rollbackWasCalled);
+	}
+
+	@Test
+	public void testPreparedStatements() {
+		organisationUpdater.update(dataGroup);
+		assertTrue(preparedStatementCreator.createWasCalled);
+		DatabaseFacadeSpy databaseFacade = sqlDatabaseFactory.factoredDatabaseFacade;
+		assertSame(preparedStatementCreator.databaseFacade, databaseFacade);
+		int orgStatementAndStatmentsFromSpy = 5;
+		assertEquals(preparedStatementCreator.dbStatements.size(), orgStatementAndStatmentsFromSpy);
+
+	}
+
+	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
+			+ "Error executing prepared statement: Error executing statement: error from spy")
+	public void testPreparedStatementThrowsException() {
+		preparedStatementCreator.throwExceptionOnGenerateStatement = true;
+		organisationUpdater.update(dataGroup);
+	}
 }
