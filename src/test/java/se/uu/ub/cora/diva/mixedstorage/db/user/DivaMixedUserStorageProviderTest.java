@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -29,12 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import javax.naming.InitialContext;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupFactorySpy;
@@ -43,8 +40,7 @@ import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.gatekeeper.user.GuestUserStorageProvider;
 import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.logger.LoggerProvider;
-import se.uu.ub.cora.sqldatabase.DataReaderImp;
-import se.uu.ub.cora.sqldatabase.RecordReaderImp;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
 
 public class DivaMixedUserStorageProviderTest {
 	private String basePath = "/tmp/divaMixedUserRecordStorageOnDiskTemp/";
@@ -111,14 +107,10 @@ public class DivaMixedUserStorageProviderTest {
 		assertTrue(userStorage
 				.getDataGroupRoleReferenceCreator() instanceof DataGroupRoleReferenceCreatorImp);
 
-		RecordReaderImp recordReader = (RecordReaderImp) userStorage.getRecordReader();
-		DataReaderImp dataReader = (DataReaderImp) recordReader.getDataReader();
-
-		ContextConnectionProviderImp sqlConnectionProvider = (ContextConnectionProviderImp) dataReader
-				.getSqlConnectionProvider();
-		assertEquals(sqlConnectionProvider.getName(), initInfo.get("databaseLookupName"));
-		assertTrue(sqlConnectionProvider.getContext() instanceof InitialContext);
-
+		SqlDatabaseFactoryImp sqlDatabaseFactory = (SqlDatabaseFactoryImp) userStorage
+				.getSqlDatabaseFactory();
+		assertTrue(sqlDatabaseFactory instanceof SqlDatabaseFactoryImp);
+		assertEquals(sqlDatabaseFactory.getLookupName(), initInfo.get("databaseLookupName"));
 	}
 
 	@Test
@@ -132,7 +124,7 @@ public class DivaMixedUserStorageProviderTest {
 	}
 
 	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ""
-			+ "Error starting ContextConnectionProviderImp InitInfo must contain databaseLookupName")
+			+ "InitInfo must contain databaseLookupName")
 	public void testErrorWhenDbLookupNameIsMissing() {
 		initInfo.remove("databaseLookupName");
 		divaUserStorageProvider.startUsingInitInfo(initInfo);

@@ -41,13 +41,11 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.MultipleRowDbToDataReaderSpy;
-import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderFactorySpy;
 
 public class DivaDbOrganisationReaderTest {
 
 	private static final String TYPE = "organisation";
 	private DivaDbToCoraConverterFactorySpy converterFactory;
-	private RecordReaderFactorySpy recordReaderFactory;
 	private DivaDbOrganisationReader divaDbOrganisationReader;
 	private DataGroupFactory dataGroupFactory;
 	private DivaDbFactorySpy divaDbFactorySpy;
@@ -59,7 +57,6 @@ public class DivaDbOrganisationReaderTest {
 		dataGroupFactory = new DataGroupFactorySpy();
 		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 		converterFactory = new DivaDbToCoraConverterFactorySpy();
-		// recordReaderFactory = new RecordReaderFactorySpy();
 		divaDbFactorySpy = new DivaDbFactorySpy();
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 

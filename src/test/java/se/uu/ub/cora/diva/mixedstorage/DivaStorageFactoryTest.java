@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -25,7 +25,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraUserConverter;
-import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DataGroupRoleReferenceCreatorImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorage;
@@ -39,7 +38,6 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 public class DivaStorageFactoryTest {
 
 	private UserStorage guestUserStorage;
-	private RecordReaderFactorySpy recordReaderFactory;
 	private DivaStorageFactoryImp factory;
 	private SqlDatabaseFactory sqlDatabaseFactory;
 
@@ -50,7 +48,7 @@ public class DivaStorageFactoryTest {
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 		LoggerFactory loggerFactory = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactory);
-		factory = DivaStorageFactoryImp.usingGuestUserStorageAndRecordReader(guestUserStorage,
+		factory = DivaStorageFactoryImp.usingGuestUserStorageAndSqlDatabaseFactory(guestUserStorage,
 				sqlDatabaseFactory);
 	}
 

@@ -26,7 +26,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaMultipleRowDbToDataReaderImp;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.TableFacadeSpy;
@@ -34,7 +33,6 @@ import se.uu.ub.cora.diva.mixedstorage.db.organisation.TableQuerySpy;
 
 public class MultipleRowDbToDataUserGroupReaderTest {
 
-	private RecordReaderFactorySpy readerFactory;
 	private DivaDbToCoraConverterFactorySpy converterFactory;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
@@ -64,7 +62,7 @@ public class MultipleRowDbToDataUserGroupReaderTest {
 		TableFacadeSpy tableFacade = (TableFacadeSpy) userGroupReader.getTableFacade();
 		assertEquals(sqlDatabaseFactory.tableName, "groupsforuser");
 		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQuery;
-		assertSame(tableFacade.tableQuery, tableQuery);
+		assertSame(tableFacade.tableQueries.get(0), tableQuery);
 
 		assertEquals(tableQuery.conditions.get("db_id"), 67);
 	}

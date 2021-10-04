@@ -32,7 +32,7 @@ public class DivaStorageFactoryImp implements DivaStorageFactory {
 	private UserStorage guestUserStorage;
 	private SqlDatabaseFactory sqlDatabaseFactory;
 
-	public static DivaStorageFactoryImp usingGuestUserStorageAndRecordReader(
+	public static DivaStorageFactoryImp usingGuestUserStorageAndSqlDatabaseFactory(
 			UserStorage guestUserStorage, SqlDatabaseFactory sqlDatabaseFactory) {
 		return new DivaStorageFactoryImp(guestUserStorage, sqlDatabaseFactory);
 	}

@@ -289,11 +289,9 @@ public class OrganisationDataToDbTranslaterTest {
 
 	@Test
 	public void testOrganisationTypeWhenSubOrganisation() {
-		RowSpy rowToReturnForOrgType = new RowSpy();
-		sqlDatabaseFactory.rowToReturn = rowToReturnForOrgType;
+		sqlDatabaseFactory.createAndAddRowToReturn("organisation_type_id", 52);
 		translater = new OrganisationDataToDbTranslater(sqlDatabaseFactory);
 
-		rowToReturnForOrgType.addColumnWithValue("organisation_type_id", 52);
 		DataGroup dataGroup = createDataGroupWithIdTypeAndOrgType("45", "subOrganisation", "unit");
 
 		translater.translate(dataGroup);
@@ -306,7 +304,7 @@ public class OrganisationDataToDbTranslaterTest {
 		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQuery;
 		assertEquals(tableQuery.conditions.get("organisation_type_code"), "unit");
 		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
-		assertSame(tableFacade.tableQuery, tableQuery);
+		assertSame(tableFacade.tableQueries.get(0), tableQuery);
 
 		assertEquals(translater.getValues().get("organisation_type_id"), 52);
 	}
