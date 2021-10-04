@@ -37,6 +37,7 @@ public class TableFacadeSpy implements TableFacade {
 
 	public long nextVal;
 	public String sequenceName;
+	public long numOfReadRows;
 
 	@Override
 	public void insertRowUsingQuery(TableQuery tableQuery) {
@@ -69,8 +70,8 @@ public class TableFacadeSpy implements TableFacade {
 	@Override
 	public Row readOneRowForQuery(TableQuery tableQuery) {
 		readOneRowForQueryWasCalled = true;
-		possiblyThrowException(tableQuery);
 		tableQueries.add(tableQuery);
+		possiblyThrowException(tableQuery);
 		if (rowsToReturn.isEmpty()) {
 			rowsToReturn.add(new RowSpy());
 		}
@@ -80,8 +81,10 @@ public class TableFacadeSpy implements TableFacade {
 
 	@Override
 	public long readNumberOfRows(TableQuery tableQuery) {
-		// TODO Auto-generated method stub
-		return 0;
+		tableQueries.add(tableQuery);
+
+		numOfReadRows = 3;
+		return numOfReadRows;
 	}
 
 	@Override

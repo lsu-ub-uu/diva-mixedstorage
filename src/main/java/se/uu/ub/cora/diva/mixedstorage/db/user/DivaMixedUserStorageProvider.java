@@ -66,7 +66,7 @@ public class DivaMixedUserStorageProvider implements UserStorageProvider {
 		DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator = new DataGroupRoleReferenceCreatorImp();
 
 		userStorage = DivaMixedUserStorage
-				.usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(
+				.usingGuestUserStorageDatabaseFactoryAndUserConverterAndRoleReferenceCreator(
 						guestUserStorage, recordReader, converter, dataGroupRoleReferenceCreator);
 	}
 

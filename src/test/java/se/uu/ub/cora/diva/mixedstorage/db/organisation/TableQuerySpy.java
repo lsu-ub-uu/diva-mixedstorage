@@ -18,6 +18,7 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +27,12 @@ import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
 public class TableQuerySpy implements TableQuery {
 
-	public Map<String, Object> conditions = new HashMap();
+	public Map<String, Object> conditions = new HashMap<>();
 	public boolean throwException = false;
 	public String tableName;
+	public List<String> ascOrdersBy = new ArrayList<>();
+	public List<Long> fromNumbers = new ArrayList<>();
+	public List<Long> toNumbers = new ArrayList<>();
 
 	public TableQuerySpy(String tableName) {
 		this.tableName = tableName;
@@ -47,18 +51,17 @@ public class TableQuerySpy implements TableQuery {
 
 	@Override
 	public void setFromNo(Long fromNo) {
-		// TODO Auto-generated method stub
-
+		fromNumbers.add(fromNo);
 	}
 
 	@Override
 	public void setToNo(Long toNo) {
-		// TODO Auto-generated method stub
-
+		toNumbers.add(toNo);
 	}
 
 	@Override
 	public void addOrderByAsc(String column) {
+		ascOrdersBy.add(column);
 		// TODO Auto-generated method stub
 
 	}

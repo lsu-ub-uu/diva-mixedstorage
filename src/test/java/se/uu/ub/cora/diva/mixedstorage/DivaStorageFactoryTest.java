@@ -18,7 +18,6 @@
  */
 package se.uu.ub.cora.diva.mixedstorage;
 
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
@@ -27,6 +26,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraUserConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderFactorySpy;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DataGroupRoleReferenceCreatorImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorage;
 import se.uu.ub.cora.diva.mixedstorage.db.user.UserStorageSpy;
@@ -34,21 +34,24 @@ import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.logger.LoggerFactory;
 import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public class DivaStorageFactoryTest {
 
 	private UserStorage guestUserStorage;
 	private RecordReaderFactorySpy recordReaderFactory;
 	private DivaStorageFactoryImp factory;
+	private SqlDatabaseFactory sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
 		guestUserStorage = new UserStorageSpy();
-		recordReaderFactory = new RecordReaderFactorySpy();
+		// recordReaderFactory = new RecordReaderFactorySpy();
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 		LoggerFactory loggerFactory = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactory);
 		factory = DivaStorageFactoryImp.usingGuestUserStorageAndRecordReader(guestUserStorage,
-				recordReaderFactory);
+				sqlDatabaseFactory);
 	}
 
 	@Test
@@ -61,8 +64,7 @@ public class DivaStorageFactoryTest {
 
 		assertSame(factoredStorage.getUserStorageForGuest(), guestUserStorage);
 
-		assertNotNull(factoredStorage.getRecordReader());
-		assertSame(factoredStorage.getRecordReader(), recordReaderFactory.factored);
+		assertSame(factoredStorage.getSqlDatabaseFactory(), sqlDatabaseFactory);
 		assertTrue(factoredStorage instanceof DivaMixedUserStorage);
 	}
 
@@ -76,8 +78,7 @@ public class DivaStorageFactoryTest {
 
 		assertSame(factoredStorage.getUserStorageForGuest(), guestUserStorage);
 
-		assertNotNull(factoredStorage.getRecordReader());
-		assertSame(factoredStorage.getRecordReader(), recordReaderFactory.factored);
+		assertSame(factoredStorage.getSqlDatabaseFactory(), sqlDatabaseFactory);
 		assertTrue(factoredStorage instanceof DivaMixedUserStorage);
 	}
 

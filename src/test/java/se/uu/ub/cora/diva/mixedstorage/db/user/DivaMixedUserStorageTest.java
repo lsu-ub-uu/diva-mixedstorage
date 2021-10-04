@@ -223,7 +223,7 @@ public class DivaMixedUserStorageTest {
 
 	private void reInitUserStorage() {
 		userStorage = DivaMixedUserStorage
-				.usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(
+				.usingGuestUserStorageDatabaseFactoryAndUserConverterAndRoleReferenceCreator(
 						guestUserStorage, sqlDatabaseFactory, userConverter,
 						dataGroupRoleReferenceCreator);
 	}

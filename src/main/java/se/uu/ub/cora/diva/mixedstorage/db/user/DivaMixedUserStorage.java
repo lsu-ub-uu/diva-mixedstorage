@@ -56,7 +56,7 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	private SqlDatabaseFactory sqlDatabaseFactory;
 	private TableFacade tableFacade;
 
-	public static DivaMixedUserStorage usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(
+	public static DivaMixedUserStorage usingGuestUserStorageDatabaseFactoryAndUserConverterAndRoleReferenceCreator(
 			UserStorage guestUserStorage, SqlDatabaseFactory sqlDatabaseFactory,
 			DivaDbToCoraConverter userConverter,
 			DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator) {

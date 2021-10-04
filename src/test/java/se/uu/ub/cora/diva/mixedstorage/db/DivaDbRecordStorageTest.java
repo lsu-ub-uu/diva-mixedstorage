@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019, 2020 Uppsala University Library
+ * Copyright 2018, 2019, 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,13 +21,11 @@ package se.uu.ub.cora.diva.mixedstorage.db;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -36,7 +34,10 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.sqldatabase.DbQueryInfoFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.TableFacadeSpy;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.TableQuerySpy;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
@@ -44,32 +45,32 @@ public class DivaDbRecordStorageTest {
 	private static final String ORGANISATION_TYPE = "organisation";
 	private DivaDbRecordStorage divaRecordStorage;
 	private DivaDbToCoraConverterFactorySpy converterFactorySpy;
-	private RecordReaderFactorySpy recordReaderFactorySpy;
 	private DivaDbFactorySpy divaDbFactorySpy;
 	private DivaDbUpdaterFactorySpy divaDbUpdaterFactorySpy;
-	private DbQueryInfoFactorySpy dbQueryInfoFactory = new DbQueryInfoFactorySpy();
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void BeforeMethod() {
 		converterFactorySpy = new DivaDbToCoraConverterFactorySpy();
-		recordReaderFactorySpy = new RecordReaderFactorySpy();
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 123);
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 456);
+
 		divaDbFactorySpy = new DivaDbFactorySpy();
 		divaDbUpdaterFactorySpy = new DivaDbUpdaterFactorySpy();
 		divaRecordStorage = DivaDbRecordStorage
-				.usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(recordReaderFactorySpy,
+				.usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(sqlDatabaseFactory,
 						divaDbFactorySpy, divaDbUpdaterFactorySpy, converterFactorySpy);
-		dbQueryInfoFactory = new DbQueryInfoFactorySpy();
-		divaRecordStorage.setDbQueryInfoFactory(dbQueryInfoFactory);
 	}
 
 	@Test
 	public void testInit() throws Exception {
 		divaRecordStorage = DivaDbRecordStorage
-				.usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(recordReaderFactorySpy,
+				.usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(sqlDatabaseFactory,
 						divaDbFactorySpy, divaDbUpdaterFactorySpy, converterFactorySpy);
 
 		assertNotNull(divaRecordStorage);
-		assertTrue(divaRecordStorage.getDbQueryInfoFactory() instanceof DbQueryInfoFactoryImp);
+		assertSame(divaRecordStorage.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test
@@ -176,35 +177,40 @@ public class DivaDbRecordStorageTest {
 	@Test
 	public void testReadOrganisationListFactorDbReader() throws Exception {
 		divaRecordStorage.readList(ORGANISATION_TYPE, new DataGroupSpy("filter"));
-		assertTrue(recordReaderFactorySpy.factorWasCalled);
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertNotNull(tableFacade);
 	}
 
 	@Test
 	public void testReadOrganisationListTableRequestedFromReader() throws Exception {
 		divaRecordStorage.readList(ORGANISATION_TYPE, new DataGroupSpy("filter"));
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "organisationview");
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+		assertEquals(tableQuery.tableName, "organisationview");
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertSame(tableFacade.tableQueries.get(0), tableQuery);
 	}
 
 	@Test
 	public void testReadRootOrganisationListTableRequestedFromReader() throws Exception {
 		divaRecordStorage.readList("rootOrganisation", new DataGroupSpy("filter"));
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "rootorganisationview");
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+		assertEquals(tableQuery.tableName, "rootorganisationview");
+		// RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
+		// assertEquals(recordReader.usedTableName, "rootorganisationview");
 	}
 
 	@Test
 	public void testReadTopOrganisationListTableRequestedFromReader() throws Exception {
 		divaRecordStorage.readList("topOrganisation", new DataGroupSpy("filter"));
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "toporganisationview");
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+		assertEquals(tableQuery.tableName, "toporganisationview");
 	}
 
 	@Test
 	public void testReadSubOrganisationListTableRequestedFromReader() throws Exception {
 		divaRecordStorage.readList("subOrganisation", new DataGroupSpy("filter"));
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "suborganisationview");
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+		assertEquals(tableQuery.tableName, "suborganisationview");
 	}
 
 	@Test
@@ -214,16 +220,12 @@ public class DivaDbRecordStorageTest {
 		filter.addChild(new DataAtomicSpy("toNo", "19"));
 
 		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+		assertEquals(tableQuery.tableName, "organisationview");
 
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "organisationview");
-
-		DbQueryInfoSpy factoredInfo = dbQueryInfoFactory.factoredInfo;
-		assertEquals(factoredInfo.orderBy, "id");
-		assertEquals(dbQueryInfoFactory.fromNo, Integer.valueOf(10));
-		assertEquals(dbQueryInfoFactory.toNo, Integer.valueOf(19));
-		assertNotNull(factoredInfo);
-		assertSame(recordReader.queryInfo, factoredInfo);
+		assertEquals(tableQuery.ascOrdersBy.get(0), "id");
+		assertEquals(tableQuery.fromNumbers.get(0), Long.valueOf(10));
+		assertEquals(tableQuery.toNumbers.get(0), Long.valueOf(19));
 	}
 
 	@Test
@@ -232,10 +234,12 @@ public class DivaDbRecordStorageTest {
 
 		divaRecordStorage.readList(ORGANISATION_TYPE, filter);
 
-		DbQueryInfoSpy factoredInfo = dbQueryInfoFactory.factoredInfo;
-		assertEquals(factoredInfo.orderBy, "id");
-		assertEquals(dbQueryInfoFactory.fromNo, null);
-		assertEquals(dbQueryInfoFactory.toNo, null);
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+		assertEquals(tableQuery.tableName, "organisationview");
+
+		assertEquals(tableQuery.ascOrdersBy.get(0), "id");
+		assertEquals(tableQuery.fromNumbers.get(0), null);
+		assertEquals(tableQuery.toNumbers.get(0), null);
 	}
 
 	@Test
@@ -246,8 +250,9 @@ public class DivaDbRecordStorageTest {
 
 	@Test
 	public void testReadOrganisationListMultipleFactoryIsCalledCorrectly() {
-		RecordReaderFactoryForListSpy recordReaderFactoryForList = new RecordReaderFactoryForListSpy();
-		setUpRecordStorageAndReadList(recordReaderFactoryForList);
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 543);
+
+		divaRecordStorage.readList(ORGANISATION_TYPE, new DataGroupSpy("filter"));
 
 		assertEquals(divaDbFactorySpy.listOfFactoredMultiples.size(), 6);
 		assertEquals(divaDbFactorySpy.usedTypes.size(), 6);
@@ -261,57 +266,53 @@ public class DivaDbRecordStorageTest {
 
 	@Test
 	public void testReadOrganisationListMultipleReadersAreCalledCorrectly() {
-		RecordReaderFactoryForListSpy recordReaderFactoryForList = new RecordReaderFactoryForListSpy();
-		setUpRecordStorageAndReadList(recordReaderFactoryForList);
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 543);
+		divaRecordStorage.readList(ORGANISATION_TYPE, new DataGroupSpy("filter"));
 
-		RecordReaderForListSpy recordReader = recordReaderFactoryForList.factored;
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
-		List<Map<String, Object>> readRows = recordReader.returnedList;
+		List<Row> readRows = tableFacade.rowsToReturn;
 
 		List<MultipleRowDbToDataReaderSpy> multipleReaders = divaDbFactorySpy.listOfFactoredMultiples;
-		assertEquals(multipleReaders.get(0).usedId, String.valueOf(readRows.get(0).get("id")));
-		assertEquals(multipleReaders.get(1).usedId, String.valueOf(readRows.get(0).get("id")));
+		assertEquals(multipleReaders.get(0).usedId,
+				String.valueOf(readRows.get(0).getValueByColumn("id")));
+		assertEquals(multipleReaders.get(1).usedId,
+				String.valueOf(readRows.get(0).getValueByColumn("id")));
 
-		assertEquals(multipleReaders.get(2).usedId, String.valueOf(readRows.get(1).get("id")));
-		assertEquals(multipleReaders.get(3).usedId, String.valueOf(readRows.get(1).get("id")));
+		assertEquals(multipleReaders.get(2).usedId,
+				String.valueOf(readRows.get(1).getValueByColumn("id")));
+		assertEquals(multipleReaders.get(3).usedId,
+				String.valueOf(readRows.get(1).getValueByColumn("id")));
 
-		assertEquals(multipleReaders.get(4).usedId, String.valueOf(readRows.get(2).get("id")));
-		assertEquals(multipleReaders.get(5).usedId, String.valueOf(readRows.get(2).get("id")));
+		assertEquals(multipleReaders.get(4).usedId,
+				String.valueOf(readRows.get(2).getValueByColumn("id")));
+		assertEquals(multipleReaders.get(5).usedId,
+				String.valueOf(readRows.get(2).getValueByColumn("id")));
 
 	}
 
 	@Test
 	public void testReadOrganisationListAllReadFromDbAreSentToConverterAndAddedToResult() {
-		RecordReaderFactoryForListSpy recordReaderFactoryForList = new RecordReaderFactoryForListSpy();
-		StorageReadResult readList = setUpRecordStorageAndReadList(recordReaderFactoryForList);
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 543);
+		StorageReadResult readList = divaRecordStorage.readList(ORGANISATION_TYPE,
+				new DataGroupSpy("filter"));
 
-		RecordReaderForListSpy recordReader = recordReaderFactoryForList.factored;
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+
 		List<DataGroup> organisations = readList.listOfDataGroups;
 
-		assertReadRecordIsSentToConverterUsingIndex(recordReader, 0);
+		assertReadRecordIsSentToConverterUsingIndex(tableFacade, 0);
 		assertConvertedRowIsAddedToResultUsingIndex(readList, 0);
 		assertCorrectParentsAndPredecessorsWereAddedToOrganisation(organisations.get(0), 0, 1);
 
-		assertReadRecordIsSentToConverterUsingIndex(recordReader, 1);
+		assertReadRecordIsSentToConverterUsingIndex(tableFacade, 1);
 		assertConvertedRowIsAddedToResultUsingIndex(readList, 1);
 		assertCorrectParentsAndPredecessorsWereAddedToOrganisation(organisations.get(1), 2, 3);
 
-		assertReadRecordIsSentToConverterUsingIndex(recordReader, 2);
+		assertReadRecordIsSentToConverterUsingIndex(tableFacade, 2);
 		assertConvertedRowIsAddedToResultUsingIndex(readList, 2);
 		assertCorrectParentsAndPredecessorsWereAddedToOrganisation(organisations.get(2), 4, 5);
 
-	}
-
-	private StorageReadResult setUpRecordStorageAndReadList(
-			RecordReaderFactoryForListSpy recordReaderFactoryForList) {
-		divaRecordStorage = DivaDbRecordStorage
-				.usingRecordReaderFactoryDivaFactoryAndDivaDbUpdaterFactory(
-						recordReaderFactoryForList, divaDbFactorySpy, divaDbUpdaterFactorySpy,
-						converterFactorySpy);
-
-		StorageReadResult readList = divaRecordStorage.readList(ORGANISATION_TYPE,
-				new DataGroupSpy("filter"));
-		return readList;
 	}
 
 	private void assertCorrectParentsAndPredecessorsWereAddedToOrganisation(DataGroup organisation,
@@ -333,9 +334,9 @@ public class DivaDbRecordStorageTest {
 		assertSame(predececssorsInOrganisation.get(1), returnedListPredecessors.get(1));
 	}
 
-	private void assertReadRecordIsSentToConverterUsingIndex(RecordReaderForListSpy recordReader,
+	private void assertReadRecordIsSentToConverterUsingIndex(TableFacadeSpy tableFacade,
 			int index) {
-		Map<String, Object> readRow = recordReader.returnedList.get(index);
+		Row readRow = tableFacade.rowsToReturn.get(index);
 		DivaDbToCoraConverterSpy factoredConverter = converterFactorySpy.factoredConverters
 				.get(index);
 		assertSame(readRow, factoredConverter.rowToConvert);
@@ -356,31 +357,32 @@ public class DivaDbRecordStorageTest {
 	@Test
 	public void testReadAbstractListForUserFactorDbReader() throws Exception {
 		divaRecordStorage.readAbstractList("user", new DataGroupSpy("filter"));
-		assertTrue(recordReaderFactorySpy.factorWasCalled);
-		RecordReaderSpy factored = recordReaderFactorySpy.factored;
-		assertEquals(factored.usedTableName, "public.user");
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+		assertEquals(tableQuery.tableName, "public.user");
 	}
 
 	@Test
 	public void testReadAbstractListForUserReturnsCorrectData() throws Exception {
-		recordReaderFactorySpy.noOfRecordsToReturn = 3;
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 543);
+
 		StorageReadResult result = divaRecordStorage.readAbstractList("user",
 				new DataGroupSpy("filter"));
 
-		RecordReaderSpy factoredReader = recordReaderFactorySpy.factored;
-		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 0);
-		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 1);
-		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 2);
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+
+		assertDataSentFromDbToConverterToResultUsingIndex(tableFacade, result, 0);
+		assertDataSentFromDbToConverterToResultUsingIndex(tableFacade, result, 1);
+		assertDataSentFromDbToConverterToResultUsingIndex(tableFacade, result, 2);
 
 	}
 
-	private void assertDataSentFromDbToConverterToResultUsingIndex(RecordReaderSpy factoredReader,
+	private void assertDataSentFromDbToConverterToResultUsingIndex(TableFacadeSpy tableFacade,
 			StorageReadResult result, int index) {
-		List<Map<String, Object>> returnedList = factoredReader.returnedList;
+		List<Row> returnedList = tableFacade.rowsToReturn;
 		DivaDbToCoraConverterSpy converter = converterFactorySpy.factoredConverters.get(index);
 
-		Map<String, Object> rowFromDb = returnedList.get(index);
-		Map<String, Object> rowSentToConverter = converter.rowToConvert;
+		Row rowFromDb = returnedList.get(index);
+		Row rowSentToConverter = converter.rowToConvert;
 		assertEquals(rowFromDb, rowSentToConverter);
 
 		DataGroup dataGroupInReturnedResult = result.listOfDataGroups.get(index);
@@ -391,21 +393,20 @@ public class DivaDbRecordStorageTest {
 	@Test
 	public void testReadAbstractListForOrganisationFactorDbReader() throws Exception {
 		divaRecordStorage.readAbstractList("organisation", new DataGroupSpy("filter"));
-		assertTrue(recordReaderFactorySpy.factorWasCalled);
-		RecordReaderSpy factored = recordReaderFactorySpy.factored;
-		assertEquals(factored.usedTableName, "organisationview");
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), "organisationview");
 	}
 
 	@Test
 	public void testReadAbstractListForOrganisationReturnsCorrectData() throws Exception {
-		recordReaderFactorySpy.noOfRecordsToReturn = 3;
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 543);
 		StorageReadResult result = divaRecordStorage.readAbstractList("organisation",
 				new DataGroupSpy("filter"));
 
-		RecordReaderSpy factoredReader = recordReaderFactorySpy.factored;
-		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 0);
-		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 1);
-		assertDataSentFromDbToConverterToResultUsingIndex(factoredReader, result, 2);
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+
+		assertDataSentFromDbToConverterToResultUsingIndex(tableFacade, result, 0);
+		assertDataSentFromDbToConverterToResultUsingIndex(tableFacade, result, 1);
+		assertDataSentFromDbToConverterToResultUsingIndex(tableFacade, result, 2);
 
 	}
 
@@ -438,10 +439,12 @@ public class DivaDbRecordStorageTest {
 			String tableName) {
 		boolean organisationExists = divaRecordStorage
 				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, "26");
-		RecordReaderSpy readerSpy = recordReaderFactorySpy.factored;
-		assertEquals(readerSpy.usedTableName, tableName);
-		Map<String, Object> usedConditions = readerSpy.usedConditions;
-		assertEquals(usedConditions.get("id"), 26);
+
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), tableName);
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertEquals(tableQuery.conditions.get("id"), 26);
+		assertSame(tableQuery, tableFacade.tableQueries.get(0));
 		assertTrue(organisationExists);
 	}
 
@@ -465,37 +468,61 @@ public class DivaDbRecordStorageTest {
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForOrganisationWhenNotExist() {
+		sqlDatabaseFactory.tablesToThrowExceptionFor.add("organisationview");
+
+		boolean organisationExists = divaRecordStorage
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("organisation", "600");
+
 		assertCorrectRecordExistsWhenNotExistsForOrganisationType("organisation",
 				"organisationview");
+		assertFalse(organisationExists);
 	}
 
 	private void assertCorrectRecordExistsWhenNotExistsForOrganisationType(String type,
 			String tableName) {
-		boolean organisationExists = divaRecordStorage
-				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, "600");
-		RecordReaderSpy readerSpy = recordReaderFactorySpy.factored;
-		assertEquals(readerSpy.usedTableName, tableName);
-		Map<String, Object> usedConditions = readerSpy.usedConditions;
-		assertEquals(usedConditions.get("id"), 600);
-		assertFalse(organisationExists);
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), tableName);
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertEquals(tableQuery.conditions.get("id"), 600);
+		assertSame(tableQuery, tableFacade.tableQueries.get(0));
 	}
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForRootOrganisationWhenNotExist() {
+		sqlDatabaseFactory.tablesToThrowExceptionFor.add("rootorganisationview");
+
+		boolean organisationExists = divaRecordStorage
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("rootOrganisation",
+						"600");
+
 		assertCorrectRecordExistsWhenNotExistsForOrganisationType("rootOrganisation",
 				"rootorganisationview");
+		assertFalse(organisationExists);
 	}
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForTopOrganisationWhenNotExist() {
+		sqlDatabaseFactory.tablesToThrowExceptionFor.add("toporganisationview");
+
+		boolean organisationExists = divaRecordStorage
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("topOrganisation",
+						"600");
+
 		assertCorrectRecordExistsWhenNotExistsForOrganisationType("topOrganisation",
 				"toporganisationview");
+		assertFalse(organisationExists);
 	}
 
 	@Test
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForSubOrganisationWhenNotExist() {
+		sqlDatabaseFactory.tablesToThrowExceptionFor.add("suborganisationview");
+
+		boolean organisationExists = divaRecordStorage
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("subOrganisation",
+						"600");
 		assertCorrectRecordExistsWhenNotExistsForOrganisationType("subOrganisation",
 				"suborganisationview");
+		assertFalse(organisationExists);
 	}
 
 	@Test
@@ -518,11 +545,12 @@ public class DivaDbRecordStorageTest {
 		long totalNumberOfRecordsForType = divaRecordStorage.getTotalNumberOfRecordsForType(type,
 				filterDataGroup);
 
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, tableName);
-		Map<String, Object> usedConditions = recordReader.usedConditions;
-		assertTrue(usedConditions.isEmpty());
-		assertEquals(totalNumberOfRecordsForType, recordReader.numberToReturn);
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), tableName);
+		assertSame(tableFacade.tableQueries.get(0), tableQuery);
+		assertTrue(tableQuery.conditions.isEmpty());
+		assertEquals(totalNumberOfRecordsForType, tableFacade.numOfReadRows);
 	}
 
 	@Test
@@ -551,14 +579,15 @@ public class DivaDbRecordStorageTest {
 		long totalNumberOfRecordsForType = divaRecordStorage
 				.getTotalNumberOfRecordsForType("topOrganisation", filterDataGroup);
 
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "toporganisationview");
-		assertTrue(recordReader.usedConditions.isEmpty());
-		DbQueryInfoSpy factoredQueryInfo = dbQueryInfoFactory.factoredInfo;
-		assertEquals(dbQueryInfoFactory.fromNo, Integer.valueOf(4));
-		assertNull(dbQueryInfoFactory.toNo);
-		assertSame(recordReader.queryInfo, factoredQueryInfo);
-		assertEquals(totalNumberOfRecordsForType, recordReader.numberToReturn);
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), "toporganisationview");
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+
+		assertEquals(tableQuery.ascOrdersBy.get(0), "id");
+		assertEquals(tableQuery.fromNumbers.get(0), Long.valueOf(4));
+		assertEquals(tableQuery.toNumbers.get(0), null);
+
+		assertEquals(totalNumberOfRecordsForType,
+				sqlDatabaseFactory.factoredTableFacade.numToReturn);
 	}
 
 	@Test
@@ -568,11 +597,11 @@ public class DivaDbRecordStorageTest {
 
 		divaRecordStorage.getTotalNumberOfRecordsForType("topOrganisation", filterDataGroup);
 
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		DbQueryInfoSpy factoredQueryInfo = dbQueryInfoFactory.factoredInfo;
-		assertNull(dbQueryInfoFactory.fromNo);
-		assertEquals(dbQueryInfoFactory.toNo, Integer.valueOf(4));
-		assertSame(recordReader.queryInfo, factoredQueryInfo);
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), "toporganisationview");
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+
+		assertEquals(tableQuery.fromNumbers.get(0), null);
+		assertEquals(tableQuery.toNumbers.get(0), Long.valueOf(4));
 	}
 
 	@Test
@@ -583,11 +612,13 @@ public class DivaDbRecordStorageTest {
 
 		divaRecordStorage.getTotalNumberOfRecordsForType("topOrganisation", filterDataGroup);
 
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		DbQueryInfoSpy factoredQueryInfo = dbQueryInfoFactory.factoredInfo;
-		assertEquals(dbQueryInfoFactory.fromNo, Integer.valueOf(4));
-		assertEquals(dbQueryInfoFactory.toNo, Integer.valueOf(9));
-		assertSame(recordReader.queryInfo, factoredQueryInfo);
+		divaRecordStorage.getTotalNumberOfRecordsForType("topOrganisation", filterDataGroup);
+
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), "toporganisationview");
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
+
+		assertEquals(tableQuery.fromNumbers.get(0), Long.valueOf(4));
+		assertEquals(tableQuery.toNumbers.get(0), Long.valueOf(9));
 	}
 
 	@Test
@@ -599,16 +630,15 @@ public class DivaDbRecordStorageTest {
 		long totalNumberOfRecordsForType = divaRecordStorage.getTotalNumberOfRecordsForAbstractType(
 				"organisation", implementingTypes, filterDataGroup);
 
-		RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		assertEquals(recordReader.usedTableName, "organisationview");
-		Map<String, Object> usedConditions = recordReader.usedConditions;
-		assertTrue(usedConditions.isEmpty());
-		assertEquals(totalNumberOfRecordsForType, recordReader.numberToReturn);
+		assertEquals(sqlDatabaseFactory.tableNames.get(0), "organisationview");
+		assertTrue(sqlDatabaseFactory.factoredTableQueries.get(0).conditions.isEmpty());
 
-		assertSame(dbQueryInfoFactory.factoredInfo, recordReader.queryInfo);
-		assertNull(dbQueryInfoFactory.fromNo);
-		assertNull(dbQueryInfoFactory.toNo);
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
 
+		assertEquals(tableQuery.fromNumbers.get(0), null);
+		assertEquals(tableQuery.toNumbers.get(0), null);
+		assertEquals(totalNumberOfRecordsForType,
+				sqlDatabaseFactory.factoredTableFacade.numToReturn);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class)
