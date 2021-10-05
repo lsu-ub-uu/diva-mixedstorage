@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -20,6 +20,8 @@
 package se.uu.ub.cora.diva.mixedstorage.db;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 /**
  * DivaDbUpdater interface is intended to handle database operations for a Datagroup.
@@ -34,6 +36,6 @@ public interface DivaDbUpdater {
 	 * 
 	 * @param dataGroup
 	 */
-	void update(DataGroup dataGroup);
+	void update(TableFacade tableFacade, DatabaseFacade databaseFacade, DataGroup dataGroup);
 
 }

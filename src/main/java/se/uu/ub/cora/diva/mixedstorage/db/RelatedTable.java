@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -22,9 +22,11 @@ import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public interface RelatedTable {
 
-	List<DbStatement> handleDbForDataGroup(DataGroup organisation, List<Row> dbRows);
+	List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup organisation,
+			List<Row> dbRows);
 
 }

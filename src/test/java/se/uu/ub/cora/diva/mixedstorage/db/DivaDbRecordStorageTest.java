@@ -91,6 +91,15 @@ public class DivaDbRecordStorageTest {
 		DivaDbSpy factored = divaDbFactorySpy.factored;
 		assertEquals(factored.type, ORGANISATION_TYPE);
 		assertEquals(factored.id, "someId");
+		assertSame(factored.tableFacade, sqlDatabaseFactory.factoredTableFacade);
+	}
+
+	@Test
+	public void testReadOrganisationClosesTableFacade() throws Exception {
+		divaRecordStorage.read(ORGANISATION_TYPE, "someId");
+		DivaDbSpy factored = divaDbFactorySpy.factored;
+		TableFacadeSpy tableFacade = (TableFacadeSpy) factored.tableFacade;
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	@Test
@@ -166,6 +175,20 @@ public class DivaDbRecordStorageTest {
 		DivaDbUpdaterSpy recordStorageForOneTypeSpy = (DivaDbUpdaterSpy) divaDbUpdaterFactorySpy.divaDbUpdaterList
 				.get(0);
 		assertEquals(recordStorageForOneTypeSpy.dataGroup, organisation);
+		assertSame(recordStorageForOneTypeSpy.tableFacade, sqlDatabaseFactory.factoredTableFacade);
+		assertSame(recordStorageForOneTypeSpy.databaseFacade,
+				sqlDatabaseFactory.factoredDatabaseFacade);
+	}
+
+	@Test
+	public void testUpdateClosesTableFacade() throws Exception {
+		DataGroup organisation = new DataGroupSpy("someType");
+		organisation.addChild(new DataAtomicSpy("organisationName", "someChangedName"));
+
+		divaRecordStorage.update("someType", "56", organisation, null, null, "");
+
+		assertTrue(sqlDatabaseFactory.factoredTableFacade.closeWasCalled);
+		assertTrue(sqlDatabaseFactory.factoredDatabaseFacade.closeWasCalled);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -179,6 +202,7 @@ public class DivaDbRecordStorageTest {
 		divaRecordStorage.readList(ORGANISATION_TYPE, new DataGroupSpy("filter"));
 		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 		assertNotNull(tableFacade);
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	@Test
@@ -195,8 +219,6 @@ public class DivaDbRecordStorageTest {
 		divaRecordStorage.readList("rootOrganisation", new DataGroupSpy("filter"));
 		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
 		assertEquals(tableQuery.tableName, "rootorganisationview");
-		// RecordReaderSpy recordReader = recordReaderFactorySpy.factored;
-		// assertEquals(recordReader.usedTableName, "rootorganisationview");
 	}
 
 	@Test
@@ -276,8 +298,11 @@ public class DivaDbRecordStorageTest {
 		List<MultipleRowDbToDataReaderSpy> multipleReaders = divaDbFactorySpy.listOfFactoredMultiples;
 		assertEquals(multipleReaders.get(0).usedId,
 				String.valueOf(readRows.get(0).getValueByColumn("id")));
+		assertSame(multipleReaders.get(0).tableFacade, sqlDatabaseFactory.factoredTableFacade);
+
 		assertEquals(multipleReaders.get(1).usedId,
 				String.valueOf(readRows.get(0).getValueByColumn("id")));
+		assertSame(multipleReaders.get(1).tableFacade, sqlDatabaseFactory.factoredTableFacade);
 
 		assertEquals(multipleReaders.get(2).usedId,
 				String.valueOf(readRows.get(1).getValueByColumn("id")));
@@ -374,6 +399,8 @@ public class DivaDbRecordStorageTest {
 		assertDataSentFromDbToConverterToResultUsingIndex(tableFacade, result, 1);
 		assertDataSentFromDbToConverterToResultUsingIndex(tableFacade, result, 2);
 
+		assertTrue(tableFacade.closeWasCalled);
+
 	}
 
 	private void assertDataSentFromDbToConverterToResultUsingIndex(TableFacadeSpy tableFacade,
@@ -446,6 +473,8 @@ public class DivaDbRecordStorageTest {
 		assertEquals(tableQuery.conditions.get("id"), 26);
 		assertSame(tableQuery, tableFacade.tableQueries.get(0));
 		assertTrue(organisationExists);
+
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	@Test
@@ -551,6 +580,8 @@ public class DivaDbRecordStorageTest {
 		assertSame(tableFacade.tableQueries.get(0), tableQuery);
 		assertTrue(tableQuery.conditions.isEmpty());
 		assertEquals(totalNumberOfRecordsForType, tableFacade.numOfReadRows);
+
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	@Test

@@ -43,15 +43,13 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 	private static final String ADDRESS_ID = "address_id";
 	private SqlDatabaseFactory sqlDatabaseFactory;
 	private int organisationId;
-	private TableFacade tableFacade;
 
 	public OrganisationAddressRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
 		this.sqlDatabaseFactory = sqlDatabaseFactory;
-		tableFacade = sqlDatabaseFactory.factorTableFacade();
 	}
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
+	public List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup organisation,
 			List<Row> organisationsFromDb) {
 		setIdAsInt(organisation);
 
@@ -61,7 +59,7 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 		if (addressExistsInDatabase(addressIdInOrganisation)) {
 			deleteOrUpdateAddress(dbStatements, organisation, addressIdInOrganisation);
 		} else {
-			possiblyInsertAddress(dbStatements, organisation);
+			possiblyInsertAddress(tableFacade, dbStatements, organisation);
 
 		}
 		return dbStatements;
@@ -181,7 +179,8 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 
 	}
 
-	private void possiblyInsertAddress(List<DbStatement> dbStatements, DataGroup organisation) {
+	private void possiblyInsertAddress(TableFacade tableFacade, List<DbStatement> dbStatements,
+			DataGroup organisation) {
 		if (organisationDataGroupContainsAddress(organisation)) {
 			long nextValueFromSequence = tableFacade.nextValueFromSequence("address_sequence");
 			createInsertForAddress(dbStatements, organisation, nextValueFromSequence);
@@ -203,10 +202,6 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 		Map<String, Object> valuesForInsert = createValuesForAddressInsertOrUpdate(organisation);
 		valuesForInsert.put(ADDRESS_ID, object);
 		return valuesForInsert;
-	}
-
-	public TableFacade getTableFacade() {
-		return tableFacade;
 	}
 
 	public SqlDatabaseFactory getSqlDatabaseFactory() {

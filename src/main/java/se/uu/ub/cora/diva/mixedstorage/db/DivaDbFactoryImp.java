@@ -25,10 +25,10 @@ import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataPredec
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
 //import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class DivaDbFactoryImp implements DivaDbFactory {
 
-	// private RecordReaderFactory readerFactory;
 	private DivaDbToCoraConverterFactory converterFactory;
 	private SqlDatabaseFactory sqlDatabaseFactory;
 

@@ -25,6 +25,7 @@ import java.util.List;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
@@ -61,8 +62,10 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	@Override
 	public DataGroup read(String type, String id) {
-		DivaDbReader divaDbReader = divaDbFactory.factor(type);
-		return divaDbReader.read(type, id);
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			DivaDbReader divaDbReader = divaDbFactory.factor(type);
+			return divaDbReader.read(tableFacade, type, id);
+		}
 	}
 
 	@Override
@@ -84,8 +87,12 @@ public class DivaDbRecordStorage implements RecordStorage {
 	@Override
 	public void update(String type, String id, DataGroup dataRecord, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		DivaDbUpdater divaDbUpdater = divaDbUpdaterFactory.factor(type);
-		divaDbUpdater.update(dataRecord);
+
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade();
+				DatabaseFacade databaseFacade = sqlDatabaseFactory.factorDatabaseFacade()) {
+			DivaDbUpdater divaDbUpdater = divaDbUpdaterFactory.factor(type);
+			divaDbUpdater.update(tableFacade, databaseFacade, dataRecord);
+		}
 	}
 
 	private DataGroup convertOneMapFromDbToDataGroup(String type, Row readRow) {
@@ -121,18 +128,25 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	private StorageReadResult readOrganisationList(String type, String tableName,
 			DataGroup filter) {
+		TableQuery tableQuery = createTableQueryForReadOrganisationList(tableName, filter);
+
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			List<Row> rowsFromDb = tableFacade.readRowsForQuery(tableQuery);
+
+			List<DataGroup> convertedGroups = new ArrayList<>();
+			for (Row map : rowsFromDb) {
+				convertOrganisation(tableFacade, type, convertedGroups, map);
+			}
+			return createStorageReadResult(convertedGroups);
+		}
+	}
+
+	private TableQuery createTableQueryForReadOrganisationList(String tableName, DataGroup filter) {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(tableName);
-		tableQuery.addOrderByAsc("id");
 		tableQuery.setFromNo(getAtomicValueAsLongIfExists(filter, "fromNo"));
 		tableQuery.setToNo(getAtomicValueAsLongIfExists(filter, "toNo"));
-		TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade();
-		List<Row> rowsFromDb = tableFacade.readRowsForQuery(tableQuery);
-
-		List<DataGroup> convertedGroups = new ArrayList<>();
-		for (Row map : rowsFromDb) {
-			convertOrganisation(type, convertedGroups, map);
-		}
-		return createStorageReadResult(convertedGroups);
+		tableQuery.addOrderByAsc("id");
+		return tableQuery;
 	}
 
 	private Long getAtomicValueAsLongIfExists(DataGroup filter, String nameInData) {
@@ -142,28 +156,32 @@ public class DivaDbRecordStorage implements RecordStorage {
 		return null;
 	}
 
-	private void convertOrganisation(String type, List<DataGroup> convertedGroups, Row map) {
+	private void convertOrganisation(TableFacade tableFacade, String type,
+			List<DataGroup> convertedGroups, Row map) {
 		DataGroup convertedOrganisation = convertOneMapFromDbToDataGroup(type, map);
 		String id = String.valueOf(map.getValueByColumn("id"));
-		addParentsToOrganisation(convertedOrganisation, id);
-		addPredecessorsToOrganisation(convertedOrganisation, id);
+		addParentsToOrganisation(tableFacade, convertedOrganisation, id);
+		addPredecessorsToOrganisation(tableFacade, convertedOrganisation, id);
 		convertedGroups.add(convertedOrganisation);
 	}
 
-	private void addParentsToOrganisation(DataGroup convertedOrganisation, String id) {
+	private void addParentsToOrganisation(TableFacade tableFacade, DataGroup convertedOrganisation,
+			String id) {
 		MultipleRowDbToDataReader parentMultipleReader = divaDbFactory
 				.factorMultipleReader("divaOrganisationParent");
-		List<DataGroup> readParents = parentMultipleReader.read("divaOrganisationParent", id);
+		List<DataGroup> readParents = parentMultipleReader.read(tableFacade,
+				"divaOrganisationParent", id);
 		for (DataGroup parent : readParents) {
 			convertedOrganisation.addChild(parent);
 		}
 	}
 
-	private void addPredecessorsToOrganisation(DataGroup convertedOrganisation, String id) {
+	private void addPredecessorsToOrganisation(TableFacade tableFacade,
+			DataGroup convertedOrganisation, String id) {
 		MultipleRowDbToDataReader predecessorReader = divaDbFactory
 				.factorMultipleReader("divaOrganisationPredecessor");
-		List<DataGroup> readPredecessors = predecessorReader.read("divaOrganisationPredecessor",
-				id);
+		List<DataGroup> readPredecessors = predecessorReader.read(tableFacade,
+				"divaOrganisationPredecessor", id);
 		for (DataGroup predecessor : readPredecessors) {
 			convertedOrganisation.addChild(predecessor);
 		}
@@ -172,8 +190,9 @@ public class DivaDbRecordStorage implements RecordStorage {
 	private List<Row> readAllFromDb(String type) {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(type);
 
-		TableFacade factorTableFacade = sqlDatabaseFactory.factorTableFacade();
-		return factorTableFacade.readRowsForQuery(tableQuery);
+		try (TableFacade factorTableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			return factorTableFacade.readRowsForQuery(tableQuery);
+		}
 	}
 
 	private StorageReadResult createStorageReadResult(List<DataGroup> listToReturn) {
@@ -249,8 +268,10 @@ public class DivaDbRecordStorage implements RecordStorage {
 		try {
 			TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(tableName);
 			tableQuery.addCondition("id", Integer.valueOf(id));
-			TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade();
-			tableFacade.readOneRowForQuery(tableQuery);
+
+			try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+				tableFacade.readOneRowForQuery(tableQuery);
+			}
 
 		} catch (SqlDatabaseException | NumberFormatException e) {
 			throw new RecordNotFoundException("Organisation not found: " + id);
@@ -275,18 +296,26 @@ public class DivaDbRecordStorage implements RecordStorage {
 	@Override
 	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
 		throwNotImplementedErrorIfNotOrganisation(type);
-
 		String tableName = getTableName(type);
+		TableQuery tableQuery = createTableQueryForTotalNumberOfRecords(filter, tableName);
+
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			return tableFacade.readNumberOfRows(tableQuery);
+		}
+	}
+
+	private TableQuery createTableQueryForTotalNumberOfRecords(DataGroup filter, String tableName) {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(tableName);
+		addToAndFromToTableQuery(filter, tableQuery);
+		tableQuery.addOrderByAsc("id");
+		return tableQuery;
+	}
+
+	private void addToAndFromToTableQuery(DataGroup filter, TableQuery tableQuery) {
 		Long fromNo = getAtomicValueAsLongIfExists(filter, "fromNo");
 		Long toNo = getAtomicValueAsLongIfExists(filter, "toNo");
 		tableQuery.setFromNo(fromNo);
 		tableQuery.setToNo(toNo);
-
-		tableQuery.addOrderByAsc("id");
-
-		TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade();
-		return tableFacade.readNumberOfRows(tableQuery);
 	}
 
 	private Long extractAtomicValueAsInteger(DataGroup filter, String nameInData) {

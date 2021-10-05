@@ -33,11 +33,12 @@ public class TableFacadeSpy implements TableFacade {
 	public List<Row> returnedRows = new ArrayList<>();
 	public int numToReturn;
 	public RowSpy rowToReturn = new RowSpy();
-	public List<Row> rowsToReturn;
+	public List<Row> rowsToReturn = new ArrayList<>();
 
 	public long nextVal;
 	public String sequenceName;
 	public long numOfReadRows;
+	public boolean closeWasCalled = false;
 
 	@Override
 	public void insertRowUsingQuery(TableQuery tableQuery) {
@@ -87,6 +88,13 @@ public class TableFacadeSpy implements TableFacade {
 		return numOfReadRows;
 	}
 
+	public RowSpy createAndAddRowToReturn(String columnName, Object columnValue) {
+		RowSpy rowToReturn = new RowSpy();
+		rowToReturn.addColumnWithValue(columnName, columnValue);
+		rowsToReturn.add(rowToReturn);
+		return rowToReturn;
+	}
+
 	@Override
 	public void updateRowsUsingQuery(TableQuery tableQuery) {
 		// TODO Auto-generated method stub
@@ -126,8 +134,7 @@ public class TableFacadeSpy implements TableFacade {
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
-
+		closeWasCalled = true;
 	}
 
 }

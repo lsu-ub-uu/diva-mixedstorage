@@ -39,22 +39,20 @@ public class MultipleRowDbToDataParentReaderTest {
 	private DivaDbToCoraConverterFactorySpy converterFactory;
 	private MultipleRowDbToDataParentReader parentReader;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
+	private TableFacadeSpy tableFacade;
 
 	@BeforeMethod
 	public void BeforeMethod() {
 		converterFactory = new DivaDbToCoraConverterFactorySpy();
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
+		tableFacade = new TableFacadeSpy();
+
 		parentReader = new MultipleRowDbToDataParentReader(sqlDatabaseFactory, converterFactory);
 		initRowsToReturn();
 	}
 
 	private void initRowsToReturn() {
-		sqlDatabaseFactory.createAndAddRowToReturn("id", 567);
-	}
-
-	@Test
-	public void testInit() {
-		assertSame(parentReader.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
+		tableFacade.createAndAddRowToReturn("id", 567);
 	}
 
 	@Test
@@ -64,8 +62,7 @@ public class MultipleRowDbToDataParentReaderTest {
 
 	@Test
 	public void testReadParentTableFactorsQueryAndSendsToFacade() {
-		parentReader.read(TABLE_NAME, "567");
-		TableFacadeSpy tableFacade = (TableFacadeSpy) parentReader.getTableFacade();
+		parentReader.read(tableFacade, TABLE_NAME, "567");
 		assertEquals(sqlDatabaseFactory.tableName, TABLE_NAME);
 		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQuery;
 		assertSame(tableFacade.tableQueries.get(0), tableQuery);
@@ -73,7 +70,7 @@ public class MultipleRowDbToDataParentReaderTest {
 
 	@Test
 	public void testReadParentConditionsForParentTable() throws Exception {
-		parentReader.read(TABLE_NAME, "567");
+		parentReader.read(tableFacade, TABLE_NAME, "567");
 		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQuery;
 		assertEquals(tableQuery.conditions.get("organisation_id"), 567);
 
@@ -81,7 +78,7 @@ public class MultipleRowDbToDataParentReaderTest {
 
 	@Test
 	public void testReadParentConverterIsFactored() throws Exception {
-		parentReader.read(TABLE_NAME, "567");
+		parentReader.read(tableFacade, TABLE_NAME, "567");
 		DivaDbToCoraConverterSpy divaDbToCoraConverter = converterFactory.factoredConverters.get(0);
 		assertNotNull(divaDbToCoraConverter);
 		assertEquals(converterFactory.factoredTypes.get(0), "divaOrganisationParent");
@@ -89,18 +86,17 @@ public class MultipleRowDbToDataParentReaderTest {
 
 	@Test
 	public void testReadParentNoParentsFound() throws Exception {
-		sqlDatabaseFactory.rowsToReturn = Collections.emptyList();
+		tableFacade.rowsToReturn = Collections.emptyList();
 		parentReader = new MultipleRowDbToDataParentReader(sqlDatabaseFactory, converterFactory);
 
-		List<DataGroup> readParents = parentReader.read(TABLE_NAME, "567");
+		List<DataGroup> readParents = parentReader.read(tableFacade, TABLE_NAME, "567");
 		assertTrue(readParents.isEmpty());
 		assertTrue(converterFactory.factoredConverters.isEmpty());
 	}
 
 	@Test
 	public void testParentConverterIsCalledWithReadParentFromDbStorage() throws Exception {
-		parentReader.read(TABLE_NAME, "567");
-		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		parentReader.read(tableFacade, TABLE_NAME, "567");
 
 		DivaDbToCoraConverterSpy divaDbToCoraConverter = converterFactory.factoredConverters.get(0);
 		assertNotNull(divaDbToCoraConverter.rowToConvert);
@@ -109,11 +105,9 @@ public class MultipleRowDbToDataParentReaderTest {
 
 	@Test
 	public void testParentConverterIsCalledWithMultipleReadParentFromDbStorage() throws Exception {
-		sqlDatabaseFactory.createAndAddRowToReturn("id", 123);
-		sqlDatabaseFactory.createAndAddRowToReturn("id", 765);
-		parentReader.read(TABLE_NAME, "567");
-
-		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		tableFacade.createAndAddRowToReturn("id", 123);
+		tableFacade.createAndAddRowToReturn("id", 765);
+		parentReader.read(tableFacade, TABLE_NAME, "567");
 
 		List<DivaDbToCoraConverterSpy> factoredConverters = converterFactory.factoredConverters;
 		DivaDbToCoraConverterSpy divaDbToCoraConverter = factoredConverters.get(0);
@@ -125,9 +119,9 @@ public class MultipleRowDbToDataParentReaderTest {
 
 	@Test
 	public void testReadParentMultipleParentsFound() throws Exception {
-		sqlDatabaseFactory.createAndAddRowToReturn("id", 123);
-		sqlDatabaseFactory.createAndAddRowToReturn("id", 765);
-		List<DataGroup> readParents = parentReader.read(TABLE_NAME, "567");
+		tableFacade.createAndAddRowToReturn("id", 123);
+		tableFacade.createAndAddRowToReturn("id", 765);
+		List<DataGroup> readParents = parentReader.read(tableFacade, TABLE_NAME, "567");
 		assertEquals(readParents.size(), 3);
 
 		assertEquals(readParents.get(0).getRepeatId(), "0");

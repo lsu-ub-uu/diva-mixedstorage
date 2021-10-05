@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,7 +19,6 @@
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 
 import org.testng.annotations.BeforeMethod;
@@ -35,12 +34,13 @@ public class MultipleRowDbToDataUserGroupReaderTest {
 
 	private DivaDbToCoraConverterFactorySpy converterFactory;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
+	private TableFacadeSpy tableFacade;
 
 	@BeforeMethod
 	public void setUp() {
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 		converterFactory = new DivaDbToCoraConverterFactorySpy();
-
+		tableFacade = new TableFacadeSpy();
 	}
 
 	@Test
@@ -48,8 +48,6 @@ public class MultipleRowDbToDataUserGroupReaderTest {
 		DivaMultipleRowDbToDataReaderImp userGroupReader = new MultipleRowDbToDataUserGroupReader(
 				sqlDatabaseFactory, converterFactory);
 		assertSame(userGroupReader.getSqlDatabaseFactory(), sqlDatabaseFactory);
-		assertNotNull(userGroupReader.getTableFacade());
-		assertSame(userGroupReader.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
 
 	}
 
@@ -57,9 +55,8 @@ public class MultipleRowDbToDataUserGroupReaderTest {
 	public void testRead() {
 		DivaMultipleRowDbToDataReaderImp userGroupReader = new MultipleRowDbToDataUserGroupReader(
 				sqlDatabaseFactory, converterFactory);
-		userGroupReader.read("", "67");
+		userGroupReader.read(tableFacade, "", "67");
 
-		TableFacadeSpy tableFacade = (TableFacadeSpy) userGroupReader.getTableFacade();
 		assertEquals(sqlDatabaseFactory.tableName, "groupsforuser");
 		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQuery;
 		assertSame(tableFacade.tableQueries.get(0), tableQuery);

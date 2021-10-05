@@ -33,6 +33,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 	public boolean endTransactionWasCalled = false;
 	public boolean throwErrorInDatabaseFacade = false;
 	public boolean rollbackWasCalled = false;
+	public boolean closeWasCalled = false;
 
 	@Override
 	public List<Row> readUsingSqlAndValues(String sql, List<Object> values) {
@@ -75,8 +76,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
-
+		closeWasCalled = true;
 	}
 
 }

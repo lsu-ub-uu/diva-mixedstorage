@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -35,7 +35,6 @@ public abstract class DivaMultipleRowDbToDataReaderImp implements MultipleRowDbT
 
 	protected DivaDbToCoraConverterFactory converterFactory;
 	protected SqlDatabaseFactory sqlDatabaseFactory;
-	protected TableFacade tableFacade;
 
 	protected List<DataGroup> convertToDataGroups(List<Row> readRows) {
 		int repeatId = 0;
@@ -70,7 +69,8 @@ public abstract class DivaMultipleRowDbToDataReaderImp implements MultipleRowDbT
 	protected abstract Map<String, Object> getConditions(String id);
 
 	@Override
-	public List<DataGroup> read(String tableName, Map<String, Object> conditions) {
+	public List<DataGroup> read(TableFacade tableFacade, String tableName,
+			Map<String, Object> conditions) {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(tableName);
 		for (Entry<String, Object> condition : conditions.entrySet()) {
 			tableQuery.addCondition(condition.getKey(), condition.getValue());
@@ -80,12 +80,8 @@ public abstract class DivaMultipleRowDbToDataReaderImp implements MultipleRowDbT
 	}
 
 	@Override
-	public List<DataGroup> read(String type, String id) {
-		return read(getTableName(), getConditions(id));
-	}
-
-	public TableFacade getTableFacade() {
-		return tableFacade;
+	public List<DataGroup> read(TableFacade tableFacade, String type, String id) {
+		return read(tableFacade, getTableName(), getConditions(id));
 	}
 
 }

@@ -44,22 +44,21 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 		this.converterFactory = converterFactory;
 		this.divaDbFactory = divaDbFactory;
 		this.sqlDatabaseFactory = sqlDatabaseFactory;
-		this.tableFacade = sqlDatabaseFactory.factorTableFacade();
 	}
 
 	public static DivaDbOrganisationReader usingRecordReaderFactoryAndConverterFactory(
 			DivaDbToCoraConverterFactory converterFactory, DivaDbFactory divaDbFactory,
-			SqlDatabaseFactory databaseFactory) {
-		return new DivaDbOrganisationReader(converterFactory, divaDbFactory, databaseFactory);
+			SqlDatabaseFactory sqlDatabaseFactory) {
+		return new DivaDbOrganisationReader(converterFactory, divaDbFactory, sqlDatabaseFactory);
 	}
 
 	@Override
-	public DataGroup read(String type, String id) {
+	public DataGroup read(TableFacade tableFacade, String type, String id) {
 		String tableName = getTableName(type);
-		Row readRow = readOneRowFromDbUsingTypeAndId(tableName, id);
+		Row readRow = readOneRowFromDbUsingTypeAndId(tableFacade, tableName, id);
 		DataGroup organisation = convertOneMapFromDbToDataGroup(type, readRow);
-		tryToReadAndConvertParents(type, id, organisation);
-		tryToReadAndConvertPredecessors(id, organisation);
+		tryToReadAndConvertParents(tableFacade, type, id, organisation);
+		tryToReadAndConvertPredecessors(tableFacade, id, organisation);
 		return organisation;
 	}
 
@@ -74,7 +73,7 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 		return DEFAULT_TABLENAME;
 	}
 
-	private Row readOneRowFromDbUsingTypeAndId(String type, String id) {
+	private Row readOneRowFromDbUsingTypeAndId(TableFacade tableFacade, String type, String id) {
 		throwDbExceptionIfIdNotAnIntegerValue(id);
 
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(type);
@@ -95,11 +94,11 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 		return dbToCoraConverter.fromRow(readRow);
 	}
 
-	private void tryToReadAndConvertParents(String organisationType, String id,
-			DataGroup organisation) {
+	private void tryToReadAndConvertParents(TableFacade tableFacade, String organisationType,
+			String id, DataGroup organisation) {
 		String type = "divaOrganisationParent";
 		MultipleRowDbToDataReader parentReader = divaDbFactory.factorMultipleReader(type);
-		List<DataGroup> convertedParents = parentReader.read(type, id);
+		List<DataGroup> convertedParents = parentReader.read(tableFacade, type, id);
 		for (DataGroup convertedParent : convertedParents) {
 			removeRepeatIdIfParentInTopOrganisation(organisationType, convertedParent);
 			organisation.addChild(convertedParent);
@@ -113,10 +112,12 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 		}
 	}
 
-	private void tryToReadAndConvertPredecessors(String stringId, DataGroup organisation) {
+	private void tryToReadAndConvertPredecessors(TableFacade tableFacade, String stringId,
+			DataGroup organisation) {
 		String type = "divaOrganisationPredecessor";
 		MultipleRowDbToDataReader prededcessorReader = divaDbFactory.factorMultipleReader(type);
-		List<DataGroup> convertedPredecessors = prededcessorReader.read(type, stringId);
+		List<DataGroup> convertedPredecessors = prededcessorReader.read(tableFacade, type,
+				stringId);
 
 		for (DataGroup convertedPredecessor : convertedPredecessors) {
 			organisation.addChild(convertedPredecessor);

@@ -31,11 +31,10 @@ import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaMultipleRowDbToDataRe
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataParentReader;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataPredecessorReader;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
-import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public class DivaDbFactoryTest {
 	private DivaDbFactoryImp divaDbToCoraFactoryImp;
-	private SqlDatabaseFactory databaseFactory;
+	private SqlDatabaseFactorySpy databaseFactory;
 	private DivaDbToCoraConverterFactory converterFactory;
 
 	@BeforeMethod

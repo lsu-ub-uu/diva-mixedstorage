@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -31,6 +31,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 		implements RelatedTable {
@@ -44,7 +45,7 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 	}
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
+	public List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup organisation,
 			List<Row> existingParents) {
 
 		setIdAsInt(organisation);

@@ -42,15 +42,13 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 	private static final String ALTERNATIVE_NAME = "organisationAlternativeName";
 	private SqlDatabaseFactory sqlDatabaseFactory;
 	private Row alternativeNameRow;
-	private TableFacade tableFacade;
 
 	public OrganisationAlternativeNameRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
 		this.sqlDatabaseFactory = sqlDatabaseFactory;
-		tableFacade = sqlDatabaseFactory.factorTableFacade();
 	}
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
+	public List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup organisation,
 			List<Row> alternativeNameRows) {
 		throwExceptionIfAlternativeNameIsMissing(organisation);
 		throwErrorIfMoreThanOneAlternativeNameInDb(alternativeNameRows);
@@ -58,7 +56,7 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 		String organisationId = getOrganisationId(organisation);
 		List<DbStatement> dbStatements = new ArrayList<>();
 
-		handleAlternativeName(organisation, organisationId, dbStatements);
+		handleAlternativeName(tableFacade, organisation, organisationId, dbStatements);
 
 		return dbStatements;
 	}
@@ -98,13 +96,13 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 		return organisationId;
 	}
 
-	private void handleAlternativeName(DataGroup organisation, String organisationId,
-			List<DbStatement> dbStatements) {
+	private void handleAlternativeName(TableFacade tableFacade, DataGroup organisation,
+			String organisationId, List<DbStatement> dbStatements) {
 
 		if (alternativeNameExistsInDatabase(alternativeNameRow)) {
 			handleUpdate(organisation, organisationId, dbStatements);
 		} else {
-			handleInsert(dbStatements, organisation, organisationId);
+			handleInsert(tableFacade, dbStatements, organisation, organisationId);
 		}
 	}
 
@@ -156,21 +154,18 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 		return new Timestamp(time);
 	}
 
-	private void handleInsert(List<DbStatement> dbStatements, DataGroup organisation,
-			String organisationId) {
+	private void handleInsert(TableFacade tableFacade, List<DbStatement> dbStatements,
+			DataGroup organisation, String organisationId) {
 		Map<String, Object> values = generateValues(organisation, organisationId);
-		addOrganisationNameIdNextValue(values);
+		addOrganisationNameIdNextValue(tableFacade, values);
 		dbStatements
 				.add(new DbStatement("insert", ORGANISATION_NAME, values, Collections.emptyMap()));
 	}
 
-	private void addOrganisationNameIdNextValue(Map<String, Object> values) {
+	private void addOrganisationNameIdNextValue(TableFacade tableFacade,
+			Map<String, Object> values) {
 		long nextValue = tableFacade.nextValueFromSequence("name_sequence");
 		values.put(ORGANISATION_NAME_ID, nextValue);
-	}
-
-	public TableFacade getTableFacade() {
-		return tableFacade;
 	}
 
 	public SqlDatabaseFactory getSqlDatabaseFactory() {

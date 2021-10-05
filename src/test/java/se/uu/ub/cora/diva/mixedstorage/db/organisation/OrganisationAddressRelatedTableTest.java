@@ -40,11 +40,14 @@ public class OrganisationAddressRelatedTableTest {
 	private OrganisationAddressRelatedTable address;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 	private List<Row> rowsFromDb;
+	private TableFacadeSpy tableFacade;
 
 	@BeforeMethod
 	public void setUp() {
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
+		tableFacade = new TableFacadeSpy();
 		initOrganisationRows();
+
 		address = new OrganisationAddressRelatedTable(sqlDatabaseFactory);
 
 	}
@@ -61,14 +64,14 @@ public class OrganisationAddressRelatedTableTest {
 	@Test
 	public void testInit() {
 		assertSame(address.getSqlDatabaseFactory(), sqlDatabaseFactory);
-		assertSame(address.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
 	}
 
 	@Test
 	public void testNoAddressInDataGroupNoAddressInDatabase() {
 		DataGroup organisation = createDataGroupWithId("678");
 		setUpOrganisationRowWithoutAddress();
-		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
+		List<DbStatement> dbStatements = address.handleDbForDataGroup(tableFacade, organisation,
+				rowsFromDb);
 		assertTrue(dbStatements.isEmpty());
 	}
 
@@ -97,7 +100,8 @@ public class OrganisationAddressRelatedTableTest {
 	}
 
 	private void assertCorrectUpdateAndDeleteOfAddress(int organisationId, DataGroup organisation) {
-		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
+		List<DbStatement> dbStatements = address.handleDbForDataGroup(tableFacade, organisation,
+				rowsFromDb);
 		assertEquals(dbStatements.size(), 2);
 		DbStatement dbStatement = dbStatements.get(0);
 		assertCorrectUpdateOrganisationAddressSetToNull(organisationId, dbStatement);
@@ -145,7 +149,8 @@ public class OrganisationAddressRelatedTableTest {
 		addressGroup.addChild(new DataAtomicSpy("city", "City of rock and roll"));
 		organisation.addChild(addressGroup);
 
-		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
+		List<DbStatement> dbStatements = address.handleDbForDataGroup(tableFacade, organisation,
+				rowsFromDb);
 		assertEquals(dbStatements.size(), 1);
 		DbStatement dbStatement = dbStatements.get(0);
 		assertCorrectDataForAddressUpdate(organisation, dbStatement, 4);
@@ -190,7 +195,8 @@ public class OrganisationAddressRelatedTableTest {
 		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
 		addressGroup.addChild(new DataAtomicSpy("street", "Hill street"));
 
-		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
+		List<DbStatement> dbStatements = address.handleDbForDataGroup(tableFacade, organisation,
+				rowsFromDb);
 		assertEquals(dbStatements.size(), 1);
 		DbStatement dbStatement = dbStatements.get(0);
 		assertCorrectDataForAddressUpdate(organisation, dbStatement, 4);
@@ -204,7 +210,8 @@ public class OrganisationAddressRelatedTableTest {
 
 		addressGroup.addChild(new DataAtomicSpy("box", "box21"));
 
-		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
+		List<DbStatement> dbStatements = address.handleDbForDataGroup(tableFacade, organisation,
+				rowsFromDb);
 		assertEquals(dbStatements.size(), 1);
 		DbStatement dbStatement = dbStatements.get(0);
 		assertCorrectDataForAddressUpdate(organisation, dbStatement, 4);
@@ -216,7 +223,8 @@ public class OrganisationAddressRelatedTableTest {
 		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
 		addressGroup.addChild(new DataAtomicSpy("postcode", "90210"));
 
-		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
+		List<DbStatement> dbStatements = address.handleDbForDataGroup(tableFacade, organisation,
+				rowsFromDb);
 		assertEquals(dbStatements.size(), 1);
 		DbStatement dbStatement = dbStatements.get(0);
 		assertCorrectDataForAddressUpdate(organisation, dbStatement, 4);
@@ -228,7 +236,8 @@ public class OrganisationAddressRelatedTableTest {
 		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
 		addressGroup.addChild(new DataAtomicSpy("country", "SE"));
 
-		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
+		List<DbStatement> dbStatements = address.handleDbForDataGroup(tableFacade, organisation,
+				rowsFromDb);
 		assertEquals(dbStatements.size(), 1);
 		DbStatement dbStatement = dbStatements.get(0);
 		assertCorrectDataForAddressUpdate(organisation, dbStatement, 4);
@@ -245,7 +254,8 @@ public class OrganisationAddressRelatedTableTest {
 		addressGroup.addChild(new DataAtomicSpy("box", "box21"));
 		addressGroup.addChild(new DataAtomicSpy("street", "Hill street"));
 
-		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
+		List<DbStatement> dbStatements = address.handleDbForDataGroup(tableFacade, organisation,
+				rowsFromDb);
 		assertEquals(dbStatements.size(), 1);
 		DbStatement dbStatement = dbStatements.get(0);
 		assertCorrectDataForAddressUpdate(organisation, dbStatement, 4);
@@ -259,10 +269,10 @@ public class OrganisationAddressRelatedTableTest {
 		addressGroup.addChild(new DataAtomicSpy("box", "box21"));
 		setUpOrganisationRowWithoutAddress();
 
-		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
+		List<DbStatement> dbStatements = address.handleDbForDataGroup(tableFacade, organisation,
+				rowsFromDb);
 		assertEquals(dbStatements.size(), 2);
 
-		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 		assertEquals(tableFacade.sequenceName, "address_sequence");
 
 		assertCorrectDataForAddressInsert(organisation, dbStatements.get(0), 4,

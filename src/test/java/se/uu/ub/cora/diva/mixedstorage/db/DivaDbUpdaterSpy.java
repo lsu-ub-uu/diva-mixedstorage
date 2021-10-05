@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,15 +19,21 @@
 package se.uu.ub.cora.diva.mixedstorage.db;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class DivaDbUpdaterSpy implements DivaDbUpdater {
 
 	public DataGroup dataGroup;
+	public TableFacade tableFacade;
+	public DatabaseFacade databaseFacade;
 
 	@Override
-	public void update(DataGroup dataGroup) {
+	public void update(TableFacade tableFacade, DatabaseFacade databaseFacade,
+			DataGroup dataGroup) {
+		this.tableFacade = tableFacade;
+		this.databaseFacade = databaseFacade;
 		this.dataGroup = dataGroup;
-
 	}
 
 }

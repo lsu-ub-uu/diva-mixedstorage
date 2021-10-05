@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -22,11 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public interface MultipleRowDbToDataReader {
 
-	List<DataGroup> read(String type, String id);
+	List<DataGroup> read(TableFacade tableFacade, String type, String id);
 
-	List<DataGroup> read(String tableName, Map<String, Object> conditions);
+	List<DataGroup> read(TableFacade tableFacade, String tableName, Map<String, Object> conditions);
 
 }

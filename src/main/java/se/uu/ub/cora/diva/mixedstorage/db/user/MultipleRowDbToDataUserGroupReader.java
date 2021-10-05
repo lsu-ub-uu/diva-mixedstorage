@@ -31,7 +31,6 @@ public class MultipleRowDbToDataUserGroupReader extends DivaMultipleRowDbToDataR
 			DivaDbToCoraConverterFactory converterFactory) {
 		this.sqlDatabaseFactory = sqlDatabaseFactory;
 		this.converterFactory = converterFactory;
-		this.tableFacade = sqlDatabaseFactory.factorTableFacade();
 	}
 
 	@Override

@@ -45,8 +45,6 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	private Map<String, Object> organisationConditions;
 	private Map<String, Object> organisationValues;
 	private SqlDatabaseFactory sqlDatabaseFactory;
-	private TableFacade tableFacade;
-	private DatabaseFacade databaseFacade;
 
 	public DivaDbOrganisationUpdater(DataToDbTranslater dataTranslater,
 			SqlDatabaseFactory sqlDatabaseFactory, RelatedTableFactory relatedTableFactory,
@@ -55,26 +53,27 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		this.sqlDatabaseFactory = sqlDatabaseFactory;
 		this.relatedTableFactory = relatedTableFactory;
 		this.statementExecutor = preparedStatementCreator;
-		this.tableFacade = sqlDatabaseFactory.factorTableFacade();
-		this.databaseFacade = sqlDatabaseFactory.factorDatabaseFacade();
 	}
 
 	@Override
-	public void update(DataGroup dataGroup) {
+	public void update(TableFacade tableFacade, DatabaseFacade databaseFacade,
+			DataGroup dataGroup) {
 		organisationToDbTranslater.translate(dataGroup);
 		organisationConditions = organisationToDbTranslater.getConditions();
 		organisationValues = organisationToDbTranslater.getValues();
-		updateOrganisation(dataGroup);
+		updateOrganisation(tableFacade, databaseFacade, dataGroup);
 
 	}
 
-	private void updateOrganisation(DataGroup dataGroup) {
-		List<Row> existingDbOrganisation = readExistingOrganisationRow();
-		List<DbStatement> dbStatements = generateDbStatements(dataGroup, existingDbOrganisation);
-		tryUpdateDatabaseWithGivenDbStatements(dbStatements);
+	private void updateOrganisation(TableFacade tableFacade, DatabaseFacade databaseFacade,
+			DataGroup dataGroup) {
+		List<Row> existingDbOrganisation = readExistingOrganisationRow(tableFacade);
+		List<DbStatement> dbStatements = generateDbStatements(tableFacade, dataGroup,
+				existingDbOrganisation);
+		tryUpdateDatabaseWithGivenDbStatements(databaseFacade, dbStatements);
 	}
 
-	private List<Row> readExistingOrganisationRow() {
+	private List<Row> readExistingOrganisationRow(TableFacade tableFacade) {
 		TableQuery tableQuery = createTableQueryForReadOrganisation();
 		return tableFacade.readRowsForQuery(tableQuery);
 	}
@@ -90,15 +89,16 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		tableQuery.addCondition(ORGANISATION_ID, organisationsId);
 	}
 
-	private List<DbStatement> generateDbStatements(DataGroup dataGroup,
+	private List<DbStatement> generateDbStatements(TableFacade tableFacade, DataGroup dataGroup,
 			List<Row> organisationRowsFromDb) {
 		List<DbStatement> dbStatements = new ArrayList<>();
 		dbStatements.add(createDbStatementForOrganisationUpdate());
-		dbStatements
-				.addAll(generateDbStatementsForAlternativeName(dataGroup, organisationRowsFromDb));
-		dbStatements.addAll(generateDbStatementsForAddress(dataGroup, organisationRowsFromDb));
-		dbStatements.addAll(generateDbStatementsForParents(dataGroup));
-		dbStatements.addAll(generateDbStatementsForPredecessors(dataGroup));
+		dbStatements.addAll(generateDbStatementsForAlternativeName(tableFacade, dataGroup,
+				organisationRowsFromDb));
+		dbStatements.addAll(
+				generateDbStatementsForAddress(tableFacade, dataGroup, organisationRowsFromDb));
+		dbStatements.addAll(generateDbStatementsForParents(tableFacade, dataGroup));
+		dbStatements.addAll(generateDbStatementsForPredecessors(tableFacade, dataGroup));
 		return dbStatements;
 	}
 
@@ -107,37 +107,40 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 				organisationConditions);
 	}
 
-	private List<DbStatement> generateDbStatementsForAlternativeName(DataGroup dataGroup,
-			List<Row> organisationRowsFromDb) {
+	private List<DbStatement> generateDbStatementsForAlternativeName(TableFacade tableFacade,
+			DataGroup dataGroup, List<Row> organisationRowsFromDb) {
 		RelatedTable alternativeName = relatedTableFactory.factor("organisationAlternativeName");
-		return alternativeName.handleDbForDataGroup(dataGroup, organisationRowsFromDb);
+		return alternativeName.handleDbForDataGroup(tableFacade, dataGroup, organisationRowsFromDb);
 	}
 
-	private List<DbStatement> generateDbStatementsForAddress(DataGroup dataGroup,
-			List<Row> organisationRowsFromDb) {
+	private List<DbStatement> generateDbStatementsForAddress(TableFacade tableFacade,
+			DataGroup dataGroup, List<Row> organisationRowsFromDb) {
 		RelatedTable addressTable = relatedTableFactory.factor("organisationAddress");
-		return addressTable.handleDbForDataGroup(dataGroup, organisationRowsFromDb);
+		return addressTable.handleDbForDataGroup(tableFacade, dataGroup, organisationRowsFromDb);
 	}
 
-	private List<DbStatement> generateDbStatementsForParents(DataGroup dataGroup) {
+	private List<DbStatement> generateDbStatementsForParents(TableFacade tableFacade,
+			DataGroup dataGroup) {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("organisation_parent");
 		addConditionForRead(tableQuery);
 		List<Row> dbParents = tableFacade.readRowsForQuery(tableQuery);
 		RelatedTable parent = relatedTableFactory.factor("organisationParent");
-		return parent.handleDbForDataGroup(dataGroup, dbParents);
+		return parent.handleDbForDataGroup(tableFacade, dataGroup, dbParents);
 	}
 
-	private List<DbStatement> generateDbStatementsForPredecessors(DataGroup dataGroup) {
+	private List<DbStatement> generateDbStatementsForPredecessors(TableFacade tableFacade,
+			DataGroup dataGroup) {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("divaorganisationpredecessor");
 		addConditionForRead(tableQuery);
 		List<Row> dbPredecessors = tableFacade.readRowsForQuery(tableQuery);
 		RelatedTable predecessor = relatedTableFactory.factor("organisationPredecessor");
-		return predecessor.handleDbForDataGroup(dataGroup, dbPredecessors);
+		return predecessor.handleDbForDataGroup(tableFacade, dataGroup, dbPredecessors);
 	}
 
-	private void tryUpdateDatabaseWithGivenDbStatements(List<DbStatement> dbStatements) {
+	private void tryUpdateDatabaseWithGivenDbStatements(DatabaseFacade databaseFacade,
+			List<DbStatement> dbStatements) {
 		try {
-			tryUpdateDatabaseWithGivenDbStatementsUsingConnection(dbStatements);
+			tryUpdateDatabaseWithGivenDbStatementsUsingConnection(databaseFacade, dbStatements);
 		} catch (Exception e) {
 			throw SqlDatabaseException.withMessageAndException(
 					"Error executing prepared statement: " + e.getMessage(), e);
@@ -145,9 +148,9 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private void tryUpdateDatabaseWithGivenDbStatementsUsingConnection(
-			List<DbStatement> dbStatements) {
+			DatabaseFacade databaseFacade, List<DbStatement> dbStatements) {
 		try {
-			updateDatabaseWithGivenDbStatementsUsingConnection(dbStatements);
+			updateDatabaseWithGivenDbStatementsUsingConnection(databaseFacade, dbStatements);
 		} catch (Exception innerException) {
 			databaseFacade.rollback();
 			throw innerException;
@@ -156,7 +159,7 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		}
 	}
 
-	private void updateDatabaseWithGivenDbStatementsUsingConnection(
+	private void updateDatabaseWithGivenDbStatementsUsingConnection(DatabaseFacade databaseFacade,
 			List<DbStatement> dbStatements) {
 		databaseFacade.startTransaction();
 		statementExecutor.executeDbStatmentUsingDatabaseFacade(dbStatements, databaseFacade);
@@ -180,14 +183,6 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	public SqlDatabaseFactory getSqlDatabaseFactory() {
 		return sqlDatabaseFactory;
-	}
-
-	public TableFacade getTableFacade() {
-		return tableFacade;
-	}
-
-	public DatabaseFacade getDatabaseFacade() {
-		return databaseFacade;
 	}
 
 }

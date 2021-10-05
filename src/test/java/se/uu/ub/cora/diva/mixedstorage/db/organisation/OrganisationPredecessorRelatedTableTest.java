@@ -43,10 +43,12 @@ public class OrganisationPredecessorRelatedTableTest {
 	private OrganisationPredecessorRelatedTable predecessor;
 	private List<Row> predecessorRows;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
+	private TableFacadeSpy tableFacade;
 
 	@BeforeMethod
 	public void setUp() {
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
+		tableFacade = new TableFacadeSpy();
 		initPredecessorRows();
 		predecessor = new OrganisationPredecessorRelatedTable(sqlDatabaseFactory);
 	}
@@ -70,13 +72,13 @@ public class OrganisationPredecessorRelatedTableTest {
 	@Test
 	public void testInit() {
 		assertSame(predecessor.getSqlDatabaseFactory(), sqlDatabaseFactory);
-		assertSame(predecessor.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
+		// assertSame(predecessor.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
 	}
 
 	@Test
 	public void testNoPredecessorInDbNoPredecessorInDataGroup() {
 		DataGroup organisation = createDataGroupWithId("678");
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				Collections.emptyList());
 		assertTrue(dbStatements.isEmpty());
 	}
@@ -85,7 +87,7 @@ public class OrganisationPredecessorRelatedTableTest {
 	public void testOnePredecessorInDbButNoPredecessorInDataGroup() {
 		DataGroup organisation = createDataGroupWithId("678");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				predecessorRows);
 		assertEquals(dbStatements.size(), 2);
 		assertCorrectDeleteForPredecessorDescription(dbStatements.get(0), 678, 234);
@@ -118,7 +120,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addPredecessor(organisation, "234", "0");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				predecessorRows);
 		assertTrue(dbStatements.isEmpty());
 	}
@@ -157,7 +159,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addPredecessor(organisation, "22234", "0");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				predecessorRows);
 		assertEquals(dbStatements.size(), 3);
 
@@ -181,7 +183,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addPredecessor(organisation, "234", "0");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				Collections.emptyList());
 		assertEquals(dbStatements.size(), 1);
 		assertCorrectPredecessorInsert(dbStatements.get(0), 678, 234);
@@ -199,7 +201,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		addPredecessorRow(multiplePredecessorRows, 678, 2444);
 		addPredecessorRow(multiplePredecessorRows, 678, 2222);
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				multiplePredecessorRows);
 		assertEquals(dbStatements.size(), 6);
 		assertCorrectPredecessorInsert(dbStatements.get(0), 678, 23);
@@ -240,7 +242,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addPredecessorWithDescription(organisation, "234", "0");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				Collections.emptyList());
 
 		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
@@ -285,7 +287,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		addPredecessorRowWithDesciption(predecessorWithDescriptionRows, 678, 234, 33,
 				"some description for descriptionId 33");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				predecessorWithDescriptionRows);
 		assertEquals(dbStatements.size(), 2);
 		assertCorrectDeleteForPredecessorDescription(dbStatements.get(0), 678, 234);
@@ -310,7 +312,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		predecessorRow.addColumnWithValue("predecessordescriptionid", 7777);
 		predecessorRow.addColumnWithValue("description", "some description");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				predecessorRows);
 		assertTrue(dbStatements.isEmpty());
 	}
@@ -324,7 +326,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		predecessorRow.addColumnWithValue("predecessordescriptionid", 7778);
 		predecessorRow.addColumnWithValue("description", "some OTHER description");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				predecessorRows);
 
 		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
@@ -346,7 +348,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		predecessorRow.addColumnWithValue("predecessordescriptionid", 7778);
 		predecessorRow.addColumnWithValue("description", "some OTHER description");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				predecessorRows);
 		assertEquals(dbStatements.size(), 1);
 		assertCorrectDeleteForPredecessorDescription(dbStatements.get(0), 678, 234);
@@ -357,7 +359,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addPredecessorWithDescription(organisation, "234", "0");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				predecessorRows);
 
 		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
@@ -378,7 +380,7 @@ public class OrganisationPredecessorRelatedTableTest {
 		predecessorRow.addColumnWithValue("predecessordescriptionid", 7778);
 		predecessorRow.addColumnWithValue("description", "some description");
 
-		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(organisation,
+		List<DbStatement> dbStatements = predecessor.handleDbForDataGroup(tableFacade, organisation,
 				predecessorRows);
 
 		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;

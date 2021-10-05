@@ -31,7 +31,6 @@ public class MultipleRowDbToDataParentReader extends DivaMultipleRowDbToDataRead
 			DivaDbToCoraConverterFactory converterFactory) {
 		this.sqlDatabaseFactory = sqlDatabaseFactory;
 		this.converterFactory = converterFactory;
-		this.tableFacade = sqlDatabaseFactory.factorTableFacade();
 	}
 
 	@Override

@@ -43,6 +43,8 @@ public class DivaDbOrganisationUpdaterTest {
 	private DataGroup dataGroup;
 	private PreparedStatementExecutorSpy preparedStatementCreator;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
+	private TableFacadeSpy tableFacade;
+	private DatabaseFacadeSpy databaseFacade;
 
 	@BeforeMethod
 	public void setUp() {
@@ -51,6 +53,8 @@ public class DivaDbOrganisationUpdaterTest {
 		relatedTableFactory = new RelatedTableFactorySpy();
 		preparedStatementCreator = new PreparedStatementExecutorSpy();
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
+		tableFacade = new TableFacadeSpy();
+		databaseFacade = new DatabaseFacadeSpy();
 		organisationUpdater = new DivaDbOrganisationUpdater(dataTranslater, sqlDatabaseFactory,
 				relatedTableFactory, preparedStatementCreator);
 	}
@@ -65,18 +69,14 @@ public class DivaDbOrganisationUpdaterTest {
 	@Test
 	public void testInit() {
 		assertSame(organisationUpdater.getSqlDatabaseFactory(), sqlDatabaseFactory);
-		assertSame(organisationUpdater.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
-		assertSame(organisationUpdater.getDatabaseFacade(),
-				sqlDatabaseFactory.factoredDatabaseFacade);
 	}
 
 	@Test
 	public void testTranslaterConditionsUsedWhenReadingOrganisation() {
-		organisationUpdater.update(dataGroup);
+		organisationUpdater.update(tableFacade, databaseFacade, dataGroup);
 		assertEquals(dataTranslater.dataGroup, dataGroup);
 
 		assertEquals(sqlDatabaseFactory.tableNames.get(0), "organisationview");
-		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
 		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQueries.get(0);
 		assertNotNull(tableQuery);
@@ -90,10 +90,9 @@ public class DivaDbOrganisationUpdaterTest {
 
 	@Test
 	public void testAlternativeName() {
-		organisationUpdater.update(dataGroup);
+		organisationUpdater.update(tableFacade, databaseFacade, dataGroup);
 
 		assertEquals(sqlDatabaseFactory.tableNames.get(0), "organisationview");
-		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
 		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQueries.get(0);
 		assertSame(tableFacade.tableQueries.get(0), sqlDatabaseFactory.factoredTableQueries.get(0));
@@ -106,6 +105,7 @@ public class DivaDbOrganisationUpdaterTest {
 		RelatedTableSpy firstRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
 				.get(0);
 
+		assertSame(firstRelatedTable.tableFacade, tableFacade);
 		assertSame(firstRelatedTable.dataGroup, dataGroup);
 		assertEquals(firstRelatedTable.dbRows, tableFacade.rowsToReturn);
 
@@ -113,26 +113,24 @@ public class DivaDbOrganisationUpdaterTest {
 
 	@Test
 	public void testAddress() {
-		organisationUpdater.update(dataGroup);
-
-		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		organisationUpdater.update(tableFacade, databaseFacade, dataGroup);
 
 		assertSame(tableFacade.tableQueries.get(0), sqlDatabaseFactory.factoredTableQueries.get(0));
 
 		assertEquals(relatedTableFactory.relatedTableNames.get(1), "organisationAddress");
 		RelatedTableSpy addressTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
 				.get(1);
+
+		assertSame(addressTable.tableFacade, tableFacade);
 		assertSame(addressTable.dataGroup, dataGroup);
 		assertEquals(addressTable.dbRows, tableFacade.rowsToReturn);
 	}
 
 	@Test
 	public void testParent() {
-		organisationUpdater.update(dataGroup);
+		organisationUpdater.update(tableFacade, databaseFacade, dataGroup);
 
 		assertEquals(sqlDatabaseFactory.tableNames.get(1), "organisation_parent");
-
-		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
 		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQueries.get(1);
 		assertSame(tableQuery, sqlDatabaseFactory.factoredTableQueries.get(1));
@@ -140,6 +138,8 @@ public class DivaDbOrganisationUpdaterTest {
 
 		RelatedTableSpy secondRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
 				.get(2);
+
+		assertSame(secondRelatedTable.tableFacade, tableFacade);
 		assertSame(secondRelatedTable.dataGroup, dataGroup);
 		assertEquals(secondRelatedTable.dbRows, tableFacade.rowsToReturn);
 
@@ -147,9 +147,8 @@ public class DivaDbOrganisationUpdaterTest {
 
 	@Test
 	public void testPredecessor() {
-		organisationUpdater.update(dataGroup);
+		organisationUpdater.update(tableFacade, databaseFacade, dataGroup);
 		assertEquals(sqlDatabaseFactory.tableNames.get(2), "divaorganisationpredecessor");
-		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
 		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQueries.get(2);
 		assertSame(tableQuery, sqlDatabaseFactory.factoredTableQueries.get(2));
@@ -158,14 +157,15 @@ public class DivaDbOrganisationUpdaterTest {
 		assertEquals(relatedTableFactory.relatedTableNames.get(3), "organisationPredecessor");
 		RelatedTableSpy thirdRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
 				.get(3);
+
+		assertSame(thirdRelatedTable.tableFacade, tableFacade);
 		assertSame(thirdRelatedTable.dataGroup, dataGroup);
 		assertEquals(thirdRelatedTable.dbRows, tableFacade.rowsToReturn);
 	}
 
 	@Test
 	public void testSQLConnectionConfiguration() {
-		organisationUpdater.update(dataGroup);
-		DatabaseFacadeSpy databaseFacade = sqlDatabaseFactory.factoredDatabaseFacade;
+		organisationUpdater.update(tableFacade, databaseFacade, dataGroup);
 		assertTrue(databaseFacade.startTransactionWasCalled);
 		assertTrue(databaseFacade.endTransactionWasCalled);
 	}
@@ -174,10 +174,9 @@ public class DivaDbOrganisationUpdaterTest {
 	public void testConnectionClosedOnSQLException() throws Exception {
 		preparedStatementCreator.throwExceptionOnGenerateStatement = true;
 		try {
-			organisationUpdater.update(dataGroup);
+			organisationUpdater.update(tableFacade, databaseFacade, dataGroup);
 		} catch (Exception sqlException) {
 		}
-		DatabaseFacadeSpy databaseFacade = sqlDatabaseFactory.factoredDatabaseFacade;
 		assertTrue(databaseFacade.endTransactionWasCalled);
 	}
 
@@ -185,18 +184,16 @@ public class DivaDbOrganisationUpdaterTest {
 	public void testRollbackOnSQLException() throws Exception {
 		preparedStatementCreator.throwExceptionOnGenerateStatement = true;
 		try {
-			organisationUpdater.update(dataGroup);
+			organisationUpdater.update(tableFacade, databaseFacade, dataGroup);
 		} catch (Exception sqlException) {
 		}
-		DatabaseFacadeSpy databaseFacade = sqlDatabaseFactory.factoredDatabaseFacade;
 		assertTrue(databaseFacade.rollbackWasCalled);
 	}
 
 	@Test
 	public void testPreparedStatements() {
-		organisationUpdater.update(dataGroup);
+		organisationUpdater.update(tableFacade, databaseFacade, dataGroup);
 		assertTrue(preparedStatementCreator.createWasCalled);
-		DatabaseFacadeSpy databaseFacade = sqlDatabaseFactory.factoredDatabaseFacade;
 		assertSame(preparedStatementCreator.databaseFacade, databaseFacade);
 		int orgStatementAndStatmentsFromSpy = 5;
 		assertEquals(preparedStatementCreator.dbStatements.size(), orgStatementAndStatmentsFromSpy);
@@ -207,6 +204,6 @@ public class DivaDbOrganisationUpdaterTest {
 			+ "Error executing prepared statement: Error executing statement: error from spy")
 	public void testPreparedStatementThrowsException() {
 		preparedStatementCreator.throwExceptionOnGenerateStatement = true;
-		organisationUpdater.update(dataGroup);
+		organisationUpdater.update(tableFacade, databaseFacade, dataGroup);
 	}
 }

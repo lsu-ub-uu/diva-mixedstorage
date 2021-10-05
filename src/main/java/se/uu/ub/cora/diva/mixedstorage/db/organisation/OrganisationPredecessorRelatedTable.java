@@ -47,15 +47,13 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	private static final String ORGANISATION_PREDECESSOR = "organisation_predecessor";
 	private Map<String, DataGroup> predecessorsInDataGroup;
 	private Map<Integer, Row> mapWithPredecessorAsKey;
-	private TableFacade tableFacade;
 
 	public OrganisationPredecessorRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
 		this.sqlDatabaseFactory = sqlDatabaseFactory;
-		tableFacade = sqlDatabaseFactory.factorTableFacade();
 	}
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
+	public List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup organisation,
 			List<Row> existingPredecessors) {
 		setIdAsInt(organisation);
 
@@ -177,15 +175,16 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 		DataGroup dataGroup = predecessorsInDataGroup.get(predecessorId);
 		if (dataGroup.containsChildWithNameInData(INTERNAL_NOTE)) {
 			String comment = dataGroup.getFirstAtomicValueWithNameInData(INTERNAL_NOTE);
-			Map<String, Object> values = createValuesForDescriptionCreate(predecessorId, comment);
+			Map<String, Object> values = createValuesForDescriptionCreate(tableFacade,
+					predecessorId, comment);
 			dbStatments.add(new DbStatement(INSERT, ORGANISATION_PREDECESSOR_DESCRIPTION, values,
 					Collections.emptyMap()));
 
 		}
 	}
 
-	private Map<String, Object> createValuesForDescriptionCreate(String predecessorId,
-			String comment) {
+	private Map<String, Object> createValuesForDescriptionCreate(TableFacade tableFacade,
+			String predecessorId, String comment) {
 		Map<String, Object> descriptionValues = createConditionsForPredecessorDescription(
 				predecessorId);
 		long nextVal = tableFacade
