@@ -23,6 +23,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
@@ -45,6 +46,11 @@ public class MultipleRowDbToDataPredecessorReaderTest {
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
 		predecessorReader = new MultipleRowDbToDataPredecessorReader(sqlDatabaseFactory,
 				converterFactory);
+		initRowsToReturn();
+	}
+
+	private void initRowsToReturn() {
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 567);
 	}
 
 	@Test
@@ -85,7 +91,7 @@ public class MultipleRowDbToDataPredecessorReaderTest {
 
 	@Test
 	public void testReadPredecessorNoPredecessorsFound() throws Exception {
-		sqlDatabaseFactory.numToReturn = 0;
+		sqlDatabaseFactory.rowsToReturn = Collections.emptyList();
 		predecessorReader = new MultipleRowDbToDataPredecessorReader(sqlDatabaseFactory,
 				converterFactory);
 
@@ -101,12 +107,14 @@ public class MultipleRowDbToDataPredecessorReaderTest {
 
 		DivaDbToCoraConverterSpy divaDbToCoraConverter = converterFactory.factoredConverters.get(0);
 		assertNotNull(divaDbToCoraConverter.rowToConvert);
-		assertEquals(tableFacade.returnedRows.get(0), divaDbToCoraConverter.rowToConvert);
+		assertEquals(tableFacade.rowsToReturn.get(0), divaDbToCoraConverter.rowToConvert);
 
 	}
 
 	@Test
 	public void testPredecessorConverterIsCalledWithMultipleReadPredecessorFromDbStorage() {
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 123);
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 765);
 		predecessorReader.read(TABLE_NAME, "567");
 
 		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
@@ -114,13 +122,15 @@ public class MultipleRowDbToDataPredecessorReaderTest {
 		List<DivaDbToCoraConverterSpy> factoredConverters = converterFactory.factoredConverters;
 		DivaDbToCoraConverterSpy divaDbToCoraConverter = factoredConverters.get(0);
 		assertNotNull(divaDbToCoraConverter.rowToConvert);
-		assertEquals(factoredConverters.get(0).rowToConvert, tableFacade.returnedRows.get(0));
-		assertEquals(factoredConverters.get(1).rowToConvert, tableFacade.returnedRows.get(1));
-		assertEquals(factoredConverters.get(2).rowToConvert, tableFacade.returnedRows.get(2));
+		assertEquals(factoredConverters.get(0).rowToConvert, tableFacade.rowsToReturn.get(0));
+		assertEquals(factoredConverters.get(1).rowToConvert, tableFacade.rowsToReturn.get(1));
+		assertEquals(factoredConverters.get(2).rowToConvert, tableFacade.rowsToReturn.get(2));
 	}
 
 	@Test
 	public void testReadPredecessorMultiplePredecessorsFound() throws Exception {
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 123);
+		sqlDatabaseFactory.createAndAddRowToReturn("id", 765);
 		List<DataGroup> readPredecessors = predecessorReader.read(TABLE_NAME, "567");
 		assertEquals(readPredecessors.size(), 3);
 

@@ -63,4 +63,8 @@ public class DivaStorageFactoryImp implements DivaStorageFactory {
 	public UserStorage getGuestUserStorage() {
 		return guestUserStorage;
 	}
+
+	public SqlDatabaseFactory getSqldatabaseFactory() {
+		return sqlDatabaseFactory;
+	}
 }

@@ -31,7 +31,6 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
-import se.uu.ub.cora.diva.mixedstorage.DataReaderSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslaterSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableSpy;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
@@ -43,7 +42,6 @@ public class DivaDbOrganisationUpdaterTest {
 	private RelatedTableFactorySpy relatedTableFactory;
 	private DataGroup dataGroup;
 	private PreparedStatementExecutorSpy preparedStatementCreator;
-	private DataReaderSpy dataReader;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod

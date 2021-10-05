@@ -51,7 +51,6 @@ import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
-import se.uu.ub.cora.sqlstorage.DatabaseRecordStorage;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -172,16 +171,16 @@ public class DivaMixedRecordStorageProviderTest {
 
 		assertTrue(divaClassicDbStorage
 				.getConverterFactory() instanceof DivaDbToCoraConverterFactoryImp);
-		assertCorrectRecordStorageForOneTypeFactory(divaClassicDbStorage);
+		assertCorrectRecordStorageForOneTypeFactory(divaClassicDbStorage, sqlDatabaseFactory);
 
 		DivaDbFactoryImp divaDbToCoraFactory = (DivaDbFactoryImp) divaClassicDbStorage
 				.getDivaDbToCoraFactory();
-		// assertSame(divaDbToCoraFactory.getReaderFactory(), recordReaderFactory);
 		assertSame(divaDbToCoraFactory.getConverterFactory(),
 				divaClassicDbStorage.getConverterFactory());
 	}
 
-	private void assertCorrectRecordStorageForOneTypeFactory(DivaDbRecordStorage dbStorage) {
+	private void assertCorrectRecordStorageForOneTypeFactory(DivaDbRecordStorage dbStorage,
+			SqlDatabaseFactoryImp sqlDatabaseFactory) {
 		DivaDbUpdaterFactoryImp recordStorageForOneTypeFactory = (DivaDbUpdaterFactoryImp) dbStorage
 				.getRecordStorageForOneTypeFactory();
 		assertTrue(recordStorageForOneTypeFactory instanceof DivaDbUpdaterFactoryImp);
@@ -189,52 +188,28 @@ public class DivaMixedRecordStorageProviderTest {
 		DivaDataToDbTranslaterFactoryImp translaterFactory = (DivaDataToDbTranslaterFactoryImp) recordStorageForOneTypeFactory
 				.getTranslaterFactory();
 		assertTrue(translaterFactory instanceof DivaDataToDbTranslaterFactoryImp);
-		// assertTrue(translaterFactory.getRecordReaderFactory() instanceof RecordReaderFactoryImp);
-		//
-		// ContextConnectionProviderImp connectionProvider = (ContextConnectionProviderImp)
-		// recordStorageForOneTypeFactory
-		// .getSqlConnectionProvider();
-		// assertCorrectSqlConnectionProvider(connectionProvider, "databaseLookupName");
-		// assertTrue(recordStorageForOneTypeFactory
-		// .getRecordReaderFactory() instanceof RecordReaderFactoryImp);
-		assertCorrectRelatedTableFactory(recordStorageForOneTypeFactory);
 
-	}
-
-	private void assertCorrectRelatedTableFactory(
-			DivaDbUpdaterFactoryImp recordStorageForOneTypeFactory) {
 		RelatedTableFactoryImp relatedTableFactory = (RelatedTableFactoryImp) recordStorageForOneTypeFactory
 				.getRelatedTableFactory();
 		assertTrue(relatedTableFactory.getSqlDatabaseFactory() instanceof SqlDatabaseFactoryImp);
-
-		// assertTrue(relatedTableFactory.getRecordReaderFactory() instanceof
-		// RecordReaderFactoryImp);
-		// assertTrue(
-		// relatedTableFactory.getRecordDeleterFactory() instanceof RecordDeleterFactoryImp);
-		// assertTrue(
-		// relatedTableFactory.getRecordCreatorFactory() instanceof RecordCreatorFactoryImp);
+		assertSame(relatedTableFactory.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	private SqlDatabaseFactoryImp assertCorrectSqlDatabaseFactory(DivaDbRecordStorage dbStorage) {
 		SqlDatabaseFactoryImp sqlDatabaseFactory = (SqlDatabaseFactoryImp) dbStorage
 				.getSqlDatabaseFactory();
-		assertEquals(sqlDatabaseFactory.getLookupName(), initInfo.get("databaseLookupName"));
+		assertEquals(sqlDatabaseFactory.onlyForTestGetLookupName(),
+				initInfo.get("databaseLookupName"));
 		return sqlDatabaseFactory;
 	}
-
-	// private void assertCorrectSqlConnectionProvider(ContextConnectionProviderImp
-	// connectionProvider,
-	// String name) {
-	// assertEquals(connectionProvider.getName(), initInfo.get(name));
-	// assertTrue(connectionProvider.getContext() instanceof InitialContext);
-	// }
 
 	@Test
 	public void testDivaMixedRecordStorageContainsCorrectGenericDbStorage() {
 		DivaMixedRecordStorage recordStorage = startRecordStorage();
 
-		DatabaseRecordStorage databaseStorage = (DatabaseRecordStorage) recordStorage
-				.getDatabaseStorage();
+		// DatabaseRecordStorage databaseStorage = (DatabaseRecordStorage) recordStorage
+		// .getDatabaseStorage();
+		// assertTrue(databaseStorage.getSqlDatabaseFactory() instanceof SqlDatabaseFactoryImp);
 
 		// RecordReaderFactoryImp recordReaderFactory = (RecordReaderFactoryImp) databaseStorage
 		// .getSqlDatabaseFactory();
@@ -265,8 +240,8 @@ public class DivaMixedRecordStorageProviderTest {
 				.getDivaStorageFactory();
 		assertSame(divaStorageFactory.getGuestUserStorage(),
 				divaMixedRecordStorageProvider.getGuestUserStorage());
-		// assertSame(divaStorageFactory.getReaderFactory(),
-		// divaMixedRecordStorageProvider.getRecordReaderFactory());
+		assertSame(divaStorageFactory.getSqldatabaseFactory(),
+				divaMixedRecordStorageProvider.getSqlDatabaseFactory());
 	}
 
 	@Test

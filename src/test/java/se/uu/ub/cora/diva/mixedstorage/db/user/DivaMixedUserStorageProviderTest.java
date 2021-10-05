@@ -110,7 +110,8 @@ public class DivaMixedUserStorageProviderTest {
 		SqlDatabaseFactoryImp sqlDatabaseFactory = (SqlDatabaseFactoryImp) userStorage
 				.getSqlDatabaseFactory();
 		assertTrue(sqlDatabaseFactory instanceof SqlDatabaseFactoryImp);
-		assertEquals(sqlDatabaseFactory.getLookupName(), initInfo.get("databaseLookupName"));
+		assertEquals(sqlDatabaseFactory.onlyForTestGetLookupName(),
+				initInfo.get("databaseLookupName"));
 	}
 
 	@Test

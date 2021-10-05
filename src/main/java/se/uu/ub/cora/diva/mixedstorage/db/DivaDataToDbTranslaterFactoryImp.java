@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -34,7 +34,6 @@ public class DivaDataToDbTranslaterFactoryImp implements DataToDbTranslaterFacto
 	@Override
 	public DataToDbTranslater factorForTableName(String tableName) {
 		if ("organisation".contentEquals(tableName)) {
-			// RecordReader recordReader = recordReaderFactory.factor();
 			return new OrganisationDataToDbTranslater(sqlDatabaseFactory);
 		}
 		if ("organisation_name".equals(tableName)) {
