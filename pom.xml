@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>se.uu.ub.cora</groupId>
 		<artifactId>cora-parent</artifactId>
-		<version>1.4.1</version>
+		<version>1.4.4</version>
 	</parent>
 
 	<artifactId>divamixedstorage</artifactId>
@@ -40,7 +40,7 @@
 		<xmlutils.version>1.1.0</xmlutils.version>
 		<xmlconverter.version>1.6.0</xmlconverter.version>
 		<converter.version>1.5.0</converter.version>
-		<testutils.version>1.1.0</testutils.version>
+		<testutils.version>1.1.1</testutils.version>
 	</properties>
 
 	<scm>
