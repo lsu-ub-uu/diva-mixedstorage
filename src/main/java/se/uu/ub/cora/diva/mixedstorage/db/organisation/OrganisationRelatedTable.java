@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -40,8 +40,8 @@ public abstract class OrganisationRelatedTable {
 		organisationId = Integer.parseInt(organisationIdAsString);
 	}
 
-	protected void handleDeleteAndCreate(List<DbStatement> dbStatements,
-			List<Row> allCurrentRowsInDb, Set<String> idsFromDataGroup) {
+	protected void handleDeleteAndCreate(List<DbStatement> dbStatements, List<Row> allCurrentRowsInDb,
+			Set<String> idsFromDataGroup) {
 		Set<String> idsInDatabase = getIdsForCurrentRowsInDatabase(allCurrentRowsInDb);
 
 		if (idsInDatabase.isEmpty()) {

@@ -59,6 +59,7 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 		if (noParentsInDataGroup(parentsInDataGroup)) {
 			createDeleteStatements(dbStatements, existingParents);
 		} else {
+			// TODO:with tablefacade
 			handleDeleteAndCreate(dbStatements, existingParents, parentsInDataGroup);
 		}
 

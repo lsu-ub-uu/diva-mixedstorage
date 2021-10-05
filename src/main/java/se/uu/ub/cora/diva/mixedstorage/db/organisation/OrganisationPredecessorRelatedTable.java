@@ -53,7 +53,7 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	}
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup organisation,
+	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
 			List<Row> existingPredecessors) {
 		setIdAsInt(organisation);
 
@@ -175,21 +175,22 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 		DataGroup dataGroup = predecessorsInDataGroup.get(predecessorId);
 		if (dataGroup.containsChildWithNameInData(INTERNAL_NOTE)) {
 			String comment = dataGroup.getFirstAtomicValueWithNameInData(INTERNAL_NOTE);
-			Map<String, Object> values = createValuesForDescriptionCreate(tableFacade,
-					predecessorId, comment);
+			Map<String, Object> values = createValuesForDescriptionCreate(predecessorId, comment);
 			dbStatments.add(new DbStatement(INSERT, ORGANISATION_PREDECESSOR_DESCRIPTION, values,
 					Collections.emptyMap()));
 
 		}
 	}
 
-	private Map<String, Object> createValuesForDescriptionCreate(TableFacade tableFacade,
-			String predecessorId, String comment) {
+	private Map<String, Object> createValuesForDescriptionCreate(String predecessorId,
+			String comment) {
 		Map<String, Object> descriptionValues = createConditionsForPredecessorDescription(
 				predecessorId);
-		long nextVal = tableFacade
-				.nextValueFromSequence("organisation_predecessor_description_sequence");
-		descriptionValues.put(ORGANISATION_PREDECESSOR_ID, nextVal);
+		try (TableFacade factorTableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			long nextVal = factorTableFacade
+					.nextValueFromSequence("organisation_predecessor_description_sequence");
+			descriptionValues.put(ORGANISATION_PREDECESSOR_ID, nextVal);
+		}
 		descriptionValues.put("last_updated", getCurrentTimestamp());
 		descriptionValues.put(DESCRIPTION, comment);
 		return descriptionValues;
@@ -286,10 +287,6 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 
 	public SqlDatabaseFactory getSqlDatabaseFactory() {
 		return sqlDatabaseFactory;
-	}
-
-	public TableFacade getTableFacade() {
-		return tableFacade;
 	}
 
 }

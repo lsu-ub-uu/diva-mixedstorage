@@ -22,11 +22,9 @@ import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.sqldatabase.Row;
-import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public interface RelatedTable {
 
-	List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup organisation,
-			List<Row> dbRows);
+	List<DbStatement> handleDbForDataGroup(DataGroup organisation, List<Row> dbRows);
 
 }
