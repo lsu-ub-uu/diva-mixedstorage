@@ -43,6 +43,7 @@ public class DivaMixedRecordStorageTest {
 	private RecordStorageSpy divaDbToCoraStorage;
 	private RecordStorageSpy userStorage;
 	private RecordStorageSpy databaseRecordStorage;
+	private DatabaseStorageProviderSpy databaseStorageProvider;
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -52,8 +53,8 @@ public class DivaMixedRecordStorageTest {
 		userStorage = new RecordStorageSpy();
 		databaseRecordStorage = new RecordStorageSpy();
 		divaMixedRecordStorage = (DivaMixedRecordStorage) DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, divaDbToCoraStorage,
-						userStorage, databaseRecordStorage);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
+						divaDbToCoraStorage, userStorage, databaseRecordStorage);
 	}
 
 	@Test
@@ -231,8 +232,8 @@ public class DivaMixedRecordStorageTest {
 		userStorage.existsInStorage = false;
 
 		divaMixedRecordStorage = (DivaMixedRecordStorage) DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, divaDbToCoraStorageSpy,
-						userStorage, null);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
+						divaDbToCoraStorageSpy, userStorage, null);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = "user";
@@ -330,8 +331,8 @@ public class DivaMixedRecordStorageTest {
 	public void readUserListGoesToDUserStorageANDToBasicStorage() throws Exception {
 		userStorage = new RecordStorageSpy("userStorage");
 		divaMixedRecordStorage = (DivaMixedRecordStorage) DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, divaDbToCoraStorage,
-						userStorage, null);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
+						divaDbToCoraStorage, userStorage, null);
 
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
@@ -715,8 +716,8 @@ public class DivaMixedRecordStorageTest {
 			throws Exception {
 		userStorage.linkExistsInStorage = true;
 		divaMixedRecordStorage = (DivaMixedRecordStorage) DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, null, userStorage,
-						null);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, null,
+						userStorage, null);
 
 		String type = "coraUser";
 		String id = "userId";
@@ -737,8 +738,8 @@ public class DivaMixedRecordStorageTest {
 	@Test
 	public void recordDoesNotExistForAbstractOrImplementingRecordTypeAndRecordIdForUser() {
 		divaMixedRecordStorage = (DivaMixedRecordStorage) DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, null, userStorage,
-						null);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, null,
+						userStorage, null);
 
 		boolean recordExists = divaMixedRecordStorage
 				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("user", "id");
@@ -751,8 +752,8 @@ public class DivaMixedRecordStorageTest {
 		userStorage.existsInStorage = false;
 		basicStorage.linkExistsInStorage = true;
 		divaMixedRecordStorage = (DivaMixedRecordStorage) DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, null, userStorage,
-						null);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, null,
+						userStorage, null);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = "coraUser";

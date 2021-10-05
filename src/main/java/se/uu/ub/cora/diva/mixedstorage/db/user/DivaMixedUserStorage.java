@@ -215,12 +215,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		}
 	}
 
-	private Map<String, Object> calculateUserForGroupsConditions(Row readRow) {
-		Map<String, Object> groupConditions = new HashMap<>();
-		groupConditions.put(DB_ID, readRow.getValueByColumn(DB_ID));
-		return groupConditions;
-	}
-
 	private String getUserIdFromIdFromLogin(String idFromLogin) {
 		int indexOfAt = idFromLogin.indexOf('@');
 		return idFromLogin.substring(0, indexOfAt);

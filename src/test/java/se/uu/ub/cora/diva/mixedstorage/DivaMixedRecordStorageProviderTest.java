@@ -51,6 +51,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
+import se.uu.ub.cora.sqlstorage.DatabaseRecordStorage;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -204,21 +205,10 @@ public class DivaMixedRecordStorageProviderTest {
 	}
 
 	@Test
-	public void testDivaMixedRecordStorageContainsCorrectGenericDbStorage() {
+	public void testDivaMixedRecordStorageContainsCorrectDatabaseStorageProvider() {
 		DivaMixedRecordStorage recordStorage = startRecordStorage();
 
-		// DatabaseRecordStorage databaseStorage = (DatabaseRecordStorage) recordStorage
-		// .getDatabaseStorage();
-		// assertTrue(databaseStorage.getSqlDatabaseFactory() instanceof SqlDatabaseFactoryImp);
-
-		// RecordReaderFactoryImp recordReaderFactory = (RecordReaderFactoryImp) databaseStorage
-		// .getSqlDatabaseFactory();
-		// assertNotNull(recordReaderFactory.getSqlConnectionProvider());
-		//
-		// ContextConnectionProviderImp connectionProvider = (ContextConnectionProviderImp)
-		// recordReaderFactory
-		// .getSqlConnectionProvider();
-		// assertCorrectSqlConnectionProvider(connectionProvider, "coraDatabaseLookupName");
+		assertTrue(recordStorage.getDatabaseStorage() instanceof DatabaseRecordStorage);
 
 	}
 

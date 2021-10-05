@@ -20,9 +20,7 @@ package se.uu.ub.cora.diva.mixedstorage.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
@@ -68,7 +66,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 	}
 
 	@Override
-	public void create(String type, String id, DataGroup record, DataGroup collectedTerms,
+	public void create(String type, String id, DataGroup dataRecord, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
 		throw NotImplementedException.withMessage("create is not implemented");
 	}
@@ -84,10 +82,10 @@ public class DivaDbRecordStorage implements RecordStorage {
 	}
 
 	@Override
-	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
+	public void update(String type, String id, DataGroup dataRecord, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
 		DivaDbUpdater divaDbUpdater = divaDbUpdaterFactory.factor(type);
-		divaDbUpdater.update(record);
+		divaDbUpdater.update(dataRecord);
 	}
 
 	private DataGroup convertOneMapFromDbToDataGroup(String type, Row readRow) {
@@ -288,7 +286,6 @@ public class DivaDbRecordStorage implements RecordStorage {
 		tableQuery.addOrderByAsc("id");
 
 		TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade();
-		Map<String, Object> conditions = new HashMap<>();
 		return tableFacade.readNumberOfRows(tableQuery);
 	}
 

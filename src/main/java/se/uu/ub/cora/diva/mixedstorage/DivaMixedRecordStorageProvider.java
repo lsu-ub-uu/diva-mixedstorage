@@ -37,6 +37,8 @@ import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
+import se.uu.ub.cora.sqlstorage.DatabaseRecordStorage;
+import se.uu.ub.cora.sqlstorage.DatabaseStorageProvider;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -96,26 +98,15 @@ public class DivaMixedRecordStorageProvider
 		}
 		DivaDbRecordStorage classicDbStorage = createDbStorage(sqlDatabaseFactory);
 		RecordStorage userStorage = createUserStorage();
-		// }
-		// SqlConnectionProvider connectionProvider = tryToCreateConnectionProvider(
-		// "coraDatabaseLookupName");
-		//
-		// RecordReaderFactory readerFactory = RecordReaderFactoryImp
-		// .usingSqlConnectionProvider(connectionProvider);
-		// TODO: what jsonparser??
-		// TODO: use provider
-		// RecordStorage databaseStorage = new DatabaseRecordStorage(sqlDatabaseFactory, null);
-		//
+		DatabaseStorageProvider databaseStorageProvider = new DatabaseStorageProvider();
+		databaseStorageProvider.startUsingInitInfo(initInfo);
+		DatabaseRecordStorage recordStorage = databaseStorageProvider.getRecordStorage();
+
 		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
-						classicDbStorage, userStorage, null);
+						classicDbStorage, userStorage, recordStorage);
 		setStaticInstance(mixedRecordStorage);
 	}
-	//
-	// private void setUpResources() {
-	// sqlConnectionProvider = tryToCreateConnectionProvider("databaseLookupName");
-	// recordReaderFactory = createRecordReaderFactory();
-	// }
 
 	private RecordStorage createBasicStorage() {
 		String basePath = tryToGetInitParameterLogIfFound("storageOnDiskBasePath");
