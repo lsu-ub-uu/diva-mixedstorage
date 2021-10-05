@@ -41,6 +41,12 @@ public class DivaFedoraConverterFactoryTest {
 				.usingFedoraURLAndTransformerFactory(fedoraURL, transformationFactory);
 	}
 
+	@Test
+	public void testInit() {
+		assertSame(divaToCoraConverterFactoryImp.getCoraTransformerFactory(),
+				transformationFactory);
+	}
+
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "No converter implemented for: someType")
 	public void factorUnknownTypeThrowsException() throws Exception {

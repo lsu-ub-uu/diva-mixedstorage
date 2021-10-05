@@ -31,7 +31,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
 
 public class DataToDbTranslaterFactoryTest {
 
-	private DataToDbTranslaterFactory factory;
+	private DivaDataToDbTranslaterFactoryImp factory;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
@@ -43,6 +43,7 @@ public class DataToDbTranslaterFactoryTest {
 	@Test
 	public void testInitFactory() {
 		assertTrue(factory instanceof DataToDbTranslaterFactory);
+		assertSame(factory.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = "No translater implemented for: nonExistingTable")

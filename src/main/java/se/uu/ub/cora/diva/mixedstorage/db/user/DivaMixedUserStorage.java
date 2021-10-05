@@ -21,9 +21,7 @@ package se.uu.ub.cora.diva.mixedstorage.db.user;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
@@ -268,14 +266,8 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		}
 	}
 
-	private Map<String, Object> createConditionsForId(String id) {
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put(DB_ID, Integer.valueOf(id));
-		return conditions;
-	}
-
 	@Override
-	public void create(String type, String id, DataGroup record, DataGroup collectedTerms,
+	public void create(String type, String id, DataGroup dataRecord, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
 		throw NotImplementedException.withMessage("create is not implemented for user");
 	}
@@ -292,7 +284,7 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	}
 
 	@Override
-	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
+	public void update(String type, String id, DataGroup dataRecord, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
 		throw NotImplementedException.withMessage("update is not implemented for user");
 	}
