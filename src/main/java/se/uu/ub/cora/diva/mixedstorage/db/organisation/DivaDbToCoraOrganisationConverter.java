@@ -138,8 +138,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private boolean valueExistsForKey(String key) {
-		Object value = dbRow.getValueByColumn(key);
-		return value != null && !"".equals(value);
+		return dbRow.hasColumnWithNonEmptyValue(key);
 	}
 
 	private void addCountryConvertedToUpperCaseOrSetDefault(DataGroup dataGroup) {

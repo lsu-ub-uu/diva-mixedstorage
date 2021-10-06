@@ -53,13 +53,29 @@ public class RowSpy implements Row {
 
 	@Override
 	public boolean hasColumn(String columnName) {
-		// TODO Auto-generated method stub
-		return false;
+		return columnValues.containsKey(columnName);
 	}
 
 	@Override
 	public boolean hasColumnWithNonEmptyValue(String columnName) {
-		// TODO Auto-generated method stub
+		if (hasColumn(columnName)) {
+			return columnHasValue(columnName);
+		}
+		return false;
+	}
+
+	private boolean columnHasValue(String columnName) {
+		Object value = columnValues.get(columnName);
+		return (DatabaseValues.NULL != value && !isStringWithoutValue(value));
+	}
+
+	private boolean isStringWithoutValue(Object value) {
+		// using longer version as we do not get full coverage with short version
+		// return (value instanceof String stringValue && stringValue.isBlank());
+		if (value instanceof String) {
+			String stringValue = (String) value;
+			return stringValue.isBlank();
+		}
 		return false;
 	}
 
