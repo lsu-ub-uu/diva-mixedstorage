@@ -93,10 +93,9 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 			List<Row> organisationRowsFromDb) {
 		List<DbStatement> dbStatements = new ArrayList<>();
 		dbStatements.add(createDbStatementForOrganisationUpdate());
-		dbStatements.addAll(generateDbStatementsForAlternativeName(tableFacade, dataGroup,
-				organisationRowsFromDb));
+		dbStatements.addAll(generateDbStatementsForAlternativeName(dataGroup, organisationRowsFromDb));
 		dbStatements.addAll(
-				generateDbStatementsForAddress(tableFacade, dataGroup, organisationRowsFromDb));
+				generateDbStatementsForAddress(dataGroup, organisationRowsFromDb));
 		dbStatements.addAll(generateDbStatementsForParents(tableFacade, dataGroup));
 		dbStatements.addAll(generateDbStatementsForPredecessors(tableFacade, dataGroup));
 		return dbStatements;
@@ -107,14 +106,14 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 				organisationConditions);
 	}
 
-	private List<DbStatement> generateDbStatementsForAlternativeName(TableFacade tableFacade,
-			DataGroup dataGroup, List<Row> organisationRowsFromDb) {
+	private List<DbStatement> generateDbStatementsForAlternativeName(DataGroup dataGroup,
+			List<Row> organisationRowsFromDb) {
 		RelatedTable alternativeName = relatedTableFactory.factor("organisationAlternativeName");
 		return alternativeName.handleDbForDataGroup(dataGroup, organisationRowsFromDb);
 	}
 
-	private List<DbStatement> generateDbStatementsForAddress(TableFacade tableFacade,
-			DataGroup dataGroup, List<Row> organisationRowsFromDb) {
+	private List<DbStatement> generateDbStatementsForAddress(DataGroup dataGroup,
+			List<Row> organisationRowsFromDb) {
 		RelatedTable addressTable = relatedTableFactory.factor("organisationAddress");
 		return addressTable.handleDbForDataGroup(dataGroup, organisationRowsFromDb);
 	}

@@ -128,7 +128,7 @@ public class DivaDbRecordStorage implements RecordStorage {
 
 	private StorageReadResult readOrganisationList(String type, String tableName,
 			DataGroup filter) {
-		TableQuery tableQuery = createTableQueryForReadOrganisationList(tableName, filter);
+		TableQuery tableQuery = createTableQueryForReadList(filter, tableName);
 
 		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
 			List<Row> rowsFromDb = tableFacade.readRowsForQuery(tableQuery);
@@ -141,19 +141,11 @@ public class DivaDbRecordStorage implements RecordStorage {
 		}
 	}
 
-	private TableQuery createTableQueryForReadOrganisationList(String tableName, DataGroup filter) {
+	private TableQuery createTableQueryForReadList(DataGroup filter, String tableName) {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(tableName);
-		tableQuery.setFromNo(getAtomicValueAsLongIfExists(filter, "fromNo"));
-		tableQuery.setToNo(getAtomicValueAsLongIfExists(filter, "toNo"));
+		addToAndFromToTableQuery(filter, tableQuery);
 		tableQuery.addOrderByAsc("id");
 		return tableQuery;
-	}
-
-	private Long getAtomicValueAsLongIfExists(DataGroup filter, String nameInData) {
-		if (filter.containsChildWithNameInData(nameInData)) {
-			return extractAtomicValueAsInteger(filter, nameInData);
-		}
-		return null;
 	}
 
 	private void convertOrganisation(TableFacade tableFacade, String type,
@@ -297,25 +289,21 @@ public class DivaDbRecordStorage implements RecordStorage {
 	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
 		throwNotImplementedErrorIfNotOrganisation(type);
 		String tableName = getTableName(type);
-		TableQuery tableQuery = createTableQueryForTotalNumberOfRecords(filter, tableName);
+		TableQuery tableQuery = createTableQueryForReadList(filter, tableName);
 
 		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
 			return tableFacade.readNumberOfRows(tableQuery);
 		}
 	}
 
-	private TableQuery createTableQueryForTotalNumberOfRecords(DataGroup filter, String tableName) {
-		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(tableName);
-		addToAndFromToTableQuery(filter, tableQuery);
-		tableQuery.addOrderByAsc("id");
-		return tableQuery;
-	}
-
 	private void addToAndFromToTableQuery(DataGroup filter, TableQuery tableQuery) {
-		Long fromNo = getAtomicValueAsLongIfExists(filter, "fromNo");
-		Long toNo = getAtomicValueAsLongIfExists(filter, "toNo");
-		tableQuery.setFromNo(fromNo);
-		tableQuery.setToNo(toNo);
+		if (filter.containsChildWithNameInData("fromNo")) {
+			tableQuery.setFromNo(extractAtomicValueAsInteger(filter, "fromNo"));
+		}
+		if (filter.containsChildWithNameInData("toNo")) {
+			tableQuery.setToNo(extractAtomicValueAsInteger(filter, "toNo"));
+
+		}
 	}
 
 	private Long extractAtomicValueAsInteger(DataGroup filter, String nameInData) {

@@ -260,8 +260,8 @@ public class DivaDbRecordStorageTest {
 		assertEquals(tableQuery.tableName, "organisationview");
 
 		assertEquals(tableQuery.ascOrdersBy.get(0), "id");
-		assertEquals(tableQuery.fromNumbers.get(0), null);
-		assertEquals(tableQuery.toNumbers.get(0), null);
+		assertEquals(tableQuery.fromNumbers.size(), 0);
+		assertEquals(tableQuery.toNumbers.size(), 0);
 	}
 
 	@Test
@@ -615,7 +615,7 @@ public class DivaDbRecordStorageTest {
 
 		assertEquals(tableQuery.ascOrdersBy.get(0), "id");
 		assertEquals(tableQuery.fromNumbers.get(0), Long.valueOf(4));
-		assertEquals(tableQuery.toNumbers.get(0), null);
+		assertEquals(tableQuery.toNumbers.size(), 0);
 
 		assertEquals(totalNumberOfRecordsForType,
 				sqlDatabaseFactory.factoredTableFacade.numToReturn);
@@ -631,7 +631,7 @@ public class DivaDbRecordStorageTest {
 		assertEquals(sqlDatabaseFactory.tableNames.get(0), "toporganisationview");
 		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
 
-		assertEquals(tableQuery.fromNumbers.get(0), null);
+		assertEquals(tableQuery.fromNumbers.size(), 0);
 		assertEquals(tableQuery.toNumbers.get(0), Long.valueOf(4));
 	}
 
@@ -666,8 +666,8 @@ public class DivaDbRecordStorageTest {
 
 		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQueries.get(0);
 
-		assertEquals(tableQuery.fromNumbers.get(0), null);
-		assertEquals(tableQuery.toNumbers.get(0), null);
+		assertEquals(tableQuery.fromNumbers.size(), 0);
+		assertEquals(tableQuery.toNumbers.size(), 0);
 		assertEquals(totalNumberOfRecordsForType,
 				sqlDatabaseFactory.factoredTableFacade.numToReturn);
 	}
