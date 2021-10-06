@@ -23,9 +23,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbOrganisationReader;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataParentReader;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataPredecessorReader;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
-//import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
-import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class DivaDbFactoryImp implements DivaDbFactory {
 

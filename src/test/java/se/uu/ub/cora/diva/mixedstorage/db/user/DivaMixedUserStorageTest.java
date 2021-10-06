@@ -199,12 +199,6 @@ public class DivaMixedUserStorageTest {
 		assertTrue(tableFacade.closeWasCalled);
 	}
 
-	private RowSpy createRowWithColumn(String columnName, String value) {
-		RowSpy rowToReturn = new RowSpy();
-		rowToReturn.addColumnWithValue(columnName, value);
-		return rowToReturn;
-	}
-
 	@Test
 	public void testReadRecordGroupUsersView() throws Exception {
 		sqlDatabaseFactory.createAndAddRowToReturn("db_id", "917");

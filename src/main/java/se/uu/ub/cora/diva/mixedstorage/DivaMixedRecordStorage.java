@@ -85,9 +85,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	}
 
 	@Override
-	public void create(String type, String id, DataGroup record, DataGroup collectedTerms,
+	public void create(String type, String id, DataGroup dataRecord, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		basicStorage.create(type, id, record, collectedTerms, linkList, dataDivider);
+		basicStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 	}
 
 	@Override

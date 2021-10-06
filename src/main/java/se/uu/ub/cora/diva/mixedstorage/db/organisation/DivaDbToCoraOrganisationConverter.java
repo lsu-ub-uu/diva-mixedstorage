@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2020 Uppsala University Library
+ * Copyright 2019, 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -49,9 +49,7 @@ public class DivaDbToCoraOrganisationConverter implements DivaDbToCoraConverter 
 	}
 
 	private boolean organisationIsEmpty() {
-		// TODO: DatabaseNull??
-		Object organisationId = dbRow.getValueByColumn(ORGANISATION_ID);
-		return organisationId == null || "".equals(organisationId);
+		return !dbRow.hasColumnWithNonEmptyValue(ORGANISATION_ID);
 	}
 
 	private DataGroup createDataGroup() {

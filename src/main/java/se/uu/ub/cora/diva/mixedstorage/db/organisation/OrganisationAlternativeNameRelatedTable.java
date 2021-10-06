@@ -86,7 +86,6 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 	}
 
 	private Row getRowIfOnlyOneOrEmptyMap(List<Row> readRows) {
-		// TODO:something else but null?
 		return readRows.size() == 1 ? readRows.get(0) : null;
 	}
 

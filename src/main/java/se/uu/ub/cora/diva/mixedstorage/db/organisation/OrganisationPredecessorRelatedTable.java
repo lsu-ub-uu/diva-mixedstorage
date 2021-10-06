@@ -261,8 +261,7 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	}
 
 	private boolean predecessorHasDescription(Row readDescription) {
-		// TODO: throws exception - handle it
-		return readDescription.getValueByColumn(DESCRIPTION) != null;
+		return readDescription.hasColumnWithNonEmptyValue(DESCRIPTION);
 	}
 
 	private void deleteDescriptionFromDbUsingConditions(List<DbStatement> dbStatements,
