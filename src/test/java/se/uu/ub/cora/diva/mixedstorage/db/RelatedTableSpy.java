@@ -24,19 +24,15 @@ import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.sqldatabase.Row;
-import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class RelatedTableSpy implements RelatedTable {
 
 	public List<Row> dbRows;
 	private List<DbStatement> dbStatements;
 	public DataGroup dataGroup;
-	public TableFacade tableFacade;
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup dataGroup,
-			List<Row> dbRows) {
-		this.tableFacade = tableFacade;
+	public List<DbStatement> handleDbForDataGroup(DataGroup dataGroup, List<Row> dbRows) {
 		this.dataGroup = dataGroup;
 		this.dbRows = dbRows;
 		dbStatements = new ArrayList<>();

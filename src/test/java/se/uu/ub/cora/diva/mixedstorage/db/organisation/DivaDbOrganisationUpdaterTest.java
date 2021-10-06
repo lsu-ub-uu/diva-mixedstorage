@@ -105,7 +105,6 @@ public class DivaDbOrganisationUpdaterTest {
 		RelatedTableSpy firstRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
 				.get(0);
 
-		assertSame(firstRelatedTable.tableFacade, tableFacade);
 		assertSame(firstRelatedTable.dataGroup, dataGroup);
 		assertEquals(firstRelatedTable.dbRows, tableFacade.rowsToReturn);
 
@@ -121,7 +120,6 @@ public class DivaDbOrganisationUpdaterTest {
 		RelatedTableSpy addressTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
 				.get(1);
 
-		assertSame(addressTable.tableFacade, tableFacade);
 		assertSame(addressTable.dataGroup, dataGroup);
 		assertEquals(addressTable.dbRows, tableFacade.rowsToReturn);
 	}
@@ -139,7 +137,6 @@ public class DivaDbOrganisationUpdaterTest {
 		RelatedTableSpy secondRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
 				.get(2);
 
-		assertSame(secondRelatedTable.tableFacade, tableFacade);
 		assertSame(secondRelatedTable.dataGroup, dataGroup);
 		assertEquals(secondRelatedTable.dbRows, tableFacade.rowsToReturn);
 
@@ -158,7 +155,6 @@ public class DivaDbOrganisationUpdaterTest {
 		RelatedTableSpy thirdRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
 				.get(3);
 
-		assertSame(thirdRelatedTable.tableFacade, tableFacade);
 		assertSame(thirdRelatedTable.dataGroup, dataGroup);
 		assertEquals(thirdRelatedTable.dbRows, tableFacade.rowsToReturn);
 	}

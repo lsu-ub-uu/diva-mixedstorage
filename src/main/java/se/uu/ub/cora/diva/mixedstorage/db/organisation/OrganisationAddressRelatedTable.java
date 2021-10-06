@@ -49,7 +49,7 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 	}
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup organisation,
+	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
 			List<Row> organisationsFromDb) {
 		setIdAsInt(organisation);
 
@@ -59,7 +59,7 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 		if (addressExistsInDatabase(addressIdInOrganisation)) {
 			deleteOrUpdateAddress(dbStatements, organisation, addressIdInOrganisation);
 		} else {
-			possiblyInsertAddress(tableFacade, dbStatements, organisation);
+			possiblyInsertAddress(dbStatements, organisation);
 
 		}
 		return dbStatements;
@@ -179,15 +179,16 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 
 	}
 
-	private void possiblyInsertAddress(TableFacade tableFacade, List<DbStatement> dbStatements,
-			DataGroup organisation) {
+	private void possiblyInsertAddress(List<DbStatement> dbStatements, DataGroup organisation) {
 		if (organisationDataGroupContainsAddress(organisation)) {
-			long nextValueFromSequence = tableFacade.nextValueFromSequence("address_sequence");
-			createInsertForAddress(dbStatements, organisation, nextValueFromSequence);
-			Map<String, Object> values = new HashMap<>();
-			values.put(ADDRESS_ID, nextValueFromSequence);
-			updateAddressColumnInOrganisation(dbStatements, values,
-					createConditionsWithOrganisationId());
+			try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+				long nextValueFromSequence = tableFacade.nextValueFromSequence("address_sequence");
+				createInsertForAddress(dbStatements, organisation, nextValueFromSequence);
+				Map<String, Object> values = new HashMap<>();
+				values.put(ADDRESS_ID, nextValueFromSequence);
+				updateAddressColumnInOrganisation(dbStatements, values,
+						createConditionsWithOrganisationId());
+			}
 		}
 	}
 

@@ -307,6 +307,9 @@ public class OrganisationDataToDbTranslaterTest {
 		assertSame(tableFacade.tableQueries.get(0), tableQuery);
 
 		assertEquals(translater.getValues().get("organisation_type_id"), 52);
+
+		assertTrue(tableFacade.closeWasCalled);
+
 	}
 
 	@Test

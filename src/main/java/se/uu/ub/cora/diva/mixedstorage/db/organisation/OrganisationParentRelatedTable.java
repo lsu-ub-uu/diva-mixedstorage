@@ -31,7 +31,6 @@ import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
-import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 		implements RelatedTable {
@@ -45,7 +44,7 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 	}
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup organisation,
+	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
 			List<Row> existingParents) {
 
 		setIdAsInt(organisation);
@@ -59,7 +58,6 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 		if (noParentsInDataGroup(parentsInDataGroup)) {
 			createDeleteStatements(dbStatements, existingParents);
 		} else {
-			// TODO:with tablefacade
 			handleDeleteAndCreate(dbStatements, existingParents, parentsInDataGroup);
 		}
 

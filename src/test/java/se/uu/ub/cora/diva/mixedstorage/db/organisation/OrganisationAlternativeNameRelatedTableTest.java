@@ -44,12 +44,12 @@ public class OrganisationAlternativeNameRelatedTableTest {
 	private OrganisationAlternativeNameRelatedTable alternativeName;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 	private List<Row> rowsFromDb;
-	private TableFacadeSpy tableFacade;
+	// private TableFacadeSpy tableFacade;
 
 	@BeforeMethod
 	public void setUp() {
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
-		tableFacade = new TableFacadeSpy();
+		// tableFacade = new TableFacadeSpy();
 		initAlternativeNameRows();
 		alternativeName = new OrganisationAlternativeNameRelatedTable(sqlDatabaseFactory);
 	}
@@ -73,7 +73,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 			+ "Organisation must have alternative name")
 	public void testNoNameInDataGroupThrowsException() {
 		DataGroup organisation = createDataGroupWithId("678");
-		alternativeName.handleDbForDataGroup(tableFacade, organisation, rowsFromDb);
+		alternativeName.handleDbForDataGroup(organisation, rowsFromDb);
 	}
 
 	private DataGroup createDataGroupWithId(String id) {
@@ -91,7 +91,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		DataGroupSpy alternativeNameGroup = new DataGroupSpy("organisationAlternativeName");
 		organisation.addChild(alternativeNameGroup);
 
-		alternativeName.handleDbForDataGroup(tableFacade, organisation, rowsFromDb);
+		alternativeName.handleDbForDataGroup(organisation, rowsFromDb);
 	}
 
 	@Test(expectedExceptions = DbException.class, expectedExceptionsMessageRegExp = ""
@@ -102,7 +102,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		RowSpy secondRow = new RowSpy();
 		secondRow.addColumnWithValue("organisation_name_id", 234234);
 		rowsFromDb.add(secondRow);
-		alternativeName.handleDbForDataGroup(tableFacade, organisation, rowsFromDb);
+		alternativeName.handleDbForDataGroup(organisation, rowsFromDb);
 	}
 
 	@Test
@@ -110,8 +110,8 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addAlternativeName(organisation, "some english name");
 
-		List<DbStatement> dbStatments = alternativeName.handleDbForDataGroup(tableFacade,
-				organisation, rowsFromDb);
+		List<DbStatement> dbStatments = alternativeName.handleDbForDataGroup(organisation,
+				rowsFromDb);
 		assertEquals(dbStatments.size(), 0);
 	}
 
@@ -121,8 +121,8 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		String newAlternativeName = "some other english name";
 		addAlternativeName(organisation, newAlternativeName);
 
-		List<DbStatement> dbStatements = alternativeName.handleDbForDataGroup(tableFacade,
-				organisation, rowsFromDb);
+		List<DbStatement> dbStatements = alternativeName.handleDbForDataGroup(organisation,
+				rowsFromDb);
 		assertEquals(dbStatements.size(), 1);
 		DbStatement dbStatement = dbStatements.get(0);
 		assertEquals(dbStatement.getOperation(), "update");
@@ -167,9 +167,10 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		alternativeNameGroup.addChild(new DataAtomicSpy("language", "en"));
 		organisation.addChild(alternativeNameGroup);
 
-		List<DbStatement> dbStatements = alternativeName.handleDbForDataGroup(tableFacade,
-				organisation, Collections.emptyList());
+		List<DbStatement> dbStatements = alternativeName.handleDbForDataGroup(organisation,
+				Collections.emptyList());
 
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 		assertEquals(tableFacade.sequenceName, "name_sequence");
 
 		assertEquals(dbStatements.size(), 1);
@@ -190,5 +191,7 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		assertEquals(values.get("organisation_name"), newAlternativeName);
 
 		assertTrue(dbStatement.getConditions().isEmpty());
+
+		assertTrue(tableFacade.closeWasCalled);
 	}
 }

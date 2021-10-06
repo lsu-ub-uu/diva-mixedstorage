@@ -52,7 +52,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	private DivaDbToCoraConverter userConverter;
 	private DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator;
 	private SqlDatabaseFactory sqlDatabaseFactory;
-	private TableFacade tableFacade;
 
 	public static DivaMixedUserStorage usingGuestUserStorageDatabaseFactoryAndUserConverterAndRoleReferenceCreator(
 			UserStorage guestUserStorage, SqlDatabaseFactory sqlDatabaseFactory,
@@ -67,7 +66,6 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 			DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator) {
 		this.guestUserStorage = guestUserStorage;
 		this.sqlDatabaseFactory = sqlDatabaseFactory;
-		tableFacade = sqlDatabaseFactory.factorTableFacade();
 		this.userConverter = userConverter;
 		this.dataGroupRoleReferenceCreator = dataGroupRoleReferenceCreator;
 	}
@@ -87,11 +85,12 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(PUBLIC_USER);
 		addConditionsToQuery(idFromLogin, tableQuery);
-		Row userRowFromDb = tableFacade.readOneRowForQuery(tableQuery);
-		DataGroup user = userConverter.fromRow(userRowFromDb);
-		readAndPossiblyAddRoles(userRowFromDb, user);
-
-		return user;
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			Row userRowFromDb = tableFacade.readOneRowForQuery(tableQuery);
+			DataGroup user = userConverter.fromRow(userRowFromDb);
+			readAndPossiblyAddRoles(tableFacade, userRowFromDb, user);
+			return user;
+		}
 	}
 
 	private void logAndThrowExceptionIfUnexpectedFormatOf(String idFromLogin) {
@@ -121,17 +120,20 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		tableQuery.addCondition(DOMAIN, userDomain);
 	}
 
-	private void readAndPossiblyAddRoles(Row userRowFromDb, DataGroup user) {
-		List<DataGroup> rolesList = readAndConvertClassicGroupsToCoraRoles(userRowFromDb);
+	private void readAndPossiblyAddRoles(TableFacade tableFacade, Row userRowFromDb,
+			DataGroup user) {
+		List<DataGroup> rolesList = readAndConvertClassicGroupsToCoraRoles(tableFacade,
+				userRowFromDb);
 		possiblyAddRoles(rolesList, user);
 	}
 
-	private List<DataGroup> readAndConvertClassicGroupsToCoraRoles(Row userRowFromDb) {
-		List<Row> groupRowsFromDb = readGroupsFromDb(userRowFromDb);
+	private List<DataGroup> readAndConvertClassicGroupsToCoraRoles(TableFacade tableFacade,
+			Row userRowFromDb) {
+		List<Row> groupRowsFromDb = readGroupsFromDb(tableFacade, userRowFromDb);
 		return convertClassicGroupsToCoraRoles(groupRowsFromDb);
 	}
 
-	private List<Row> readGroupsFromDb(Row userDataFromDb) {
+	private List<Row> readGroupsFromDb(TableFacade tableFacade, Row userDataFromDb) {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("public.groupsforuser");
 		tableQuery.addCondition(DB_ID, userDataFromDb.getValueByColumn(DB_ID));
 		return tableFacade.readRowsForQuery(tableQuery);
@@ -229,15 +231,17 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	@Override
 	public DataGroup read(String type, String id) {
-		Row userRowFromDb = createConditionsAndTryToRead(id);
-		return tryToConvertUserAndAddRoles(id, userRowFromDb);
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			Row userRowFromDb = createConditionsAndTryToRead(tableFacade, id);
+			return tryToConvertUserAndAddRoles(tableFacade, id, userRowFromDb);
+		}
 	}
 
-	private Row createConditionsAndTryToRead(String id) {
+	private Row createConditionsAndTryToRead(TableFacade tableFacade, String id) {
 		throwDbExceptionIfIdNotAnIntegerValue(id);
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(PUBLIC_USER);
 		tableQuery.addCondition(DB_ID, Integer.valueOf(id));
-		return tryToReadUser(id, tableQuery);
+		return tryToReadUser(tableFacade, id, tableQuery);
 	}
 
 	private void throwDbExceptionIfIdNotAnIntegerValue(String id) {
@@ -248,17 +252,18 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 		}
 	}
 
-	private DataGroup tryToConvertUserAndAddRoles(String id, Row userRowFromDb) {
+	private DataGroup tryToConvertUserAndAddRoles(TableFacade tableFacade, String id,
+			Row userRowFromDb) {
 		try {
 			DataGroup user = userConverter.fromRow(userRowFromDb);
-			readAndPossiblyAddRoles(userRowFromDb, user);
+			readAndPossiblyAddRoles(tableFacade, userRowFromDb, user);
 			return user;
 		} catch (SqlDatabaseException sqle) {
 			throw new RecordNotFoundException("Error when reading roles for user: " + id, sqle);
 		}
 	}
 
-	private Row tryToReadUser(String id, TableQuery tableQuery) {
+	private Row tryToReadUser(TableFacade tableFacade, String id, TableQuery tableQuery) {
 		try {
 			return tableFacade.readOneRowForQuery(tableQuery);
 		} catch (SqlDatabaseException s) {
@@ -292,9 +297,12 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(PUBLIC_USER);
-		List<Row> rowsFromDb = tableFacade.readRowsForQuery(tableQuery);
-		List<DataGroup> dataGroups = convertUserGroupsAndAddToList(rowsFromDb);
-		return createStorageResult(dataGroups);
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			List<Row> rowsFromDb = tableFacade.readRowsForQuery(tableQuery);
+			List<DataGroup> dataGroups = Collections.emptyList();
+			convertUserGroupsAndAddToList(rowsFromDb);
+			return createStorageResult(dataGroups);
+		}
 	}
 
 	private List<DataGroup> convertUserGroupsAndAddToList(List<Row> rowsFromDb) {
@@ -341,8 +349,8 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 	}
 
 	private boolean checkIfUserExist(String id) {
-		try {
-			createConditionsAndTryToRead(id);
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			createConditionsAndTryToRead(tableFacade, id);
 		} catch (RecordNotFoundException exception) {
 			return false;
 		}
@@ -379,9 +387,5 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	public SqlDatabaseFactory getSqlDatabaseFactory() {
 		return sqlDatabaseFactory;
-	}
-
-	public TableFacade getTableFacade() {
-		return tableFacade;
 	}
 }

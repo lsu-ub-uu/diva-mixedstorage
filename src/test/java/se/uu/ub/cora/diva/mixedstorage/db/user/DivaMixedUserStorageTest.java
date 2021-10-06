@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -78,7 +78,6 @@ public class DivaMixedUserStorageTest {
 	public void testInit() {
 		assertSame(userStorage.getUserStorageForGuest(), guestUserStorage);
 		assertSame(userStorage.getSqlDatabaseFactory(), sqlDatabaseFactory);
-		assertSame(userStorage.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
 		assertSame(userStorage.getDbToCoraUserConverter(), userConverter);
 	}
 
@@ -95,14 +94,18 @@ public class DivaMixedUserStorageTest {
 	public void testGetUserByIdFromLoginTestTableNameAndConditions() {
 		userStorage.getUserByIdFromLogin(userId);
 
-		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 		assertEquals(sqlDatabaseFactory.tableNames.get(0), "public.user");
+		assertEquals(sqlDatabaseFactory.tableNames.get(1), "public.groupsforuser");
+
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertEquals(tableFacade.tableQueries.size(), 2);
 
 		TableQuerySpy tableQuery = (TableQuerySpy) tableFacade.tableQueries.get(0);
 		assertSame(tableQuery, sqlDatabaseFactory.factoredTableQueries.get(0));
 		assertEquals(tableQuery.conditions.get("user_id"), "userId");
 		assertEquals(tableQuery.conditions.get("domain"), "uu");
 
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	@Test
@@ -116,6 +119,8 @@ public class DivaMixedUserStorageTest {
 		assertSame(tableQuery, sqlDatabaseFactory.factoredTableQueries.get(0));
 		assertEquals(tableQuery.conditions.get("db_id"), 14);
 		assertEquals(tableQuery.conditions.size(), 1);
+
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
@@ -136,6 +141,7 @@ public class DivaMixedUserStorageTest {
 
 		assertEquals(userConverter.rowToConvert, tableFacade.returnedRows.get(0));
 		assertSame(user, userConverter.convertedDbDataGroup);
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	@Test
@@ -189,6 +195,8 @@ public class DivaMixedUserStorageTest {
 		TableQuerySpy queryForRoles = (TableQuerySpy) tableFacade.tableQueries.get(1);
 		assertEquals(userRowFromFacade.getValueByColumn("db_id"),
 				queryForRoles.conditions.get("db_id"));
+
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	private RowSpy createRowWithColumn(String columnName, String value) {
@@ -219,6 +227,8 @@ public class DivaMixedUserStorageTest {
 
 		assertEquals(userGroupQuery.conditions.get("db_id"),
 				returnedUserRow.getValueByColumn("db_id"));
+
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	private void reInitUserStorage() {
@@ -644,10 +654,14 @@ public class DivaMixedUserStorageTest {
 				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("user", "26");
 
 		assertEquals(sqlDatabaseFactory.tableNames.get(0), "public.user");
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
 		TableQuerySpy tableQuerySpy = sqlDatabaseFactory.factoredTableQueries.get(0);
 		assertEquals(tableQuerySpy.conditions.get("db_id"), 26);
 		assertTrue(userExists);
+
+		assertSame(tableFacade.tableQueries.get(0), tableQuerySpy);
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	@Test
@@ -731,6 +745,8 @@ public class DivaMixedUserStorageTest {
 		assertEquals(userConverter.rowsToConvert.get(0), tableFacade.rowsToReturn.get(0));
 		assertEquals(userConverter.rowsToConvert.get(1), tableFacade.rowsToReturn.get(1));
 		assertEquals(result.totalNumberOfMatches, result.listOfDataGroups.size());
+
+		assertTrue(tableFacade.closeWasCalled);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

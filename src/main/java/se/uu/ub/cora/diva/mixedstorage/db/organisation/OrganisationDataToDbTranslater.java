@@ -38,11 +38,9 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	private Map<String, Object> conditions = new HashMap<>(1);
 	private DataGroup dataGroup;
 	private SqlDatabaseFactory sqlDatabaseFactory;
-	private TableFacade tableFacade;
 
 	public OrganisationDataToDbTranslater(SqlDatabaseFactory sqlDatabaseFactory) {
 		this.sqlDatabaseFactory = sqlDatabaseFactory;
-		this.tableFacade = sqlDatabaseFactory.factorTableFacade();
 	}
 
 	@Override
@@ -188,8 +186,15 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 		TableQuery tableQuery = getSqlDatabaseFactory().factorTableQuery("organisation_type");
 		tableQuery.addCondition("organisation_type_code",
 				dataGroup.getFirstAtomicValueWithNameInData("organisationType"));
-		Row readRow = tableFacade.readOneRowForQuery(tableQuery);
-		return readRow.getValueByColumn("organisation_type_id");
+
+		return tryToReadOrganisationType(tableQuery);
+	}
+
+	private Object tryToReadOrganisationType(TableQuery tableQuery) {
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			Row readRow = tableFacade.readOneRowForQuery(tableQuery);
+			return readRow.getValueByColumn("organisation_type_id");
+		}
 	}
 
 	@Override

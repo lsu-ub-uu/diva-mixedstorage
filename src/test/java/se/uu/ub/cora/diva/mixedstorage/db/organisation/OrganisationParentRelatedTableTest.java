@@ -41,12 +41,10 @@ public class OrganisationParentRelatedTableTest {
 	private OrganisationParentRelatedTable parent;
 	private List<Row> parentRows;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
-	private TableFacadeSpy tableFacade;
 
 	@BeforeMethod
 	public void setUp() {
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
-		tableFacade = new TableFacadeSpy();
 		parent = new OrganisationParentRelatedTable(sqlDatabaseFactory);
 		initParentRows();
 	}
@@ -75,7 +73,7 @@ public class OrganisationParentRelatedTableTest {
 	@Test
 	public void testNoParentInDbNoParentInDataGroup() {
 		DataGroup organisation = createDataGroupWithId("678");
-		List<DbStatement> dbStatements = parent.handleDbForDataGroup(tableFacade, organisation,
+		List<DbStatement> dbStatements = parent.handleDbForDataGroup(organisation,
 				Collections.emptyList());
 		assertTrue(dbStatements.isEmpty());
 	}
@@ -83,8 +81,7 @@ public class OrganisationParentRelatedTableTest {
 	@Test
 	public void testOneParentInDbButNoParentInDataGroup() {
 		DataGroup organisation = createDataGroupWithId("678");
-		List<DbStatement> dbStatements = parent.handleDbForDataGroup(tableFacade, organisation,
-				parentRows);
+		List<DbStatement> dbStatements = parent.handleDbForDataGroup(organisation, parentRows);
 		assertEquals(dbStatements.size(), 1);
 		assertCorrectDelete(dbStatements.get(0), 234);
 
@@ -95,8 +92,7 @@ public class OrganisationParentRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addParent(organisation, "234", "0");
 
-		List<DbStatement> dbStatements = parent.handleDbForDataGroup(tableFacade, organisation,
-				parentRows);
+		List<DbStatement> dbStatements = parent.handleDbForDataGroup(organisation, parentRows);
 		assertTrue(dbStatements.isEmpty());
 
 	}
@@ -116,8 +112,7 @@ public class OrganisationParentRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addParent(organisation, "22234", "0");
 
-		List<DbStatement> dbStatements = parent.handleDbForDataGroup(tableFacade, organisation,
-				parentRows);
+		List<DbStatement> dbStatements = parent.handleDbForDataGroup(organisation, parentRows);
 
 		assertEquals(dbStatements.size(), 2);
 
@@ -131,7 +126,7 @@ public class OrganisationParentRelatedTableTest {
 		DataGroup organisation = createDataGroupWithId("678");
 		addParent(organisation, "234", "0");
 
-		List<DbStatement> dbStatements = parent.handleDbForDataGroup(tableFacade, organisation,
+		List<DbStatement> dbStatements = parent.handleDbForDataGroup(organisation,
 				Collections.emptyList());
 		assertCorrectInsert(dbStatements.get(0), 234);
 	}
@@ -150,8 +145,7 @@ public class OrganisationParentRelatedTableTest {
 		addParenRow(multipleParents, 678, 2444);
 		addParenRow(multipleParents, 678, 2222);
 
-		List<DbStatement> dbStatements = parent.handleDbForDataGroup(tableFacade, organisation,
-				multipleParents);
+		List<DbStatement> dbStatements = parent.handleDbForDataGroup(organisation, multipleParents);
 		assertEquals(dbStatements.size(), 4);
 
 		assertCorrectInsert(dbStatements.get(0), 23);

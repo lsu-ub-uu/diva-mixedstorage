@@ -48,7 +48,7 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 	}
 
 	@Override
-	public List<DbStatement> handleDbForDataGroup(TableFacade tableFacade, DataGroup organisation,
+	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
 			List<Row> alternativeNameRows) {
 		throwExceptionIfAlternativeNameIsMissing(organisation);
 		throwErrorIfMoreThanOneAlternativeNameInDb(alternativeNameRows);
@@ -56,7 +56,7 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 		String organisationId = getOrganisationId(organisation);
 		List<DbStatement> dbStatements = new ArrayList<>();
 
-		handleAlternativeName(tableFacade, organisation, organisationId, dbStatements);
+		handleAlternativeName(organisation, organisationId, dbStatements);
 
 		return dbStatements;
 	}
@@ -96,13 +96,13 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 		return organisationId;
 	}
 
-	private void handleAlternativeName(TableFacade tableFacade, DataGroup organisation,
-			String organisationId, List<DbStatement> dbStatements) {
+	private void handleAlternativeName(DataGroup organisation, String organisationId,
+			List<DbStatement> dbStatements) {
 
 		if (alternativeNameExistsInDatabase(alternativeNameRow)) {
 			handleUpdate(organisation, organisationId, dbStatements);
 		} else {
-			handleInsert(tableFacade, dbStatements, organisation, organisationId);
+			handleInsert(dbStatements, organisation, organisationId);
 		}
 	}
 
@@ -154,12 +154,14 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 		return new Timestamp(time);
 	}
 
-	private void handleInsert(TableFacade tableFacade, List<DbStatement> dbStatements,
-			DataGroup organisation, String organisationId) {
-		Map<String, Object> values = generateValues(organisation, organisationId);
-		addOrganisationNameIdNextValue(tableFacade, values);
-		dbStatements
-				.add(new DbStatement("insert", ORGANISATION_NAME, values, Collections.emptyMap()));
+	private void handleInsert(List<DbStatement> dbStatements, DataGroup organisation,
+			String organisationId) {
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			Map<String, Object> values = generateValues(organisation, organisationId);
+			addOrganisationNameIdNextValue(tableFacade, values);
+			dbStatements.add(
+					new DbStatement("insert", ORGANISATION_NAME, values, Collections.emptyMap()));
+		}
 	}
 
 	private void addOrganisationNameIdNextValue(TableFacade tableFacade,
