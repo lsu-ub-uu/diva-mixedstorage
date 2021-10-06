@@ -36,7 +36,7 @@
 		<httphandler.version>2.3.0</httphandler.version>
 		<apptokenstorage.version>2.3.0</apptokenstorage.version>
 		<gatekeeper.version>3.7.0</gatekeeper.version>
-		<json.version>2.5.0</json.version>
+		<json.version>3.0-SNAPSHOT</json.version>
 		<xmlutils.version>1.1.0</xmlutils.version>
 		<xmlconverter.version>1.6.0</xmlconverter.version>
 		<converter.version>1.5.0</converter.version>
@@ -112,7 +112,7 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>json</artifactId>
 			<version>${json.version}</version>
-			<scope>provided</scope>
+<!-- 			<scope>provided</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
