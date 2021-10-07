@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2020 Uppsala University Library
+ * Copyright 2019, 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -23,25 +23,26 @@ import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbOrganisationReader;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataParentReader;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataPredecessorReader;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public class DivaDbFactoryImp implements DivaDbFactory {
 
-	private RecordReaderFactory readerFactory;
 	private DivaDbToCoraConverterFactory converterFactory;
+	private SqlDatabaseFactory sqlDatabaseFactory;
 
-	public DivaDbFactoryImp(RecordReaderFactory readerFactory,
+	public DivaDbFactoryImp(SqlDatabaseFactory sqlDatabaseFactory,
 			DivaDbToCoraConverterFactory converterFactory) {
-		this.readerFactory = readerFactory;
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 		this.converterFactory = converterFactory;
 	}
 
 	@Override
 	public DivaDbReader factor(String type) {
 		if (isOrganisation(type)) {
-			DivaDbFactory divaDbFactory = new DivaDbFactoryImp(readerFactory, converterFactory);
+			DivaDbFactory divaDbFactory = new DivaDbFactoryImp(sqlDatabaseFactory,
+					converterFactory);
 			return DivaDbOrganisationReader.usingRecordReaderFactoryAndConverterFactory(
-					readerFactory, converterFactory, divaDbFactory);
+					converterFactory, divaDbFactory, sqlDatabaseFactory);
 		}
 		throw NotImplementedException.withMessage("No implementation found for: " + type);
 	}
@@ -51,9 +52,9 @@ public class DivaDbFactoryImp implements DivaDbFactory {
 				|| "topOrganisation".equals(type) || "subOrganisation".equals(type);
 	}
 
-	public RecordReaderFactory getReaderFactory() {
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
 		// for testing
-		return readerFactory;
+		return sqlDatabaseFactory;
 	}
 
 	public DivaDbToCoraConverterFactory getConverterFactory() {
@@ -64,11 +65,11 @@ public class DivaDbFactoryImp implements DivaDbFactory {
 	@Override
 	public MultipleRowDbToDataReader factorMultipleReader(String type) {
 		if ("divaOrganisationParent".equals(type)) {
-			return new MultipleRowDbToDataParentReader(readerFactory, converterFactory);
+			return new MultipleRowDbToDataParentReader(sqlDatabaseFactory, converterFactory);
 
 		}
 		if ("divaOrganisationPredecessor".equals(type)) {
-			return new MultipleRowDbToDataPredecessorReader(readerFactory, converterFactory);
+			return new MultipleRowDbToDataPredecessorReader(sqlDatabaseFactory, converterFactory);
 
 		}
 		throw NotImplementedException.withMessage("No implementation found for: " + type);

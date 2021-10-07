@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -26,7 +26,10 @@ import java.util.Map;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslater;
-import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
+import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
 public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 
@@ -34,10 +37,10 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	private Map<String, Object> values = new HashMap<>();
 	private Map<String, Object> conditions = new HashMap<>(1);
 	private DataGroup dataGroup;
-	private RecordReader recordReader;
+	private SqlDatabaseFactory sqlDatabaseFactory;
 
-	public OrganisationDataToDbTranslater(RecordReader recordReader) {
-		this.recordReader = recordReader;
+	public OrganisationDataToDbTranslater(SqlDatabaseFactory sqlDatabaseFactory) {
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 	}
 
 	@Override
@@ -180,18 +183,18 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 	}
 
 	private Object getTypeCodeForOrganisationType() {
-		Map<String, Object> conditionsForReadType = createConditionsForReadingType();
-		Map<String, Object> organisationTypeRow = recordReader
-				.readOneRowFromDbUsingTableAndConditions("organisation_type",
-						conditionsForReadType);
-		return organisationTypeRow.get("organisation_type_id");
+		TableQuery tableQuery = getSqlDatabaseFactory().factorTableQuery("organisation_type");
+		tableQuery.addCondition("organisation_type_code",
+				dataGroup.getFirstAtomicValueWithNameInData("organisationType"));
+
+		return tryToReadOrganisationType(tableQuery);
 	}
 
-	private Map<String, Object> createConditionsForReadingType() {
-		Map<String, Object> conditionsForReadType = new HashMap<>();
-		conditionsForReadType.put("organisation_type_code",
-				dataGroup.getFirstAtomicValueWithNameInData("organisationType"));
-		return conditionsForReadType;
+	private Object tryToReadOrganisationType(TableQuery tableQuery) {
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			Row readRow = tableFacade.readOneRowForQuery(tableQuery);
+			return readRow.getValueByColumn("organisation_type_id");
+		}
 	}
 
 	@Override
@@ -204,9 +207,7 @@ public class OrganisationDataToDbTranslater implements DataToDbTranslater {
 		return values;
 	}
 
-	public RecordReader getRecordReader() {
-		// needed for test
-		return recordReader;
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,26 +16,33 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db;
+package se.uu.ub.cora.diva.mixedstorage;
 
-import se.uu.ub.cora.connection.SqlConnectionProvider;
-import se.uu.ub.cora.sqldatabase.RecordDeleter;
-import se.uu.ub.cora.sqldatabase.RecordDeleterFactory;
+import java.util.Map;
 
-public class RecordDeleterFactorySpy implements RecordDeleterFactory {
+import se.uu.ub.cora.storage.RecordStorage;
+import se.uu.ub.cora.storage.RecordStorageProvider;
 
-	public RecordDeleter factored;
+public class DatabaseStorageProviderSpy implements RecordStorageProvider {
+
+	public RecordStorageSpy providedRecordStorage;
 
 	@Override
-	public SqlConnectionProvider getSqlConnectionProvider() {
+	public int getOrderToSelectImplementionsBy() {
 		// TODO Auto-generated method stub
-		return null;
+		return 0;
 	}
 
 	@Override
-	public RecordDeleter factor() {
-		factored = new RecordDeleterSpy();
-		return factored;
+	public void startUsingInitInfo(Map<String, String> initInfo) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public RecordStorage getRecordStorage() {
+		providedRecordStorage = new RecordStorageSpy();
+		return providedRecordStorage;
 	}
 
 }

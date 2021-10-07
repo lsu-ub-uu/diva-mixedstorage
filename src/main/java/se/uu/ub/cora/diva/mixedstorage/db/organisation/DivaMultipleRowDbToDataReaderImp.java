@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,22 +21,25 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
+import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
 public abstract class DivaMultipleRowDbToDataReaderImp implements MultipleRowDbToDataReader {
 
 	protected DivaDbToCoraConverterFactory converterFactory;
-	protected RecordReaderFactory recordReaderFactory;
+	protected SqlDatabaseFactory sqlDatabaseFactory;
 
-	protected List<DataGroup> convertToDataGroups(List<Map<String, Object>> readRows) {
+	protected List<DataGroup> convertToDataGroups(List<Row> readRows) {
 		int repeatId = 0;
 		List<DataGroup> convertedDataGroups = new ArrayList<>(readRows.size());
-		for (Map<String, Object> readRow : readRows) {
+		for (Row readRow : readRows) {
 			DataGroup convertedParent = convertToDataGroup(repeatId, readRow);
 			convertedDataGroups.add(convertedParent);
 			repeatId++;
@@ -44,18 +47,18 @@ public abstract class DivaMultipleRowDbToDataReaderImp implements MultipleRowDbT
 		return convertedDataGroups;
 	}
 
-	private DataGroup convertToDataGroup(int repeatId, Map<String, Object> parentValues) {
+	private DataGroup convertToDataGroup(int repeatId, Row readRow) {
 		DivaDbToCoraConverter converter = converterFactory.factor(getTableName());
-		DataGroup parent = converter.fromMap(parentValues);
+		DataGroup parent = converter.fromRow(readRow);
 		parent.setRepeatId(String.valueOf(repeatId));
 		return parent;
 	}
 
 	protected abstract String getTableName();
 
-	public RecordReaderFactory getRecordReaderFactory() {
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
 		// needed for test
-		return recordReaderFactory;
+		return sqlDatabaseFactory;
 	}
 
 	public DivaDbToCoraConverterFactory getConverterFactory() {
@@ -66,17 +69,19 @@ public abstract class DivaMultipleRowDbToDataReaderImp implements MultipleRowDbT
 	protected abstract Map<String, Object> getConditions(String id);
 
 	@Override
-	public List<DataGroup> read(String tableName, Map<String, Object> conditions) {
-		RecordReader recordReader = recordReaderFactory.factor();
-		List<Map<String, Object>> listOfTableRows = recordReader
-				.readFromTableUsingConditions(tableName, conditions);
-
-		return convertToDataGroups(listOfTableRows);
+	public List<DataGroup> read(TableFacade tableFacade, String tableName,
+			Map<String, Object> conditions) {
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(tableName);
+		for (Entry<String, Object> condition : conditions.entrySet()) {
+			tableQuery.addCondition(condition.getKey(), condition.getValue());
+		}
+		List<Row> readRows = tableFacade.readRowsForQuery(tableQuery);
+		return convertToDataGroups(readRows);
 	}
 
 	@Override
-	public List<DataGroup> read(String type, String id) {
-		return read(getTableName(), getConditions(id));
+	public List<DataGroup> read(TableFacade tableFacade, String type, String id) {
+		return read(tableFacade, getTableName(), getConditions(id));
 	}
 
 }

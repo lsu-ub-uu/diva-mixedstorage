@@ -18,18 +18,17 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
-import java.util.Map;
-
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public class DivaDbToCoraOrganisationParentConverter
 		extends DivaDbToCoraOrganisationAncestryConverter implements DivaDbToCoraConverter {
 
 	@Override
-	public DataGroup fromMap(Map<String, Object> dbRow) {
+	public DataGroup fromRow(Row dbRow) {
 		this.dbRow = dbRow;
 		if (mandatoryValuesAreMissing()) {
 			throw ConversionException.withMessageAndException(
@@ -56,8 +55,8 @@ public class DivaDbToCoraOrganisationParentConverter
 	}
 
 	private void addParentLink(DataGroup parentGroup) {
-		String parentId = String.valueOf(dbRow.get("organisation_parent_id"));
-		String coraOrganisationType = (String) dbRow.get("coraorganisationtype");
+		String parentId = String.valueOf(dbRow.getValueByColumn("organisation_parent_id"));
+		String coraOrganisationType = (String) dbRow.getValueByColumn("coraorganisationtype");
 		DataGroup organisationLink = createOrganisationLinkUsingLinkedRecordIdAndRecordType(
 				parentId, coraOrganisationType);
 		parentGroup.addChild(organisationLink);

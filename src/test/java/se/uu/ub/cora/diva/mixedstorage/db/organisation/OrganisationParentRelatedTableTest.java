@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,11 +19,11 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,27 +34,27 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
-import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public class OrganisationParentRelatedTableTest {
 
-	private RecordReaderRelatedTableSpy recordReader;
-	private RelatedTable parent;
-	private List<Map<String, Object>> parentRows;
+	private OrganisationParentRelatedTable parent;
+	private List<Row> parentRows;
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		recordReader = new RecordReaderRelatedTableSpy();
-		parent = new OrganisationParentRelatedTable(recordReader);
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
+		parent = new OrganisationParentRelatedTable(sqlDatabaseFactory);
 		initParentRows();
 	}
 
 	private void initParentRows() {
 		parentRows = new ArrayList<>();
-		Map<String, Object> parentRow = new HashMap<>();
-		parentRow.put("organisation_id", 678);
-		parentRow.put("organisation_parent_id", 234);
-		parentRows.add(parentRow);
+		RowSpy row = new RowSpy();
+		row.addColumnWithValue("organisation_id", 678);
+		row.addColumnWithValue("organisation_parent_id", 234);
+		parentRows.add(row);
 	}
 
 	private DataGroup createDataGroupWithId(String id) {
@@ -63,6 +63,11 @@ public class OrganisationParentRelatedTableTest {
 		recordInfo.addChild(new DataAtomicSpy("id", id));
 		dataGroup.addChild(recordInfo);
 		return dataGroup;
+	}
+
+	@Test
+	public void testGetSqlDatabaseFactory() {
+		assertSame(parent.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 
 	@Test
@@ -134,7 +139,7 @@ public class OrganisationParentRelatedTableTest {
 		addParent(organisation, "22234", "2");
 		addParent(organisation, "44444", "2");
 
-		List<Map<String, Object>> multipleParents = new ArrayList<>();
+		List<Row> multipleParents = new ArrayList<>();
 		addParenRow(multipleParents, 678, 234);
 		addParenRow(multipleParents, 678, 22234);
 		addParenRow(multipleParents, 678, 2444);
@@ -167,12 +172,11 @@ public class OrganisationParentRelatedTableTest {
 		assertEquals(deleteConditions.get("organisation_parent_id"), parentId);
 	}
 
-	private void addParenRow(List<Map<String, Object>> multipleParents, int organisationId,
-			int parentId) {
+	private void addParenRow(List<Row> multipleParents, int organisationId, int parentId) {
 
-		Map<String, Object> parentRow = new HashMap<>();
-		parentRow.put("organisation_id", organisationId);
-		parentRow.put("organisation_parent_id", parentId);
+		RowSpy parentRow = new RowSpy();
+		parentRow.addColumnWithValue("organisation_id", organisationId);
+		parentRow.addColumnWithValue("organisation_parent_id", parentId);
 		multipleParents.add(parentRow);
 	}
 }

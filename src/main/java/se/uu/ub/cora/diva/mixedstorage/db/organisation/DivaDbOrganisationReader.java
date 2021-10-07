@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,9 +18,7 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
@@ -28,38 +26,39 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbReader;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
+import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
 public class DivaDbOrganisationReader implements DivaDbReader {
 
-	private RecordReaderFactory recordReaderFactory;
 	private DivaDbToCoraConverterFactory converterFactory;
-	private RecordReader recordReader;
 	private DivaDbFactory divaDbFactory;
 	private static final String DEFAULT_TABLENAME = "organisationview";
+	private TableFacade tableFacade;
+	private SqlDatabaseFactory sqlDatabaseFactory;
 
-	public DivaDbOrganisationReader(RecordReaderFactory recordReaderFactory,
-			DivaDbToCoraConverterFactory converterFactory, DivaDbFactory divaDbFactory) {
-		this.recordReaderFactory = recordReaderFactory;
+	public DivaDbOrganisationReader(DivaDbToCoraConverterFactory converterFactory,
+			DivaDbFactory divaDbFactory, SqlDatabaseFactory sqlDatabaseFactory) {
 		this.converterFactory = converterFactory;
 		this.divaDbFactory = divaDbFactory;
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 	}
 
 	public static DivaDbOrganisationReader usingRecordReaderFactoryAndConverterFactory(
-			RecordReaderFactory recordReaderFactory, DivaDbToCoraConverterFactory converterFactory,
-			DivaDbFactory divaDbFactory) {
-		return new DivaDbOrganisationReader(recordReaderFactory, converterFactory, divaDbFactory);
+			DivaDbToCoraConverterFactory converterFactory, DivaDbFactory divaDbFactory,
+			SqlDatabaseFactory sqlDatabaseFactory) {
+		return new DivaDbOrganisationReader(converterFactory, divaDbFactory, sqlDatabaseFactory);
 	}
 
 	@Override
-	public DataGroup read(String type, String id) {
-		recordReader = recordReaderFactory.factor();
+	public DataGroup read(TableFacade tableFacade, String type, String id) {
 		String tableName = getTableName(type);
-		Map<String, Object> readRow = readOneRowFromDbUsingTypeAndId(tableName, id);
+		Row readRow = readOneRowFromDbUsingTypeAndId(tableFacade, tableName, id);
 		DataGroup organisation = convertOneMapFromDbToDataGroup(type, readRow);
-		tryToReadAndConvertParents(type, id, organisation);
-		tryToReadAndConvertPredecessors(id, organisation);
+		tryToReadAndConvertParents(tableFacade, type, id, organisation);
+		tryToReadAndConvertPredecessors(tableFacade, id, organisation);
 		return organisation;
 	}
 
@@ -74,11 +73,12 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 		return DEFAULT_TABLENAME;
 	}
 
-	private Map<String, Object> readOneRowFromDbUsingTypeAndId(String type, String id) {
+	private Row readOneRowFromDbUsingTypeAndId(TableFacade tableFacade, String type, String id) {
 		throwDbExceptionIfIdNotAnIntegerValue(id);
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("id", Integer.valueOf(id));
-		return recordReader.readOneRowFromDbUsingTableAndConditions(type, conditions);
+
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(type);
+		tableQuery.addCondition("id", Integer.valueOf(id));
+		return tableFacade.readOneRowForQuery(tableQuery);
 	}
 
 	private void throwDbExceptionIfIdNotAnIntegerValue(String id) {
@@ -89,16 +89,16 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 		}
 	}
 
-	private DataGroup convertOneMapFromDbToDataGroup(String type, Map<String, Object> readRow) {
+	private DataGroup convertOneMapFromDbToDataGroup(String type, Row readRow) {
 		DivaDbToCoraConverter dbToCoraConverter = converterFactory.factor(type);
-		return dbToCoraConverter.fromMap(readRow);
+		return dbToCoraConverter.fromRow(readRow);
 	}
 
-	private void tryToReadAndConvertParents(String organisationType, String id,
-			DataGroup organisation) {
+	private void tryToReadAndConvertParents(TableFacade tableFacade, String organisationType,
+			String id, DataGroup organisation) {
 		String type = "divaOrganisationParent";
 		MultipleRowDbToDataReader parentReader = divaDbFactory.factorMultipleReader(type);
-		List<DataGroup> convertedParents = parentReader.read(type, id);
+		List<DataGroup> convertedParents = parentReader.read(tableFacade, type, id);
 		for (DataGroup convertedParent : convertedParents) {
 			removeRepeatIdIfParentInTopOrganisation(organisationType, convertedParent);
 			organisation.addChild(convertedParent);
@@ -112,19 +112,16 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 		}
 	}
 
-	private void tryToReadAndConvertPredecessors(String stringId, DataGroup organisation) {
+	private void tryToReadAndConvertPredecessors(TableFacade tableFacade, String stringId,
+			DataGroup organisation) {
 		String type = "divaOrganisationPredecessor";
 		MultipleRowDbToDataReader prededcessorReader = divaDbFactory.factorMultipleReader(type);
-		List<DataGroup> convertedPredecessors = prededcessorReader.read(type, stringId);
+		List<DataGroup> convertedPredecessors = prededcessorReader.read(tableFacade, type,
+				stringId);
 
 		for (DataGroup convertedPredecessor : convertedPredecessors) {
 			organisation.addChild(convertedPredecessor);
 		}
-	}
-
-	public RecordReaderFactory getRecordReaderFactory() {
-		// for testing
-		return recordReaderFactory;
 	}
 
 	public DivaDbToCoraConverterFactory getConverterFactory() {
@@ -135,5 +132,13 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 	public DivaDbFactory getDbFactory() {
 		// for testing
 		return divaDbFactory;
+	}
+
+	public TableFacade getTableFacade() {
+		return tableFacade;
+	}
+
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
 }

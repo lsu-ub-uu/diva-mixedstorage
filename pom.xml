@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>se.uu.ub.cora</groupId>
 		<artifactId>cora-parent</artifactId>
-		<version>1.4.1</version>
+		<version>1.4.4</version>
 	</parent>
 
 	<artifactId>divamixedstorage</artifactId>
@@ -28,18 +28,19 @@
 	<properties>
 		<logger.version>2.3.0</logger.version>
 		<coradata.version>5.1.0</coradata.version>
-		<storage.version>4.2.0</storage.version>
+		<storage.version>4.3-SNAPSHOT</storage.version>
 		<searchstorage.version>3.7.0</searchstorage.version>
 		<basicstorage.version>5.1.0</basicstorage.version>
-		<sqldatabase.version>4.1.0</sqldatabase.version>
+		<sqldatabase.version>5.0-SNAPSHOT</sqldatabase.version>
+		<sqlstorage.version>1.0-SNAPSHOT</sqlstorage.version>
 		<httphandler.version>2.3.0</httphandler.version>
 		<apptokenstorage.version>2.3.0</apptokenstorage.version>
 		<gatekeeper.version>3.7.0</gatekeeper.version>
-		<json.version>2.5.0</json.version>
+		<json.version>3.0-SNAPSHOT</json.version>
 		<xmlutils.version>1.1.0</xmlutils.version>
 		<xmlconverter.version>1.6.0</xmlconverter.version>
 		<converter.version>1.5.0</converter.version>
-		<testutils.version>1.1.0</testutils.version>
+		<testutils.version>1.1.1</testutils.version>
 	</properties>
 
 	<scm>
@@ -86,6 +87,11 @@
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>sqlstorage</artifactId>
+			<version>${sqlstorage.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>httphandler</artifactId>
 			<version>${httphandler.version}</version>
 			<scope>provided</scope>
@@ -106,7 +112,7 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>json</artifactId>
 			<version>${json.version}</version>
-			<scope>provided</scope>
+<!-- 			<scope>provided</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>

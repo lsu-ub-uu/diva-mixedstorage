@@ -18,8 +18,9 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db;
 
-import java.sql.Connection;
 import java.util.List;
+
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 
 /**
  * StatementsExecutor executes dbStatements
@@ -35,9 +36,10 @@ public interface StatementExecutor {
 	 * 
 	 * @param dbStatements
 	 *            statements to execute
-	 * @param connection
+	 * @param databaseFacade
 	 *            to use to execute statements
 	 */
-	void executeDbStatmentUsingConnection(List<DbStatement> dbStatements, Connection connection);
+	void executeDbStatmentUsingDatabaseFacade(List<DbStatement> dbStatements,
+			DatabaseFacade databaseFacade);
 
 }

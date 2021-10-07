@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -22,9 +22,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -41,7 +38,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
 
 public class DivaDbToCoraOrganisationPredecessorConverterTest {
 	private DivaDbToCoraOrganisationPredecessorConverter converter;
-	private Map<String, Object> rowFromDb;
+	private RowSpy rowFromDb;
 
 	private DataGroupFactory dataGroupFactorySpy;
 	private DataAtomicFactory dataAtomicFactorySpy;
@@ -55,10 +52,10 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactorySpy);
 		dataRecordLinkFactory = new DataRecordLinkFactorySpy();
 		DataRecordLinkProvider.setDataRecordLinkFactory(dataRecordLinkFactory);
-		rowFromDb = new HashMap<>();
-		rowFromDb.put("organisation_id", 1234);
-		rowFromDb.put("organisation_predecessor_id", 7788);
-		rowFromDb.put("coraorganisationtype", "subOrganisation");
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("organisation_id", 1234);
+		rowFromDb.addColumnWithValue("organisation_predecessor_id", 7788);
+		rowFromDb.addColumnWithValue("coraorganisationtype", "subOrganisation");
 		converter = new DivaDbToCoraOrganisationPredecessorConverter();
 
 	}
@@ -66,39 +63,39 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting organisation predecessor to Cora organisation predecessor: Map does not contain mandatory values for organisation id and predecessor id")
 	public void testEmptyMap() {
-		rowFromDb = new HashMap<>();
-		DataGroup organisation = converter.fromMap(rowFromDb);
+		rowFromDb = new RowSpy();
+		DataGroup organisation = converter.fromRow(rowFromDb);
 		assertNull(organisation);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting organisation predecessor to Cora organisation predecessor: Map does not contain mandatory values for organisation id and predecessor id")
 	public void testMapWithEmptyValueForOrganisationIdThrowsError() {
-		rowFromDb = new HashMap<>();
-		rowFromDb.put("organisation_id", "");
-		converter.fromMap(rowFromDb);
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("organisation_id", "");
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting organisation predecessor to Cora organisation predecessor: Map does not contain mandatory values for organisation id and predecessor id")
 	public void testMapWithMissingPredecessorIdThrowsError() {
-		rowFromDb = new HashMap<>();
-		rowFromDb.put("organisation_id", 2134);
-		converter.fromMap(rowFromDb);
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("organisation_id", 2134);
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting organisation predecessor to Cora organisation predecessor: Map does not contain mandatory values for organisation id and predecessor id")
 	public void testMapWithEmptyValueForPredecessorIdThrowsError() {
-		rowFromDb = new HashMap<>();
-		rowFromDb.put("organisation_id", 1234);
-		rowFromDb.put("predecessorid", "");
-		converter.fromMap(rowFromDb);
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("organisation_id", 1234);
+		rowFromDb.addColumnWithValue("predecessorid", "");
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test
 	public void testMinimalValuesReturnsDataGroupWithCorrectChildren() {
-		DataGroup predecessor = converter.fromMap(rowFromDb);
+		DataGroup predecessor = converter.fromRow(rowFromDb);
 		assertEquals(predecessor.getNameInData(), "earlierOrganisation");
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
 				.getFirstGroupWithNameInData("organisationLink");
@@ -111,8 +108,8 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 
 	@Test
 	public void testMinimalValuesWithEmptyValueForDescriptionReturnsDataGroupWithCorrectChildren() {
-		rowFromDb.put("description", "");
-		DataGroup predecessor = converter.fromMap(rowFromDb);
+		rowFromDb.addColumnWithValue("description", "");
+		DataGroup predecessor = converter.fromRow(rowFromDb);
 		assertEquals(predecessor.getNameInData(), "earlierOrganisation");
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
 				.getFirstGroupWithNameInData("organisationLink");
@@ -124,8 +121,8 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 
 	@Test
 	public void testMinimalValuesWithNullValueForDescriptionReturnsDataGroupWithCorrectChildren() {
-		rowFromDb.put("description", null);
-		DataGroup predecessor = converter.fromMap(rowFromDb);
+		rowFromDb.addColumnWithValue("description", null);
+		DataGroup predecessor = converter.fromRow(rowFromDb);
 		assertEquals(predecessor.getNameInData(), "earlierOrganisation");
 
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
@@ -138,8 +135,8 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 
 	@Test
 	public void testCompleteValuesReturnsDataGroupWithCorrectChildren() {
-		rowFromDb.put("description", "some description text");
-		DataGroup predecessor = converter.fromMap(rowFromDb);
+		rowFromDb.addColumnWithValue("description", "some description text");
+		DataGroup predecessor = converter.fromRow(rowFromDb);
 		assertEquals(predecessor.getNameInData(), "earlierOrganisation");
 		assertEquals(predecessor.getFirstAtomicValueWithNameInData("internalNote"),
 				"some description text");
@@ -153,10 +150,10 @@ public class DivaDbToCoraOrganisationPredecessorConverterTest {
 
 	@Test
 	public void testCoraOrganisationTypeTopOrganisation() {
-		rowFromDb.put("description", null);
-		rowFromDb.put("coraorganisationtype", "topOrganisation");
+		rowFromDb.addColumnWithValue("description", null);
+		rowFromDb.addColumnWithValue("coraorganisationtype", "topOrganisation");
 
-		DataGroup predecessor = converter.fromMap(rowFromDb);
+		DataGroup predecessor = converter.fromRow(rowFromDb);
 
 		DataRecordLinkSpy linkedOrganisation = (DataRecordLinkSpy) predecessor
 				.getFirstGroupWithNameInData("organisationLink");

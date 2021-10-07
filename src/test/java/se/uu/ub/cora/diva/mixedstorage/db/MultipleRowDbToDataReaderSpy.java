@@ -26,6 +26,7 @@ import java.util.Map;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.MultipleRowDbToDataReader;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class MultipleRowDbToDataReaderSpy implements MultipleRowDbToDataReader {
 
@@ -33,9 +34,11 @@ public class MultipleRowDbToDataReaderSpy implements MultipleRowDbToDataReader {
 	public String usedId;
 	public List<DataGroup> returnedList = new ArrayList<>();
 	public boolean returnEmptyResult = false;
+	public TableFacade tableFacade;
 
 	@Override
-	public List<DataGroup> read(String type, String id) {
+	public List<DataGroup> read(TableFacade tableFacade, String type, String id) {
+		this.tableFacade = tableFacade;
 		// usedType = type;
 		usedId = id;
 		if (returnEmptyResult) {
@@ -47,7 +50,8 @@ public class MultipleRowDbToDataReaderSpy implements MultipleRowDbToDataReader {
 	}
 
 	@Override
-	public List<DataGroup> read(String tableName, Map<String, Object> conditions) {
+	public List<DataGroup> read(TableFacade tableFacade, String tableName,
+			Map<String, Object> conditions) {
 		// TODO Auto-generated method stub
 		return null;
 

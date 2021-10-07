@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -29,7 +29,8 @@ import java.util.Set;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
-import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 		implements RelatedTable {
@@ -38,13 +39,13 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 	private static final String ORGANISATION_PARENT_ID = "organisation_parent_id";
 	private static final String ORGANISATION_ID = "organisation_id";
 
-	public OrganisationParentRelatedTable(RecordReader recordReader) {
-		this.recordReader = recordReader;
+	public OrganisationParentRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 	}
 
 	@Override
 	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
-			List<Map<String, Object>> existingParents) {
+			List<Row> existingParents) {
 
 		setIdAsInt(organisation);
 		List<DbStatement> dbStatements = new ArrayList<>();
@@ -63,8 +64,7 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 		return dbStatements;
 	}
 
-	private boolean noParentsToHandle(List<Map<String, Object>> existingParents,
-			Set<String> parentsInDataGroup) {
+	private boolean noParentsToHandle(List<Row> existingParents, Set<String> parentsInDataGroup) {
 		return existingParents.isEmpty() && noParentsInDataGroup(parentsInDataGroup);
 	}
 
@@ -72,10 +72,9 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 		return parentsInDataGroup.isEmpty();
 	}
 
-	private void createDeleteStatements(List<DbStatement> dbStatements,
-			List<Map<String, Object>> parents) {
-		for (Map<String, Object> readRow : parents) {
-			int parentId = (int) readRow.get(ORGANISATION_PARENT_ID);
+	private void createDeleteStatements(List<DbStatement> dbStatements, List<Row> parents) {
+		for (Row readRow : parents) {
+			int parentId = (int) readRow.getValueByColumn(ORGANISATION_PARENT_ID);
 			dbStatements.add(createDeleteStatement(parentId));
 		}
 	}
@@ -104,11 +103,11 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 	}
 
 	@Override
-	protected Set<String> getIdsForCurrentRowsInDatabase(
-			List<Map<String, Object>> allCurrentParentsInDb) {
+	protected Set<String> getIdsForCurrentRowsInDatabase(List<Row> allCurrentParentsInDb) {
 		Set<String> parentIdsInDatabase = new HashSet<>(allCurrentParentsInDb.size());
-		for (Map<String, Object> readRow : allCurrentParentsInDb) {
-			parentIdsInDatabase.add(String.valueOf(readRow.get(ORGANISATION_PARENT_ID)));
+		for (Row readRow : allCurrentParentsInDb) {
+			parentIdsInDatabase
+					.add(String.valueOf(readRow.getValueByColumn(ORGANISATION_PARENT_ID)));
 		}
 		return parentIdsInDatabase;
 	}
@@ -149,9 +148,8 @@ public class OrganisationParentRelatedTable extends OrganisationRelatedTable
 		}
 	}
 
-	public RecordReader getRecordReader() {
-		// needed for test
-		return recordReader;
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
 
 }

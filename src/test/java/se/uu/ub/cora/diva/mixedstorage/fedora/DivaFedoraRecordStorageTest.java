@@ -62,6 +62,13 @@ public class DivaFedoraRecordStorageTest {
 	@Test
 	public void testInit() throws Exception {
 		assertNotNull(divaToCoraRecordStorage);
+		assertSame(divaToCoraRecordStorage.getHttpHandlerFactory(), httpHandlerFactory);
+		assertSame(divaToCoraRecordStorage.getDivaFedoraConverterFactory(), converterFactory);
+		assertEquals(divaToCoraRecordStorage.getBaseURL(), baseURL);
+		assertEquals(divaToCoraRecordStorage.getBaseURL(), baseURL);
+		assertEquals(divaToCoraRecordStorage.getFedoraUsername(), fedoraUsername);
+		assertEquals(divaToCoraRecordStorage.getFedoraPassword(), fedoraPassword);
+
 	}
 
 	@Test

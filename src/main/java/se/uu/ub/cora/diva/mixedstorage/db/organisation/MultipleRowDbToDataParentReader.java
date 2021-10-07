@@ -22,14 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public class MultipleRowDbToDataParentReader extends DivaMultipleRowDbToDataReaderImp
 		implements MultipleRowDbToDataReader {
 
-	public MultipleRowDbToDataParentReader(RecordReaderFactory recordReaderFactory,
+	public MultipleRowDbToDataParentReader(SqlDatabaseFactory sqlDatabaseFactory,
 			DivaDbToCoraConverterFactory converterFactory) {
-		this.recordReaderFactory = recordReaderFactory;
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 		this.converterFactory = converterFactory;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2020 Uppsala University Library
+ * Copyright 2019, 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,13 +18,12 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
-import java.util.Map;
-
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public class DivaDbToCoraOrganisationPredecessorConverter
 		extends DivaDbToCoraOrganisationAncestryConverter implements DivaDbToCoraConverter {
@@ -32,7 +31,7 @@ public class DivaDbToCoraOrganisationPredecessorConverter
 	private static final String DESCRIPTION = "description";
 
 	@Override
-	public DataGroup fromMap(Map<String, Object> dbRow) {
+	public DataGroup fromRow(Row dbRow) {
 		this.dbRow = dbRow;
 		if (mandatoryValuesAreMissing()) {
 			throw ConversionException.withMessageAndException(
@@ -52,16 +51,16 @@ public class DivaDbToCoraOrganisationPredecessorConverter
 	}
 
 	private void addPredecessorLink(DataGroup predecessorGroup) {
-		String coraOrganisationType = (String) dbRow.get("coraorganisationtype");
+		String coraOrganisationType = (String) dbRow.getValueByColumn("coraorganisationtype");
 		DataGroup predecessorLink = createOrganisationLinkUsingLinkedRecordIdAndRecordType(
-				String.valueOf(dbRow.get(PREDECESSOR_ID)), coraOrganisationType);
+				String.valueOf(dbRow.getValueByColumn(PREDECESSOR_ID)), coraOrganisationType);
 		predecessorGroup.addChild(predecessorLink);
 	}
 
 	private void possiblyAddDescription(DataGroup earlierOrganisation) {
 		if (predecessorHasDescription()) {
 			earlierOrganisation.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue(
-					"internalNote", (String) dbRow.get(DESCRIPTION)));
+					"internalNote", (String) dbRow.getValueByColumn(DESCRIPTION)));
 		}
 	}
 

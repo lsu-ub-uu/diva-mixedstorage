@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -31,23 +31,25 @@ import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
-import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 
 	private static final String ORGANISATION_NAME_ID = "organisation_name_id";
 	private static final String ORGANISATION_NAME = "organisation_name";
 	private static final String ALTERNATIVE_NAME = "organisationAlternativeName";
-	private RecordReader recordReader;
-	private Map<String, Object> alternativeNameRow;
+	private SqlDatabaseFactory sqlDatabaseFactory;
+	private Row alternativeNameRow;
 
-	public OrganisationAlternativeNameRelatedTable(RecordReader recordReader) {
-		this.recordReader = recordReader;
+	public OrganisationAlternativeNameRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 	}
 
 	@Override
 	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
-			List<Map<String, Object>> alternativeNameRows) {
+			List<Row> alternativeNameRows) {
 		throwExceptionIfAlternativeNameIsMissing(organisation);
 		throwErrorIfMoreThanOneAlternativeNameInDb(alternativeNameRows);
 		alternativeNameRow = getRowIfOnlyOneOrEmptyMap(alternativeNameRows);
@@ -76,16 +78,15 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 		return alternativeNameGroup.containsChildWithNameInData("name");
 	}
 
-	private void throwErrorIfMoreThanOneAlternativeNameInDb(
-			List<Map<String, Object>> alternativeNameRows) {
+	private void throwErrorIfMoreThanOneAlternativeNameInDb(List<Row> alternativeNameRows) {
 		if (alternativeNameRows.size() > 1) {
 			throw DbException
 					.withMessage("Organisation can not have more than one alternative name");
 		}
 	}
 
-	private Map<String, Object> getRowIfOnlyOneOrEmptyMap(List<Map<String, Object>> readRows) {
-		return readRows.size() == 1 ? readRows.get(0) : Collections.emptyMap();
+	private Row getRowIfOnlyOneOrEmptyMap(List<Row> readRows) {
+		return readRows.size() == 1 ? readRows.get(0) : null;
 	}
 
 	private String getOrganisationId(DataGroup organisation) {
@@ -104,22 +105,23 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 		}
 	}
 
-	private boolean alternativeNameExistsInDatabase(Map<String, Object> readRow) {
-		return !readRow.isEmpty();
+	private boolean alternativeNameExistsInDatabase(Row readRow) {
+		return readRow != null;
 	}
 
 	private void handleUpdate(DataGroup organisation, String organisationId,
 			List<DbStatement> dbStatements) {
 		boolean nameInDataGroupDiffersFromNameInDb = nameInDbNotSameAsNameInDataGroup(organisation);
 		if (nameInDataGroupDiffersFromNameInDb) {
-			int nameId = (int) alternativeNameRow.get(ORGANISATION_NAME_ID);
+			int nameId = (int) alternativeNameRow.getValueByColumn(ORGANISATION_NAME_ID);
 			updateAlternativeName(dbStatements, organisation, organisationId, nameId);
 		}
 	}
 
 	private boolean nameInDbNotSameAsNameInDataGroup(DataGroup organisation) {
 		String nameOfOrganisation = getAlternativeNameFromOrganisation(organisation);
-		String organisationNameInDb = (String) alternativeNameRow.get(ORGANISATION_NAME);
+		String organisationNameInDb = (String) alternativeNameRow
+				.getValueByColumn(ORGANISATION_NAME);
 		return !nameOfOrganisation.equals(organisationNameInDb);
 	}
 
@@ -153,19 +155,21 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 
 	private void handleInsert(List<DbStatement> dbStatements, DataGroup organisation,
 			String organisationId) {
-		Map<String, Object> values = generateValues(organisation, organisationId);
-		addOrganisationNameIdNextValue(values);
-		dbStatements
-				.add(new DbStatement("insert", ORGANISATION_NAME, values, Collections.emptyMap()));
+		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			Map<String, Object> values = generateValues(organisation, organisationId);
+			addOrganisationNameIdNextValue(tableFacade, values);
+			dbStatements.add(
+					new DbStatement("insert", ORGANISATION_NAME, values, Collections.emptyMap()));
+		}
 	}
 
-	private void addOrganisationNameIdNextValue(Map<String, Object> values) {
-		Map<String, Object> nextValue = recordReader.readNextValueFromSequence("name_sequence");
-		values.put(ORGANISATION_NAME_ID, nextValue.get("nextval"));
+	private void addOrganisationNameIdNextValue(TableFacade tableFacade,
+			Map<String, Object> values) {
+		long nextValue = tableFacade.nextValueFromSequence("name_sequence");
+		values.put(ORGANISATION_NAME_ID, nextValue);
 	}
 
-	RecordReader getRecordReader() {
-		// Only needed for test
-		return recordReader;
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
 }

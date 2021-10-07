@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,14 +18,10 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslater;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
@@ -33,83 +29,75 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdater;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableFactory;
 import se.uu.ub.cora.diva.mixedstorage.db.StatementExecutor;
-import se.uu.ub.cora.sqldatabase.DataReader;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
-import se.uu.ub.cora.sqldatabase.SqlStorageException;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
+import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
 public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	private static final String ORGANISATION_ID = "organisation_id";
 	private DataToDbTranslater organisationToDbTranslater;
 	private RelatedTableFactory relatedTableFactory;
-	private RecordReaderFactory recordReaderFactory;
-	private RecordReader recordReader;
-	private SqlConnectionProvider connectionProvider;
 	private StatementExecutor statementExecutor;
 	private Map<String, Object> organisationConditions;
 	private Map<String, Object> organisationValues;
-	private DataReader dataReader;
+	private SqlDatabaseFactory sqlDatabaseFactory;
 
 	public DivaDbOrganisationUpdater(DataToDbTranslater dataTranslater,
-			RecordReaderFactory recordReaderFactory, RelatedTableFactory relatedTableFactory,
-			SqlConnectionProvider connectionProvider, StatementExecutor preparedStatementCreator,
-			DataReader dataReader) {
+			SqlDatabaseFactory sqlDatabaseFactory, RelatedTableFactory relatedTableFactory,
+			StatementExecutor preparedStatementCreator) {
 		this.organisationToDbTranslater = dataTranslater;
-		this.recordReaderFactory = recordReaderFactory;
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 		this.relatedTableFactory = relatedTableFactory;
-		this.connectionProvider = connectionProvider;
 		this.statementExecutor = preparedStatementCreator;
-		this.dataReader = dataReader;
-
 	}
 
 	@Override
-	public void update(DataGroup dataGroup) {
+	public void update(TableFacade tableFacade, DatabaseFacade databaseFacade,
+			DataGroup dataGroup) {
 		organisationToDbTranslater.translate(dataGroup);
 		organisationConditions = organisationToDbTranslater.getConditions();
 		organisationValues = organisationToDbTranslater.getValues();
-		recordReader = recordReaderFactory.factor();
-		updateOrganisation(dataGroup);
+		updateOrganisation(tableFacade, databaseFacade, dataGroup);
 
 	}
 
-	private void updateOrganisation(DataGroup dataGroup) {
-		List<Map<String, Object>> existingDbOrganisation = readExistingOrganisationRow();
-		Map<String, Object> readConditionsRelatedTables = generateReadConditionsForRelatedTables();
-		List<DbStatement> dbStatements = generateDbStatements(dataGroup,
-				readConditionsRelatedTables, existingDbOrganisation);
-		tryUpdateDatabaseWithGivenDbStatements(dbStatements);
+	private void updateOrganisation(TableFacade tableFacade, DatabaseFacade databaseFacade,
+			DataGroup dataGroup) {
+		List<Row> existingDbOrganisation = readExistingOrganisationRow(tableFacade);
+		List<DbStatement> dbStatements = generateDbStatements(tableFacade, dataGroup,
+				existingDbOrganisation);
+		tryUpdateDatabaseWithGivenDbStatements(databaseFacade, dbStatements);
 	}
 
-	private List<Map<String, Object>> readExistingOrganisationRow() {
-		Map<String, Object> readConditionsForOrganisation = generateReadConditions();
-		return recordReader.readFromTableUsingConditions("organisationview",
-				readConditionsForOrganisation);
+	private List<Row> readExistingOrganisationRow(TableFacade tableFacade) {
+		TableQuery tableQuery = createTableQueryForReadOrganisation();
+		return tableFacade.readRowsForQuery(tableQuery);
 	}
 
-	private Map<String, Object> generateReadConditions() {
-		Map<String, Object> readConditions = new HashMap<>();
+	private TableQuery createTableQueryForReadOrganisation() {
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("organisationview");
+		addConditionForRead(tableQuery);
+		return tableQuery;
+	}
+
+	private void addConditionForRead(TableQuery tableQuery) {
 		int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
-		readConditions.put("id", organisationsId);
-		return readConditions;
+		tableQuery.addCondition(ORGANISATION_ID, organisationsId);
 	}
 
-	private Map<String, Object> generateReadConditionsForRelatedTables() {
-		Map<String, Object> readConditions = new HashMap<>();
-		int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
-		readConditions.put(ORGANISATION_ID, organisationsId);
-		return readConditions;
-	}
-
-	private List<DbStatement> generateDbStatements(DataGroup dataGroup,
-			Map<String, Object> readConditions, List<Map<String, Object>> dbOrganisation) {
+	private List<DbStatement> generateDbStatements(TableFacade tableFacade, DataGroup dataGroup,
+			List<Row> organisationRowsFromDb) {
 		List<DbStatement> dbStatements = new ArrayList<>();
 		dbStatements.add(createDbStatementForOrganisationUpdate());
-		dbStatements.addAll(generateDbStatementsForAlternativeName(dataGroup, dbOrganisation));
-		dbStatements.addAll(generateDbStatementsForAddress(dataGroup, dbOrganisation));
-		dbStatements.addAll(generateDbStatementsForParents(dataGroup, readConditions));
-		dbStatements.addAll(generateDbStatementsForPredecessors(dataGroup, readConditions));
+		dbStatements.addAll(generateDbStatementsForAlternativeName(dataGroup, organisationRowsFromDb));
+		dbStatements.addAll(
+				generateDbStatementsForAddress(dataGroup, organisationRowsFromDb));
+		dbStatements.addAll(generateDbStatementsForParents(tableFacade, dataGroup));
+		dbStatements.addAll(generateDbStatementsForPredecessors(tableFacade, dataGroup));
 		return dbStatements;
 	}
 
@@ -119,59 +107,62 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 	}
 
 	private List<DbStatement> generateDbStatementsForAlternativeName(DataGroup dataGroup,
-			List<Map<String, Object>> dbOrganisation) {
+			List<Row> organisationRowsFromDb) {
 		RelatedTable alternativeName = relatedTableFactory.factor("organisationAlternativeName");
-		return alternativeName.handleDbForDataGroup(dataGroup, dbOrganisation);
+		return alternativeName.handleDbForDataGroup(dataGroup, organisationRowsFromDb);
 	}
 
 	private List<DbStatement> generateDbStatementsForAddress(DataGroup dataGroup,
-			List<Map<String, Object>> dbOrganisation) {
+			List<Row> organisationRowsFromDb) {
 		RelatedTable addressTable = relatedTableFactory.factor("organisationAddress");
-		return addressTable.handleDbForDataGroup(dataGroup, dbOrganisation);
+		return addressTable.handleDbForDataGroup(dataGroup, organisationRowsFromDb);
 	}
 
-	private List<DbStatement> generateDbStatementsForParents(DataGroup dataGroup,
-			Map<String, Object> readConditions) {
-		List<Map<String, Object>> dbParents = recordReader
-				.readFromTableUsingConditions("organisation_parent", readConditions);
+	private List<DbStatement> generateDbStatementsForParents(TableFacade tableFacade,
+			DataGroup dataGroup) {
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("organisation_parent");
+		addConditionForRead(tableQuery);
+		List<Row> dbParents = tableFacade.readRowsForQuery(tableQuery);
 		RelatedTable parent = relatedTableFactory.factor("organisationParent");
 		return parent.handleDbForDataGroup(dataGroup, dbParents);
 	}
 
-	private List<DbStatement> generateDbStatementsForPredecessors(DataGroup dataGroup,
-			Map<String, Object> readConditions) {
-		List<Map<String, Object>> dbPredecessors = recordReader
-				.readFromTableUsingConditions("divaorganisationpredecessor", readConditions);
+	private List<DbStatement> generateDbStatementsForPredecessors(TableFacade tableFacade,
+			DataGroup dataGroup) {
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("divaorganisationpredecessor");
+		addConditionForRead(tableQuery);
+		List<Row> dbPredecessors = tableFacade.readRowsForQuery(tableQuery);
 		RelatedTable predecessor = relatedTableFactory.factor("organisationPredecessor");
 		return predecessor.handleDbForDataGroup(dataGroup, dbPredecessors);
 	}
 
-	private void tryUpdateDatabaseWithGivenDbStatements(List<DbStatement> dbStatements) {
-		try (Connection connection = connectionProvider.getConnection();) {
-			tryUpdateDatabaseWithGivenDbStatementsUsingConnection(dbStatements, connection);
+	private void tryUpdateDatabaseWithGivenDbStatements(DatabaseFacade databaseFacade,
+			List<DbStatement> dbStatements) {
+		try {
+			tryUpdateDatabaseWithGivenDbStatementsUsingConnection(databaseFacade, dbStatements);
 		} catch (Exception e) {
-			throw SqlStorageException.withMessageAndException(
+			throw SqlDatabaseException.withMessageAndException(
 					"Error executing prepared statement: " + e.getMessage(), e);
 		}
 	}
 
 	private void tryUpdateDatabaseWithGivenDbStatementsUsingConnection(
-			List<DbStatement> dbStatements, Connection connection) throws SQLException {
+			DatabaseFacade databaseFacade, List<DbStatement> dbStatements) {
 		try {
-			updateDatabaseWithGivenDbStatementsUsingConnection(dbStatements, connection);
+			updateDatabaseWithGivenDbStatementsUsingConnection(databaseFacade, dbStatements);
 		} catch (Exception innerException) {
-			connection.rollback();
+			databaseFacade.rollback();
 			throw innerException;
 		} finally {
-			connection.setAutoCommit(true);
+			databaseFacade.endTransaction();
 		}
 	}
 
-	private void updateDatabaseWithGivenDbStatementsUsingConnection(List<DbStatement> dbStatements,
-			Connection connection) throws SQLException {
-		connection.setAutoCommit(false);
-		statementExecutor.executeDbStatmentUsingConnection(dbStatements, connection);
-		connection.commit();
+	private void updateDatabaseWithGivenDbStatementsUsingConnection(DatabaseFacade databaseFacade,
+			List<DbStatement> dbStatements) {
+		databaseFacade.startTransaction();
+		statementExecutor.executeDbStatmentUsingDatabaseFacade(dbStatements, databaseFacade);
+		databaseFacade.endTransaction();
 	}
 
 	public DataToDbTranslater getDataToDbTranslater() {
@@ -184,24 +175,13 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 		return relatedTableFactory;
 	}
 
-	public RecordReaderFactory getRecordReaderFactory() {
-		// needed for test
-		return recordReaderFactory;
-	}
-
-	public SqlConnectionProvider getSqlConnectionProvider() {
-		// needed for test
-		return connectionProvider;
-	}
-
 	public StatementExecutor getPreparedStatementCreator() {
 		// needed for test
 		return statementExecutor;
 	}
 
-	public DataReader getDataReader() {
-		// needed for test
-		return dataReader;
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
 
 }

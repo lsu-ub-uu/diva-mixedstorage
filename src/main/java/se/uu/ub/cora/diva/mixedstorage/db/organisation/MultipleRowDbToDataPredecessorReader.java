@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -22,14 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactory;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public class MultipleRowDbToDataPredecessorReader extends DivaMultipleRowDbToDataReaderImp
 		implements MultipleRowDbToDataReader {
 
-	public MultipleRowDbToDataPredecessorReader(RecordReaderFactory recordReaderFactory,
+	public MultipleRowDbToDataPredecessorReader(SqlDatabaseFactory sqlDatabaseFactory,
 			DivaDbToCoraConverterFactory converterFactory) {
-		this.recordReaderFactory = recordReaderFactory;
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 		this.converterFactory = converterFactory;
 	}
 

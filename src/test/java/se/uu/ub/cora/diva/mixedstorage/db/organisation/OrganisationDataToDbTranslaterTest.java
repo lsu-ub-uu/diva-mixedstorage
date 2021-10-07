@@ -1,5 +1,5 @@
 /*
-  * Copyright 2019 Uppsala University Library
+  * Copyright 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -20,6 +20,7 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.sql.Date;
@@ -34,17 +35,16 @@ import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslater;
 import se.uu.ub.cora.diva.mixedstorage.db.DbException;
-import se.uu.ub.cora.diva.mixedstorage.db.RecordReaderSpy;
 
 public class OrganisationDataToDbTranslaterTest {
 
-	private RecordReaderSpy recordReader;
 	private DataToDbTranslater translater;
+	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 
 	@BeforeMethod
 	public void setUp() {
-		recordReader = new RecordReaderSpy();
-		translater = new OrganisationDataToDbTranslater(recordReader);
+		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
+		translater = new OrganisationDataToDbTranslater(sqlDatabaseFactory);
 	}
 
 	@Test
@@ -289,11 +289,27 @@ public class OrganisationDataToDbTranslaterTest {
 
 	@Test
 	public void testOrganisationTypeWhenSubOrganisation() {
+		sqlDatabaseFactory.createAndAddRowToReturn("organisation_type_id", 52);
+		translater = new OrganisationDataToDbTranslater(sqlDatabaseFactory);
+
 		DataGroup dataGroup = createDataGroupWithIdTypeAndOrgType("45", "subOrganisation", "unit");
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getConditions().get("organisation_id"), 45);
 		assertOrgTypeIsReadFromDbAndUsed();
+	}
+
+	private void assertOrgTypeIsReadFromDbAndUsed() {
+		assertEquals(sqlDatabaseFactory.tableName, "organisation_type");
+		TableQuerySpy tableQuery = sqlDatabaseFactory.factoredTableQuery;
+		assertEquals(tableQuery.conditions.get("organisation_type_code"), "unit");
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertSame(tableFacade.tableQueries.get(0), tableQuery);
+
+		assertEquals(translater.getValues().get("organisation_type_id"), 52);
+
+		assertTrue(tableFacade.closeWasCalled);
+
 	}
 
 	@Test
@@ -302,15 +318,6 @@ public class OrganisationDataToDbTranslaterTest {
 
 		translater.translate(dataGroup);
 		assertEquals(translater.getValues().get("organisation_type_id"), 49);
-	}
-
-	private void assertOrgTypeIsReadFromDbAndUsed() {
-		assertEquals(recordReader.usedTableNames.size(), 1);
-		assertEquals(recordReader.usedTableNames.get(0), "organisation_type");
-		assertEquals(recordReader.usedConditions.get("organisation_type_code"), "unit");
-
-		assertEquals(recordReader.oneRowRead.get("organisation_type_id"),
-				translater.getValues().get("organisation_type_id"));
 	}
 
 }

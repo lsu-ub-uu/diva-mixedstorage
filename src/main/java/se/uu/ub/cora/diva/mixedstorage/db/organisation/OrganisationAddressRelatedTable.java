@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -30,8 +30,9 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class OrganisationAddressRelatedTable implements RelatedTable {
 
@@ -40,21 +41,21 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 	private static final String STREET = "street";
 	private static final String ORGANISATION_ADDRESS = "organisation_address";
 	private static final String ADDRESS_ID = "address_id";
-	private RecordReaderFactory recordReaderFactory;
+	private SqlDatabaseFactory sqlDatabaseFactory;
 	private int organisationId;
 
-	public OrganisationAddressRelatedTable(RecordReaderFactory recordReaderFactory) {
-		this.recordReaderFactory = recordReaderFactory;
+	public OrganisationAddressRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 	}
 
 	@Override
 	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
-			List<Map<String, Object>> organisationsFromDb) {
+			List<Row> organisationsFromDb) {
 		setIdAsInt(organisation);
 
 		List<DbStatement> dbStatements = new ArrayList<>();
 
-		Object addressIdInOrganisation = organisationsFromDb.get(0).get(ADDRESS_ID);
+		Object addressIdInOrganisation = organisationsFromDb.get(0).getValueByColumn(ADDRESS_ID);
 		if (addressExistsInDatabase(addressIdInOrganisation)) {
 			deleteOrUpdateAddress(dbStatements, organisation, addressIdInOrganisation);
 		} else {
@@ -180,17 +181,14 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 
 	private void possiblyInsertAddress(List<DbStatement> dbStatements, DataGroup organisation) {
 		if (organisationDataGroupContainsAddress(organisation)) {
-
-			RecordReader sequenceReader = recordReaderFactory.factor();
-			Map<String, Object> nextValue = sequenceReader
-					.readNextValueFromSequence("address_sequence");
-			createInsertForAddress(dbStatements, organisation, nextValue.get("nextval"));
-
-			Map<String, Object> values = new HashMap<>();
-			values.put(ADDRESS_ID, nextValue.get("nextval"));
-
-			updateAddressColumnInOrganisation(dbStatements, values,
-					createConditionsWithOrganisationId());
+			try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
+				long nextValueFromSequence = tableFacade.nextValueFromSequence("address_sequence");
+				createInsertForAddress(dbStatements, organisation, nextValueFromSequence);
+				Map<String, Object> values = new HashMap<>();
+				values.put(ADDRESS_ID, nextValueFromSequence);
+				updateAddressColumnInOrganisation(dbStatements, values,
+						createConditionsWithOrganisationId());
+			}
 		}
 	}
 
@@ -207,8 +205,8 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 		return valuesForInsert;
 	}
 
-	public RecordReaderFactory getRecordReaderFactory() {
-		// needed for test
-		return recordReaderFactory;
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
+
 }

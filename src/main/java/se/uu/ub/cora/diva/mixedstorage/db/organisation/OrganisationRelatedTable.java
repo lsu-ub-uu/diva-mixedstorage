@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,18 +21,18 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
-import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public abstract class OrganisationRelatedTable {
 
 	protected int organisationId;
-	protected RecordReader recordReader;
+	protected SqlDatabaseFactory sqlDatabaseFactory;
 
 	protected void setIdAsInt(DataGroup organisation) {
 		String organisationIdAsString = DataToDbHelper.extractIdFromDataGroup(organisation);
@@ -40,8 +40,8 @@ public abstract class OrganisationRelatedTable {
 		organisationId = Integer.parseInt(organisationIdAsString);
 	}
 
-	protected void handleDeleteAndCreate(List<DbStatement> dbStatements,
-			List<Map<String, Object>> allCurrentRowsInDb, Set<String> idsFromDataGroup) {
+	protected void handleDeleteAndCreate(List<DbStatement> dbStatements, List<Row> allCurrentRowsInDb,
+			Set<String> idsFromDataGroup) {
 		Set<String> idsInDatabase = getIdsForCurrentRowsInDatabase(allCurrentRowsInDb);
 
 		if (idsInDatabase.isEmpty()) {
@@ -69,7 +69,6 @@ public abstract class OrganisationRelatedTable {
 
 	protected abstract void addToDb(List<DbStatement> dbStatements, Set<String> idsFromDataGroup);
 
-	protected abstract Set<String> getIdsForCurrentRowsInDatabase(
-			List<Map<String, Object>> allCurrentRowsInDb);
+	protected abstract Set<String> getIdsForCurrentRowsInDatabase(List<Row> allCurrentRowsInDb);
 
 }

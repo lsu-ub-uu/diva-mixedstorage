@@ -23,9 +23,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -36,11 +33,12 @@ import se.uu.ub.cora.diva.mixedstorage.DataAtomicFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RowSpy;
 
 public class DivaDbToCoraUserConverterTest {
 
 	private DivaDbToCoraUserConverter converter;
-	private Map<String, Object> rowFromDb;
+	private RowSpy rowFromDb;
 	private DataGroupFactorySpy dataGroupFactorySpy;
 	private DataAtomicFactorySpy dataAtomicFactorySpy;
 
@@ -50,47 +48,47 @@ public class DivaDbToCoraUserConverterTest {
 		DataGroupProvider.setDataGroupFactory(dataGroupFactorySpy);
 		dataAtomicFactorySpy = new DataAtomicFactorySpy();
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactorySpy);
-		rowFromDb = new HashMap<>();
-		rowFromDb.put("db_id", 678);
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("db_id", 678);
 		converter = new DivaDbToCoraUserConverter();
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting user to Cora user: Map does not contain value for id")
 	public void testEmptyMap() {
-		rowFromDb = new HashMap<>();
-		DataGroup user = converter.fromMap(rowFromDb);
+		rowFromDb = new RowSpy();
+		DataGroup user = converter.fromRow(rowFromDb);
 		assertNull(user);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting user to Cora user: Map does not contain value for id")
 	public void testMapWithEmptyValueThrowsError() {
-		rowFromDb = new HashMap<>();
-		rowFromDb.put("db_id", "");
-		converter.fromMap(rowFromDb);
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("db_id", "");
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting user to Cora user: Map does not contain value for id")
 	public void testMapWithNonEmptyValueANDEmptyValueThrowsError() {
-		Map<String, Object> rowFromDb = new HashMap<>();
-		rowFromDb.put("first_name", "someName");
-		rowFromDb.put("db_id", "");
-		converter.fromMap(rowFromDb);
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("first_name", "someName");
+		rowFromDb.addColumnWithValue("db_id", "");
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting user to Cora user: Map does not contain value for id")
 	public void mapDoesNotContainUserIdValue() {
-		rowFromDb = new HashMap<>();
-		rowFromDb.put("first_name", "someName");
-		converter.fromMap(rowFromDb);
+		rowFromDb = new RowSpy();
+		rowFromDb.addColumnWithValue("first_name", "someName");
+		converter.fromRow(rowFromDb);
 	}
 
 	@Test
 	public void testReturnsDataGroupWithCorrectRecordInfo() {
-		DataGroup user = converter.fromMap(rowFromDb);
+		DataGroup user = converter.fromRow(rowFromDb);
 		assertEquals(user.getNameInData(), "user");
 		assertEquals(user.getAttribute("type").getValue(), "coraUser");
 
@@ -115,7 +113,7 @@ public class DivaDbToCoraUserConverterTest {
 		assertSame(recordInfo.getFirstDataAtomicWithNameInData("id"),
 				dataAtomicFactorySpy.factoredDataAtomics.get(0));
 		assertEquals(dataAtomicFactorySpy.factoredDataAtomics.get(0).value,
-				String.valueOf(rowFromDb.get("db_id")));
+				String.valueOf(rowFromDb.getValueByColumn("db_id")));
 
 		assertCorrectCreatedInfo(recordInfo);
 		assertCorrectUpdatedInfo(recordInfo);
@@ -167,7 +165,7 @@ public class DivaDbToCoraUserConverterTest {
 
 	@Test
 	public void testReturnsDataGroupWithActiveUser() {
-		DataGroup user = converter.fromMap(rowFromDb);
+		DataGroup user = converter.fromRow(rowFromDb);
 		assertEquals(user.getNameInData(), "user");
 		assertEquals(user.getAttribute("type").getValue(), "coraUser");
 		assertEquals(user.getFirstAtomicValueWithNameInData("activeStatus"), "active");
@@ -175,7 +173,7 @@ public class DivaDbToCoraUserConverterTest {
 
 	@Test
 	public void testMinimalContentDoesNotContainNonMandatoryValues() {
-		DataGroup user = converter.fromMap(rowFromDb);
+		DataGroup user = converter.fromRow(rowFromDb);
 		assertEquals(user.getNameInData(), "user");
 		assertEquals(user.getAttribute("type").getValue(), "coraUser");
 		assertFalse(user.containsChildWithNameInData("userFirstname"));
@@ -183,25 +181,11 @@ public class DivaDbToCoraUserConverterTest {
 
 	}
 
-	// TODO: domain är inte med i coraUser, hur hantera detta? divaUser?
-	// @Test
-	// public void testUserDomain() throws Exception {
-	// rowFromDb.put("domain", "uu");
-	//
-	// DataGroup user = converter.fromMap(rowFromDb);
-	//
-	// DataAtomicSpy factoredDataAtomicForId = getFactoredDataAtomicByNumber(11);
-	// assertEquals(factoredDataAtomicForId.nameInData, "domain");
-	// assertEquals(factoredDataAtomicForId.value, "uu");
-	//
-	// assertEquals(user.getFirstAtomicValueWithNameInData("domain"), "uu");
-	// }
-
 	@Test
 	public void testUserName() {
-		rowFromDb.put("first_name", "Kalle");
-		rowFromDb.put("last_name", "Kula");
-		DataGroup user = converter.fromMap(rowFromDb);
+		rowFromDb.addColumnWithValue("first_name", "Kalle");
+		rowFromDb.addColumnWithValue("last_name", "Kula");
+		DataGroup user = converter.fromRow(rowFromDb);
 		assertEquals(user.getNameInData(), "user");
 
 		DataAtomicSpy factoredDataAtomicForName = getFactoredDataAtomicByNumber(4);

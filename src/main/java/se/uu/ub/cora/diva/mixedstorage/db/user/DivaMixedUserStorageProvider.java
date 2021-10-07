@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,9 +21,6 @@ package se.uu.ub.cora.diva.mixedstorage.db.user;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import javax.naming.InitialContext;
-
-import se.uu.ub.cora.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraUserConverter;
 import se.uu.ub.cora.gatekeeper.user.GuestUserStorageProvider;
@@ -31,10 +28,7 @@ import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.gatekeeper.user.UserStorageProvider;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
-import se.uu.ub.cora.sqldatabase.DataReader;
-import se.uu.ub.cora.sqldatabase.DataReaderImp;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderImp;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
 
 public class DivaMixedUserStorageProvider implements UserStorageProvider {
 
@@ -61,13 +55,14 @@ public class DivaMixedUserStorageProvider implements UserStorageProvider {
 
 	private void createUserStorage() {
 		UserStorage guestUserStorage = createGuestUserStorage();
-		RecordReader recordReader = createRecordReader();
+		SqlDatabaseFactoryImp sqlDatabaseFactory = createDatabaseFactory();
 		DivaDbToCoraConverter converter = new DivaDbToCoraUserConverter();
 		DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator = new DataGroupRoleReferenceCreatorImp();
 
 		userStorage = DivaMixedUserStorage
-				.usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(
-						guestUserStorage, recordReader, converter, dataGroupRoleReferenceCreator);
+				.usingGuestUserStorageDatabaseFactoryAndUserConverterAndRoleReferenceCreator(
+						guestUserStorage, sqlDatabaseFactory, converter,
+						dataGroupRoleReferenceCreator);
 	}
 
 	private UserStorage createGuestUserStorage() {
@@ -78,21 +73,9 @@ public class DivaMixedUserStorageProvider implements UserStorageProvider {
 		return guestUserStorageStarter.getGuestUserStorage();
 	}
 
-	private RecordReader createRecordReader() {
-		ContextConnectionProviderImp connectionProvider = createConnectionProvider();
-		DataReader dataReader = DataReaderImp.usingSqlConnectionProvider(connectionProvider);
-		return RecordReaderImp.usingDataReader(dataReader);
-	}
-
-	private ContextConnectionProviderImp createConnectionProvider() {
-		try {
-			InitialContext context = new InitialContext();
-			String name = tryToGetInitParameter("databaseLookupName");
-			return ContextConnectionProviderImp.usingInitialContextAndName(context, name);
-		} catch (Exception e) {
-			throw new RuntimeException(
-					"Error starting ContextConnectionProviderImp " + e.getMessage(), e);
-		}
+	private SqlDatabaseFactoryImp createDatabaseFactory() {
+		String name = tryToGetInitParameter("databaseLookupName");
+		return SqlDatabaseFactoryImp.usingLookupNameFromContext(name);
 	}
 
 	private String tryToGetInitParameter(String parameterName) {

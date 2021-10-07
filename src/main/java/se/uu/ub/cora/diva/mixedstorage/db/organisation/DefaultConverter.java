@@ -18,12 +18,11 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
-import java.util.Map;
-
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.sqldatabase.Row;
 
 public interface DefaultConverter {
 
-	DataGroup fromMap(Map<String, Object> dbRow);
+	DataGroup fromMap(Row dbRow);
 
 }

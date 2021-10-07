@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -24,24 +24,23 @@ import se.uu.ub.cora.diva.mixedstorage.db.user.DataGroupRoleReferenceCreator;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DataGroupRoleReferenceCreatorImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorage;
 import se.uu.ub.cora.gatekeeper.user.UserStorage;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaStorageFactoryImp implements DivaStorageFactory {
 
 	private UserStorage guestUserStorage;
-	private RecordReaderFactory recordReaderFactory;
+	private SqlDatabaseFactory sqlDatabaseFactory;
 
-	public static DivaStorageFactoryImp usingGuestUserStorageAndRecordReader(
-			UserStorage guestUserStorage, RecordReaderFactory recordReaderFactory) {
-		return new DivaStorageFactoryImp(guestUserStorage, recordReaderFactory);
+	public static DivaStorageFactoryImp usingGuestUserStorageAndSqlDatabaseFactory(
+			UserStorage guestUserStorage, SqlDatabaseFactory sqlDatabaseFactory) {
+		return new DivaStorageFactoryImp(guestUserStorage, sqlDatabaseFactory);
 	}
 
 	private DivaStorageFactoryImp(UserStorage guestUserStorage,
-			RecordReaderFactory recordReaderFactory) {
+			SqlDatabaseFactory sqlDatabaseFactory) {
 		this.guestUserStorage = guestUserStorage;
-		this.recordReaderFactory = recordReaderFactory;
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 	}
 
 	@Override
@@ -55,10 +54,9 @@ public class DivaStorageFactoryImp implements DivaStorageFactory {
 	private RecordStorage factorRecordUserStorage() {
 		DivaDbToCoraConverter userConverter = new DivaDbToCoraUserConverter();
 		DataGroupRoleReferenceCreator dataGroupRoleReferenceCreator = new DataGroupRoleReferenceCreatorImp();
-		RecordReader recordReader = recordReaderFactory.factor();
 		return DivaMixedUserStorage
-				.usingGuestUserStorageRecordReaderAndUserConverterAndRoleReferenceCreator(
-						guestUserStorage, recordReader, userConverter,
+				.usingGuestUserStorageDatabaseFactoryAndUserConverterAndRoleReferenceCreator(
+						guestUserStorage, sqlDatabaseFactory, userConverter,
 						dataGroupRoleReferenceCreator);
 	}
 
@@ -66,8 +64,7 @@ public class DivaStorageFactoryImp implements DivaStorageFactory {
 		return guestUserStorage;
 	}
 
-	public RecordReaderFactory getReaderFactory() {
-		return recordReaderFactory;
+	public SqlDatabaseFactory getSqldatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
-
 }

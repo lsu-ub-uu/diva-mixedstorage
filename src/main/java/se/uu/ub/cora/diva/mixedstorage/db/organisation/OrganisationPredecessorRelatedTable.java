@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Uppsala University Library
+ * Copyright 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -29,7 +29,9 @@ import java.util.Set;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
-import se.uu.ub.cora.sqldatabase.RecordReader;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTable
 		implements RelatedTable {
@@ -44,20 +46,20 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	private static final String ORGANISATION_ID = "organisation_id";
 	private static final String ORGANISATION_PREDECESSOR = "organisation_predecessor";
 	private Map<String, DataGroup> predecessorsInDataGroup;
-	private Map<Integer, Map<String, Object>> mapWithPredecessorAsKey;
+	private Map<Integer, Row> mapWithPredecessorAsKey;
 
-	public OrganisationPredecessorRelatedTable(RecordReader recordReader) {
-		this.recordReader = recordReader;
+	public OrganisationPredecessorRelatedTable(SqlDatabaseFactory sqlDatabaseFactory) {
+		this.sqlDatabaseFactory = sqlDatabaseFactory;
 	}
 
 	@Override
 	public List<DbStatement> handleDbForDataGroup(DataGroup organisation,
-			List<Map<String, Object>> existingPredecessors) {
+			List<Row> existingPredecessors) {
 		setIdAsInt(organisation);
 
 		mapWithPredecessorAsKey = new HashMap<>(existingPredecessors.size());
-		for (Map<String, Object> dbRow : existingPredecessors) {
-			int predecessorId = (int) dbRow.get(ORGANISATION_PREDECESSOR_ID);
+		for (Row dbRow : existingPredecessors) {
+			int predecessorId = (int) dbRow.getValueByColumn(ORGANISATION_PREDECESSOR_ID);
 			mapWithPredecessorAsKey.put(predecessorId, dbRow);
 		}
 		List<DbStatement> dbStatements = new ArrayList<>();
@@ -91,7 +93,7 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 
 	@Override
 	protected void handleDeleteAndCreate(List<DbStatement> dbStatements,
-			List<Map<String, Object>> existingPredecessors, Set<String> idsFromDataGroup) {
+			List<Row> existingPredecessors, Set<String> idsFromDataGroup) {
 
 		Set<String> idsInDatabase = getIdsForCurrentRowsInDatabase(existingPredecessors);
 		Set<String> existsInDbAndDataGroup = createSetWithPredecessorsInDataGroupIds();
@@ -113,10 +115,9 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 		return organisationLink.getFirstAtomicValueWithNameInData("linkedRecordId");
 	}
 
-	private void deletePredecessors(List<DbStatement> dbStatements,
-			List<Map<String, Object>> predecessors) {
-		for (Map<String, Object> readRow : predecessors) {
-			int predecessorId = (int) readRow.get(ORGANISATION_PREDECESSOR_ID);
+	private void deletePredecessors(List<DbStatement> dbStatements, List<Row> predecessors) {
+		for (Row readRow : predecessors) {
+			int predecessorId = (int) readRow.getValueByColumn(ORGANISATION_PREDECESSOR_ID);
 			createDeleteForPredecessorAndDescription(dbStatements, predecessorId);
 		}
 	}
@@ -149,11 +150,11 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	}
 
 	@Override
-	protected Set<String> getIdsForCurrentRowsInDatabase(
-			List<Map<String, Object>> allCurrentPredecessorsInDb) {
+	protected Set<String> getIdsForCurrentRowsInDatabase(List<Row> allCurrentPredecessorsInDb) {
 		Set<String> predecessorIdsInDatabase = new HashSet<>(allCurrentPredecessorsInDb.size());
-		for (Map<String, Object> readRow : allCurrentPredecessorsInDb) {
-			predecessorIdsInDatabase.add(String.valueOf(readRow.get(ORGANISATION_PREDECESSOR_ID)));
+		for (Row readRow : allCurrentPredecessorsInDb) {
+			predecessorIdsInDatabase
+					.add(String.valueOf(readRow.getValueByColumn(ORGANISATION_PREDECESSOR_ID)));
 		}
 		return predecessorIdsInDatabase;
 	}
@@ -185,10 +186,11 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 			String comment) {
 		Map<String, Object> descriptionValues = createConditionsForPredecessorDescription(
 				predecessorId);
-		Map<String, Object> nextValue = recordReader
-				.readNextValueFromSequence("organisation_predecessor_description_sequence");
-
-		descriptionValues.put(ORGANISATION_PREDECESSOR_ID, nextValue.get("nextval"));
+		try (TableFacade factorTableFacade = sqlDatabaseFactory.factorTableFacade()) {
+			long nextVal = factorTableFacade
+					.nextValueFromSequence("organisation_predecessor_description_sequence");
+			descriptionValues.put(ORGANISATION_PREDECESSOR_ID, nextVal);
+		}
 		descriptionValues.put("last_updated", getCurrentTimestamp());
 		descriptionValues.put(DESCRIPTION, comment);
 		return descriptionValues;
@@ -228,8 +230,7 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 			String predecessorId) {
 		DataGroup dataGroup = predecessorsInDataGroup.get(predecessorId);
 		Map<String, Object> conditions = createConditionsForPredecessorDescription(predecessorId);
-		Map<String, Object> readDescription = mapWithPredecessorAsKey
-				.get(Integer.valueOf(predecessorId));
+		Row readDescription = mapWithPredecessorAsKey.get(Integer.valueOf(predecessorId));
 		if (dataGroup.containsChildWithNameInData(INTERNAL_NOTE)) {
 			handleDeleteAndCreatedForDescription(dbStatements, predecessorId, dataGroup, conditions,
 					readDescription);
@@ -239,14 +240,12 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	}
 
 	private void handleDeleteAndCreatedForDescription(List<DbStatement> dbStatements, String id,
-			DataGroup dataGroup, Map<String, Object> conditions,
-			Map<String, Object> readDescription) {
-		String descriptionInDataGroup = dataGroup
-				.getFirstAtomicValueWithNameInData(INTERNAL_NOTE);
+			DataGroup dataGroup, Map<String, Object> conditions, Row readDescription) {
+		String descriptionInDataGroup = dataGroup.getFirstAtomicValueWithNameInData(INTERNAL_NOTE);
 		if (!predecessorHasDescription(readDescription)) {
 			createNewDescriptionInDb(dbStatements, id, descriptionInDataGroup);
 		} else {
-			String description = (String) readDescription.get(DESCRIPTION);
+			String description = (String) readDescription.getValueByColumn(DESCRIPTION);
 			if (!description.equals(descriptionInDataGroup)) {
 				deleteDescriptionFromDbUsingConditions(dbStatements, conditions);
 				createNewDescriptionInDb(dbStatements, id, descriptionInDataGroup);
@@ -255,14 +254,14 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 	}
 
 	private void deleteDescriptionInDbIfExists(List<DbStatement> dbStatements,
-			Map<String, Object> conditions, Map<String, Object> readDescription) {
+			Map<String, Object> conditions, Row readDescription) {
 		if (predecessorHasDescription(readDescription)) {
 			deleteDescriptionFromDbUsingConditions(dbStatements, conditions);
 		}
 	}
 
-	private boolean predecessorHasDescription(Map<String, Object> readDescription) {
-		return readDescription.get(DESCRIPTION) != null;
+	private boolean predecessorHasDescription(Row readDescription) {
+		return readDescription.hasColumnWithNonEmptyValue(DESCRIPTION);
 	}
 
 	private void deleteDescriptionFromDbUsingConditions(List<DbStatement> dbStatements,
@@ -285,8 +284,8 @@ public class OrganisationPredecessorRelatedTable extends OrganisationRelatedTabl
 		return conditions;
 	}
 
-	public RecordReader getRecordReader() {
-		return recordReader;
+	public SqlDatabaseFactory getSqlDatabaseFactory() {
+		return sqlDatabaseFactory;
 	}
 
 }
