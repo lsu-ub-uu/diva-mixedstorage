@@ -120,8 +120,7 @@ public class OrganisationAlternativeNameRelatedTable implements RelatedTable {
 
 	private boolean nameInDbNotSameAsNameInDataGroup(DataGroup organisation) {
 		String nameOfOrganisation = getAlternativeNameFromOrganisation(organisation);
-		String organisationNameInDb = (String) alternativeNameRow
-				.getValueByColumn(ORGANISATION_NAME);
+		String organisationNameInDb = (String) alternativeNameRow.getValueByColumn("defaultname");
 		return !nameOfOrganisation.equals(organisationNameInDb);
 	}
 

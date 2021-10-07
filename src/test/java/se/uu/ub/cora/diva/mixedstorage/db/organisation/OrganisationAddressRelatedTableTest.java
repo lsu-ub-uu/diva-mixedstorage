@@ -33,6 +33,7 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
+import se.uu.ub.cora.sqldatabase.DatabaseValues;
 import se.uu.ub.cora.sqldatabase.Row;
 
 public class OrganisationAddressRelatedTableTest {
@@ -260,6 +261,31 @@ public class OrganisationAddressRelatedTableTest {
 		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
 		addressGroup.addChild(new DataAtomicSpy("box", "box21"));
 		setUpOrganisationRowWithoutAddress();
+
+		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
+		assertEquals(dbStatements.size(), 2);
+
+		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
+		assertEquals(tableFacade.sequenceName, "address_sequence");
+
+		assertCorrectDataForAddressInsert(organisation, dbStatements.get(0), 4,
+				tableFacade.nextVal);
+
+		DbStatement orgUpdateStatement = dbStatements.get(1);
+		assertCorrectOperationTableAndConditionForUpdateOrg(organisationId, orgUpdateStatement);
+		assertTrue(tableFacade.closeWasCalled);
+	}
+
+	@Test
+	public void testAddressInDataGroupButDatabaseNullAddressInDatabase() {
+		int organisationId = 678;
+		DataGroup organisation = createDataGroupWithId("678");
+		DataGroup addressGroup = createAddressGroupAndAddToOrganisation(organisation);
+		addressGroup.addChild(new DataAtomicSpy("box", "box21"));
+		rowsFromDb = new ArrayList<>();
+		RowSpy row = new RowSpy();
+		row.addColumnWithValue("organisation_id", DatabaseValues.NULL);
+		rowsFromDb.add(row);
 
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
 		assertEquals(dbStatements.size(), 2);

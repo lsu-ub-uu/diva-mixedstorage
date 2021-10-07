@@ -44,12 +44,10 @@ public class OrganisationAlternativeNameRelatedTableTest {
 	private OrganisationAlternativeNameRelatedTable alternativeName;
 	private SqlDatabaseFactorySpy sqlDatabaseFactory;
 	private List<Row> rowsFromDb;
-	// private TableFacadeSpy tableFacade;
 
 	@BeforeMethod
 	public void setUp() {
 		sqlDatabaseFactory = new SqlDatabaseFactorySpy();
-		// tableFacade = new TableFacadeSpy();
 		initAlternativeNameRows();
 		alternativeName = new OrganisationAlternativeNameRelatedTable(sqlDatabaseFactory);
 	}
@@ -59,7 +57,8 @@ public class OrganisationAlternativeNameRelatedTableTest {
 		RowSpy row = new RowSpy();
 		row.addColumnWithValue("organisation_name_id", 234);
 		row.addColumnWithValue("organisation_id", 678);
-		row.addColumnWithValue("organisation_name", "some english name");
+		row.addColumnWithValue("defaultname", "some english name");
+		// row.addColumnWithValue("organisation_name", "some english name");
 		row.addColumnWithValue("locale", "en");
 		rowsFromDb.add(row);
 	}

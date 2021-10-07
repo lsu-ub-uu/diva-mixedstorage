@@ -30,6 +30,7 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbHelper;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStatement;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
+import se.uu.ub.cora.sqldatabase.DatabaseValues;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
@@ -89,7 +90,8 @@ public class OrganisationAddressRelatedTable implements RelatedTable {
 	}
 
 	private boolean addressExistsInDatabase(Object addressIdInOrganisation) {
-		return addressIdInOrganisation != null;
+		return addressIdInOrganisation != null
+				&& !addressIdInOrganisation.equals(DatabaseValues.NULL);
 	}
 
 	private boolean noAddressInDataGroup(DataGroup organisation) {

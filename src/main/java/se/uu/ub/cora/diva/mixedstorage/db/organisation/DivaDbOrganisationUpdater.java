@@ -80,8 +80,13 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 
 	private TableQuery createTableQueryForReadOrganisation() {
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery("organisationview");
-		addConditionForRead(tableQuery);
+		addConditionForReadFromView(tableQuery);
 		return tableQuery;
+	}
+
+	private void addConditionForReadFromView(TableQuery tableQuery) {
+		int organisationsId = (int) organisationConditions.get(ORGANISATION_ID);
+		tableQuery.addCondition("id", organisationsId);
 	}
 
 	private void addConditionForRead(TableQuery tableQuery) {
@@ -93,9 +98,9 @@ public class DivaDbOrganisationUpdater implements DivaDbUpdater {
 			List<Row> organisationRowsFromDb) {
 		List<DbStatement> dbStatements = new ArrayList<>();
 		dbStatements.add(createDbStatementForOrganisationUpdate());
-		dbStatements.addAll(generateDbStatementsForAlternativeName(dataGroup, organisationRowsFromDb));
-		dbStatements.addAll(
-				generateDbStatementsForAddress(dataGroup, organisationRowsFromDb));
+		dbStatements
+				.addAll(generateDbStatementsForAlternativeName(dataGroup, organisationRowsFromDb));
+		dbStatements.addAll(generateDbStatementsForAddress(dataGroup, organisationRowsFromDb));
 		dbStatements.addAll(generateDbStatementsForParents(tableFacade, dataGroup));
 		dbStatements.addAll(generateDbStatementsForPredecessors(tableFacade, dataGroup));
 		return dbStatements;

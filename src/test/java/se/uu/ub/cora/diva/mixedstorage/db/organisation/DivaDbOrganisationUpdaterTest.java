@@ -83,8 +83,7 @@ public class DivaDbOrganisationUpdaterTest {
 		assertSame(tableFacade.tableQueries.get(0), sqlDatabaseFactory.factoredTableQueries.get(0));
 
 		Map<String, Object> conditions = dataTranslater.getConditions();
-		assertEquals(tableQuery.conditions.get("organisation_id"),
-				conditions.get("organisation_id"));
+		assertEquals(tableQuery.conditions.get("id"), conditions.get("organisation_id"));
 
 	}
 
@@ -98,8 +97,7 @@ public class DivaDbOrganisationUpdaterTest {
 		assertSame(tableFacade.tableQueries.get(0), sqlDatabaseFactory.factoredTableQueries.get(0));
 
 		Map<String, Object> conditions = dataTranslater.getConditions();
-		assertEquals(tableQuery.conditions.get("organisation_id"),
-				conditions.get("organisation_id"));
+		assertEquals(tableQuery.conditions.get("id"), conditions.get("organisation_id"));
 
 		assertEquals(relatedTableFactory.relatedTableNames.get(0), "organisationAlternativeName");
 		RelatedTableSpy firstRelatedTable = (RelatedTableSpy) relatedTableFactory.factoredRelatedTables
