@@ -33,12 +33,7 @@ public class PreparedStatementExecutorImp implements StatementExecutor {
 			DatabaseFacade databaseFacade) {
 		for (DbStatement dbStatement : dbStatements) {
 			StringBuilder sql = createSql(dbStatement);
-			// try {
 			tryToExecuteUsingPreparedStatement(dbStatement, sql, databaseFacade);
-			// } catch (SQLException e) {
-			// throw SqlStorageException
-			// .withMessageAndException("Error executing statement: " + sql, e);
-			// }
 		}
 
 	}
