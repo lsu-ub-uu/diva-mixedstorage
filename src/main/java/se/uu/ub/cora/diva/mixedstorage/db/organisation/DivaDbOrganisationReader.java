@@ -36,7 +36,6 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 	private DivaDbToCoraConverterFactory converterFactory;
 	private DivaDbFactory divaDbFactory;
 	private static final String DEFAULT_TABLENAME = "organisationview";
-	private TableFacade tableFacade;
 	private SqlDatabaseFactory sqlDatabaseFactory;
 
 	public DivaDbOrganisationReader(DivaDbToCoraConverterFactory converterFactory,
@@ -132,10 +131,6 @@ public class DivaDbOrganisationReader implements DivaDbReader {
 	public DivaDbFactory getDbFactory() {
 		// for testing
 		return divaDbFactory;
-	}
-
-	public TableFacade getTableFacade() {
-		return tableFacade;
 	}
 
 	public SqlDatabaseFactory getSqlDatabaseFactory() {

@@ -22,12 +22,10 @@ import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableFactory;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
-import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class RelatedTableFactoryImp implements RelatedTableFactory {
 
 	private SqlDatabaseFactory sqlDatabaseFactory;
-	private TableFacade tableFacade;
 
 	public static RelatedTableFactoryImp usingReaderDeleterAndCreator(
 			SqlDatabaseFactory sqlDatabaseFactory) {
@@ -56,10 +54,6 @@ public class RelatedTableFactoryImp implements RelatedTableFactory {
 
 		throw NotImplementedException
 				.withMessage("Related table not implemented for " + relatedTableName);
-	}
-
-	public TableFacade getTableFacade() {
-		return tableFacade;
 	}
 
 	public SqlDatabaseFactory getSqlDatabaseFactory() {

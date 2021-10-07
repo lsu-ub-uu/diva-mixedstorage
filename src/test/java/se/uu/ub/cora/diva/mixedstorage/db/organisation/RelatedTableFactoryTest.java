@@ -38,7 +38,6 @@ public class RelatedTableFactoryTest {
 
 	@Test
 	public void testInit() {
-		assertSame(factory.getTableFacade(), sqlDatabaseFactory.factoredTableFacade);
 		assertSame(factory.getSqlDatabaseFactory(), sqlDatabaseFactory);
 	}
 

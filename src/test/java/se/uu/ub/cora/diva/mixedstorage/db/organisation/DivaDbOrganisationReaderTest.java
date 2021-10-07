@@ -64,13 +64,6 @@ public class DivaDbOrganisationReaderTest {
 		divaDbOrganisationReader = DivaDbOrganisationReader
 				.usingRecordReaderFactoryAndConverterFactory(converterFactory, divaDbFactorySpy,
 						sqlDatabaseFactory);
-		// tableFacade = (TableFacadeSpy) divaDbOrganisationReader.getTableFacade();
-	}
-
-	@Test
-	public void testInit() {
-		assertSame(divaDbOrganisationReader.getTableFacade(),
-				sqlDatabaseFactory.factoredTableFacade);
 	}
 
 	@Test
