@@ -284,7 +284,7 @@ public class OrganisationAddressRelatedTableTest {
 		addressGroup.addChild(new DataAtomicSpy("box", "box21"));
 		rowsFromDb = new ArrayList<>();
 		RowSpy row = new RowSpy();
-		row.addColumnWithValue("organisation_id", DatabaseValues.NULL);
+		row.addColumnWithValue("address_id", DatabaseValues.NULL);
 		rowsFromDb.add(row);
 
 		List<DbStatement> dbStatements = address.handleDbForDataGroup(organisation, rowsFromDb);
