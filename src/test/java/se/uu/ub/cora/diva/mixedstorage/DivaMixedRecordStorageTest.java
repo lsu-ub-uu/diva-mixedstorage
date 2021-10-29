@@ -476,8 +476,8 @@ public class DivaMixedRecordStorageTest {
 
 		DivaDbToCoraStorageSpy divaDbToCoraStorageSpy = new DivaDbToCoraStorageSpy();
 		divaMixedRecordStorage = (DivaMixedRecordStorage) DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, divaDbToCoraStorageSpy,
-						null, null);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
+						divaDbToCoraStorageSpy, null, null);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = type;
@@ -643,8 +643,8 @@ public class DivaMixedRecordStorageTest {
 	private void assertRecordExistsGoesToDbForOrganisationType(String recordType) {
 		DivaDbToCoraStorageSpy divaDbToCoraStorageSpy = new DivaDbToCoraStorageSpy();
 		divaMixedRecordStorage = (DivaMixedRecordStorage) DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, divaDbToCoraStorageSpy,
-						null, null);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
+						divaDbToCoraStorageSpy, null, null);
 
 		RecordStorageSpyData expectedData = new RecordStorageSpyData();
 		expectedData.type = recordType;
@@ -692,8 +692,8 @@ public class DivaMixedRecordStorageTest {
 			throws Exception {
 		userStorage.linkExistsInStorage = true;
 		divaMixedRecordStorage = (DivaMixedRecordStorage) DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, null, userStorage,
-						null);
+				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage, null,
+						userStorage, null);
 
 		String type = "user";
 		String id = "userId";
@@ -815,6 +815,40 @@ public class DivaMixedRecordStorageTest {
 	@Test
 	public void testGetTotalNumberOfRecordsForTypeRootOrganisation() {
 		testGetTotalNumberOfRecordsForType("rootOrganisation");
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForPerson() {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(databaseRecordStorage);
+
+		DataGroup filter = new DataGroupSpy("filter");
+		long totalNumberOfRecords = divaMixedRecordStorage.getTotalNumberOfRecordsForType("person",
+				filter);
+		RecordStorageSpyData data = databaseRecordStorage.data;
+		assertEquals(data.type, "person");
+		assertSame(data.filter, filter);
+		assertEquals(totalNumberOfRecords, data.answer);
+
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(basicStorage);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForPersonDomainPart() {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(databaseRecordStorage);
+
+		DataGroup filter = new DataGroupSpy("filter");
+		long totalNumberOfRecords = divaMixedRecordStorage
+				.getTotalNumberOfRecordsForType("personDomainPart", filter);
+		RecordStorageSpyData data = databaseRecordStorage.data;
+		assertEquals(data.type, "personDomainPart");
+		assertSame(data.filter, filter);
+		assertEquals(totalNumberOfRecords, data.answer);
+
+		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
+		assertNoInteractionWithStorage(basicStorage);
 	}
 
 	@Test

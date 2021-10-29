@@ -227,6 +227,12 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		if (PERSON.equals(type)) {
+			return databaseStorage.getTotalNumberOfRecordsForType(type, filter);
+		}
+		if ("personDomainPart".equals(type)) {
+			return databaseStorage.getTotalNumberOfRecordsForType(type, filter);
+		}
 		if (isOrganisation(type)) {
 			return divaClassicDbStorage.getTotalNumberOfRecordsForType(type, filter);
 		}
