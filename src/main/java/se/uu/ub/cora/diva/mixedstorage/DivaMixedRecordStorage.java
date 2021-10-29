@@ -29,6 +29,7 @@ import se.uu.ub.cora.storage.StorageReadResult;
 
 public final class DivaMixedRecordStorage implements RecordStorage, SearchStorage {
 
+	private static final String PERSON_DOMAIN_PART = "personDomainPart";
 	private static final String USER = "user";
 	private static final String CORA_USER = "coraUser";
 	private static final String PERSON = "person";
@@ -58,7 +59,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (PERSON.equals(type)) {
 			return databaseStorage.read(type, id);
 		}
-		if ("personDomainPart".equals(type)) {
+		if (PERSON_DOMAIN_PART.equals(type)) {
 			return databaseStorage.read(type, id);
 		}
 		if (isOrganisation(type)) {
@@ -118,7 +119,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (PERSON.equals(type)) {
 			return databaseStorage.readList(type, filter);
 		}
-		if ("personDomainPart".equals(type)) {
+		if (PERSON_DOMAIN_PART.equals(type)) {
 			return databaseStorage.readList(type, filter);
 		}
 		if (isOrganisation(type)) {
@@ -230,7 +231,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		if (PERSON.equals(type)) {
 			return databaseStorage.getTotalNumberOfRecordsForType(type, filter);
 		}
-		if ("personDomainPart".equals(type)) {
+		if (PERSON_DOMAIN_PART.equals(type)) {
 			return databaseStorage.getTotalNumberOfRecordsForType(type, filter);
 		}
 		if (isOrganisation(type)) {
