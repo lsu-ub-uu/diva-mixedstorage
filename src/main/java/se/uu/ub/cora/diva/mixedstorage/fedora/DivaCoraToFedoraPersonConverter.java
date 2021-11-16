@@ -39,16 +39,16 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 	}
 
 	@Override
-	public String toXML(DataGroup record) {
-		String recordId = getIdFromRecord(record);
+	public String toXML(DataGroup dataRecord) {
+		String recordId = getIdFromRecord(dataRecord);
 		String fedoraXML = getXMLForRecordFromFedora(recordId);
 		parser = XMLXPathParser.forXML(fedoraXML);
-		convertNames(record);
+		convertNames(dataRecord);
 		return parser.getDocumentAsString("/");
 	}
 
-	private String getIdFromRecord(DataGroup record) {
-		DataGroup recordInfo = record.getFirstGroupWithNameInData("recordInfo");
+	private String getIdFromRecord(DataGroup dataRecord) {
+		DataGroup recordInfo = dataRecord.getFirstGroupWithNameInData("recordInfo");
 		return recordInfo.getFirstAtomicValueWithNameInData("id");
 	}
 
@@ -59,8 +59,8 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 		return httpHandler.getResponseText();
 	}
 
-	private void convertNames(DataGroup record) {
-		DataGroup authorizedNameGroup = record.getFirstGroupWithNameInData("authorizedName");
+	private void convertNames(DataGroup dataRecord) {
+		DataGroup authorizedNameGroup = dataRecord.getFirstGroupWithNameInData("authorizedName");
 		updateFamilyName(authorizedNameGroup);
 		updateGivenName(authorizedNameGroup);
 	}
