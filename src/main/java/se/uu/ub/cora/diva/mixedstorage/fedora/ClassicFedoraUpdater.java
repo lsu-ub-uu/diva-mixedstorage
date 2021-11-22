@@ -18,10 +18,13 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.List;
+
 import se.uu.ub.cora.data.DataGroup;
 
 public interface ClassicFedoraUpdater {
 
-	void updateInFedora(String recordType, String recordId, DataGroup dataGroup);
+	void updateInFedora(String recordType, String recordId, DataGroup dataGroup,
+			List<DataGroup> relatedDataGroups);
 
 }

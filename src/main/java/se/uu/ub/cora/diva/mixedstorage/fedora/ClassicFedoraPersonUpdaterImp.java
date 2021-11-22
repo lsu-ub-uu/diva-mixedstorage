@@ -20,6 +20,7 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
@@ -45,9 +46,10 @@ public class ClassicFedoraPersonUpdaterImp implements ClassicFedoraUpdater {
 	}
 
 	@Override
-	public void updateInFedora(String recordType, String recordId, DataGroup dataGroup) {
+	public void updateInFedora(String recordType, String recordId, DataGroup dataGroup,
+			List<DataGroup> relatedDataGroups) {
 		HttpHandler httpHandler = setUpHttpHandlerForUpdate(recordId);
-		String fedoraXML = convertRecordToFedoraXML(recordType, dataGroup);
+		String fedoraXML = convertRecordToFedoraXML(recordType, dataGroup, relatedDataGroups);
 		httpHandler.setOutput(fedoraXML);
 		int responseCode = httpHandler.getResponseCode();
 		throwErrorIfNotOkFromFedora(recordId, responseCode);
@@ -74,9 +76,8 @@ public class ClassicFedoraPersonUpdaterImp implements ClassicFedoraUpdater {
 		httpHandler.setRequestProperty("Authorization", "Basic " + encoded);
 	}
 
-	private String convertRecordToFedoraXML(String recordType, DataGroup dataGroup) {
-		// TODO: read personDomainParts from db?? XML in classic contains both person and
-		// personDomainPart
+	private String convertRecordToFedoraXML(String recordType, DataGroup dataGroup,
+			List<DataGroup> relatedDataGroups) {
 		DivaCoraToFedoraConverter toFedoraConverter = divaCoraToFedoraConverterFactory
 				.factorToFedoraConverter(recordType);
 		// TODO:this converter is outdated, and should be changed, or use other (new) converter
