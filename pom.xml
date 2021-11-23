@@ -41,6 +41,9 @@
 		<xmlconverter.version>1.8.0</xmlconverter.version>
 		<converter.version>1.7.0</converter.version>
 		<testutils.version>1.2.0</testutils.version>
+		
+		<basicdata.version>3.4.0</basicdata.version>
+		
 	</properties>
 
 	<scm>
@@ -51,6 +54,15 @@
 	</scm>
 
 	<dependencies>
+		<dependency>
+			<!-- must be here from modulesystem to work as this is needed by tests 
+				in basicstorage -->
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>basicdata</artifactId>
+			<version>${basicdata.version}</version>
+			<scope>test</scope>
+		</dependency>
+	
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>logger</artifactId>
@@ -143,5 +155,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
 </project>
