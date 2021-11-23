@@ -35,7 +35,7 @@ import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 
 public class ClassicFedoraPersonUpdaterTest {
 
-	private ClassicFedoraPersonUpdaterImp fedoraUpdater;
+	private ClassicFedoraPersonUpdater fedoraUpdater;
 	private HttpHandlerFactorySpy httpHandlerFactory;
 	private DivaFedoraConverterFactorySpy toFedoraConverterFactory;
 	private String baseUrl = "someBaseUrl/";
@@ -53,7 +53,7 @@ public class ClassicFedoraPersonUpdaterTest {
 		relatedDataGroups.add(new DataGroupSpy("personDomainPart"));
 		relatedDataGroups.add(new DataGroupSpy("personDomainPart"));
 
-		fedoraUpdater = new ClassicFedoraPersonUpdaterImp(httpHandlerFactory,
+		fedoraUpdater = new ClassicFedoraPersonUpdater(httpHandlerFactory,
 				toFedoraConverterFactory, baseUrl, fedoraUsername, fedoraPassword);
 
 	}
@@ -61,7 +61,7 @@ public class ClassicFedoraPersonUpdaterTest {
 	@Test
 	public void testInit() {
 		assertSame(fedoraUpdater.getHttpHandlerFactory(), httpHandlerFactory);
-		assertSame(fedoraUpdater.getDivaCoraToFedoraConverter(), toFedoraConverterFactory);
+		assertSame(fedoraUpdater.getDivaCoraToFedoraConverterFactory(), toFedoraConverterFactory);
 	}
 
 	@Test

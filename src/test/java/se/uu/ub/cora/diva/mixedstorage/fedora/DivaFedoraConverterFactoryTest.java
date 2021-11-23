@@ -90,12 +90,12 @@ public class DivaFedoraConverterFactoryTest {
 	public void testFactoryToFedoraPerson() throws Exception {
 		DivaCoraToFedoraConverter converter = divaToCoraConverterFactoryImp
 				.factorToFedoraConverter("person");
-		assertTrue(converter instanceof DivaCoraToFedoraPersonConverter);
+		assertTrue(converter instanceof OldDivaCoraToFedoraPersonConverter);
 	}
 
 	@Test
 	public void testFactorToFedoraForPersonHasCorrectDependencies() throws Exception {
-		DivaCoraToFedoraPersonConverter converter = (DivaCoraToFedoraPersonConverter) divaToCoraConverterFactoryImp
+		OldDivaCoraToFedoraPersonConverter converter = (OldDivaCoraToFedoraPersonConverter) divaToCoraConverterFactoryImp
 				.factorToFedoraConverter("person");
 		assertTrue(converter.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
 		assertEquals(converter.getFedorURL(), fedoraURL);

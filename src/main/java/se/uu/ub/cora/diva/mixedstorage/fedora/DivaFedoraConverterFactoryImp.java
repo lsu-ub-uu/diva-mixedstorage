@@ -62,7 +62,7 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	public DivaCoraToFedoraConverter factorToFedoraConverter(String type) {
 		if ("person".equals(type)) {
 			HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
-			return DivaCoraToFedoraPersonConverter
+			return OldDivaCoraToFedoraPersonConverter
 					.usingHttpHandlerFactoryAndFedoraUrl(httpHandlerFactory, fedoraURL);
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);

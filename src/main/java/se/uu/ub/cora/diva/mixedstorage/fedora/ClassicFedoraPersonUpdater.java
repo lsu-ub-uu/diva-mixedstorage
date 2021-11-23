@@ -26,7 +26,7 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 
-public class ClassicFedoraPersonUpdaterImp implements ClassicFedoraUpdater {
+public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 
 	private static final int OK = 200;
 	private HttpHandlerFactory httpHandlerFactory;
@@ -35,7 +35,7 @@ public class ClassicFedoraPersonUpdaterImp implements ClassicFedoraUpdater {
 	private String username;
 	private String password;
 
-	public ClassicFedoraPersonUpdaterImp(HttpHandlerFactory httpHandlerFactory,
+	public ClassicFedoraPersonUpdater(HttpHandlerFactory httpHandlerFactory,
 			DivaFedoraConverterFactory divaCoraToFedoraConverterFactory, String baseUrl,
 			String username, String password) {
 		this.httpHandlerFactory = httpHandlerFactory;
@@ -93,8 +93,20 @@ public class ClassicFedoraPersonUpdaterImp implements ClassicFedoraUpdater {
 		return httpHandlerFactory;
 	}
 
-	DivaFedoraConverterFactory getDivaCoraToFedoraConverter() {
+	DivaFedoraConverterFactory getDivaCoraToFedoraConverterFactory() {
 		return divaCoraToFedoraConverterFactory;
+	}
+
+	String getBaseUrl() {
+		return baseUrl;
+	}
+
+	String getUsername() {
+		return username;
+	}
+
+	String getPassword() {
+		return password;
 	}
 
 }

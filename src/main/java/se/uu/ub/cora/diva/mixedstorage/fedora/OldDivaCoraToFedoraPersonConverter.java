@@ -22,17 +22,17 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 
-public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverter {
+public class OldDivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverter {
 	private HttpHandlerFactory httpHandlerFactory;
 	private String fedoraURL;
 	private XMLXPathParser parser;
 
-	public static DivaCoraToFedoraPersonConverter usingHttpHandlerFactoryAndFedoraUrl(
+	public static OldDivaCoraToFedoraPersonConverter usingHttpHandlerFactoryAndFedoraUrl(
 			HttpHandlerFactory httpHandlerFactory, String fedoraURL) {
-		return new DivaCoraToFedoraPersonConverter(httpHandlerFactory, fedoraURL);
+		return new OldDivaCoraToFedoraPersonConverter(httpHandlerFactory, fedoraURL);
 	}
 
-	private DivaCoraToFedoraPersonConverter(HttpHandlerFactory httpHandlerFactory,
+	private OldDivaCoraToFedoraPersonConverter(HttpHandlerFactory httpHandlerFactory,
 			String fedoraURL) {
 		this.httpHandlerFactory = httpHandlerFactory;
 		this.fedoraURL = fedoraURL;

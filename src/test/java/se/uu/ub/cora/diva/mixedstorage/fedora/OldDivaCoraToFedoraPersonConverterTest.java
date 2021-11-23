@@ -28,7 +28,7 @@ import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.resource.ResourceReader;
 
-public class DivaCoraToFedoraPersonConverterTest {
+public class OldDivaCoraToFedoraPersonConverterTest {
 	@Test
 	public void testConvertToFedoraXML() throws Exception {
 
@@ -38,7 +38,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 				.add(ResourceReader.readResourceAsString("person/11685.xml"));
 
 		String fedoraURL = "someFedoraURL";
-		DivaCoraToFedoraConverter converter = DivaCoraToFedoraPersonConverter
+		DivaCoraToFedoraConverter converter = OldDivaCoraToFedoraPersonConverter
 				.usingHttpHandlerFactoryAndFedoraUrl(httpHandlerFactory, fedoraURL);
 		DataGroup record = createPerson11685DataGroup();
 
