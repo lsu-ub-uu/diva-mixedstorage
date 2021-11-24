@@ -1,3 +1,21 @@
+/*
+ * Copyright 2021 Uppsala University Library
+ *
+ * This file is part of Cora.
+ *
+ *     Cora is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Cora is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import static org.testng.Assert.assertEquals;
@@ -22,6 +40,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 	private String toCoraPersonXsl = "person/toCoraPerson.xsl";
 	private String toCoraPersonDomainPartXsl = "person/toCoraPersonDomainPart.xsl";
 	private DataGroupSpy dataGroup = new DataGroupSpy("someNameInData");
+	private DivaCoraToFedoraConverter converter;
 
 	@BeforeMethod
 	public void setUp() {
@@ -30,22 +49,29 @@ public class DivaCoraToFedoraPersonConverterTest {
 		dataGroupToXmlConverterFactory = new ConverterFactorySpy();
 		ConverterProvider.setConverterFactory("xml", dataGroupToXmlConverterFactory);
 		transformationFactory = new TransformationFactorySpy();
-
+		converter = new DivaCoraToFedoraPersonConverter(transformationFactory);
 	}
 
 	@Test
-	public void testInit() {
-		DivaCoraToFedoraConverter converter = new DivaCoraToFedoraPersonConverter(
-				transformationFactory);
+	public void testToXml() {
+		String fedoraXml = converter.toXML(dataGroup);
+		ConverterSpy factoredConverter = dataGroupToXmlConverterFactory.factoredConverter;
+		assertEquals(factoredConverter.dataElements.size(), 1);
+		assertSame(factoredConverter.dataElements.get(0), dataGroup);
 
+		List<CoraTransformationSpy> factoredTransformations = transformationFactory.factoredTransformations;
+		assertEquals(factoredTransformations.size(), 1);
+		assertEquals(transformationFactory.xsltPath, toCoraPersonXsl);
+
+		CoraTransformationSpy factoredTransformation = factoredTransformations.get(0);
+		assertEquals(factoredTransformation.inputXml, factoredConverter.commonStringToReturn + 0);
+
+		assertEquals(fedoraXml, factoredTransformation.xmlToReturn);
 	}
 
 	@Test
 	public void testToXmlWithRelatedRecords() {
 		List<DataGroup> relatedDataGroups = createRelatedDataGroups();
-
-		DivaCoraToFedoraConverter converter = new DivaCoraToFedoraPersonConverter(
-				transformationFactory);
 
 		String fedoraXml = converter.toXML(dataGroup, relatedDataGroups);
 

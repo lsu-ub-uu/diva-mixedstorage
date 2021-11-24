@@ -28,11 +28,12 @@ public class CoraTransformationSpy implements CoraTransformation {
 	public String mainXml;
 	public List<String> relatedXmls;
 	public String xmlToReturn = "some xml answer from spy";
+	public String inputXml;
 
 	@Override
 	public String transform(String inputXml) {
-		// TODO Auto-generated method stub
-		return null;
+		this.inputXml = inputXml;
+		return xmlToReturn;
 	}
 
 	@Override
