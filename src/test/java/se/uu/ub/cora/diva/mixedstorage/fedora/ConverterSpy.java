@@ -18,6 +18,9 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import se.uu.ub.cora.converter.Converter;
 import se.uu.ub.cora.data.DataElement;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
@@ -25,13 +28,21 @@ import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 public class ConverterSpy implements Converter {
 
 	public DataElement dataElement;
+	public List<DataElement> dataElements = new ArrayList<>();
 	public String dataString;
-	public String stringToReturn = "some returned string from converter spy";
+	public String commonStringToReturn = "some returned string from converter spy";
+	public List<String> returnedStrings = new ArrayList<>();
 	public DataGroupSpy dataGroupToReturn;
+	private int counter = 0;
 
 	@Override
 	public String convert(DataElement dataElement) {
+		dataElements.add(dataElement);
 		this.dataElement = dataElement;
+		String stringToReturn = commonStringToReturn + counter;
+		counter++;
+		returnedStrings.add(stringToReturn);
+
 		return stringToReturn;
 	}
 

@@ -18,6 +18,7 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
@@ -42,5 +43,11 @@ public class XsltTransformationSpy implements CoraTransformation {
 
 		this.parameters = parameters;
 		return stringToReturn;
+	}
+
+	@Override
+	public String transform(String mainXml, List<String> relatedXmls) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

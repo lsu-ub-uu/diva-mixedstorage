@@ -18,6 +18,8 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.List;
+
 import se.uu.ub.cora.data.DataGroup;
 
 public class DivaCoraToFedoraConverterSpy implements DivaCoraToFedoraConverter {
@@ -30,6 +32,12 @@ public class DivaCoraToFedoraConverterSpy implements DivaCoraToFedoraConverter {
 
 		this.record = record;
 		return returnedXML;
+	}
+
+	@Override
+	public String toXML(DataGroup dataRecord, List<DataGroup> relatedRecords) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -18,11 +18,16 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 
 public class CoraTransformationSpy implements CoraTransformation {
+
+	public String mainXml;
+	public List<String> relatedXmls;
+	public String xmlToReturn = "some xml answer from spy";
 
 	@Override
 	public String transform(String inputXml) {
@@ -34,6 +39,14 @@ public class CoraTransformationSpy implements CoraTransformation {
 	public String transformWithParameters(String inputXml, Map<String, Object> parameters) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String transform(String mainXml, List<String> relatedXmls) {
+		this.mainXml = mainXml;
+		this.relatedXmls = relatedXmls;
+
+		return xmlToReturn;
 	}
 
 }
