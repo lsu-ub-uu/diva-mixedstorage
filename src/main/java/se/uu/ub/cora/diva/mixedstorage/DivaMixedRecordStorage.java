@@ -29,6 +29,7 @@ import se.uu.ub.cora.storage.StorageReadResult;
 
 public final class DivaMixedRecordStorage implements RecordStorage, SearchStorage {
 
+	private static final String INDEX_BATCH_JOB = "indexBatchJob";
 	private static final String PERSON_DOMAIN_PART = "personDomainPart";
 	private static final String USER = "user";
 	private static final String CORA_USER = "coraUser";
@@ -56,7 +57,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public DataGroup read(String type, String id) {
-		if (PERSON.equals(type)) {
+		if (PERSON.equals(type) || INDEX_BATCH_JOB.equals(type)) {
 			return databaseStorage.read(type, id);
 		}
 		if (PERSON_DOMAIN_PART.equals(type)) {
@@ -88,7 +89,11 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	@Override
 	public void create(String type, String id, DataGroup dataRecord, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		basicStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
+		if (INDEX_BATCH_JOB.equals(type)) {
+			databaseStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
+		} else {
+			basicStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
+		}
 	}
 
 	@Override
@@ -108,7 +113,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	@Override
 	public void update(String type, String id, DataGroup dataRecord, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		if (PERSON.equals(type)) {
+		if (PERSON.equals(type) || INDEX_BATCH_JOB.equals(type)) {
 			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 		} else if (isOrganisation(type)) {
 			divaClassicDbStorage.update(type, id, dataRecord, collectedTerms, linkList,
