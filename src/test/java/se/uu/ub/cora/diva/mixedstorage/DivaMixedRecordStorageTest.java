@@ -407,6 +407,21 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
+	public void deletePersonDomainPartGoesToDbStorage() throws Exception {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(databaseRecordStorage);
+
+		RecordStorageSpyData expectedData = new RecordStorageSpyData();
+		expectedData.type = "personDomainPart";
+		expectedData.id = "someId";
+		expectedData.calledMethod = "deleteByTypeAndId";
+		divaMixedRecordStorage.deleteByTypeAndId(expectedData.type, expectedData.id);
+
+		assertNoInteractionWithStorage(basicStorage);
+		assertExpectedDataSameAsInStorageSpy(databaseRecordStorage, expectedData);
+	}
+
+	@Test
 	public void linksExistForRecordGoesToBasicStorage() throws Exception {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
