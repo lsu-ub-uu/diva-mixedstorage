@@ -22,8 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
-import se.uu.ub.cora.converter.Converter;
-import se.uu.ub.cora.converter.ConverterProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
@@ -80,17 +78,9 @@ public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 
 	private String convertRecordToFedoraXML(String recordType, DataGroup dataGroup,
 			List<DataGroup> relatedDataGroups) {
-		// for dataGroup and related dataGroups, call converter
-		Converter converter = ConverterProvider.getConverter("xml");
-		String convert = converter.convert(dataGroup);
-		for (DataGroup group : relatedDataGroups) {
-			converter.convert(group);
-		}
-
 		DivaCoraToFedoraConverter toFedoraConverter = divaCoraToFedoraConverterFactory
 				.factorToFedoraConverter(recordType);
-		// TODO:this converter is outdated, and should be changed, or use other (new) converter
-		return toFedoraConverter.toXML(dataGroup);
+		return toFedoraConverter.toXML(dataGroup, relatedDataGroups);
 	}
 
 	private String createURL(String recordId) {

@@ -42,14 +42,4 @@ public class TransformationFactorySpy implements CoraTransformationFactory {
 		return transformationSpy;
 	}
 
-	@Override
-	public CoraTransformation factorWithRelatedRecords(String mainXsltPath,
-			String relatedXsltPath) {
-		this.mainXsltPath = mainXsltPath;
-		this.relatedXsltPath = relatedXsltPath;
-		transformationSpy = new CoraTransformationSpy();
-		factoredTransformations.add(transformationSpy);
-		return transformationSpy;
-	}
-
 }

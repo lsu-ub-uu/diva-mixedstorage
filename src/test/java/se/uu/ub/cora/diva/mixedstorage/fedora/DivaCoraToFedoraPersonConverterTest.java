@@ -38,7 +38,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 	private ConverterFactorySpy dataGroupToXmlConverterFactory;
 	private TransformationFactorySpy transformationFactory;
 	private String toCoraPersonXsl = "person/toCoraPerson.xsl";
-	private String toCoraPersonDomainPartXsl = "person/toCoraPersonDomainPart.xsl";
+	private String toCoraPersonWithDomainPartXsl = "person/toCoraPersonWithDomainPart.xsl";
 	private DataGroupSpy dataGroup = new DataGroupSpy("someNameInData");
 	private DivaCoraToFedoraConverter converter;
 
@@ -98,8 +98,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 	private void assertTransformationFactoryWasCalledCorrectly() {
 		List<CoraTransformationSpy> factoredTransformations = transformationFactory.factoredTransformations;
 		assertEquals(factoredTransformations.size(), 1);
-		assertEquals(transformationFactory.mainXsltPath, toCoraPersonXsl);
-		assertEquals(transformationFactory.relatedXsltPath, toCoraPersonDomainPartXsl);
+		assertEquals(transformationFactory.xsltPath, toCoraPersonWithDomainPartXsl);
 	}
 
 	private void assertConvertedGroupsAreSentToTransformation(

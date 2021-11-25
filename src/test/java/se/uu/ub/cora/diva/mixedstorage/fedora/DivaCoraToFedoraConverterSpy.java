@@ -24,20 +24,22 @@ import se.uu.ub.cora.data.DataGroup;
 
 public class DivaCoraToFedoraConverterSpy implements DivaCoraToFedoraConverter {
 
-	public DataGroup record;
+	public DataGroup dataRecord;
 	public String returnedXML = "<dummy>Dummy xml from DivaCoraToFedoraConverterSpy</dummy>";
+	public List<DataGroup> relatedRecords;
 
 	@Override
-	public String toXML(DataGroup record) {
+	public String toXML(DataGroup dataRecord) {
 
-		this.record = record;
+		this.dataRecord = dataRecord;
 		return returnedXML;
 	}
 
 	@Override
 	public String toXML(DataGroup dataRecord, List<DataGroup> relatedRecords) {
-		// TODO Auto-generated method stub
-		return null;
+		this.dataRecord = dataRecord;
+		this.relatedRecords = relatedRecords;
+		return returnedXML;
 	}
 
 }

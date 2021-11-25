@@ -31,7 +31,7 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 	private CoraTransformationFactory transformationFactory;
 	private static final String PERSON_XSLT_PATH = "person/toCoraPerson.xsl";
-	private static final String PERSON_DOMAIN_PART_XSLT_PATH = "person/toCoraPersonDomainPart.xsl";
+	private static final String PERSON_WITH_DOMAIN_PART_XSLT_PATH = "person/toCoraPersonWithDomainPart.xsl";
 
 	public DivaCoraToFedoraPersonConverter(CoraTransformationFactory transformationFactory) {
 		this.transformationFactory = transformationFactory;
@@ -74,7 +74,7 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 	private String transformToFedoraXml(String mainXML, List<String> relatedXmlStrings) {
 		CoraTransformation transformation = transformationFactory
-				.factorWithRelatedRecords(PERSON_XSLT_PATH, PERSON_DOMAIN_PART_XSLT_PATH);
+				.factor(PERSON_WITH_DOMAIN_PART_XSLT_PATH);
 		return transformation.transform(mainXML, relatedXmlStrings);
 	}
 

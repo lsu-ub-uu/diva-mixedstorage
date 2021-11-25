@@ -41,7 +41,7 @@ public class ClassicFedoraPersonUpdaterTest {
 
 	private ClassicFedoraPersonUpdater fedoraUpdater;
 	private HttpHandlerFactorySpy httpHandlerFactory;
-	private DivaFedoraConverterFactorySpy toFedoraConverterFactory;
+	private DivaFedoraConverterFactorySpy fedoraConverterFactory;
 	private ConverterFactorySpy dataGroupToXmlConverterFactory;
 	private String baseUrl = "someBaseUrl/";
 	private String fedoraUsername = "someFedoraUserName";
@@ -55,14 +55,14 @@ public class ClassicFedoraPersonUpdaterTest {
 		LoggerProvider.setLoggerFactory(loggerFactory);
 
 		setUpHttpHandlerFactory();
-		toFedoraConverterFactory = new DivaFedoraConverterFactorySpy();
+		fedoraConverterFactory = new DivaFedoraConverterFactorySpy();
 		dataGroupToXmlConverterFactory = new ConverterFactorySpy();
 		ConverterProvider.setConverterFactory("xml", dataGroupToXmlConverterFactory);
 
 		relatedDataGroups.add(new DataGroupSpy("personDomainPart"));
 		relatedDataGroups.add(new DataGroupSpy("personDomainPart"));
 
-		fedoraUpdater = new ClassicFedoraPersonUpdater(httpHandlerFactory, toFedoraConverterFactory,
+		fedoraUpdater = new ClassicFedoraPersonUpdater(httpHandlerFactory, fedoraConverterFactory,
 				baseUrl, fedoraUsername, fedoraPassword);
 
 	}
@@ -76,7 +76,7 @@ public class ClassicFedoraPersonUpdaterTest {
 	@Test
 	public void testInit() {
 		assertSame(fedoraUpdater.getHttpHandlerFactory(), httpHandlerFactory);
-		assertSame(fedoraUpdater.getDivaCoraToFedoraConverterFactory(), toFedoraConverterFactory);
+		assertSame(fedoraUpdater.getDivaCoraToFedoraConverterFactory(), fedoraConverterFactory);
 	}
 
 	@Test
@@ -94,10 +94,9 @@ public class ClassicFedoraPersonUpdaterTest {
 
 		assertCorrectCredentials(factoredHttpHandler);
 
-		DivaCoraToFedoraConverterSpy factoredConverter = (DivaCoraToFedoraConverterSpy) toFedoraConverterFactory.factoredToFedoraConverters
+		DivaCoraToFedoraConverterSpy factoredConverter = (DivaCoraToFedoraConverterSpy) fedoraConverterFactory.factoredToFedoraConverters
 				.get(0);
 		assertEquals(factoredConverter.returnedXML, factoredHttpHandler.outputStrings.get(0));
-
 	}
 
 	private void assertCorrectCredentials(HttpHandlerSpy factoredHttpHandler) {
@@ -108,21 +107,19 @@ public class ClassicFedoraPersonUpdaterTest {
 	}
 
 	@Test
-	public void testConverters() {
+	public void testUpdateInFedora() {
 		fedoraUpdater.updateInFedora("someRecordType", "someRecordId", dataGroup,
 				relatedDataGroups);
 
-		ConverterSpy factoredConverter = dataGroupToXmlConverterFactory.factoredConverter;
-		assertEquals(factoredConverter.dataElements.size(), 3);
-		assertSame(factoredConverter.dataElements.get(0), dataGroup);
-		assertSame(factoredConverter.dataElements.get(1), relatedDataGroups.get(0));
-		assertSame(factoredConverter.dataElements.get(2), relatedDataGroups.get(1));
+		DivaCoraToFedoraConverterSpy divaCoraToFedoraConverter = (DivaCoraToFedoraConverterSpy) fedoraConverterFactory.factoredToFedoraConverters
+				.get(0);
+		assertSame(divaCoraToFedoraConverter.dataRecord, dataGroup);
+		assertSame(divaCoraToFedoraConverter.relatedRecords, relatedDataGroups);
+		HttpHandlerSpy factoredHttpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
 
-		// DivaCoraToFedoraConverterSpy factoredConverter = (DivaCoraToFedoraConverterSpy)
-		// toFedoraConverterFactory.factoredToFedoraConverters
-		// .get(0);
-		// assertEquals(toFedoraConverterFactory.factoredToFedoraTypes.get(0), "someRecordType");
-		// assertEquals(factoredConverter.record, dataGroup);
+		assertEquals(factoredHttpHandler.outputStrings.get(0),
+				divaCoraToFedoraConverter.returnedXML);
+
 	}
 
 	@Test(expectedExceptions = FedoraException.class)

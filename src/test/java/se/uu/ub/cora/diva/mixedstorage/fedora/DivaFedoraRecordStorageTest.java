@@ -228,7 +228,7 @@ public class DivaFedoraRecordStorageTest {
 		assertEquals(converterFactory.factoredToFedoraTypes.get(0), "person");
 		DivaCoraToFedoraConverterSpy converterSpy = (DivaCoraToFedoraConverterSpy) converterFactory.factoredToFedoraConverters
 				.get(0);
-		assertSame(converterSpy.record, record);
+		assertSame(converterSpy.dataRecord, record);
 		assertEquals(converterSpy.returnedXML, httpHandler.outputStrings.get(0));
 	}
 
