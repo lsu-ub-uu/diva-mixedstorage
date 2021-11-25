@@ -98,7 +98,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public void deleteByTypeAndId(String type, String id) {
-		if (PERSON_DOMAIN_PART.equals(type)) {
+		if (PERSON_DOMAIN_PART.equals(type) || INDEX_BATCH_JOB.equals(type)) {
 			databaseStorage.deleteByTypeAndId(type, id);
 		} else {
 			basicStorage.deleteByTypeAndId(type, id);
@@ -125,10 +125,8 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
-		if (PERSON.equals(type)) {
-			return databaseStorage.readList(type, filter);
-		}
-		if (PERSON_DOMAIN_PART.equals(type)) {
+		if (PERSON.equals(type) || PERSON_DOMAIN_PART.equals(type)
+				|| INDEX_BATCH_JOB.equals(type)) {
 			return databaseStorage.readList(type, filter);
 		}
 		if (isOrganisation(type)) {

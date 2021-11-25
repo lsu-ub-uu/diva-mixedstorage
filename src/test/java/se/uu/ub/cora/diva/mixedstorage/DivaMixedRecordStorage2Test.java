@@ -26,6 +26,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.storage.StorageReadResult;
 
 public class DivaMixedRecordStorage2Test {
 	private RecordStorageSpy basicStorage;
@@ -40,6 +41,7 @@ public class DivaMixedRecordStorage2Test {
 	private DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
 	private DataGroupSpy collectedTerms = new DataGroupSpy("collectedTerms");
 	private DataGroupSpy linkList = new DataGroupSpy("linkList");
+	private DataGroupSpy filter = new DataGroupSpy("filter");
 	private String dataDivider = "someDataDivider";
 
 	@BeforeMethod
@@ -65,6 +67,20 @@ public class DivaMixedRecordStorage2Test {
 		assertEquals(databaseRecordStorage.data.type, recordType);
 		assertEquals(databaseRecordStorage.data.id, id);
 		assertSame(readIndexBatchJob, databaseRecordStorage.data.answer);
+
+	}
+
+	@Test
+	public void readListGoesToDbStorageForIndexBatchJob() throws Exception {
+		assertNoCallsMadeToStorage();
+		String recordType = "indexBatchJob";
+		StorageReadResult readList = divaMixedRecordStorage.readList(recordType, filter);
+
+		assertNull(basicStorage.data.calledMethod);
+		assertEquals(databaseRecordStorage.data.calledMethod, "readList");
+		assertEquals(databaseRecordStorage.data.type, recordType);
+		assertEquals(databaseRecordStorage.data.filter, filter);
+		assertSame(readList, databaseRecordStorage.storageReadResult);
 
 	}
 
@@ -109,18 +125,16 @@ public class DivaMixedRecordStorage2Test {
 
 	}
 
-	// @Test
-	// public void deletePersonDomainPartGoesToDbStorage() throws Exception {
-	// assertNoInteractionWithStorage(basicStorage);
-	// assertNoInteractionWithStorage(databaseRecordStorage);
-	//
-	// RecordStorageSpyData expectedData = new RecordStorageSpyData();
-	// expectedData.type = "personDomainPart";
-	// expectedData.id = "someId";
-	// expectedData.calledMethod = "deleteByTypeAndId";
-	// divaMixedRecordStorage.deleteByTypeAndId(expectedData.type, expectedData.id);
-	//
-	// assertNoInteractionWithStorage(basicStorage);
-	// assertExpectedDataSameAsInStorageSpy(databaseRecordStorage, expectedData);
-	// }
+	@Test
+	public void deletePersonDomainPartGoesToDbStorage() throws Exception {
+		assertNoCallsMadeToStorage();
+
+		String recordType = "indexBatchJob";
+		divaMixedRecordStorage.deleteByTypeAndId(recordType, id);
+
+		assertNull(basicStorage.data.calledMethod);
+		assertEquals(databaseRecordStorage.data.calledMethod, "deleteByTypeAndId");
+		assertEquals(databaseRecordStorage.data.type, recordType);
+		assertEquals(databaseRecordStorage.data.id, id);
+	}
 }
