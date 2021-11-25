@@ -93,7 +93,11 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public void deleteByTypeAndId(String type, String id) {
-		basicStorage.deleteByTypeAndId(type, id);
+		if (PERSON_DOMAIN_PART.equals(type)) {
+			databaseStorage.deleteByTypeAndId(type, id);
+		} else {
+			basicStorage.deleteByTypeAndId(type, id);
+		}
 	}
 
 	@Override
