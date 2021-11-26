@@ -57,10 +57,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public DataGroup read(String type, String id) {
-		if (PERSON.equals(type) || INDEX_BATCH_JOB.equals(type)) {
-			return databaseStorage.read(type, id);
-		}
-		if (PERSON_DOMAIN_PART.equals(type)) {
+		if (typeIsUsingDatabaseStorage(type)) {
 			return databaseStorage.read(type, id);
 		}
 		if (isOrganisation(type)) {
@@ -70,6 +67,11 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			return handleUserStorage(type, id);
 		}
 		return basicStorage.read(type, id);
+	}
+
+	private boolean typeIsUsingDatabaseStorage(String type) {
+		return PERSON.equals(type) || PERSON_DOMAIN_PART.equals(type)
+				|| INDEX_BATCH_JOB.equals(type);
 	}
 
 	private boolean isOrganisation(String type) {
@@ -125,8 +127,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public StorageReadResult readList(String type, DataGroup filter) {
-		if (PERSON.equals(type) || PERSON_DOMAIN_PART.equals(type)
-				|| INDEX_BATCH_JOB.equals(type)) {
+		if (typeIsUsingDatabaseStorage(type)) {
 			return databaseStorage.readList(type, filter);
 		}
 		if (isOrganisation(type)) {
@@ -235,10 +236,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	@Override
 	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
-		if (PERSON.equals(type)) {
-			return databaseStorage.getTotalNumberOfRecordsForType(type, filter);
-		}
-		if (PERSON_DOMAIN_PART.equals(type)) {
+		if (typeIsUsingDatabaseStorage(type)) {
 			return databaseStorage.getTotalNumberOfRecordsForType(type, filter);
 		}
 		if (isOrganisation(type)) {

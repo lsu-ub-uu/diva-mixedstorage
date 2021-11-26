@@ -28,14 +28,13 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.storage.StorageReadResult;
 
-public class DivaMixedRecordStorage2Test {
+public class DivaMixedRecordStorageDatabaseStorageTest {
+	private static final String INDEX_BATCH_JOB = "indexBatchJob";
 	private RecordStorageSpy basicStorage;
-	private RecordStorageSpy divaFedoraToCoraStorage;
 	private DivaMixedRecordStorage divaMixedRecordStorage;
 	private RecordStorageSpy divaDbToCoraStorage;
 	private RecordStorageSpy userStorage;
 	private RecordStorageSpy databaseRecordStorage;
-	private DatabaseStorageProviderSpy databaseStorageProvider;
 
 	private String id = "someId";
 	private DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
@@ -47,7 +46,6 @@ public class DivaMixedRecordStorage2Test {
 	@BeforeMethod
 	public void beforeMethod() {
 		basicStorage = new RecordStorageSpy();
-		divaFedoraToCoraStorage = new RecordStorageSpy();
 		divaDbToCoraStorage = new RecordStorageSpy();
 		userStorage = new RecordStorageSpy();
 		databaseRecordStorage = new RecordStorageSpy();
@@ -59,13 +57,10 @@ public class DivaMixedRecordStorage2Test {
 	@Test
 	public void readGoesToDbStorageForIndexBatchJob() throws Exception {
 		assertNoCallsMadeToStorage();
-		String recordType = "indexBatchJob";
-		DataGroup readIndexBatchJob = divaMixedRecordStorage.read(recordType, id);
+		DataGroup readIndexBatchJob = divaMixedRecordStorage.read(INDEX_BATCH_JOB, id);
 
 		assertNull(basicStorage.data.calledMethod);
-		assertEquals(databaseRecordStorage.data.calledMethod, "read");
-		assertEquals(databaseRecordStorage.data.type, recordType);
-		assertEquals(databaseRecordStorage.data.id, id);
+		assertCorrectTypeIdAndMethod(INDEX_BATCH_JOB, "read");
 		assertSame(readIndexBatchJob, databaseRecordStorage.data.answer);
 
 	}
@@ -73,12 +68,11 @@ public class DivaMixedRecordStorage2Test {
 	@Test
 	public void readListGoesToDbStorageForIndexBatchJob() throws Exception {
 		assertNoCallsMadeToStorage();
-		String recordType = "indexBatchJob";
-		StorageReadResult readList = divaMixedRecordStorage.readList(recordType, filter);
+		StorageReadResult readList = divaMixedRecordStorage.readList(INDEX_BATCH_JOB, filter);
 
 		assertNull(basicStorage.data.calledMethod);
 		assertEquals(databaseRecordStorage.data.calledMethod, "readList");
-		assertEquals(databaseRecordStorage.data.type, recordType);
+		assertEquals(databaseRecordStorage.data.type, INDEX_BATCH_JOB);
 		assertEquals(databaseRecordStorage.data.filter, filter);
 		assertSame(readList, databaseRecordStorage.storageReadResult);
 
@@ -87,12 +81,11 @@ public class DivaMixedRecordStorage2Test {
 	@Test
 	public void createGoesToDbStorageForIndexBatchJob() throws Exception {
 		assertNoCallsMadeToStorage();
-		String recordType = "indexBatchJob";
-		divaMixedRecordStorage.create(recordType, id, dataGroup, collectedTerms, linkList,
+		divaMixedRecordStorage.create(INDEX_BATCH_JOB, id, dataGroup, collectedTerms, linkList,
 				dataDivider);
 
 		assertNull(basicStorage.data.calledMethod);
-		assertCorrectDataSentToDbStorageDefaultSettings("create", recordType);
+		assertCorrectDataSentToDbStorageDefaultSettings("create", INDEX_BATCH_JOB);
 
 	}
 
@@ -103,9 +96,7 @@ public class DivaMixedRecordStorage2Test {
 
 	private void assertCorrectDataSentToDbStorageDefaultSettings(String calledMethod,
 			String recordType) {
-		assertEquals(databaseRecordStorage.data.calledMethod, calledMethod);
-		assertEquals(databaseRecordStorage.data.type, recordType);
-		assertEquals(databaseRecordStorage.data.id, id);
+		assertCorrectTypeIdAndMethod(recordType, calledMethod);
 		assertEquals(databaseRecordStorage.data.record, dataGroup);
 		assertEquals(databaseRecordStorage.data.collectedTerms, collectedTerms);
 		assertEquals(databaseRecordStorage.data.linkList, linkList);
@@ -116,12 +107,11 @@ public class DivaMixedRecordStorage2Test {
 	public void updateGoesToDbStorageForIndexBatchJob() throws Exception {
 		assertNoCallsMadeToStorage();
 
-		String recordType = "indexBatchJob";
-		divaMixedRecordStorage.update(recordType, id, dataGroup, collectedTerms, linkList,
+		divaMixedRecordStorage.update(INDEX_BATCH_JOB, id, dataGroup, collectedTerms, linkList,
 				dataDivider);
 
 		assertNull(basicStorage.data.calledMethod);
-		assertCorrectDataSentToDbStorageDefaultSettings("update", recordType);
+		assertCorrectDataSentToDbStorageDefaultSettings("update", INDEX_BATCH_JOB);
 
 	}
 
@@ -129,12 +119,30 @@ public class DivaMixedRecordStorage2Test {
 	public void deletePersonDomainPartGoesToDbStorage() throws Exception {
 		assertNoCallsMadeToStorage();
 
-		String recordType = "indexBatchJob";
-		divaMixedRecordStorage.deleteByTypeAndId(recordType, id);
+		divaMixedRecordStorage.deleteByTypeAndId(INDEX_BATCH_JOB, id);
 
 		assertNull(basicStorage.data.calledMethod);
-		assertEquals(databaseRecordStorage.data.calledMethod, "deleteByTypeAndId");
+		assertCorrectTypeIdAndMethod(INDEX_BATCH_JOB, "deleteByTypeAndId");
+	}
+
+	private void assertCorrectTypeIdAndMethod(String recordType, String expectedMethod) {
+		assertEquals(databaseRecordStorage.data.calledMethod, expectedMethod);
 		assertEquals(databaseRecordStorage.data.type, recordType);
 		assertEquals(databaseRecordStorage.data.id, id);
 	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsForPerson() {
+		assertNoCallsMadeToStorage();
+
+		long totalNumberOfRecords = divaMixedRecordStorage
+				.getTotalNumberOfRecordsForType(INDEX_BATCH_JOB, filter);
+
+		assertNull(basicStorage.data.calledMethod);
+		assertEquals(databaseRecordStorage.data.type, INDEX_BATCH_JOB);
+		assertSame(databaseRecordStorage.data.filter, filter);
+		assertEquals(totalNumberOfRecords, databaseRecordStorage.data.answer);
+
+	}
+
 }
