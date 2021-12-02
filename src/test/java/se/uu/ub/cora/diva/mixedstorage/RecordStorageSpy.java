@@ -20,7 +20,9 @@ package se.uu.ub.cora.diva.mixedstorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.searchstorage.SearchStorage;
@@ -29,7 +31,7 @@ import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageSpy implements RecordStorage, SearchStorage {
-	RecordStorageSpyData data = new RecordStorageSpyData();
+	public RecordStorageSpyData data = new RecordStorageSpyData();
 	public String searchTermId;
 	public DataGroup returnedSearchTerm = new DataGroupSpy("searchTerm");
 	public String indexTermId;
@@ -39,6 +41,7 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 	public boolean linkExistsInStorage = false;
 	public boolean existsInStorage = true;
 	public List<String> implementingTypes;
+	public Map<String, Object> answerToReturn = new HashMap<>();
 
 	public RecordStorageSpy() {
 		this.storageType = "basicStorage";
@@ -57,9 +60,14 @@ public class RecordStorageSpy implements RecordStorage, SearchStorage {
 		if (!existsInStorage) {
 			throw new RecordNotFoundException("error from spy");
 		}
-		DataGroup dummyDataGroup = new DataGroupSpy("DummyGroupFromRecordStorageSpy");
-		data.answer = dummyDataGroup;
-		return dummyDataGroup;
+		if (answerToReturn.containsKey(type + "_" + id)) {
+			data.answer = answerToReturn.get(type + "_" + id);
+		} else {
+			DataGroup dummyDataGroup = new DataGroupSpy("DummyGroupFromRecordStorageSpy");
+			data.answer = dummyDataGroup;
+		}
+
+		return (DataGroup) data.answer;
 	}
 
 	@Override

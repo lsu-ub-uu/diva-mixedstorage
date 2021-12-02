@@ -30,7 +30,8 @@ public class ConverterSpy implements Converter {
 	public DataElement dataElement;
 	public List<DataElement> dataElements = new ArrayList<>();
 	public String dataString;
-	public String commonStringToReturn = "some returned string from converter spy";
+
+	public String commonStringToReturn = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>some returned string from converter spy";
 	public List<String> returnedStrings = new ArrayList<>();
 	public DataGroupSpy dataGroupToReturn;
 	private int counter = 0;
