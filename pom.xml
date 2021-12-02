@@ -38,9 +38,11 @@
 		<gatekeeper.version>3.7.0</gatekeeper.version>
 		<json.version>3.0-SNAPSHOT</json.version>
 		<xmlutils.version>1.4-SNAPSHOT</xmlutils.version>
-		<xmlconverter.version>1.6.0</xmlconverter.version>
+		<xmlconverter.version>1.8-SNAPSHOT</xmlconverter.version>
 		<converter.version>1.5.0</converter.version>
 		<testutils.version>1.1.1</testutils.version>
+<!-- just for connection to real db when testing -->
+		<basicdata.version>3.4.0</basicdata.version>
 	</properties>
 
 	<scm>
@@ -123,7 +125,8 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>xmlconverter</artifactId>
 			<version>${xmlconverter.version}</version>
-			<scope>runtime</scope>
+			<!-- add again after finished testing with real db -->
+<!-- 			<scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
@@ -141,6 +144,11 @@
 			<artifactId>testutils</artifactId>
 			<version>${testutils.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>basicdata</artifactId>
+			<version>${basicdata.version}</version>
 		</dependency>
 	</dependencies>
 
