@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,12 +18,28 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollector;
 
-public interface DivaCoraToFedoraConverter {
+public class RepeatableLinkCollectorSpy implements RepeatableRelatedLinkCollector {
 
-	String toXML(DataGroup dataRecord);
+	public List<DataGroup> groupsContainingLinks = new ArrayList<>();
+	public int numberOfGroupsToReturn = 0;
+	public List<DataGroup> listToReturn = new ArrayList<>();
 
-	// String toXML(DataGroup dataRecord, List<DataGroup> relatedRecords);
+	@Override
+	public List<DataGroup> collectLinks(List<DataGroup> groupsContainingLinks) {
+		this.groupsContainingLinks = groupsContainingLinks;
+
+		for (int i = 0; i < numberOfGroupsToReturn; i++) {
+			listToReturn.add(new DataGroupSpy("personDomainPart"));
+		}
+
+		return listToReturn;
+	}
 
 }

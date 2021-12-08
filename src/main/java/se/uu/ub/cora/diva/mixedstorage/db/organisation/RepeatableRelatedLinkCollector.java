@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,14 +16,14 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.fedora;
+package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+
+import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 
-public interface DivaCoraToFedoraConverter {
+public interface RepeatableRelatedLinkCollector {
 
-	String toXML(DataGroup dataRecord);
-
-	// String toXML(DataGroup dataRecord, List<DataGroup> relatedRecords);
+	List<DataGroup> collectLinks(List<DataGroup> groupsContainingLinks);
 
 }
