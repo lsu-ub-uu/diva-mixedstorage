@@ -18,7 +18,10 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import se.uu.ub.cora.converter.Converter;
 import se.uu.ub.cora.converter.ConverterFactory;
@@ -43,45 +46,51 @@ public class OrganisationDbToXml implements DbToXml {
 	public String toXML(String recordType, String recordId) {
 		DataGroup dataGroup = dbStorage.read(recordType, recordId);
 
+		Map<String, DataGroup> linkedOrganisations = new HashMap<>();
+		linkedOrganisations.put(recordId, dataGroup);
+
 		Converter converter = xmlConverterFactory.factorConverter();
-		StringBuilder combinedXML = new StringBuilder();
-		String coraXml = converter.convert(dataGroup);
-		combinedXML.append(coraXml);
-		possiblyConvertParents(converter, combinedXML, dataGroup);
+		StringBuilder combinedXML = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+		possiblyConvertParents(dataGroup, linkedOrganisations);
+		for (Entry<String, DataGroup> entry : linkedOrganisations.entrySet()) {
+			String coraXml = converter.convert(entry.getValue());
+			String strippedXml = removeStartingXMLTag(coraXml);
+			combinedXML.append(strippedXml);
+
+		}
 
 		return combinedXML.toString();
 	}
 
-	private void possiblyConvertParents(Converter converter, StringBuilder combinedXML,
-			DataGroup parentDataGroup) {
+	private void possiblyConvertParents(DataGroup parentDataGroup,
+			Map<String, DataGroup> linkedOrganisations) {
 		if (parentDataGroup.containsChildWithNameInData("parentOrganisation")) {
-			convertParents(converter, parentDataGroup, combinedXML);
+			convertParents(parentDataGroup, linkedOrganisations);
 		}
 	}
 
-	private void convertParents(Converter converter, DataGroup dataGroup,
-			StringBuilder combinedXML) {
+	private void convertParents(DataGroup dataGroup, Map<String, DataGroup> linkedOrganisations) {
 		List<DataGroup> parents = dataGroup.getAllGroupsWithNameInData("parentOrganisation");
 		for (DataGroup parent : parents) {
-			convertParent(converter, combinedXML, parent);
+			convertParent(parent, linkedOrganisations);
 		}
 	}
 
-	private void convertParent(Converter converter, StringBuilder combinedXML, DataGroup parent) {
-		DataGroup parentDataGroup = readParentFromStorage(parent);
-		String parentXML = converter.convert(parentDataGroup);
-		String strippedXml = removeStartingXMLTag(parentXML);
-		combinedXML.append(strippedXml);
-		possiblyConvertParents(converter, combinedXML, parentDataGroup);
+	private void convertParent(DataGroup parent, Map<String, DataGroup> linkedOrganisations) {
+		DataGroup parentDataGroup = readParentFromStorage(parent, linkedOrganisations);
+		possiblyConvertParents(parentDataGroup, linkedOrganisations);
 	}
 
 	private String removeStartingXMLTag(String parentXML) {
 		return parentXML.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
 	}
 
-	private DataGroup readParentFromStorage(DataGroup parent) {
+	private DataGroup readParentFromStorage(DataGroup parent,
+			Map<String, DataGroup> linkedOrganisations) {
 		String parentId = extractParentId(parent);
-		return dbStorage.read("organisation", parentId);
+		DataGroup readDataGroup = dbStorage.read("organisation", parentId);
+		linkedOrganisations.put(parentId, readDataGroup);
+		return readDataGroup;
 	}
 
 	private String extractParentId(DataGroup parent) {

@@ -87,9 +87,11 @@ public class OrganisationDbToXmlTest {
 		assertEquals(xml, convertedXML);
 	}
 
+	// om samma parent förekommer 2 ggr ska den bara finnas en gång i filen
+
 	@Test
 	public void testWithParents() {
-		setUpDataGroupsWithParentsInSpy();
+		createAndSetUpDataGroupsWithParentsInSpy();
 		DbToXml dbToXml = new OrganisationDbToXml(dbStorage, xmlConverterFactory,
 				transformationFactory);
 		String xml = dbToXml.toXML("organisation", "45");
@@ -99,13 +101,15 @@ public class OrganisationDbToXmlTest {
 		assertEquals(dbStorage.ids.get(1), "12");
 		assertEquals(dbStorage.ids.get(2), "890");
 		assertEquals(dbStorage.ids.get(3), "67");
-		assertEquals(dbStorage.ids.size(), 4);
+		// beror på om vi ska kolla om id finns i mappen innan vi läser från databasen
+		assertEquals(dbStorage.ids.size(), 5);
 
 		ConverterSpy factoredConverter = xmlConverterFactory.factoredConverter;
 		List<DataGroup> returnedDataGroups = dbStorage.returnedDataGroups;
 		assertSame(factoredConverter.dataElements.get(0), returnedDataGroups.get(0));
 		assertSame(factoredConverter.dataElements.get(1), returnedDataGroups.get(1));
-		assertSame(factoredConverter.dataElements.get(2), returnedDataGroups.get(2));
+		assertSame(factoredConverter.dataElements.get(2), returnedDataGroups.get(3));
+		assertSame(factoredConverter.dataElements.get(3), returnedDataGroups.get(4));
 
 		String convertedXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>some returned "
 				+ "string from converter spy0some returned string from converter spy1"
@@ -115,15 +119,15 @@ public class OrganisationDbToXmlTest {
 		assertEquals(xml, convertedXML);
 	}
 
-	private void setUpDataGroupsWithParentsInSpy() {
+	private void createAndSetUpDataGroupsWithParentsInSpy() {
 		DataGroupSpy organisation = new DataGroupSpy("organisation");
 		DataGroupSpy parent = createParentOrganisationLink("12");
 		organisation.addChild(parent);
 
 		DataGroupSpy parent2 = createParentOrganisationLink("67");
-		// DataGroupSpy grandParent = createParentOrganisation("167");
-		// parent2.addChild(grandParent);
 		organisation.addChild(parent2);
+		DataGroupSpy parentSameIdAsGrandParent = createParentOrganisationLink("890");
+		organisation.addChild(parentSameIdAsGrandParent);
 
 		Map<String, DataGroup> answerToReturn = new HashMap<>();
 		answerToReturn.put("organisation_45", organisation);
