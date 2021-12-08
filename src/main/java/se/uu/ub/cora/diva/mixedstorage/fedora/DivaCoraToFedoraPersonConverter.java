@@ -31,7 +31,6 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 	private CoraTransformationFactory transformationFactory;
 	private static final String PERSON_XSLT_PATH = "person/toCoraPerson.xsl";
-	private static final String PERSON_WITH_DOMAIN_PART_XSLT_PATH = "person/toCoraPersonWithDomainPart.xsl";
 	private RepeatableRelatedLinkCollector repeatbleRelatedLinkCollector;
 
 	public DivaCoraToFedoraPersonConverter(CoraTransformationFactory transformationFactory,
@@ -41,55 +40,44 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 	}
 
 	@Override
-	public String toXML(DataGroup dataRecord) {
+	public String toXML(DataGroup dataGroup) {
 		Converter converter = ConverterProvider.getConverter("xml");
+		StringBuilder combinedXml = new StringBuilder();
 
-		String xml = converter.convert(dataRecord);
-
-		List<DataGroup> personDomainParts = dataRecord
-				.getAllGroupsWithNameInData("personDomainPart");
-		List<DataGroup> collectedLinks = repeatbleRelatedLinkCollector
-				.collectLinks(personDomainParts);
-		for (DataGroup collectedLinkDataGroup : collectedLinks) {
-			converter.convert(collectedLinkDataGroup);
-
-		}
-		CoraTransformation transformation = transformationFactory.factor(PERSON_XSLT_PATH);
-		return transformation.transform(xml);
+		convertTopDataGroupToXml(dataGroup, converter, combinedXml);
+		convertRelatedLinksDataGroupsToXml(dataGroup, converter, combinedXml);
+		return transformCoraXmlToFedoraXml(combinedXml);
 	}
 
-	// private String convertToCoraXml(DataGroup dataGroup) {
-	// Converter converter = ConverterProvider.getConverter("xml");
-	// return converter.convert(dataGroup);
-	// }
+	private void convertTopDataGroupToXml(DataGroup dataRecord, Converter converter,
+			StringBuilder combinedXml) {
+		String xml = converter.convert(dataRecord);
+		combinedXml.append(xml);
+	}
 
-	// @Override
-	// public String toXML(DataGroup dataRecord, List<DataGroup> relatedRecords) {
-	// Converter converter = ConverterProvider.getConverter("xml");
-	// String mainXML = converter.convert(dataRecord);
-	// List<String> relatedXmlStrings = convertRelatedRecords(converter, relatedRecords);
-	// return transformToFedoraXml(mainXML, relatedXmlStrings);
-	// }
+	private void convertRelatedLinksDataGroupsToXml(DataGroup dataGroup, Converter converter,
+			StringBuilder combinedXml) {
+		List<DataGroup> collectedLinks = collectLinksForPersonDomainParts(dataGroup);
+		for (DataGroup collectedLinkDataGroup : collectedLinks) {
+			String relatedXml = converter.convert(collectedLinkDataGroup);
+			String strippedXml = removeStartingXMLTag(relatedXml);
+			combinedXml.append(strippedXml);
+		}
+	}
 
-	// private List<String> convertRelatedRecords(Converter converter,
-	// List<DataGroup> relatedRecords) {
-	// List<String> relatedXmlStrings = new ArrayList<>();
-	// for (DataGroup relatedRecord : relatedRecords) {
-	// convertAndAddRelatedRecord(converter, relatedXmlStrings, relatedRecord);
-	// }
-	// return relatedXmlStrings;
-	// }
+	private List<DataGroup> collectLinksForPersonDomainParts(DataGroup dataGroup) {
+		List<DataGroup> personDomainParts = dataGroup
+				.getAllGroupsWithNameInData("personDomainPart");
+		return repeatbleRelatedLinkCollector.collectLinks(personDomainParts);
+	}
 
-	// private void convertAndAddRelatedRecord(Converter converter, List<String> relatedXmlStrings,
-	// DataGroup relatedRecord) {
-	// String relatedXml = converter.convert(relatedRecord);
-	// relatedXmlStrings.add(relatedXml);
-	// }
+	private String removeStartingXMLTag(String xml) {
+		return xml.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
+	}
 
-	// private String transformToFedoraXml(String mainXML, List<String> relatedXmlStrings) {
-	// CoraTransformation transformation = transformationFactory
-	// .factor(PERSON_WITH_DOMAIN_PART_XSLT_PATH);
-	// return transformation.transform(mainXML, relatedXmlStrings);
-	// }
+	private String transformCoraXmlToFedoraXml(StringBuilder combinedXml) {
+		CoraTransformation transformation = transformationFactory.factor(PERSON_XSLT_PATH);
+		return transformation.transform(combinedXml.toString());
+	}
 
 }

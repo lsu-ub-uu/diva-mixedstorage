@@ -36,7 +36,6 @@ public class DivaCoraToFedoraPersonConverterTest {
 	private ConverterFactorySpy dataGroupToXmlConverterFactory;
 	private TransformationFactorySpy transformationFactory;
 	private String toCoraPersonXsl = "person/toCoraPerson.xsl";
-	private String toCoraPersonWithDomainPartXsl = "person/toCoraPersonWithDomainPart.xsl";
 	private DataGroupSpy defaultDataGroup = new DataGroupSpy("someNameInData");
 	private DivaCoraToFedoraConverter converter;
 	private RepeatableLinkCollectorSpy repeatbleCollector;
@@ -57,19 +56,29 @@ public class DivaCoraToFedoraPersonConverterTest {
 		String fedoraXml = converter.toXML(defaultDataGroup);
 
 		ConverterSpy groupToXmlConverter = dataGroupToXmlConverterFactory.factoredConverter;
-		assertEquals(groupToXmlConverter.dataElements.size(), 1);
-		assertSame(groupToXmlConverter.dataElements.get(0), defaultDataGroup);
+		assertMainDataGroupWasConvertedToCoraXml(groupToXmlConverter);
 
 		assertEquals(repeatbleCollector.groupsContainingLinks.size(), 0);
+
 		List<CoraTransformationSpy> factoredTransformations = transformationFactory.factoredTransformations;
-		assertEquals(factoredTransformations.size(), 1);
-		assertEquals(transformationFactory.xsltPath, toCoraPersonXsl);
+		assertMainXmlWasTransformedToFedoraXml(factoredTransformations);
 
 		CoraTransformationSpy factoredTransformation = factoredTransformations.get(0);
 		assertEquals(factoredTransformation.inputXml, groupToXmlConverter.commonStringToReturn + 0);
 
 		assertEquals(fedoraXml, factoredTransformation.xmlToReturn);
 
+	}
+
+	private void assertMainDataGroupWasConvertedToCoraXml(ConverterSpy groupToXmlConverter) {
+		assertEquals(groupToXmlConverter.dataElements.size(), 1);
+		assertSame(groupToXmlConverter.dataElements.get(0), defaultDataGroup);
+	}
+
+	private void assertMainXmlWasTransformedToFedoraXml(
+			List<CoraTransformationSpy> factoredTransformations) {
+		assertEquals(factoredTransformations.size(), 1);
+		assertEquals(transformationFactory.xsltPath, toCoraPersonXsl);
 	}
 
 	@Test
@@ -83,18 +92,19 @@ public class DivaCoraToFedoraPersonConverterTest {
 		assertSame(groupToXmlConverter.dataElements.get(0), defaultDataGroup);
 
 		assertEquals(repeatbleCollector.groupsContainingLinks.size(), 3);
+		assertSame(groupToXmlConverter.dataElements.get(1), repeatbleCollector.listToReturn.get(0));
+		assertSame(groupToXmlConverter.dataElements.get(2), repeatbleCollector.listToReturn.get(1));
+		assertSame(groupToXmlConverter.dataElements.get(3), repeatbleCollector.listToReturn.get(2));
+		assertSame(groupToXmlConverter.dataElements.get(4), repeatbleCollector.listToReturn.get(3));
 
-		//
-		// List<CoraTransformationSpy> factoredTransformations =
-		// transformationFactory.factoredTransformations;
-		// assertEquals(factoredTransformations.size(), 1);
-		// assertEquals(transformationFactory.xsltPath, toCoraPersonXsl);
-		//
-		// CoraTransformationSpy factoredTransformation = factoredTransformations.get(0);
-		// assertEquals(factoredTransformation.inputXml, groupToXmlConverter.commonStringToReturn +
-		// 0);
-		//
-		// assertEquals(fedoraXml, factoredTransformation.xmlToReturn);
+		List<CoraTransformationSpy> factoredTransformations = transformationFactory.factoredTransformations;
+		assertMainXmlWasTransformedToFedoraXml(factoredTransformations);
+
+		CoraTransformationSpy factoredTransformation = factoredTransformations.get(0);
+		String expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>some returned string from converter spy0some returned string from converter spy1some returned string from converter spy2some returned string from converter spy3some returned string from converter spy4";
+		assertEquals(factoredTransformation.inputXml, expectedXml);
+
+		assertEquals(fedoraXml, factoredTransformation.xmlToReturn);
 	}
 
 	private void addPersonDomainPartChildren(DataGroupSpy dataGroup) {
@@ -102,52 +112,5 @@ public class DivaCoraToFedoraPersonConverterTest {
 		dataGroup.addChild(new DataGroupSpy("personDomainPart"));
 		dataGroup.addChild(new DataGroupSpy("personDomainPart"));
 	}
-
-	// @Test
-	// public void testToXmlWithRelatedRecords() {
-	// List<DataGroup> relatedDataGroups = createRelatedDataGroups();
-	//
-	// String fedoraXml = converter.toXML(dataGroup, relatedDataGroups);
-	//
-	// assertDataGroupsAreSentToXmlConverter(dataGroup, relatedDataGroups);
-	// assertTransformationFactoryWasCalledCorrectly();
-	//
-	// List<CoraTransformationSpy> factoredTransformations =
-	// transformationFactory.factoredTransformations;
-	// CoraTransformationSpy factoredTransformation = factoredTransformations.get(0);
-	//
-	// assertConvertedGroupsAreSentToTransformation(factoredTransformation);
-	//
-	// assertEquals(fedoraXml, factoredTransformation.xmlToReturn);
-	// }
-
-	// private void assertDataGroupsAreSentToXmlConverter(DataGroupSpy dataGroup,
-	// List<DataGroup> relatedDataGroups) {
-	// ConverterSpy factoredConverter = dataGroupToXmlConverterFactory.factoredConverter;
-	// assertEquals(factoredConverter.dataElements.size(), 3);
-	// assertSame(factoredConverter.dataElements.get(0), dataGroup);
-	// assertSame(factoredConverter.dataElements.get(1), relatedDataGroups.get(0));
-	// assertSame(factoredConverter.dataElements.get(2), relatedDataGroups.get(1));
-	// }
-	//
-	// private void assertTransformationFactoryWasCalledCorrectly() {
-	// List<CoraTransformationSpy> factoredTransformations =
-	// transformationFactory.factoredTransformations;
-	// assertEquals(factoredTransformations.size(), 1);
-	// assertEquals(transformationFactory.xsltPath, toCoraPersonWithDomainPartXsl);
-	// }
-	//
-	// private void assertConvertedGroupsAreSentToTransformation(
-	// CoraTransformationSpy factoredTransformation) {
-	// ConverterSpy factoredConverter = dataGroupToXmlConverterFactory.factoredConverter;
-	//
-	// List<String> returnedStringsFromConverter = factoredConverter.returnedStrings;
-	// assertEquals(factoredTransformation.mainXml, returnedStringsFromConverter.get(0));
-	//
-	// assertEquals(factoredTransformation.relatedXmls.get(0),
-	// returnedStringsFromConverter.get(1));
-	// assertEquals(factoredTransformation.relatedXmls.get(1),
-	// returnedStringsFromConverter.get(2));
-	// }
 
 }
