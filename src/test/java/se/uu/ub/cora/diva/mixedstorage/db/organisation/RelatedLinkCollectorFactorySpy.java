@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,23 +16,25 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.fedora;
+package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import se.uu.ub.cora.data.DataGroup;
+public class RelatedLinkCollectorFactorySpy implements RelatedLinkCollectorFactory {
 
-public class DivaCoraToFedoraConverterSpy implements DivaCoraToFedoraConverter {
+	public RelatedLinkCollectorSpy returnedLinkCollector;
 
-	public DataGroup dataRecord;
-	public String returnedXML = "<dummy>Dummy xml from DivaCoraToFedoraConverterSpy</dummy>";
-	public List<DataGroup> relatedRecords;
+	public Map<Integer, List<String>> idsForDataGroupsToReturnForIndex = new HashMap<>();
+	public String type;
 
 	@Override
-	public String toXML(DataGroup dataRecord) {
-
-		this.dataRecord = dataRecord;
-		return returnedXML;
+	public RelatedLinkCollector factor(String type) {
+		this.type = type;
+		returnedLinkCollector = new RelatedLinkCollectorSpy();
+		returnedLinkCollector.idsForDataGroupsToReturnForIndex = idsForDataGroupsToReturnForIndex;
+		return returnedLinkCollector;
 	}
 
 }

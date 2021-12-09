@@ -28,10 +28,11 @@ import se.uu.ub.cora.data.DataGroup;
 
 public class RepeatableRelatedLinkCollectorImp implements RepeatableRelatedLinkCollector {
 
-	private RelatedLinkCollector linkCollector;
+	private RelatedLinkCollectorFactory relatedlinkCollectorFactory;
 
-	public RepeatableRelatedLinkCollectorImp(RelatedLinkCollector linkCollector) {
-		this.linkCollector = linkCollector;
+	public RepeatableRelatedLinkCollectorImp(
+			RelatedLinkCollectorFactory relatedlinkCollectorFactory) {
+		this.relatedlinkCollectorFactory = relatedlinkCollectorFactory;
 	}
 
 	@Override
@@ -43,6 +44,7 @@ public class RepeatableRelatedLinkCollectorImp implements RepeatableRelatedLinkC
 
 	private Map<String, DataGroup> collectDistinctiveLinksAsDataGroups(
 			List<DataGroup> groupsContainingLinks) {
+		RelatedLinkCollector linkCollector = factorLinkCollector();
 		Map<String, DataGroup> combinedCollectedLinks = new HashMap<>();
 		for (DataGroup dataGroup : groupsContainingLinks) {
 			Map<String, DataGroup> collectedLinks = linkCollector.collectLinks(dataGroup);
@@ -51,16 +53,16 @@ public class RepeatableRelatedLinkCollectorImp implements RepeatableRelatedLinkC
 		return combinedCollectedLinks;
 	}
 
+	private RelatedLinkCollector factorLinkCollector() {
+		return relatedlinkCollectorFactory.factor("personDomainPart");
+	}
+
 	private List<DataGroup> putDataGroupsInList(Map<String, DataGroup> combinedCollectedLinks) {
 		List<DataGroup> linksAsDataGroup = new ArrayList<>();
 		for (Entry<String, DataGroup> entry : combinedCollectedLinks.entrySet()) {
 			linksAsDataGroup.add(entry.getValue());
 		}
 		return linksAsDataGroup;
-	}
-
-	public RelatedLinkCollector getLinkCollector() {
-		return linkCollector;
 	}
 
 }

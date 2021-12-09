@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,23 +16,25 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.fedora;
+package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
-import java.util.List;
+import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.storage.RecordStorage;
 
-import se.uu.ub.cora.data.DataGroup;
+public class RelatedLinkCollectorFactoryImp implements RelatedLinkCollectorFactory {
 
-public class DivaCoraToFedoraConverterSpy implements DivaCoraToFedoraConverter {
+	private RecordStorage recordStorage;
 
-	public DataGroup dataRecord;
-	public String returnedXML = "<dummy>Dummy xml from DivaCoraToFedoraConverterSpy</dummy>";
-	public List<DataGroup> relatedRecords;
+	public RelatedLinkCollectorFactoryImp(RecordStorage recordStorage) {
+		this.recordStorage = recordStorage;
+	}
 
 	@Override
-	public String toXML(DataGroup dataRecord) {
-
-		this.dataRecord = dataRecord;
-		return returnedXML;
+	public RelatedLinkCollector factor(String type) {
+		if ("personDomainPart".equals(type)) {
+			return new DomainPartOrganisationCollector(recordStorage);
+		}
+		throw NotImplementedException.withMessage("Factor not implemented for type otherType");
 	}
 
 }

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataGroup;
@@ -34,32 +35,34 @@ import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 
 public class RepeatableRelatedLinkCollectorTest {
 
-	private RelatedLinkCollectorSpy linkCollector;
+	private RelatedLinkCollectorFactorySpy relatedlinkCollectorFactory;
+	private RepeatableRelatedLinkCollector repeatableCollector;
+
+	@BeforeMethod
+	public void setUp() {
+		relatedlinkCollectorFactory = new RelatedLinkCollectorFactorySpy();
+		repeatableCollector = new RepeatableRelatedLinkCollectorImp(relatedlinkCollectorFactory);
+
+	}
 
 	@Test
 	public void testCollectLinksEmptyListIn() {
-		linkCollector = new RelatedLinkCollectorSpy();
-		RepeatableRelatedLinkCollector repeatableCollector = new RepeatableRelatedLinkCollectorImp(
-				linkCollector);
-
 		List<DataGroup> linksAsDataGroups = repeatableCollector
 				.collectLinks(Collections.emptyList());
 
-		assertEquals(linkCollector.linksSentIn.size(), 0);
 		assertEquals(linksAsDataGroups.size(), 0);
 
 	}
 
 	@Test
 	public void testCollectLinksNoReturnedGroupsFromCollector() {
-		linkCollector = new RelatedLinkCollectorSpy();
-		linkCollector.idsForDataGroupsToReturnForIndex = new HashMap<>();
-		RepeatableRelatedLinkCollector repeatableCollector = new RepeatableRelatedLinkCollectorImp(
-				linkCollector);
-
+		relatedlinkCollectorFactory.idsForDataGroupsToReturnForIndex = new HashMap<>();
 		List<DataGroup> groupsContainingLinks = createListOfLinks();
+
 		List<DataGroup> linksAsDataGroups = repeatableCollector.collectLinks(groupsContainingLinks);
 
+		assertEquals(relatedlinkCollectorFactory.type, "personDomainPart");
+		RelatedLinkCollectorSpy linkCollector = relatedlinkCollectorFactory.returnedLinkCollector;
 		assertEquals(linkCollector.linksSentIn.size(), 3);
 		assertEquals(linksAsDataGroups.size(), 0);
 
@@ -67,15 +70,12 @@ public class RepeatableRelatedLinkCollectorTest {
 
 	@Test
 	public void testCollectLinks() {
-		linkCollector = new RelatedLinkCollectorSpy();
 		createResponseToReturnFromSpy();
-
-		RepeatableRelatedLinkCollector repeatableCollector = new RepeatableRelatedLinkCollectorImp(
-				linkCollector);
-
 		List<DataGroup> groupsContainingLinks = createListOfLinks();
+
 		List<DataGroup> linksAsDataGroups = repeatableCollector.collectLinks(groupsContainingLinks);
 
+		RelatedLinkCollectorSpy linkCollector = relatedlinkCollectorFactory.returnedLinkCollector;
 		assertEquals(linkCollector.linksSentIn.size(), 3);
 		assertEquals(linksAsDataGroups.size(), 7);
 
@@ -99,6 +99,6 @@ public class RepeatableRelatedLinkCollectorTest {
 		dataGroupsToReturnFromSpy.put(0, Arrays.asList("56", "45", "34"));
 		dataGroupsToReturnFromSpy.put(1, Arrays.asList("156", "145", "134"));
 		dataGroupsToReturnFromSpy.put(2, Arrays.asList("56", "45", "234"));
-		linkCollector.idsForDataGroupsToReturnForIndex = dataGroupsToReturnFromSpy;
+		relatedlinkCollectorFactory.idsForDataGroupsToReturnForIndex = dataGroupsToReturnFromSpy;
 	}
 }

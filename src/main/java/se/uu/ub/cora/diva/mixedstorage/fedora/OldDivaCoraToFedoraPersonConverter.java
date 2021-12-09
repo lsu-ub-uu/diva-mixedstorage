@@ -18,8 +18,6 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
-import java.util.List;
-
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
@@ -94,11 +92,4 @@ public class OldDivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConve
 		// needed for tests
 		return fedoraURL;
 	}
-
-	@Override
-	public String toXML(DataGroup dataRecord, List<DataGroup> relatedRecords) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

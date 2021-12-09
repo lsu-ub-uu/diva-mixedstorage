@@ -24,6 +24,6 @@ import se.uu.ub.cora.data.DataGroup;
 
 public interface RelatedLinkCollector {
 
-	Map<String, DataGroup> collectLinks(DataGroup personDomainPart);
+	Map<String, DataGroup> collectLinks(DataGroup dataGroup);
 
 }
