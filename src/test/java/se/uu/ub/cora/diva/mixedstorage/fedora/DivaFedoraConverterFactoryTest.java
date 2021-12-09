@@ -27,7 +27,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 
 public class DivaFedoraConverterFactoryTest {
 	private DivaFedoraConverterFactoryImp divaToCoraConverterFactoryImp;
@@ -72,7 +71,7 @@ public class DivaFedoraConverterFactoryTest {
 				.factorToCoraConverter("personDomainPart");
 		assertTrue(converter instanceof DivaFedoraToCoraConverterImp);
 		DivaFedoraToCoraConverterImp personDomainPartConverter = (DivaFedoraToCoraConverterImp) converter;
-		//
+
 		assertNotNull(personDomainPartConverter.getCoraTransformation());
 		assertSame(personDomainPartConverter.getCoraTransformation(),
 				transformationFactory.transformationSpy);
@@ -90,15 +89,19 @@ public class DivaFedoraConverterFactoryTest {
 	public void testFactoryToFedoraPerson() throws Exception {
 		DivaCoraToFedoraConverter converter = divaToCoraConverterFactoryImp
 				.factorToFedoraConverter("person");
-		assertTrue(converter instanceof OldDivaCoraToFedoraPersonConverter);
+		assertTrue(converter instanceof DivaCoraToFedoraPersonConverter);
 	}
 
 	@Test
 	public void testFactorToFedoraForPersonHasCorrectDependencies() throws Exception {
-		OldDivaCoraToFedoraPersonConverter converter = (OldDivaCoraToFedoraPersonConverter) divaToCoraConverterFactoryImp
+		DivaCoraToFedoraPersonConverter converter = (DivaCoraToFedoraPersonConverter) divaToCoraConverterFactoryImp
 				.factorToFedoraConverter("person");
-		assertTrue(converter.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
-		assertEquals(converter.getFedorURL(), fedoraURL);
+		assertSame(converter.getTransformationFactory(), transformationFactory);
+		// new DomainPartOrganisationCollector(dbStorage);
+		// new RepeatbleRelatedLinkCollector(DomainPartOrganisationCollector);
+		// behöver en factory nånstans
+		// assertTrue(converter.getRepeatbleRelatedLinkCollector() instanceof)
+		// assertEquals(converter.getFedorURL(), fedoraURL);
 	}
 
 	@Test

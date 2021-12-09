@@ -20,7 +20,6 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
@@ -46,10 +45,9 @@ public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 	}
 
 	@Override
-	public void updateInFedora(String recordType, String recordId, DataGroup dataGroup,
-			List<DataGroup> relatedDataGroups) {
+	public void updateInFedora(String recordType, String recordId, DataGroup dataGroup) {
 		HttpHandler httpHandler = setUpHttpHandlerForUpdate(recordId);
-		String fedoraXML = convertRecordToFedoraXML(recordType, dataGroup, relatedDataGroups);
+		String fedoraXML = convertRecordToFedoraXML(recordType, dataGroup);
 		httpHandler.setOutput(fedoraXML);
 		int responseCode = httpHandler.getResponseCode();
 		throwErrorIfNotOkFromFedora(recordId, responseCode);
@@ -76,11 +74,10 @@ public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 		httpHandler.setRequestProperty("Authorization", "Basic " + encoded);
 	}
 
-	private String convertRecordToFedoraXML(String recordType, DataGroup dataGroup,
-			List<DataGroup> relatedDataGroups) {
+	private String convertRecordToFedoraXML(String recordType, DataGroup dataGroup) {
 		DivaCoraToFedoraConverter toFedoraConverter = divaCoraToFedoraConverterFactory
 				.factorToFedoraConverter(recordType);
-		return toFedoraConverter.toXML(dataGroup, relatedDataGroups);
+		return toFedoraConverter.toXML(dataGroup);
 	}
 
 	private String createURL(String recordId) {

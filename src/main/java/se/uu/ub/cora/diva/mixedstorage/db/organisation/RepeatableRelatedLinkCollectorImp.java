@@ -59,4 +59,8 @@ public class RepeatableRelatedLinkCollectorImp implements RepeatableRelatedLinkC
 		return linksAsDataGroup;
 	}
 
+	public RelatedLinkCollector getLinkCollector() {
+		return linkCollector;
+	}
+
 }

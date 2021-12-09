@@ -20,7 +20,6 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 
@@ -61,9 +60,7 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	@Override
 	public DivaCoraToFedoraConverter factorToFedoraConverter(String type) {
 		if ("person".equals(type)) {
-			HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
-			return OldDivaCoraToFedoraPersonConverter
-					.usingHttpHandlerFactoryAndFedoraUrl(httpHandlerFactory, fedoraURL);
+			return new DivaCoraToFedoraPersonConverter(coraTransformationFactory, null);
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}

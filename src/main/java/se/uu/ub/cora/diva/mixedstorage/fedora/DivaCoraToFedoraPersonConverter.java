@@ -76,8 +76,17 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 	}
 
 	private String transformCoraXmlToFedoraXml(StringBuilder combinedXml) {
-		CoraTransformation transformation = transformationFactory.factor(PERSON_XSLT_PATH);
+		CoraTransformation transformation = getTransformationFactory().factor(PERSON_XSLT_PATH);
 		return transformation.transform(combinedXml.toString());
+	}
+
+	public CoraTransformationFactory getTransformationFactory() {
+		// needed for test
+		return transformationFactory;
+	}
+
+	public RepeatableRelatedLinkCollector getRepeatbleRelatedLinkCollector() {
+		return repeatbleRelatedLinkCollector;
 	}
 
 }
