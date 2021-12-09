@@ -51,7 +51,6 @@ public class RepeatableRelatedLinkCollectorTest {
 				.collectLinks(Collections.emptyList());
 
 		assertEquals(linksAsDataGroups.size(), 0);
-
 	}
 
 	@Test
