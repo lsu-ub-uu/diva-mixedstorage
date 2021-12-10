@@ -20,27 +20,36 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.xmlutils.transformer.XsltTransformationFactory;
 
 public class ClassicFedoraUpdaterFactoryTest {
 
 	private HttpHandlerFactorySpy httpHandlerFactory;
-	private ClassicFedoraUpdaterFactory factory;
-	private DivaFedoraConverterFactory toFedoraConverterFactory;
+	private ClassicFedoraUpdaterFactoryImp factory;
 	private String baseUrl = "someBaseUrl";
 	private String username = "someUserName";
 	private String password = "somePassword";
+	private RepeatableRelatedLinkCollector repeatableLinkCollector;
 
 	@BeforeMethod
 	public void setUp() {
 		httpHandlerFactory = new HttpHandlerFactorySpy();
-		toFedoraConverterFactory = new DivaFedoraConverterFactorySpy();
-		factory = new ClassicFedoraUpdaterFactoryImp(httpHandlerFactory, toFedoraConverterFactory,
+		repeatableLinkCollector = new RepeatableLinkCollectorSpy();
+		factory = new ClassicFedoraUpdaterFactoryImp(httpHandlerFactory, repeatableLinkCollector,
 				baseUrl, username, password);
+	}
+
+	@Test
+	public void testInit() {
+		assertSame(factory.getHttpHandlerFactory(), httpHandlerFactory);
+		assertSame(factory.getRepeatableRelatedLinkCollector(), repeatableLinkCollector);
 	}
 
 	@Test
@@ -49,10 +58,17 @@ public class ClassicFedoraUpdaterFactoryTest {
 		ClassicFedoraPersonUpdater updater = (ClassicFedoraPersonUpdater) factory
 				.factor(recordType);
 		assertSame(updater.getHttpHandlerFactory(), httpHandlerFactory);
-		assertSame(updater.getDivaCoraToFedoraConverterFactory(), toFedoraConverterFactory);
 		assertEquals(updater.getBaseUrl(), baseUrl);
 		assertEquals(updater.getUsername(), username);
 		assertEquals(updater.getPassword(), password);
+
+		DivaFedoraConverterFactoryImp divaCoraToFedoraConverterFactory = (DivaFedoraConverterFactoryImp) updater
+				.getDivaCoraToFedoraConverterFactory();
+		assertEquals(divaCoraToFedoraConverterFactory.getFedoraURL(), baseUrl);
+		assertTrue(divaCoraToFedoraConverterFactory
+				.getCoraTransformerFactory() instanceof XsltTransformationFactory);
+		assertSame(divaCoraToFedoraConverterFactory.getRepeatableRelatedLinkCollector(),
+				repeatableLinkCollector);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

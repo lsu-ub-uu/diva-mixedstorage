@@ -46,9 +46,13 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedLinkCollectorFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollectorImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
+import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
+import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
 import se.uu.ub.cora.sqlstorage.DatabaseRecordStorage;
@@ -90,6 +94,10 @@ public class DivaMixedRecordStorageProviderTest {
 		initInfo.put("storageOnDiskBasePath", basePath);
 		initInfo.put("databaseLookupName", "java:/comp/env/jdbc/postgres");
 		initInfo.put("coraDatabaseLookupName", "java:/comp/env/jdbc/coraPostgres");
+		initInfo.put("fedoraURL", "http://diva-cora-fedora:8088/fedora/");
+		initInfo.put("fedoraUsername", "fedoraUser");
+		initInfo.put("fedoraPassword", "fedoraPass");
+
 	}
 
 	public void makeSureBasePathExistsAndIsEmpty() throws IOException {
@@ -308,6 +316,27 @@ public class DivaMixedRecordStorageProviderTest {
 				.getRecordStorage();
 		MetadataStorage metadataStorage = metadataStorageProvider.getMetadataStorage();
 		assertSame(metadataStorage, recordStorage.getBasicStorage());
+	}
+
+	@Test
+	public void testCorrectFedoraUpdaterFactory() {
+		divaMixedRecordStorageProvider.startUsingInitInfo(initInfo);
+		DivaMixedRecordStorage recordStorage = (DivaMixedRecordStorage) divaMixedRecordStorageProvider
+				.getRecordStorage();
+		ClassicFedoraUpdaterFactoryImp fedoraUpdaterFactory = (ClassicFedoraUpdaterFactoryImp) recordStorage
+				.getFedoraUpdaterFactory();
+		assertTrue(fedoraUpdaterFactory.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
+		assertEquals(fedoraUpdaterFactory.getFedoraUrl(), initInfo.get("fedoraURL"));
+		assertEquals(fedoraUpdaterFactory.getUserName(), initInfo.get("fedoraUsername"));
+		assertEquals(fedoraUpdaterFactory.getPassword(), initInfo.get("fedoraPassword"));
+
+		RepeatableRelatedLinkCollectorImp repeatableRelatedLinkCollector = (RepeatableRelatedLinkCollectorImp) fedoraUpdaterFactory
+				.getRepeatableRelatedLinkCollector();
+		RelatedLinkCollectorFactoryImp linkCollectorFactory = (RelatedLinkCollectorFactoryImp) repeatableRelatedLinkCollector
+				.getRelatedLinkCollectorFactory();
+
+		assertSame(linkCollectorFactory.getRecordStorage(), recordStorage.getDatabaseStorage());
+
 	}
 
 	@Test

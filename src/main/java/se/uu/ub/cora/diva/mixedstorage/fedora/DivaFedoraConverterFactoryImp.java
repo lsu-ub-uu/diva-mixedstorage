@@ -81,4 +81,8 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 		return coraTransformationFactory;
 	}
 
+	public RepeatableRelatedLinkCollector getRepeatableRelatedLinkCollector() {
+		return repeatableLinkCollector;
+	}
+
 }

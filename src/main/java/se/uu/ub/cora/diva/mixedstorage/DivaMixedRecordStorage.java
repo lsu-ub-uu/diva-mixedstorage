@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
 import se.uu.ub.cora.searchstorage.SearchStorage;
 import se.uu.ub.cora.storage.RecordNotFoundException;
@@ -110,19 +111,8 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
 			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
-			// ClassicFedoraPersonUpdater personUpdater = DivaFedoraConverterFactoryImp
-			// .usingFedoraURLAndTransformerFactory(dataDivider, null, null);
-
-			// RepeatableRelatedLinkCollector - hämta från provider?
-			// eller
-			// RelatedLinkCollectorFactory linkCollectorFactory = new
-			// RelatedLinkCollectorFactoryImp(
-			// databaseStorage);
-			// RepeatableRelatedLinkCollector repeatableLinkCollector = new
-			// RepeatableRelatedLinkCollectorImp(
-			// linkCollectorFactory);
-			// ClassicFedoraUpdaterFactory fedoraUpdaterFactory = new
-			// ClassicFedoraUpdaterFactoryImp();
+			ClassicFedoraUpdater fedoraUpdater = fedoraUpdaterFactory.factor(PERSON);
+			fedoraUpdater.updateInFedora(type, id, dataRecord);
 
 		} else if (isOrganisation(type)) {
 			divaClassicDbStorage.update(type, id, dataRecord, collectedTerms, linkList,

@@ -24,9 +24,11 @@ import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
 public class ClassicFedoraUpdaterFactorySpy implements ClassicFedoraUpdaterFactory {
 
 	public ClassicFedoraUpdaterSpy factoredFedoraUpdater;
+	public String recordType;
 
 	@Override
 	public ClassicFedoraUpdater factor(String recordType) {
+		this.recordType = recordType;
 		factoredFedoraUpdater = new ClassicFedoraUpdaterSpy();
 		return factoredFedoraUpdater;
 	}

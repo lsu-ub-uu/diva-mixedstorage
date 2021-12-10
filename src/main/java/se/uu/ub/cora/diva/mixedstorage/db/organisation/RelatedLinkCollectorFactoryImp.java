@@ -37,4 +37,8 @@ public class RelatedLinkCollectorFactoryImp implements RelatedLinkCollectorFacto
 		throw NotImplementedException.withMessage("Factor not implemented for type otherType");
 	}
 
+	public RecordStorage getRecordStorage() {
+		return recordStorage;
+	}
+
 }

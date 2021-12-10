@@ -33,7 +33,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
@@ -45,7 +44,7 @@ public class DivaMixedRecordStorageTest {
 	private RecordStorageSpy userStorage;
 	private RecordStorageSpy databaseRecordStorage;
 	private DatabaseStorageProviderSpy databaseStorageProvider;
-	private ClassicFedoraUpdaterFactory fedoraUpdaterFactory;
+	private ClassicFedoraUpdaterFactorySpy fedoraUpdaterFactory;
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -471,7 +470,17 @@ public class DivaMixedRecordStorageTest {
 
 	@Test
 	public void updatePersonCallsUpdateForFedora() {
+		DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
+		divaMixedRecordStorage.update("person", "someId", dataGroup,
+				new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
+				"someDataDivider");
 
+		assertEquals(fedoraUpdaterFactory.recordType, "person");
+
+		ClassicFedoraUpdaterSpy factoredFedoraUpdater = fedoraUpdaterFactory.factoredFedoraUpdater;
+		assertEquals(factoredFedoraUpdater.recordType, "person");
+		assertEquals(factoredFedoraUpdater.recordId, "someId");
+		assertSame(factoredFedoraUpdater.dataGroup, dataGroup);
 	}
 
 	@Test

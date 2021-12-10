@@ -23,9 +23,15 @@ import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
 
 public class ClassicFedoraUpdaterSpy implements ClassicFedoraUpdater {
 
+	public String recordType;
+	public String recordId;
+	public DataGroup dataGroup;
+
 	@Override
 	public void updateInFedora(String recordType, String recordId, DataGroup dataGroup) {
-		// TODO Auto-generated method stub
+		this.recordType = recordType;
+		this.recordId = recordId;
+		this.dataGroup = dataGroup;
 
 	}
 

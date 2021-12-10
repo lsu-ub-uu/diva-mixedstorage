@@ -28,16 +28,17 @@ public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdaterFacto
 
 	private HttpHandlerFactory httpHandlerFactory;
 	// private DivaFedoraConverterFactory toFedoraConverterFactory;
-	private String baseUrl;
+	private String fedoraUrl;
 	private String username;
 	private String password;
+	private RepeatableRelatedLinkCollector repeatableLinkCollector;
 
 	public ClassicFedoraUpdaterFactoryImp(HttpHandlerFactory httpHandlerFactory,
-			DivaFedoraConverterFactory toFedoraConverterFactory, String baseUrl, String username,
-			String password) {
+			RepeatableRelatedLinkCollector repeatableLinkCollector, String fedoraUrl,
+			String username, String password) {
 		this.httpHandlerFactory = httpHandlerFactory;
-		// this.toFedoraConverterFactory = toFedoraConverterFactory;
-		this.baseUrl = baseUrl;
+		this.repeatableLinkCollector = repeatableLinkCollector;
+		this.fedoraUrl = fedoraUrl;
 		this.username = username;
 		this.password = password;
 	}
@@ -45,16 +46,39 @@ public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdaterFacto
 	@Override
 	public ClassicFedoraUpdater factor(String recordType) {
 		if ("person".equals(recordType)) {
-			CoraTransformationFactory transformerFactory = new XsltTransformationFactory();
-			RepeatableRelatedLinkCollector linkCollector;
-			DivaFedoraConverterFactory divaFedoraConverterFactory = DivaFedoraConverterFactoryImp
-					.usingFedoraURLAndTransformerFactory(baseUrl, transformerFactory, null);
+			DivaFedoraConverterFactory divaFedoraConverterFactory = createDivaFedoraConverterFactory();
 
 			return new ClassicFedoraPersonUpdater(httpHandlerFactory, divaFedoraConverterFactory,
-					baseUrl, username, password);
+					fedoraUrl, username, password);
 		}
 		throw NotImplementedException
 				.withMessage("Factor ClassicFedoraUpdater not implemented for " + recordType);
+	}
+
+	private DivaFedoraConverterFactory createDivaFedoraConverterFactory() {
+		CoraTransformationFactory transformerFactory = new XsltTransformationFactory();
+		return DivaFedoraConverterFactoryImp.usingFedoraURLAndTransformerFactory(fedoraUrl,
+				transformerFactory, repeatableLinkCollector);
+	}
+
+	public HttpHandlerFactory getHttpHandlerFactory() {
+		return httpHandlerFactory;
+	}
+
+	public String getFedoraUrl() {
+		return fedoraUrl;
+	}
+
+	public String getUserName() {
+		return username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public RepeatableRelatedLinkCollector getRepeatableRelatedLinkCollector() {
+		return repeatableLinkCollector;
 	}
 
 }

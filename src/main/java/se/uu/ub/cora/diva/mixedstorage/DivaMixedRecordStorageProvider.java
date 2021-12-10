@@ -29,10 +29,17 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedLinkCollectorFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedLinkCollectorFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollectorImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
+import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
+import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactoryImp;
 import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.gatekeeper.user.UserStorageProvider;
+import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
@@ -100,10 +107,28 @@ public class DivaMixedRecordStorageProvider
 		databaseStorageProvider.startUsingInitInfo(initInfo);
 		DatabaseRecordStorage recordStorage = databaseStorageProvider.getRecordStorage();
 
+		ClassicFedoraUpdaterFactory fedoraUpdaterFactory = createClassicFedoraUpdaterFactory(
+				recordStorage);
+
 		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
-						classicDbStorage, userStorage, recordStorage, null);
+						classicDbStorage, userStorage, recordStorage, fedoraUpdaterFactory);
 		setStaticInstance(mixedRecordStorage);
+	}
+
+	private ClassicFedoraUpdaterFactory createClassicFedoraUpdaterFactory(
+			DatabaseRecordStorage recordStorage) {
+		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
+
+		RelatedLinkCollectorFactory linkCollectorFactory = new RelatedLinkCollectorFactoryImp(
+				recordStorage);
+		RepeatableRelatedLinkCollector repeatableLinkCollector = new RepeatableRelatedLinkCollectorImp(
+				linkCollectorFactory);
+		String fedoraURL = tryToGetInitParameterLogIfFound("fedoraURL");
+		String fedoraUsername = tryToGetInitParameter("fedoraUsername");
+		String fedoraPassword = tryToGetInitParameter("fedoraPassword");
+		return new ClassicFedoraUpdaterFactoryImp(httpHandlerFactory, repeatableLinkCollector,
+				fedoraURL, fedoraUsername, fedoraPassword);
 	}
 
 	private RecordStorage createBasicStorage() {
