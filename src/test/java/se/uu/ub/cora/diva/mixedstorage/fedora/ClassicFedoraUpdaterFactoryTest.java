@@ -29,7 +29,7 @@ import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 public class ClassicFedoraUpdaterFactoryTest {
 
 	private HttpHandlerFactorySpy httpHandlerFactory;
-	private ClassicFedoraUpdateFactory factory;
+	private ClassicFedoraUpdaterFactory factory;
 	private DivaFedoraConverterFactory toFedoraConverterFactory;
 	private String baseUrl = "someBaseUrl";
 	private String username = "someUserName";

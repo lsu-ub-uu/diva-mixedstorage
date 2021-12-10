@@ -21,7 +21,6 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollector;
-import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollectorImp;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 
@@ -31,16 +30,21 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	private static final String PERSON_DOMAIN_PART_XSLT_PATH = "person/coraPersonDomainPart.xsl";
 	private String fedoraURL;
 	private CoraTransformationFactory coraTransformationFactory;
+	private RepeatableRelatedLinkCollector repeatableLinkCollector;
 
 	public static DivaFedoraConverterFactoryImp usingFedoraURLAndTransformerFactory(
-			String fedoraURL, CoraTransformationFactory transformationFactory) {
-		return new DivaFedoraConverterFactoryImp(fedoraURL, transformationFactory);
+			String fedoraURL, CoraTransformationFactory transformationFactory,
+			RepeatableRelatedLinkCollector repeatableLinkCollector) {
+		return new DivaFedoraConverterFactoryImp(fedoraURL, transformationFactory,
+				repeatableLinkCollector);
 	}
 
 	private DivaFedoraConverterFactoryImp(String fedoraURL,
-			CoraTransformationFactory coraTransformationFactory) {
+			CoraTransformationFactory coraTransformationFactory,
+			RepeatableRelatedLinkCollector repeatableLinkCollector) {
 		this.fedoraURL = fedoraURL;
 		this.coraTransformationFactory = coraTransformationFactory;
+		this.repeatableLinkCollector = repeatableLinkCollector;
 	}
 
 	@Override
@@ -62,11 +66,8 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	@Override
 	public DivaCoraToFedoraConverter factorToFedoraConverter(String type) {
 		if ("person".equals(type)) {
-			// RelatedLinkCollectorFactory collectorFactory = new
-			// RelatedLinkCollectorFactoryImp(null)
-			RepeatableRelatedLinkCollector repeatableLinkCollector = new RepeatableRelatedLinkCollectorImp(
-					null);
-			return new DivaCoraToFedoraPersonConverter(coraTransformationFactory, null);
+			return new DivaCoraToFedoraPersonConverter(coraTransformationFactory,
+					repeatableLinkCollector);
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}

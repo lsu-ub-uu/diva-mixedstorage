@@ -16,10 +16,17 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.fedora;
+package se.uu.ub.cora.diva.mixedstorage;
 
-public interface ClassicFedoraUpdateFactory {
+import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
 
-	ClassicFedoraUpdater factor(String recordType);
+public class ClassicFedoraUpdaterSpy implements ClassicFedoraUpdater {
+
+	@Override
+	public void updateInFedora(String recordType, String recordId, DataGroup dataGroup) {
+		// TODO Auto-generated method stub
+
+	}
 
 }

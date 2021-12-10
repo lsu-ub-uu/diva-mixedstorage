@@ -102,7 +102,7 @@ public class DivaMixedRecordStorageProvider
 
 		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
-						classicDbStorage, userStorage, recordStorage);
+						classicDbStorage, userStorage, recordStorage, null);
 		setStaticInstance(mixedRecordStorage);
 	}
 

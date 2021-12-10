@@ -19,12 +19,15 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
+import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
+import se.uu.ub.cora.xmlutils.transformer.XsltTransformationFactory;
 
-public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdateFactory {
+public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdaterFactory {
 
 	private HttpHandlerFactory httpHandlerFactory;
-	private DivaFedoraConverterFactory toFedoraConverterFactory;
+	// private DivaFedoraConverterFactory toFedoraConverterFactory;
 	private String baseUrl;
 	private String username;
 	private String password;
@@ -33,7 +36,7 @@ public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdateFactor
 			DivaFedoraConverterFactory toFedoraConverterFactory, String baseUrl, String username,
 			String password) {
 		this.httpHandlerFactory = httpHandlerFactory;
-		this.toFedoraConverterFactory = toFedoraConverterFactory;
+		// this.toFedoraConverterFactory = toFedoraConverterFactory;
 		this.baseUrl = baseUrl;
 		this.username = username;
 		this.password = password;
@@ -42,7 +45,12 @@ public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdateFactor
 	@Override
 	public ClassicFedoraUpdater factor(String recordType) {
 		if ("person".equals(recordType)) {
-			return new ClassicFedoraPersonUpdater(httpHandlerFactory, toFedoraConverterFactory,
+			CoraTransformationFactory transformerFactory = new XsltTransformationFactory();
+			RepeatableRelatedLinkCollector linkCollector;
+			DivaFedoraConverterFactory divaFedoraConverterFactory = DivaFedoraConverterFactoryImp
+					.usingFedoraURLAndTransformerFactory(baseUrl, transformerFactory, null);
+
+			return new ClassicFedoraPersonUpdater(httpHandlerFactory, divaFedoraConverterFactory,
 					baseUrl, username, password);
 		}
 		throw NotImplementedException

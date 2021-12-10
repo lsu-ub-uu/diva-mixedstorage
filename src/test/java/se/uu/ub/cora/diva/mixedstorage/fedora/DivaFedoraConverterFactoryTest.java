@@ -27,17 +27,21 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollector;
 
 public class DivaFedoraConverterFactoryTest {
 	private DivaFedoraConverterFactoryImp divaToCoraConverterFactoryImp;
 	private String fedoraURL = "someFedoraUrl";
 	private TransformationFactorySpy transformationFactory;
+	private RepeatableRelatedLinkCollector repeatableLinkCollector;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		transformationFactory = new TransformationFactorySpy();
+		repeatableLinkCollector = new RepeatableLinkCollectorSpy();
 		divaToCoraConverterFactoryImp = DivaFedoraConverterFactoryImp
-				.usingFedoraURLAndTransformerFactory(fedoraURL, transformationFactory);
+				.usingFedoraURLAndTransformerFactory(fedoraURL, transformationFactory,
+						repeatableLinkCollector);
 	}
 
 	@Test
@@ -97,11 +101,8 @@ public class DivaFedoraConverterFactoryTest {
 		DivaCoraToFedoraPersonConverter converter = (DivaCoraToFedoraPersonConverter) divaToCoraConverterFactoryImp
 				.factorToFedoraConverter("person");
 		assertSame(converter.getTransformationFactory(), transformationFactory);
-		// new DomainPartOrganisationCollector(dbStorage);
-		// new RepeatbleRelatedLinkCollector(DomainPartOrganisationCollector);
-		// behöver en factory nånstans
-		// assertTrue(converter.getRepeatbleRelatedLinkCollector() instanceof)
-		// assertEquals(converter.getFedorURL(), fedoraURL);
+
+		assertSame(converter.getRepeatbleRelatedLinkCollector(), repeatableLinkCollector);
 	}
 
 	@Test
