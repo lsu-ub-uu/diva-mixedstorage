@@ -28,8 +28,8 @@
 		<storage.version>5.2.0</storage.version>
 		<searchstorage.version>3.10.0</searchstorage.version>
 		<basicstorage.version>5.3.0</basicstorage.version>
-		<sqldatabase.version>5.1.0</sqldatabase.version>
-		<sqlstorage.version>1.1.0</sqlstorage.version>
+		<sqldatabase.version>6.0.0</sqldatabase.version>
+		<sqlstorage.version>1.2.0</sqlstorage.version>
 		<httphandler.version>2.4.0</httphandler.version>
 		<apptokenstorage.version>2.4.0</apptokenstorage.version>
 		<gatekeeper.version>3.10.0</gatekeeper.version>
