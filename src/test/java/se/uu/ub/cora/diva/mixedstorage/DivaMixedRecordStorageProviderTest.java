@@ -336,6 +336,7 @@ public class DivaMixedRecordStorageProviderTest {
 				.getRelatedLinkCollectorFactory();
 
 		assertSame(linkCollectorFactory.getRecordStorage(), recordStorage.getDatabaseStorage());
+		assertSame(linkCollectorFactory.getClassicDbStorage(), recordStorage.getClassicDbStorage());
 
 	}
 

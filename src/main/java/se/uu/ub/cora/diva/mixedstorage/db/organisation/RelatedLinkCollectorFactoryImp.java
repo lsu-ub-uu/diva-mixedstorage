@@ -24,21 +24,28 @@ import se.uu.ub.cora.storage.RecordStorage;
 public class RelatedLinkCollectorFactoryImp implements RelatedLinkCollectorFactory {
 
 	private RecordStorage recordStorage;
+	private RecordStorage classicDbStorage;
 
-	public RelatedLinkCollectorFactoryImp(RecordStorage recordStorage) {
+	public RelatedLinkCollectorFactoryImp(RecordStorage recordStorage,
+			RecordStorage classicDbStorage) {
 		this.recordStorage = recordStorage;
+		this.classicDbStorage = classicDbStorage;
 	}
 
 	@Override
 	public RelatedLinkCollector factor(String type) {
 		if ("personDomainPart".equals(type)) {
-			return new DomainPartOrganisationCollector(recordStorage);
+			return new DomainPartOrganisationCollector(recordStorage, classicDbStorage);
 		}
 		throw NotImplementedException.withMessage("Factor not implemented for type otherType");
 	}
 
 	public RecordStorage getRecordStorage() {
 		return recordStorage;
+	}
+
+	public RecordStorage getClassicDbStorage() {
+		return classicDbStorage;
 	}
 
 }

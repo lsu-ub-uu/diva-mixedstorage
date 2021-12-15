@@ -108,7 +108,7 @@ public class DivaMixedRecordStorageProvider
 		DatabaseRecordStorage recordStorage = databaseStorageProvider.getRecordStorage();
 
 		ClassicFedoraUpdaterFactory fedoraUpdaterFactory = createClassicFedoraUpdaterFactory(
-				recordStorage);
+				recordStorage, classicDbStorage);
 
 		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
 				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
@@ -117,11 +117,11 @@ public class DivaMixedRecordStorageProvider
 	}
 
 	private ClassicFedoraUpdaterFactory createClassicFedoraUpdaterFactory(
-			DatabaseRecordStorage recordStorage) {
+			DatabaseRecordStorage recordStorage, DivaDbRecordStorage classicDbStorage) {
 		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
 
 		RelatedLinkCollectorFactory linkCollectorFactory = new RelatedLinkCollectorFactoryImp(
-				recordStorage);
+				recordStorage, classicDbStorage);
 		RepeatableRelatedLinkCollector repeatableLinkCollector = new RepeatableRelatedLinkCollectorImp(
 				linkCollectorFactory);
 		String fedoraURL = tryToGetInitParameterLogIfFound("fedoraURL");

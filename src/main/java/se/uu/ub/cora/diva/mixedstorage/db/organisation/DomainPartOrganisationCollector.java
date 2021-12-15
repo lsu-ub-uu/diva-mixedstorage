@@ -28,18 +28,34 @@ import se.uu.ub.cora.storage.RecordStorage;
 public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 
 	private RecordStorage dbStorage;
+	private RecordStorage classicDbStorage;
 
-	public DomainPartOrganisationCollector(RecordStorage dbStorage) {
+	public DomainPartOrganisationCollector(RecordStorage dbStorage,
+			RecordStorage classicDbStorage) {
 		this.dbStorage = dbStorage;
+		this.classicDbStorage = classicDbStorage;
 	}
 
 	@Override
-	public Map<String, DataGroup> collectLinks(DataGroup personDomainPart) {
-		List<DataGroup> affiliations = personDomainPart.getAllGroupsWithNameInData("affiliation");
-
+	public Map<String, DataGroup> collectLinks(DataGroup personDomainPartLink) {
 		Map<String, DataGroup> collectedDataGroupsFromLinks = new HashMap<>();
+		DataGroup personDomainPart = readPersonDomainPart(personDomainPartLink);
+		collectedDataGroupsFromLinks.put(getDomainPartId(personDomainPartLink), personDomainPart);
+
+		List<DataGroup> affiliations = personDomainPart.getAllGroupsWithNameInData("affiliation");
 		collectLinksFromAffiliations(collectedDataGroupsFromLinks, affiliations);
 		return collectedDataGroupsFromLinks;
+	}
+
+	private DataGroup readPersonDomainPart(DataGroup personDomainPartLink) {
+		String linkedRecordType = personDomainPartLink
+				.getFirstAtomicValueWithNameInData("linkedRecordType");
+		String linkedRecordId = getDomainPartId(personDomainPartLink);
+		return dbStorage.read(linkedRecordType, linkedRecordId);
+	}
+
+	private String getDomainPartId(DataGroup personDomainPartLink) {
+		return personDomainPartLink.getFirstAtomicValueWithNameInData("linkedRecordId");
 	}
 
 	private void collectLinksFromAffiliations(Map<String, DataGroup> collectedLinks,
@@ -52,7 +68,7 @@ public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 	private void collectLinkFromAffiliation(Map<String, DataGroup> collectedLinks,
 			DataGroup affiliation) {
 		String organisationId = extractId(affiliation);
-		DataGroup readOrganisation = dbStorage.read("organisation", organisationId);
+		DataGroup readOrganisation = classicDbStorage.read("organisation", organisationId);
 		collectedLinks.put(organisationId, readOrganisation);
 		possiblyAddParents(collectedLinks, readOrganisation);
 	}
@@ -73,5 +89,9 @@ public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 
 	RecordStorage getDbStorage() {
 		return dbStorage;
+	}
+
+	RecordStorage getClassicDbStorage() {
+		return classicDbStorage;
 	}
 }

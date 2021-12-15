@@ -30,12 +30,14 @@ import se.uu.ub.cora.storage.RecordStorage;
 public class RelatedLinkCollectorFactoryTest {
 
 	private RecordStorage recordStorage;
+	private RecordStorage classicDbStorage;
 	private RelatedLinkCollectorFactoryImp factory;
 
 	@BeforeMethod
 	public void setUp() {
 		recordStorage = new DbStorageSpy();
-		factory = new RelatedLinkCollectorFactoryImp(recordStorage);
+		classicDbStorage = new DbStorageSpy();
+		factory = new RelatedLinkCollectorFactoryImp(recordStorage, classicDbStorage);
 	}
 
 	@Test
@@ -43,6 +45,7 @@ public class RelatedLinkCollectorFactoryTest {
 		DomainPartOrganisationCollector linkCollector = (DomainPartOrganisationCollector) factory
 				.factor("personDomainPart");
 		assertSame(linkCollector.getDbStorage(), recordStorage);
+		assertSame(linkCollector.getClassicDbStorage(), classicDbStorage);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

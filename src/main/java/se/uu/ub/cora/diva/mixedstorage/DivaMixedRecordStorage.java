@@ -190,7 +190,12 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			return linkExistInDbStorage(type, id);
 		}
 		if (USER.equals(type) || CORA_USER.equals(type)) {
-			return linkExistInUserStorage(type, id) || linkExistInBasicStorage(type, id);
+			return true;
+			// return linkExistInUserStorage(type, id) || linkExistInBasicStorage(type, id);
+		}
+		if (PERSON_DOMAIN_PART.equals(type)) {
+			return databaseStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type,
+					id);
 		}
 		return linkExistInBasicStorage(type, id);
 	}
