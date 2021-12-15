@@ -21,9 +21,25 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.storage.RecordStorage;
 
-public interface RelatedLinkCollector {
+public class OrganisationCollector implements RelatedLinkCollector {
 
-	Map<String, Map<String, DataGroup>> collectLinks(DataGroup dataGroup);
+	private RecordStorage dbStorage;
+
+	public OrganisationCollector(RecordStorage dbStorage) {
+		this.dbStorage = dbStorage;
+	}
+
+	@Override
+	public Map<String, DataGroup> collectLinks(DataGroup dataGroup) {
+		// TODO Auto-generated method stub
+		return null;
+
+	}
+
+	RecordStorage getDbStorage() {
+		return dbStorage;
+	}
 
 }

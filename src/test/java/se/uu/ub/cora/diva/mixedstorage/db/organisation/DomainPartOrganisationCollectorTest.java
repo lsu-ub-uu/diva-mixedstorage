@@ -57,14 +57,19 @@ public class DomainPartOrganisationCollectorTest {
 		coraDbStorage.dataGroupsToReturn.put("personDomainPart_authority-person:111:test",
 				personDomainPart);
 
-		Map<String, DataGroup> links = collector.collectLinks(personDomainPartLink);
+		Map<String, Map<String, DataGroup>> links = collector.collectLinks(personDomainPartLink);
 		assertEquals(coraDbStorage.ids.get(0), "authority-person:111:test");
 		assertEquals(coraDbStorage.types.get(0), "personDomainPart");
 		assertCorrectReadOrganisation(0, "56");
 
 		DataGroup returnedOrganisation = classicDbStorage.returnedDataGroups.get(0);
-		assertSame(links.get("56"), returnedOrganisation);
-		assertSame(links.get("authority-person:111:test"), coraDbStorage.returnedDataGroups.get(0));
+		Map<String, DataGroup> organisationCollection = links.get("organisation");
+
+		assertSame(organisationCollection.get("56"), returnedOrganisation);
+
+		Map<String, DataGroup> personDomainPartCollection = links.get("personDomainPart");
+		assertSame(personDomainPartCollection.get("authority-person:111:test"),
+				coraDbStorage.returnedDataGroups.get(0));
 
 	}
 
@@ -99,7 +104,7 @@ public class DomainPartOrganisationCollectorTest {
 
 		setUpDbStorgageToReturnParentAndGrandParent();
 
-		Map<String, DataGroup> links = collector.collectLinks(personDomainPartLink);
+		Map<String, Map<String, DataGroup>> links = collector.collectLinks(personDomainPartLink);
 		assertEquals(coraDbStorage.ids.get(0), "authority-person:111:test");
 		assertEquals(coraDbStorage.types.get(0), "personDomainPart");
 
@@ -108,10 +113,15 @@ public class DomainPartOrganisationCollectorTest {
 		assertCorrectReadOrganisation(2, "256");
 
 		List<DataGroup> returnedDataGroups = classicDbStorage.returnedDataGroups;
-		assertSame(links.get("56"), returnedDataGroups.get(0));
-		assertSame(links.get("156"), classicDbStorage.returnedDataGroups.get(1));
-		assertSame(links.get("256"), classicDbStorage.returnedDataGroups.get(2));
-		assertSame(links.get("authority-person:111:test"), coraDbStorage.returnedDataGroups.get(0));
+		Map<String, DataGroup> organisationCollection = links.get("organisation");
+
+		assertSame(organisationCollection.get("56"), returnedDataGroups.get(0));
+		assertSame(organisationCollection.get("156"), classicDbStorage.returnedDataGroups.get(1));
+		assertSame(organisationCollection.get("256"), classicDbStorage.returnedDataGroups.get(2));
+
+		Map<String, DataGroup> personDomainPartCollection = links.get("personDomainPart");
+		assertSame(personDomainPartCollection.get("authority-person:111:test"),
+				coraDbStorage.returnedDataGroups.get(0));
 	}
 
 	private void assertCorrectReadOrganisation(int index, String organisationId) {
@@ -153,17 +163,24 @@ public class DomainPartOrganisationCollectorTest {
 		createOrganisationWithParentAndPutInSpy("organisation_56", "156");
 		createOrganisationWithParentAndPutInSpy("organisation_57", "156");
 
-		Map<String, DataGroup> links = collector.collectLinks(personDomainPartLink);
-		assertEquals(links.size(), 4);
+		Map<String, Map<String, DataGroup>> links = collector.collectLinks(personDomainPartLink);
+		assertEquals(links.size(), 2);
 		assertCorrectReadOrganisation(0, "56");
 		assertCorrectReadOrganisation(1, "156");
 		assertCorrectReadOrganisation(2, "57");
 		assertCorrectReadOrganisation(3, "156");
 
 		List<DataGroup> returnedDataGroups = classicDbStorage.returnedDataGroups;
-		assertSame(links.get("56"), returnedDataGroups.get(0));
-		assertSame(links.get("57"), classicDbStorage.returnedDataGroups.get(2));
-		assertSame(links.get("156"), classicDbStorage.returnedDataGroups.get(3));
-		assertSame(links.get("authority-person:111:test"), coraDbStorage.returnedDataGroups.get(0));
+		Map<String, DataGroup> organisationCollection = links.get("organisation");
+		assertEquals(organisationCollection.size(), 3);
+
+		assertSame(organisationCollection.get("56"), returnedDataGroups.get(0));
+		assertSame(organisationCollection.get("57"), classicDbStorage.returnedDataGroups.get(2));
+		assertSame(organisationCollection.get("156"), classicDbStorage.returnedDataGroups.get(3));
+
+		Map<String, DataGroup> personDomainPartCollection = links.get("personDomainPart");
+		assertEquals(personDomainPartCollection.size(), 1);
+		assertSame(personDomainPartCollection.get("authority-person:111:test"),
+				coraDbStorage.returnedDataGroups.get(0));
 	}
 }
