@@ -22,11 +22,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import se.uu.ub.cora.data.DataGroup;
+
 public class RelatedLinkCollectorFactorySpy implements RelatedLinkCollectorFactory {
 
 	public RelatedLinkCollectorSpy returnedLinkCollector;
 
 	public Map<Integer, List<String>> idsForDataGroupsToReturnForIndex = new HashMap<>();
+	public Map<Integer, Map<String, Map<String, DataGroup>>> mapsToReturnFromCollectorSpy = new HashMap<>();
+
 	public String type;
 
 	@Override
@@ -34,6 +38,7 @@ public class RelatedLinkCollectorFactorySpy implements RelatedLinkCollectorFacto
 		this.type = type;
 		returnedLinkCollector = new RelatedLinkCollectorSpy();
 		returnedLinkCollector.idsForDataGroupsToReturnForIndex = idsForDataGroupsToReturnForIndex;
+		returnedLinkCollector.mapsToReturn = mapsToReturnFromCollectorSpy;
 		return returnedLinkCollector;
 	}
 

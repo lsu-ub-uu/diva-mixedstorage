@@ -19,6 +19,8 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import se.uu.ub.cora.converter.Converter;
 import se.uu.ub.cora.converter.ConverterProvider;
@@ -57,18 +59,27 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 	private void convertRelatedLinksDataGroupsToXml(DataGroup dataGroup, Converter converter,
 			StringBuilder combinedXml) {
-		List<DataGroup> collectedLinks = collectLinksForPersonDomainParts(dataGroup);
-		for (DataGroup collectedLinkDataGroup : collectedLinks) {
-			String relatedXml = converter.convert(collectedLinkDataGroup);
-			String strippedXml = removeStartingXMLTag(relatedXml);
-			combinedXml.append(strippedXml);
+		Map<String, List<DataGroup>> collectedLinks = collectLinksForPersonDomainParts(dataGroup);
+
+		for (Entry<String, List<DataGroup>> entry : collectedLinks.entrySet()) {
+			combinedXml.append("<").append(entry.getKey()).append(">");
+			for (DataGroup collectedLinkDataGroup : entry.getValue()) {
+				String relatedXml = converter.convert(collectedLinkDataGroup);
+				String strippedXml = removeStartingXMLTag(relatedXml);
+				combinedXml.append(strippedXml);
+			}
+			combinedXml.append("</").append(entry.getKey()).append(">");
+
 		}
+
 	}
 
-	private List<DataGroup> collectLinksForPersonDomainParts(DataGroup dataGroup) {
+	private Map<String, List<DataGroup>> collectLinksForPersonDomainParts(DataGroup dataGroup) {
 		List<DataGroup> personDomainParts = dataGroup
 				.getAllGroupsWithNameInData("personDomainPart");
-		return repeatbleRelatedLinkCollector.collectLinks(personDomainParts);
+		Map<String, List<DataGroup>> collectLinks = repeatbleRelatedLinkCollector
+				.collectLinks(personDomainParts);
+		return collectLinks;
 	}
 
 	private String removeStartingXMLTag(String xml) {

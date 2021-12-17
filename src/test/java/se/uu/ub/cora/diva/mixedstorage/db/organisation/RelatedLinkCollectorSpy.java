@@ -24,28 +24,30 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 
 public class RelatedLinkCollectorSpy implements RelatedLinkCollector {
 
 	public List<DataGroup> linksSentIn = new ArrayList<>();
 	public Map<Integer, List<String>> idsForDataGroupsToReturnForIndex = new HashMap<>();
+	public Map<Integer, Map<String, Map<String, DataGroup>>> mapsToReturn = new HashMap<>();
 	private int callIndex = 0;
 
 	@Override
-	public Map<String, DataGroup> collectLinks(DataGroup personDomainPart) {
+	public Map<String, Map<String, DataGroup>> collectLinks(DataGroup personDomainPart) {
 		linksSentIn.add(personDomainPart);
-
-		Map<String, DataGroup> dataGroupsToReturn = new HashMap<>();
-		if (idsForDataGroupsToReturnForIndex.containsKey(callIndex)) {
-			List<String> idList = idsForDataGroupsToReturnForIndex.get(callIndex);
-			for (String id : idList) {
-				dataGroupsToReturn.put(id, new DataGroupSpy("organisation"));
-			}
-		}
-
+		Map<String, Map<String, DataGroup>> mapToReturn = mapsToReturn.get(callIndex);
 		callIndex++;
-		return dataGroupsToReturn;
+		return mapToReturn;
+
+		// Map<String, DataGroup> dataGroupsToReturn = new HashMap<>();
+		// if (idsForDataGroupsToReturnForIndex.containsKey(callIndex)) {
+		// List<String> idList = idsForDataGroupsToReturnForIndex.get(callIndex);
+		// for (String id : idList) {
+		// dataGroupsToReturn.put(id, new DataGroupSpy("organisation"));
+		// }
+		// }
+
+		// return dataGroupsToReturn;
 	}
 
 }

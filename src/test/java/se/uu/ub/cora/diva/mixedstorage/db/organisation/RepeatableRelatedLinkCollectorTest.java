@@ -19,9 +19,11 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,54 +39,116 @@ public class RepeatableRelatedLinkCollectorTest {
 
 	private RelatedLinkCollectorFactorySpy relatedlinkCollectorFactory;
 	private RepeatableRelatedLinkCollector repeatableCollector;
+	private Map<Integer, Map<String, Map<String, DataGroup>>> answerFromSpy;
+	private Map<String, Map<String, DataGroup>> firstAnswer;
+	private Map<String, Map<String, DataGroup>> secondAnswer;
+	private Map<String, Map<String, DataGroup>> thirdAnswer;
 
 	@BeforeMethod
 	public void setUp() {
 		relatedlinkCollectorFactory = new RelatedLinkCollectorFactorySpy();
+		setUpAnswerFromSpy();
 		repeatableCollector = new RepeatableRelatedLinkCollectorImp(relatedlinkCollectorFactory);
+	}
 
+	private void setUpAnswerFromSpy() {
+		answerFromSpy = new HashMap<>();
+
+		firstAnswer = new HashMap<>();
+		Map<String, DataGroup> personDomainPartMap = new HashMap<>();
+		personDomainPartMap.put("personDomainPart0", new DataGroupSpy("personDomainPart0"));
+		firstAnswer.put("personDomainPart", personDomainPartMap);
+		answerFromSpy.put(0, firstAnswer);
+
+		secondAnswer = new HashMap<>();
+		Map<String, DataGroup> personDomainPartMap2 = new HashMap<>();
+		personDomainPartMap2.put("personDomainPart1", new DataGroupSpy("personDomainPart1"));
+		secondAnswer.put("personDomainPart", personDomainPartMap2);
+		setUpOrganisations(secondAnswer, "56", "156", "256");
+		answerFromSpy.put(1, secondAnswer);
+
+		thirdAnswer = new HashMap<>();
+		Map<String, DataGroup> personDomainPartMap3 = new HashMap<>();
+		personDomainPartMap3.put("personDomainPart2", new DataGroupSpy("personDomainPart2"));
+		thirdAnswer.put("personDomainPart", personDomainPartMap3);
+		setUpOrganisations(thirdAnswer, "256", "356", "456");
+		answerFromSpy.put(2, thirdAnswer);
+
+		relatedlinkCollectorFactory.mapsToReturnFromCollectorSpy = answerFromSpy;
+	}
+
+	private void setUpOrganisations(Map<String, Map<String, DataGroup>> answer, String... ids) {
+		Map<String, DataGroup> organisations = new HashMap<>();
+		for (String id : ids) {
+			organisations.put(id, new DataGroupSpy("organisation"));
+		}
+		answer.put("organisation", organisations);
 	}
 
 	@Test
 	public void testCollectLinksEmptyListIn() {
-		List<DataGroup> linksAsDataGroups = repeatableCollector
+		Map<String, List<DataGroup>> linksAsDataGroups = repeatableCollector
 				.collectLinks(Collections.emptyList());
 
-		assertEquals(linksAsDataGroups.size(), 0);
+		assertTrue(linksAsDataGroups.isEmpty());
 	}
 
 	@Test
-	public void testCollectLinksNoReturnedGroupsFromCollector() {
+	public void testCollectLinksOnlyPersonDomainPartReturnedFromCollector() {
 		relatedlinkCollectorFactory.idsForDataGroupsToReturnForIndex = new HashMap<>();
-		List<DataGroup> groupsContainingLinks = createListOfLinks();
 
-		List<DataGroup> linksAsDataGroups = repeatableCollector.collectLinks(groupsContainingLinks);
+		Map<String, List<DataGroup>> linksAsDataGroups = repeatableCollector
+				.collectLinks(createListOfLinks(1));
 
 		assertEquals(relatedlinkCollectorFactory.type, "personDomainPart");
+
 		RelatedLinkCollectorSpy linkCollector = relatedlinkCollectorFactory.returnedLinkCollector;
-		assertEquals(linkCollector.linksSentIn.size(), 3);
-		assertEquals(linksAsDataGroups.size(), 0);
+		assertEquals(linkCollector.linksSentIn.size(), 1);
+
+		assertEquals(linksAsDataGroups.get("personDomainParts").size(), 1);
+		assertSame(linksAsDataGroups.get("personDomainParts").get(0),
+				firstAnswer.get("personDomainPart").get("personDomainPart0"));
+		assertNull(linksAsDataGroups.get("organisation"));
 
 	}
 
 	@Test
-	public void testCollectLinks() {
-		createResponseToReturnFromSpy();
-		List<DataGroup> groupsContainingLinks = createListOfLinks();
+	public void testCollectLinksTwoRecordTypes() {
+		List<DataGroup> groupsContainingLinks = createListOfLinks(2);
 
-		List<DataGroup> linksAsDataGroups = repeatableCollector.collectLinks(groupsContainingLinks);
+		Map<String, List<DataGroup>> linksAsDataGroups = repeatableCollector
+				.collectLinks(groupsContainingLinks);
 
 		RelatedLinkCollectorSpy linkCollector = relatedlinkCollectorFactory.returnedLinkCollector;
-		assertEquals(linkCollector.linksSentIn.size(), 3);
-		assertEquals(linksAsDataGroups.size(), 7);
+		assertEquals(linkCollector.linksSentIn.size(), 2);
+		assertEquals(linksAsDataGroups.get("personDomainPart").size(), 2);
+
+		assertSame(linksAsDataGroups.get("personDomainPart").get(0),
+				firstAnswer.get("personDomainPart").get("personDomainPart0"));
+
+		assertSame(linksAsDataGroups.get("personDomainPart").get(1),
+				secondAnswer.get("personDomainPart").get("personDomainPart1"));
+
+		assertCorrectOrganisationsFromSecondDataGroup(linksAsDataGroups);
 
 	}
 
-	private List<DataGroup> createListOfLinks() {
+	private void assertCorrectOrganisationsFromSecondDataGroup(
+			Map<String, List<DataGroup>> linksAsDataGroups) {
+		List<DataGroup> organisationList = linksAsDataGroups.get("organisation");
+		assertEquals(organisationList.size(), 3);
+		assertSame(organisationList.get(0), secondAnswer.get("organisation").get("56"));
+		assertSame(linksAsDataGroups.get("organisation").get(1),
+				secondAnswer.get("organisation").get("156"));
+		assertSame(linksAsDataGroups.get("organisation").get(2),
+				secondAnswer.get("organisation").get("256"));
+	}
+
+	private List<DataGroup> createListOfLinks(int numOfLinks) {
 		List<DataGroup> groupsContainingLinks = new ArrayList<>();
-		addDataGroup(groupsContainingLinks);
-		addDataGroup(groupsContainingLinks);
-		addDataGroup(groupsContainingLinks);
+		for (int i = 0; i < numOfLinks; i++) {
+			addDataGroup(groupsContainingLinks);
+		}
 		return groupsContainingLinks;
 	}
 
@@ -93,11 +157,45 @@ public class RepeatableRelatedLinkCollectorTest {
 		groupsContainingLinks.add(dataGroupSpy);
 	}
 
-	private void createResponseToReturnFromSpy() {
-		Map<Integer, List<String>> dataGroupsToReturnFromSpy = new HashMap<>();
-		dataGroupsToReturnFromSpy.put(0, Arrays.asList("56", "45", "34"));
-		dataGroupsToReturnFromSpy.put(1, Arrays.asList("156", "145", "134"));
-		dataGroupsToReturnFromSpy.put(2, Arrays.asList("56", "45", "234"));
-		relatedlinkCollectorFactory.idsForDataGroupsToReturnForIndex = dataGroupsToReturnFromSpy;
+	@Test
+	public void testCollectLinksDuplicateOrganisations() {
+		List<DataGroup> groupsContainingLinks = createListOfLinks(3);
+
+		Map<String, List<DataGroup>> linksAsDataGroups = repeatableCollector
+				.collectLinks(groupsContainingLinks);
+
+		RelatedLinkCollectorSpy linkCollector = relatedlinkCollectorFactory.returnedLinkCollector;
+		assertEquals(linkCollector.linksSentIn.size(), 3);
+		List<DataGroup> personDomainPartList = linksAsDataGroups.get("personDomainPart");
+		assertEquals(personDomainPartList.size(), 3);
+
+		assertTrue(personDomainPartList
+				.contains(firstAnswer.get("personDomainPart").get("personDomainPart0")));
+		assertTrue(personDomainPartList
+				.contains(secondAnswer.get("personDomainPart").get("personDomainPart1")));
+		assertTrue(personDomainPartList
+				.contains(thirdAnswer.get("personDomainPart").get("personDomainPart2")));
+
+		assertOrganisationsDoesNotIncludeDuplicateOrganisation(linksAsDataGroups);
+
 	}
+
+	private void assertOrganisationsDoesNotIncludeDuplicateOrganisation(
+			Map<String, List<DataGroup>> linksAsDataGroups) {
+		List<DataGroup> organisationList = linksAsDataGroups.get("organisation");
+		assertEquals(organisationList.size(), 5);
+
+		assertSame(organisationList.get(0), secondAnswer.get("organisation").get("56"));
+		assertSame(linksAsDataGroups.get("organisation").get(1),
+				secondAnswer.get("organisation").get("156"));
+
+		assertSame(linksAsDataGroups.get("organisation").get(2),
+				thirdAnswer.get("organisation").get("256"));
+
+		assertSame(linksAsDataGroups.get("organisation").get(3),
+				thirdAnswer.get("organisation").get("356"));
+		assertSame(linksAsDataGroups.get("organisation").get(4),
+				thirdAnswer.get("organisation").get("456"));
+	}
+
 }

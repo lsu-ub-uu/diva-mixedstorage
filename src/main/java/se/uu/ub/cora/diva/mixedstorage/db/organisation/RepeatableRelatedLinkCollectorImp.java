@@ -36,33 +36,65 @@ public class RepeatableRelatedLinkCollectorImp implements RepeatableRelatedLinkC
 	}
 
 	@Override
-	public List<DataGroup> collectLinks(List<DataGroup> groupsContainingLinks) {
-		Map<String, DataGroup> combinedCollectedLinks = collectDistinctiveLinksAsDataGroups(
+	public Map<String, List<DataGroup>> collectLinks(List<DataGroup> groupsContainingLinks) {
+		Map<String, Map<String, DataGroup>> combinedCollectedLinks = collectDistinctiveLinksAsDataGroups(
 				groupsContainingLinks);
 		return putDataGroupsInList(combinedCollectedLinks);
 	}
 
-	private Map<String, DataGroup> collectDistinctiveLinksAsDataGroups(
+	private Map<String, Map<String, DataGroup>> collectDistinctiveLinksAsDataGroups(
 			List<DataGroup> groupsContainingLinks) {
+		Map<String, Map<String, DataGroup>> collectedLinks = new HashMap<>();
 		RelatedLinkCollector linkCollector = factorLinkCollector();
-		Map<String, DataGroup> combinedCollectedLinks = new HashMap<>();
 		for (DataGroup dataGroup : groupsContainingLinks) {
-			Map<String, DataGroup> collectedLinks = linkCollector.collectLinks(dataGroup);
-			combinedCollectedLinks.putAll(collectedLinks);
+			collectLinksFromDataGroup(collectedLinks, linkCollector, dataGroup);
 		}
-		return combinedCollectedLinks;
+		return collectedLinks;
+	}
+
+	private void collectLinksFromDataGroup(
+			Map<String, Map<String, DataGroup>> combinedCollectedLinks,
+			RelatedLinkCollector linkCollector, DataGroup dataGroup) {
+		Map<String, Map<String, DataGroup>> collectedLinks = linkCollector.collectLinks(dataGroup);
+		for (Entry<String, Map<String, DataGroup>> entry : collectedLinks.entrySet()) {
+			String recordType = entry.getKey();
+			// TODO: make key plural when putting it into map = personDomainParts
+			addMapForKeyIfMissing(combinedCollectedLinks, recordType);
+			combinedCollectedLinks.get(recordType).putAll(entry.getValue());
+		}
+	}
+
+	private void addMapForKeyIfMissing(Map<String, Map<String, DataGroup>> combinedCollectedLinks,
+			String recordType) {
+		combinedCollectedLinks.computeIfAbsent(recordType, key -> new HashMap<>());
 	}
 
 	private RelatedLinkCollector factorLinkCollector() {
 		return relatedlinkCollectorFactory.factor("personDomainPart");
 	}
 
-	private List<DataGroup> putDataGroupsInList(Map<String, DataGroup> combinedCollectedLinks) {
-		List<DataGroup> linksAsDataGroup = new ArrayList<>();
-		for (Entry<String, DataGroup> entry : combinedCollectedLinks.entrySet()) {
-			linksAsDataGroup.add(entry.getValue());
+	private Map<String, List<DataGroup>> putDataGroupsInList(
+			Map<String, Map<String, DataGroup>> combinedCollectedLinks) {
+		Map<String, List<DataGroup>> result = new HashMap<>();
+
+		for (Entry<String, Map<String, DataGroup>> entry : combinedCollectedLinks.entrySet()) {
+			String recordType = entry.getKey();
+			addListForKeyIfMissing(result, recordType);
+			addAllDataGroupsForCurrentRecordType(result, entry.getValue(), recordType);
 		}
-		return linksAsDataGroup;
+		return result;
+	}
+
+	private void addAllDataGroupsForCurrentRecordType(Map<String, List<DataGroup>> result,
+			Map<String, DataGroup> dataGroupMapWithIdAsKey, String recordType) {
+
+		for (Entry<String, DataGroup> entry : dataGroupMapWithIdAsKey.entrySet()) {
+			result.get(recordType).add(entry.getValue());
+		}
+	}
+
+	private void addListForKeyIfMissing(Map<String, List<DataGroup>> result, String recordType) {
+		result.computeIfAbsent(recordType, key -> new ArrayList<>());
 	}
 
 	public RelatedLinkCollectorFactory getRelatedLinkCollectorFactory() {

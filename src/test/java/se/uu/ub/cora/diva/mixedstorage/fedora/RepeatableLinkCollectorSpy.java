@@ -19,27 +19,28 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollector;
 
 public class RepeatableLinkCollectorSpy implements RepeatableRelatedLinkCollector {
 
 	public List<DataGroup> groupsContainingLinks = new ArrayList<>();
 	public int numberOfGroupsToReturn = 0;
-	public List<DataGroup> listToReturn = new ArrayList<>();
+	public Map<String, List<DataGroup>> mapToReturn = new HashMap<>();
 
 	@Override
-	public List<DataGroup> collectLinks(List<DataGroup> groupsContainingLinks) {
+	public Map<String, List<DataGroup>> collectLinks(List<DataGroup> groupsContainingLinks) {
 		this.groupsContainingLinks = groupsContainingLinks;
+		//
+		// for (int i = 0; i < numberOfGroupsToReturn; i++) {
+		// listToReturn.add(new DataGroupSpy("personDomainPart"));
+		// }
 
-		for (int i = 0; i < numberOfGroupsToReturn; i++) {
-			listToReturn.add(new DataGroupSpy("personDomainPart"));
-		}
-
-		return listToReturn;
+		return mapToReturn;
 	}
 
 }

@@ -32,7 +32,7 @@ public class OrganisationCollector implements RelatedLinkCollector {
 	}
 
 	@Override
-	public Map<String, DataGroup> collectLinks(DataGroup dataGroup) {
+	public Map<String, Map<String, DataGroup>> collectLinks(DataGroup dataGroup) {
 		// TODO Auto-generated method stub
 		return null;
 

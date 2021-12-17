@@ -19,11 +19,12 @@
 package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 
 import java.util.List;
+import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 
 public interface RepeatableRelatedLinkCollector {
 
-	List<DataGroup> collectLinks(List<DataGroup> groupsContainingLinks);
+	Map<String, List<DataGroup>> collectLinks(List<DataGroup> groupsContainingLinks);
 
 }

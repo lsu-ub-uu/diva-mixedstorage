@@ -40,7 +40,16 @@ public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 	public Map<String, Map<String, DataGroup>> collectLinks(DataGroup personDomainPartLink) {
 		DataGroup personDomainPart = readPersonDomainPart(personDomainPartLink);
 
-		return collectAllLinks(personDomainPartLink, personDomainPart);
+		Map<String, Map<String, DataGroup>> links = new HashMap<>();
+		String domainPartId = getDomainPartId(personDomainPartLink);
+		Map<String, DataGroup> domainParts = new HashMap<>();
+		domainParts.put(domainPartId, personDomainPart);
+		links.put("personDomainPart", domainParts);
+
+		Map<String, DataGroup> collectedOrganisationsFromLinks = collectOrganisations(
+				personDomainPart);
+		links.put("organisation", collectedOrganisationsFromLinks);
+		return links;
 	}
 
 	private DataGroup readPersonDomainPart(DataGroup personDomainPartLink) {
@@ -50,25 +59,12 @@ public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 		return dbStorage.read(linkedRecordType, linkedRecordId);
 	}
 
-	private Map<String, Map<String, DataGroup>> collectAllLinks(DataGroup personDomainPartLink,
+	private Map<String, DataGroup> collectAllLinks(Map<String, DataGroup> links,
 			DataGroup personDomainPart) {
-		Map<String, Map<String, DataGroup>> linksPerRecordType = new HashMap<>();
-		Map<String, DataGroup> collectedDomainPartsFromLinks = collectDomainPart(
-				personDomainPartLink, personDomainPart);
-		linksPerRecordType.put("personDomainPart", collectedDomainPartsFromLinks);
-
 		Map<String, DataGroup> collectedOrganisationsFromLinks = collectOrganisations(
 				personDomainPart);
-		linksPerRecordType.put("organisation", collectedOrganisationsFromLinks);
-		return linksPerRecordType;
-	}
-
-	private Map<String, DataGroup> collectDomainPart(DataGroup personDomainPartLink,
-			DataGroup personDomainPart) {
-		Map<String, DataGroup> collectedDomainPartsFromLinks = new HashMap<>();
-		String domainPartId = getDomainPartId(personDomainPartLink);
-		collectedDomainPartsFromLinks.put(domainPartId, personDomainPart);
-		return collectedDomainPartsFromLinks;
+		links.putAll(collectedOrganisationsFromLinks);
+		return links;
 	}
 
 	private Map<String, DataGroup> collectOrganisations(DataGroup personDomainPart) {
