@@ -57,11 +57,15 @@ public class RepeatableRelatedLinkCollectorImp implements RepeatableRelatedLinkC
 			RelatedLinkCollector linkCollector, DataGroup dataGroup) {
 		Map<String, Map<String, DataGroup>> collectedLinks = linkCollector.collectLinks(dataGroup);
 		for (Entry<String, Map<String, DataGroup>> entry : collectedLinks.entrySet()) {
-			String recordType = entry.getKey();
-			// TODO: make key plural when putting it into map = personDomainParts
-			addMapForKeyIfMissing(combinedCollectedLinks, recordType);
-			combinedCollectedLinks.get(recordType).putAll(entry.getValue());
+			String recordTypeInPlural = getRecordTypeInPlural(entry);
+			addMapForKeyIfMissing(combinedCollectedLinks, recordTypeInPlural);
+			combinedCollectedLinks.get(recordTypeInPlural).putAll(entry.getValue());
 		}
+	}
+
+	private String getRecordTypeInPlural(Entry<String, Map<String, DataGroup>> entry) {
+		String recordType = entry.getKey();
+		return recordType + "s";
 	}
 
 	private void addMapForKeyIfMissing(Map<String, Map<String, DataGroup>> combinedCollectedLinks,

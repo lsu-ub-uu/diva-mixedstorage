@@ -35,10 +35,6 @@ public class RepeatableLinkCollectorSpy implements RepeatableRelatedLinkCollecto
 	@Override
 	public Map<String, List<DataGroup>> collectLinks(List<DataGroup> groupsContainingLinks) {
 		this.groupsContainingLinks = groupsContainingLinks;
-		//
-		// for (int i = 0; i < numberOfGroupsToReturn; i++) {
-		// listToReturn.add(new DataGroupSpy("personDomainPart"));
-		// }
 
 		return mapToReturn;
 	}

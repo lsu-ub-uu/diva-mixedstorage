@@ -48,6 +48,7 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 		convertTopDataGroupToXml(dataGroup, converter, combinedXml);
 		convertRelatedLinksDataGroupsToXml(dataGroup, converter, combinedXml);
+		System.out.println(combinedXml.toString());
 		return transformCoraXmlToFedoraXml(combinedXml);
 	}
 
@@ -77,9 +78,7 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 	private Map<String, List<DataGroup>> collectLinksForPersonDomainParts(DataGroup dataGroup) {
 		List<DataGroup> personDomainParts = dataGroup
 				.getAllGroupsWithNameInData("personDomainPart");
-		Map<String, List<DataGroup>> collectLinks = repeatbleRelatedLinkCollector
-				.collectLinks(personDomainParts);
-		return collectLinks;
+		return repeatbleRelatedLinkCollector.collectLinks(personDomainParts);
 	}
 
 	private String removeStartingXMLTag(String xml) {

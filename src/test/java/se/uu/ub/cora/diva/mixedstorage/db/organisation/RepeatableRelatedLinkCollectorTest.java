@@ -121,12 +121,13 @@ public class RepeatableRelatedLinkCollectorTest {
 
 		RelatedLinkCollectorSpy linkCollector = relatedlinkCollectorFactory.returnedLinkCollector;
 		assertEquals(linkCollector.linksSentIn.size(), 2);
-		assertEquals(linksAsDataGroups.get("personDomainPart").size(), 2);
+		List<DataGroup> personDomainParts = linksAsDataGroups.get("personDomainParts");
+		assertEquals(personDomainParts.size(), 2);
 
-		assertSame(linksAsDataGroups.get("personDomainPart").get(0),
+		assertSame(personDomainParts.get(0),
 				firstAnswer.get("personDomainPart").get("personDomainPart0"));
 
-		assertSame(linksAsDataGroups.get("personDomainPart").get(1),
+		assertSame(personDomainParts.get(1),
 				secondAnswer.get("personDomainPart").get("personDomainPart1"));
 
 		assertCorrectOrganisationsFromSecondDataGroup(linksAsDataGroups);
@@ -135,13 +136,11 @@ public class RepeatableRelatedLinkCollectorTest {
 
 	private void assertCorrectOrganisationsFromSecondDataGroup(
 			Map<String, List<DataGroup>> linksAsDataGroups) {
-		List<DataGroup> organisationList = linksAsDataGroups.get("organisation");
+		List<DataGroup> organisationList = linksAsDataGroups.get("organisations");
 		assertEquals(organisationList.size(), 3);
 		assertSame(organisationList.get(0), secondAnswer.get("organisation").get("56"));
-		assertSame(linksAsDataGroups.get("organisation").get(1),
-				secondAnswer.get("organisation").get("156"));
-		assertSame(linksAsDataGroups.get("organisation").get(2),
-				secondAnswer.get("organisation").get("256"));
+		assertSame(organisationList.get(1), secondAnswer.get("organisation").get("156"));
+		assertSame(organisationList.get(2), secondAnswer.get("organisation").get("256"));
 	}
 
 	private List<DataGroup> createListOfLinks(int numOfLinks) {
@@ -166,7 +165,7 @@ public class RepeatableRelatedLinkCollectorTest {
 
 		RelatedLinkCollectorSpy linkCollector = relatedlinkCollectorFactory.returnedLinkCollector;
 		assertEquals(linkCollector.linksSentIn.size(), 3);
-		List<DataGroup> personDomainPartList = linksAsDataGroups.get("personDomainPart");
+		List<DataGroup> personDomainPartList = linksAsDataGroups.get("personDomainParts");
 		assertEquals(personDomainPartList.size(), 3);
 
 		assertTrue(personDomainPartList
@@ -182,20 +181,16 @@ public class RepeatableRelatedLinkCollectorTest {
 
 	private void assertOrganisationsDoesNotIncludeDuplicateOrganisation(
 			Map<String, List<DataGroup>> linksAsDataGroups) {
-		List<DataGroup> organisationList = linksAsDataGroups.get("organisation");
+		List<DataGroup> organisationList = linksAsDataGroups.get("organisations");
 		assertEquals(organisationList.size(), 5);
 
 		assertSame(organisationList.get(0), secondAnswer.get("organisation").get("56"));
-		assertSame(linksAsDataGroups.get("organisation").get(1),
-				secondAnswer.get("organisation").get("156"));
+		assertSame(organisationList.get(1), secondAnswer.get("organisation").get("156"));
 
-		assertSame(linksAsDataGroups.get("organisation").get(2),
-				thirdAnswer.get("organisation").get("256"));
+		assertSame(organisationList.get(2), thirdAnswer.get("organisation").get("256"));
 
-		assertSame(linksAsDataGroups.get("organisation").get(3),
-				thirdAnswer.get("organisation").get("356"));
-		assertSame(linksAsDataGroups.get("organisation").get(4),
-				thirdAnswer.get("organisation").get("456"));
+		assertSame(organisationList.get(3), thirdAnswer.get("organisation").get("356"));
+		assertSame(organisationList.get(4), thirdAnswer.get("organisation").get("456"));
 	}
 
 }

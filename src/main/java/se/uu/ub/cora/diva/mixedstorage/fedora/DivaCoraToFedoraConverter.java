@@ -24,6 +24,4 @@ public interface DivaCoraToFedoraConverter {
 
 	String toXML(DataGroup dataRecord);
 
-	// String toXML(DataGroup dataRecord, List<DataGroup> relatedRecords);
-
 }

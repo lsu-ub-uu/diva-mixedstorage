@@ -39,7 +39,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 	private ConverterFactorySpy dataGroupToXmlConverterFactory;
 	private TransformationFactorySpy transformationFactory;
 	private String toCoraPersonXsl = "person/toCoraPerson.xsl";
-	private DataGroupSpy defaultDataGroup = new DataGroupSpy("someNameInData");
+	private DataGroupSpy defaultDataGroup;
 	private DivaCoraToFedoraConverter converter;
 	private RepeatableLinkCollectorSpy repeatbleCollector;
 
@@ -51,6 +51,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 		ConverterProvider.setConverterFactory("xml", dataGroupToXmlConverterFactory);
 		transformationFactory = new TransformationFactorySpy();
 		repeatbleCollector = new RepeatableLinkCollectorSpy();
+		defaultDataGroup = new DataGroupSpy("someNameInData");
 		converter = new DivaCoraToFedoraPersonConverter(transformationFactory, repeatbleCollector);
 	}
 
@@ -116,7 +117,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 			int numOfDomainParts) {
 		List<DataGroup> dataGroupList = new ArrayList<>();
 		for (int i = 0; i < numOfDomainParts; i++) {
-			dataGroupList.add(new DataGroupSpy("personDomainPart"));
+			dataGroupList.add(new DataGroupSpy(recordType));
 		}
 		repeatbleCollector.mapToReturn.put(recordType, dataGroupList);
 	}
@@ -125,6 +126,37 @@ public class DivaCoraToFedoraPersonConverterTest {
 		dataGroup.addChild(new DataGroupSpy("personDomainPart"));
 		dataGroup.addChild(new DataGroupSpy("personDomainPart"));
 		dataGroup.addChild(new DataGroupSpy("personDomainPart"));
+	}
+
+	@Test
+	public void testToXmlWithDomainPartsAndOrganisations() {
+		addDataGroupsForRecordTypeToAnswerFromSpy("personDomainParts", 2);
+		addDataGroupsForRecordTypeToAnswerFromSpy("organisations", 4);
+		addPersonDomainPartChildren(defaultDataGroup);
+		String fedoraXml = converter.toXML(defaultDataGroup);
+
+		ConverterSpy groupToXmlConverter = dataGroupToXmlConverterFactory.factoredConverter;
+		assertEquals(groupToXmlConverter.dataElements.size(), 7);
+		assertSame(groupToXmlConverter.dataElements.get(0), defaultDataGroup);
+
+		assertEquals(repeatbleCollector.groupsContainingLinks.size(), 3);
+		Map<String, List<DataGroup>> retunedMapFromSpy = repeatbleCollector.mapToReturn;
+		List<DataGroup> personDomainParts = retunedMapFromSpy.get("personDomainParts");
+		assertSame(groupToXmlConverter.dataElements.get(5), personDomainParts.get(0));
+		assertSame(groupToXmlConverter.dataElements.get(6), personDomainParts.get(1));
+
+		List<DataGroup> organisations = retunedMapFromSpy.get("organisations");
+		assertSame(groupToXmlConverter.dataElements.get(1), organisations.get(0));
+		assertSame(groupToXmlConverter.dataElements.get(2), organisations.get(1));
+		assertSame(groupToXmlConverter.dataElements.get(3), organisations.get(2));
+		assertSame(groupToXmlConverter.dataElements.get(4), organisations.get(3));
+		String expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>some returned string from converter spy0<organisations>some returned string from converter spy1some returned string from converter spy2some returned string from converter spy3some returned string from converter spy4</organisations><personDomainParts>some returned string from converter spy5some returned string from converter spy6</personDomainParts>";
+		CoraTransformationSpy factoredTransformation = transformationFactory.factoredTransformations
+				.get(0);
+
+		assertEquals(factoredTransformation.inputXml, expectedXml);
+
+		assertEquals(fedoraXml, factoredTransformation.xmlToReturn);
 	}
 
 }
