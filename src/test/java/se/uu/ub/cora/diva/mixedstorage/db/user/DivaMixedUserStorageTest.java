@@ -651,7 +651,7 @@ public class DivaMixedUserStorageTest {
 		TableFacadeSpy tableFacade = sqlDatabaseFactory.factoredTableFacade;
 
 		TableQuerySpy tableQuerySpy = sqlDatabaseFactory.factoredTableQueries.get(0);
-		assertEquals(tableQuerySpy.conditions.get("db_id"), 26);
+		assertEquals(tableQuerySpy.conditions.get("user_id"), "26");
 		assertTrue(userExists);
 
 		assertSame(tableFacade.tableQueries.get(0), tableQuerySpy);
@@ -662,12 +662,12 @@ public class DivaMixedUserStorageTest {
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForCoraUser() {
 
 		boolean userExists = userStorage
-				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("coraUser", "26");
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("coraUser", "aaa123");
 
 		assertEquals(sqlDatabaseFactory.tableNames.get(0), "public.user");
 
 		TableQuerySpy tableQuerySpy = sqlDatabaseFactory.factoredTableQueries.get(0);
-		assertEquals(tableQuerySpy.conditions.get("db_id"), 26);
+		assertEquals(tableQuerySpy.conditions.get("user_id"), "aaa123");
 		assertTrue(userExists);
 	}
 
@@ -677,7 +677,7 @@ public class DivaMixedUserStorageTest {
 		sqlDatabaseFactory.tablesToThrowExceptionFor.add("public.user");
 
 		boolean userExists = userStorage
-				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("coraUser", "26");
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("coraUser", "aaa123");
 		assertFalse(userExists);
 	}
 
