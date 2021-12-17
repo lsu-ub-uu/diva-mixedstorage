@@ -48,7 +48,6 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 		convertTopDataGroupToXml(dataGroup, converter, combinedXml);
 		convertRelatedLinksDataGroupsToXml(dataGroup, converter, combinedXml);
-		System.out.println(combinedXml.toString());
 		return transformCoraXmlToFedoraXml(combinedXml);
 	}
 
@@ -61,18 +60,11 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 	private void convertRelatedLinksDataGroupsToXml(DataGroup dataGroup, Converter converter,
 			StringBuilder combinedXml) {
 		Map<String, List<DataGroup>> collectedLinks = collectLinksForPersonDomainParts(dataGroup);
-
 		for (Entry<String, List<DataGroup>> entry : collectedLinks.entrySet()) {
-			combinedXml.append("<").append(entry.getKey()).append(">");
-			for (DataGroup collectedLinkDataGroup : entry.getValue()) {
-				String relatedXml = converter.convert(collectedLinkDataGroup);
-				String strippedXml = removeStartingXMLTag(relatedXml);
-				combinedXml.append(strippedXml);
-			}
-			combinedXml.append("</").append(entry.getKey()).append(">");
-
+			appendStartTag(combinedXml, entry);
+			convertRelatedLinksForOneRecordType(converter, combinedXml, entry.getValue());
+			appendEndTag(combinedXml, entry);
 		}
-
 	}
 
 	private Map<String, List<DataGroup>> collectLinksForPersonDomainParts(DataGroup dataGroup) {
@@ -81,8 +73,25 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 		return repeatbleRelatedLinkCollector.collectLinks(personDomainParts);
 	}
 
+	private void appendStartTag(StringBuilder combinedXml, Entry<String, List<DataGroup>> entry) {
+		combinedXml.append("<").append(entry.getKey()).append(">");
+	}
+
+	private void convertRelatedLinksForOneRecordType(Converter converter, StringBuilder combinedXml,
+			List<DataGroup> dataGroupsForRecordType) {
+		for (DataGroup collectedLinkDataGroup : dataGroupsForRecordType) {
+			String relatedXml = converter.convert(collectedLinkDataGroup);
+			String strippedXml = removeStartingXMLTag(relatedXml);
+			combinedXml.append(strippedXml);
+		}
+	}
+
 	private String removeStartingXMLTag(String xml) {
 		return xml.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
+	}
+
+	private void appendEndTag(StringBuilder combinedXml, Entry<String, List<DataGroup>> entry) {
+		combinedXml.append("</").append(entry.getKey()).append(">");
 	}
 
 	private String transformCoraXmlToFedoraXml(StringBuilder combinedXml) {

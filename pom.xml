@@ -41,9 +41,9 @@
 		<xmlconverter.version>1.8-SNAPSHOT</xmlconverter.version>
 		<converter.version>1.5.0</converter.version>
 		<testutils.version>1.1.1</testutils.version>
-<!-- just for connection to real db when testing -->
-<!-- 		<basicdata.version>3.4.0</basicdata.version> -->
-	</properties>
+
+		<basicdata.version>3.4.0</basicdata.version>
+			</properties>
 
 	<scm>
 		<connection>scm:git:https://github.com/lsu-ub-uu/diva-mixedstorage.git</connection>
@@ -53,6 +53,14 @@
 	</scm>
 
 	<dependencies>
+		<dependency>
+			<!-- must be here from modulesystem to work as this is needed by tests 
+				in basicstorage -->
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>basicdata</artifactId>
+			<version>${basicdata.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>logger</artifactId>
@@ -125,8 +133,7 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>xmlconverter</artifactId>
 			<version>${xmlconverter.version}</version>
-			<!-- add again after finished testing with real db -->
-<!-- 			<scope>runtime</scope> -->
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
@@ -145,11 +152,6 @@
 			<version>${testutils.version}</version>
 			<scope>test</scope>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>se.uu.ub.cora</groupId> -->
-<!-- 			<artifactId>basicdata</artifactId> -->
-<!-- 			<version>${basicdata.version}</version> -->
-<!-- 		</dependency> -->
 	</dependencies>
 
 </project>
