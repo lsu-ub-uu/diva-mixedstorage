@@ -42,12 +42,4 @@ public class CoraTransformationSpy implements CoraTransformation {
 		return null;
 	}
 
-	@Override
-	public String transform(String mainXml, List<String> relatedXmls) {
-		this.mainXml = mainXml;
-		this.relatedXmls = relatedXmls;
-
-		return xmlToReturn;
-	}
-
 }
