@@ -16,10 +16,15 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage;
 
-public interface RelatedLinkCollectorFactory {
+import java.util.List;
+import java.util.Map;
 
-	RelatedLinkCollector factor(String type);
+import se.uu.ub.cora.data.DataGroup;
+
+public interface RepeatableRelatedLinkCollector {
+
+	Map<String, List<DataGroup>> collectLinks(List<DataGroup> groupsContainingLinks);
 
 }

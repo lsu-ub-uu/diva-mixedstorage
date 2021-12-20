@@ -16,9 +16,11 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage.internal;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollectorFactory;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class RelatedLinkCollectorFactoryImp implements RelatedLinkCollectorFactory {
@@ -36,9 +38,6 @@ public class RelatedLinkCollectorFactoryImp implements RelatedLinkCollectorFacto
 	public RelatedLinkCollector factor(String type) {
 		if ("personDomainPart".equals(type)) {
 			return new DomainPartOrganisationCollector(recordStorage, classicDbStorage);
-		}
-		if ("organisation".equals(type)) {
-			return new OrganisationCollector(recordStorage);
 		}
 		throw NotImplementedException.withMessage("Factor not implemented for type otherType");
 	}

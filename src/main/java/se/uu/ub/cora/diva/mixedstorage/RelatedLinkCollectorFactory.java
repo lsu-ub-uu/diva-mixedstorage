@@ -16,30 +16,10 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage;
 
-import java.util.Map;
+public interface RelatedLinkCollectorFactory {
 
-import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.storage.RecordStorage;
-
-public class OrganisationCollector implements RelatedLinkCollector {
-
-	private RecordStorage dbStorage;
-
-	public OrganisationCollector(RecordStorage dbStorage) {
-		this.dbStorage = dbStorage;
-	}
-
-	@Override
-	public Map<String, Map<String, DataGroup>> collectLinks(DataGroup dataGroup) {
-		// TODO Auto-generated method stub
-		return null;
-
-	}
-
-	RecordStorage getDbStorage() {
-		return dbStorage;
-	}
+	RelatedLinkCollector factor(String type);
 
 }

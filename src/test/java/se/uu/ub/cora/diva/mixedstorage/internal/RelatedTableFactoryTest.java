@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage.internal;
 
 import static org.testng.Assert.assertSame;
 
@@ -24,6 +24,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationAddressRelatedTable;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationAlternativeNameRelatedTable;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationParentRelatedTable;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationPredecessorRelatedTable;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
+import se.uu.ub.cora.diva.mixedstorage.internal.RelatedTableFactoryImp;
 
 public class RelatedTableFactoryTest {
 

@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage.internal;
 
 import static org.testng.Assert.assertSame;
 
@@ -46,13 +46,6 @@ public class RelatedLinkCollectorFactoryTest {
 				.factor("personDomainPart");
 		assertSame(linkCollector.getDbStorage(), recordStorage);
 		assertSame(linkCollector.getClassicDbStorage(), classicDbStorage);
-	}
-
-	@Test
-	public void testFactorForOrganisation() {
-		OrganisationCollector linkCollector = (OrganisationCollector) factory
-				.factor("organisation");
-		assertSame(linkCollector.getDbStorage(), recordStorage);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

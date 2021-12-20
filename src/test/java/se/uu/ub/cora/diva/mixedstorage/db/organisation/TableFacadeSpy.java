@@ -96,14 +96,15 @@ public class TableFacadeSpy implements TableFacade {
 	}
 
 	@Override
-	public void updateRowsUsingQuery(TableQuery tableQuery) {
+	public int updateRowsUsingQuery(TableQuery tableQuery) {
 		// TODO Auto-generated method stub
-
+		return 0;
 	}
 
 	@Override
-	public void deleteRowsForQuery(TableQuery tableQuery) {
+	public int deleteRowsForQuery(TableQuery tableQuery) {
 		// TODO Auto-generated method stub
+		return 0;
 
 	}
 

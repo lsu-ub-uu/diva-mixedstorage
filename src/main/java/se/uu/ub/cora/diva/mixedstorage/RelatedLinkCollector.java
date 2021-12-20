@@ -16,27 +16,14 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.fedora;
+package se.uu.ub.cora.diva.mixedstorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollector;
 
-public class RepeatableLinkCollectorSpy implements RepeatableRelatedLinkCollector {
+public interface RelatedLinkCollector {
 
-	public List<DataGroup> groupsContainingLinks = new ArrayList<>();
-	public int numberOfGroupsToReturn = 0;
-	public Map<String, List<DataGroup>> mapToReturn = new HashMap<>();
-
-	@Override
-	public Map<String, List<DataGroup>> collectLinks(List<DataGroup> groupsContainingLinks) {
-		this.groupsContainingLinks = groupsContainingLinks;
-
-		return mapToReturn;
-	}
+	Map<String, Map<String, DataGroup>> collectLinks(DataGroup dataGroup);
 
 }

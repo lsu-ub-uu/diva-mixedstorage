@@ -16,13 +16,14 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage.internal;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollector;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class DomainPartOrganisationCollector implements RelatedLinkCollector {

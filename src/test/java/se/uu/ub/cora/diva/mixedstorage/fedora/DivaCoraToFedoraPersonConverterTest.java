@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.converter.ConverterProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
+import se.uu.ub.cora.diva.mixedstorage.RepeatableLinkCollectorSpy;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerFactory;
 import se.uu.ub.cora.logger.LoggerProvider;
@@ -89,6 +90,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 	public void testToXmlWithOnlyDomainPartsNoOrganisations() {
 		addDataGroupsForRecordTypeToAnswerFromSpy("personDomainParts", 4);
 		addPersonDomainPartChildren(defaultDataGroup);
+
 		String fedoraXml = converter.toXML(defaultDataGroup);
 
 		ConverterSpy groupToXmlConverter = dataGroupToXmlConverterFactory.factoredConverter;
@@ -107,7 +109,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 		assertMainXmlWasTransformedToFedoraXml(factoredTransformations);
 
 		CoraTransformationSpy factoredTransformation = factoredTransformations.get(0);
-		String expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>some returned string from converter spy0<personDomainParts>some returned string from converter spy1some returned string from converter spy2some returned string from converter spy3some returned string from converter spy4</personDomainParts>";
+		String expectedXml = "some returned string from converter spy0<personDomainParts>some returned string from converter spy1some returned string from converter spy2some returned string from converter spy3some returned string from converter spy4</personDomainParts>";
 		assertEquals(factoredTransformation.inputXml, expectedXml);
 
 		assertEquals(fedoraXml, factoredTransformation.xmlToReturn);

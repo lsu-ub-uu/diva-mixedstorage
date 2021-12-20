@@ -19,7 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.diva.mixedstorage.db.organisation.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 import se.uu.ub.cora.xmlutils.transformer.XsltTransformationFactory;

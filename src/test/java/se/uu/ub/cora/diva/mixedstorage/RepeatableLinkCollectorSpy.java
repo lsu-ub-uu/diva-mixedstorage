@@ -16,30 +16,27 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
 
-public class RelatedLinkCollectorFactorySpy implements RelatedLinkCollectorFactory {
+public class RepeatableLinkCollectorSpy implements RepeatableRelatedLinkCollector {
 
-	public RelatedLinkCollectorSpy returnedLinkCollector;
-
-	public Map<Integer, List<String>> idsForDataGroupsToReturnForIndex = new HashMap<>();
-	public Map<Integer, Map<String, Map<String, DataGroup>>> mapsToReturnFromCollectorSpy = new HashMap<>();
-
-	public String type;
+	public List<DataGroup> groupsContainingLinks = new ArrayList<>();
+	public int numberOfGroupsToReturn = 0;
+	public Map<String, List<DataGroup>> mapToReturn = new HashMap<>();
 
 	@Override
-	public RelatedLinkCollector factor(String type) {
-		this.type = type;
-		returnedLinkCollector = new RelatedLinkCollectorSpy();
-		returnedLinkCollector.idsForDataGroupsToReturnForIndex = idsForDataGroupsToReturnForIndex;
-		returnedLinkCollector.mapsToReturn = mapsToReturnFromCollectorSpy;
-		return returnedLinkCollector;
+	public Map<String, List<DataGroup>> collectLinks(List<DataGroup> groupsContainingLinks) {
+		this.groupsContainingLinks = groupsContainingLinks;
+
+		return mapToReturn;
 	}
 
 }

@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage.internal;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -34,6 +34,8 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
+import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.internal.RepeatableRelatedLinkCollectorImp;
 
 public class RepeatableRelatedLinkCollectorTest {
 
