@@ -44,17 +44,20 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 	@Override
 	public String toXML(DataGroup dataGroup) {
 		Converter converter = ConverterProvider.getConverter("xml");
-		StringBuilder combinedXml = new StringBuilder();
+		StringBuilder combinedXml = new StringBuilder(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><personAccumulated>");
 
 		convertTopDataGroupToXml(dataGroup, converter, combinedXml);
 		convertRelatedLinksDataGroupsToXml(dataGroup, converter, combinedXml);
+		combinedXml.append("</personAccumulated>");
 		return transformCoraXmlToFedoraXml(combinedXml);
 	}
 
 	private void convertTopDataGroupToXml(DataGroup dataRecord, Converter converter,
 			StringBuilder combinedXml) {
 		String xml = converter.convert(dataRecord);
-		combinedXml.append(xml);
+		String strippedXml = removeStartingXMLTag(xml);
+		combinedXml.append(strippedXml);
 	}
 
 	private void convertRelatedLinksDataGroupsToXml(DataGroup dataGroup, Converter converter,

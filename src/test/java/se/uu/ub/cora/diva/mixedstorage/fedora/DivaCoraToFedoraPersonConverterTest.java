@@ -69,7 +69,8 @@ public class DivaCoraToFedoraPersonConverterTest {
 		assertMainXmlWasTransformedToFedoraXml(factoredTransformations);
 
 		CoraTransformationSpy factoredTransformation = factoredTransformations.get(0);
-		assertEquals(factoredTransformation.inputXml, groupToXmlConverter.commonStringToReturn + 0);
+		String expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><personAccumulated>some returned string from converter spy0</personAccumulated>";
+		assertEquals(factoredTransformation.inputXml, expectedXml);
 
 		assertEquals(fedoraXml, factoredTransformation.xmlToReturn);
 
@@ -109,7 +110,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 		assertMainXmlWasTransformedToFedoraXml(factoredTransformations);
 
 		CoraTransformationSpy factoredTransformation = factoredTransformations.get(0);
-		String expectedXml = "some returned string from converter spy0<personDomainParts>some returned string from converter spy1some returned string from converter spy2some returned string from converter spy3some returned string from converter spy4</personDomainParts>";
+		String expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><personAccumulated>some returned string from converter spy0<personDomainParts>some returned string from converter spy1some returned string from converter spy2some returned string from converter spy3some returned string from converter spy4</personDomainParts></personAccumulated>";
 		assertEquals(factoredTransformation.inputXml, expectedXml);
 
 		assertEquals(fedoraXml, factoredTransformation.xmlToReturn);
@@ -152,7 +153,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 		assertSame(groupToXmlConverter.dataElements.get(2), organisations.get(1));
 		assertSame(groupToXmlConverter.dataElements.get(3), organisations.get(2));
 		assertSame(groupToXmlConverter.dataElements.get(4), organisations.get(3));
-		String expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>some returned string from converter spy0<organisations>some returned string from converter spy1some returned string from converter spy2some returned string from converter spy3some returned string from converter spy4</organisations><personDomainParts>some returned string from converter spy5some returned string from converter spy6</personDomainParts>";
+		String expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><personAccumulated>some returned string from converter spy0<organisations>some returned string from converter spy1some returned string from converter spy2some returned string from converter spy3some returned string from converter spy4</organisations><personDomainParts>some returned string from converter spy5some returned string from converter spy6</personDomainParts></personAccumulated>";
 		CoraTransformationSpy factoredTransformation = transformationFactory.factoredTransformations
 				.get(0);
 
