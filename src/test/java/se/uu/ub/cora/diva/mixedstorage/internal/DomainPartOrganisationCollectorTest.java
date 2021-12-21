@@ -31,7 +31,6 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStorageSpy;
-import se.uu.ub.cora.diva.mixedstorage.internal.DomainPartOrganisationCollector;
 
 public class DomainPartOrganisationCollectorTest {
 
