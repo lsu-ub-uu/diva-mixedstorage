@@ -38,13 +38,15 @@ public class ClassicFedoraUpdaterFactoryTest {
 	private String username = "someUserName";
 	private String password = "somePassword";
 	private RepeatableRelatedLinkCollector repeatableLinkCollector;
+	private FedoraConnectionInfo fedoraConnectionInfo;
 
 	@BeforeMethod
 	public void setUp() {
 		httpHandlerFactory = new HttpHandlerFactorySpy();
 		repeatableLinkCollector = new RepeatableLinkCollectorSpy();
+		fedoraConnectionInfo = new FedoraConnectionInfo(baseUrl, username, password);
 		factory = new ClassicFedoraUpdaterFactoryImp(httpHandlerFactory, repeatableLinkCollector,
-				baseUrl, username, password);
+				fedoraConnectionInfo);
 	}
 
 	@Test
@@ -59,9 +61,8 @@ public class ClassicFedoraUpdaterFactoryTest {
 		ClassicFedoraPersonUpdater updater = (ClassicFedoraPersonUpdater) factory
 				.factor(recordType);
 		assertSame(updater.getHttpHandlerFactory(), httpHandlerFactory);
-		assertEquals(updater.getBaseUrl(), baseUrl);
-		assertEquals(updater.getUsername(), username);
-		assertEquals(updater.getPassword(), password);
+		FedoraConnectionInfo fedoraConnectionInfoUpdater = updater.getFedoraConnectionInfo();
+		assertSame(fedoraConnectionInfoUpdater, fedoraConnectionInfo);
 
 		DivaFedoraConverterFactoryImp divaCoraToFedoraConverterFactory = (DivaFedoraConverterFactoryImp) updater
 				.getDivaCoraToFedoraConverterFactory();

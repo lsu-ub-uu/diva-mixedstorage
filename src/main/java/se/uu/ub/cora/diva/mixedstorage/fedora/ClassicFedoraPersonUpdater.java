@@ -30,18 +30,14 @@ public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 	private static final int OK = 200;
 	private HttpHandlerFactory httpHandlerFactory;
 	private DivaFedoraConverterFactory divaCoraToFedoraConverterFactory;
-	private String baseUrl;
-	private String username;
-	private String password;
+	private FedoraConnectionInfo fedoraConnectionInfo;
 
 	public ClassicFedoraPersonUpdater(HttpHandlerFactory httpHandlerFactory,
-			DivaFedoraConverterFactory divaCoraToFedoraConverterFactory, String baseUrl,
-			String username, String password) {
+			DivaFedoraConverterFactory divaCoraToFedoraConverterFactory,
+			FedoraConnectionInfo fedoraConnectionInfo) {
 		this.httpHandlerFactory = httpHandlerFactory;
 		this.divaCoraToFedoraConverterFactory = divaCoraToFedoraConverterFactory;
-		this.baseUrl = baseUrl;
-		this.username = username;
-		this.password = password;
+		this.fedoraConnectionInfo = fedoraConnectionInfo;
 	}
 
 	@Override
@@ -69,8 +65,9 @@ public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 	}
 
 	private void setAutorizationInHttpHandler(HttpHandler httpHandler) {
-		String encoded = Base64.getEncoder()
-				.encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
+		String encoded = Base64.getEncoder().encodeToString(
+				(fedoraConnectionInfo.fedoraUsername + ":" + fedoraConnectionInfo.fedoraPassword)
+						.getBytes(StandardCharsets.UTF_8));
 		httpHandler.setRequestProperty("Authorization", "Basic " + encoded);
 	}
 
@@ -81,7 +78,8 @@ public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 	}
 
 	private String createURL(String recordId) {
-		return baseUrl + "objects/" + recordId + "/datastreams/METADATA?format=?xml&controlGroup=M"
+		return fedoraConnectionInfo.fedoraUrl + "objects/" + recordId
+				+ "/datastreams/METADATA?format=?xml&controlGroup=M"
 				+ "&logMessage=coraWritten&checksumType=SHA-512";
 	}
 
@@ -93,16 +91,8 @@ public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 		return divaCoraToFedoraConverterFactory;
 	}
 
-	String getBaseUrl() {
-		return baseUrl;
-	}
-
-	String getUsername() {
-		return username;
-	}
-
-	String getPassword() {
-		return password;
+	public FedoraConnectionInfo getFedoraConnectionInfo() {
+		return fedoraConnectionInfo;
 	}
 
 }

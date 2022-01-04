@@ -48,6 +48,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
 import se.uu.ub.cora.diva.mixedstorage.internal.RelatedLinkCollectorFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.internal.RelatedTableFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.internal.RepeatableRelatedLinkCollectorImp;
@@ -326,9 +327,10 @@ public class DivaMixedRecordStorageProviderTest {
 		ClassicFedoraUpdaterFactoryImp fedoraUpdaterFactory = (ClassicFedoraUpdaterFactoryImp) recordStorage
 				.getFedoraUpdaterFactory();
 		assertTrue(fedoraUpdaterFactory.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
-		assertEquals(fedoraUpdaterFactory.getFedoraUrl(), initInfo.get("fedoraURL"));
-		assertEquals(fedoraUpdaterFactory.getUserName(), initInfo.get("fedoraUsername"));
-		assertEquals(fedoraUpdaterFactory.getPassword(), initInfo.get("fedoraPassword"));
+		FedoraConnectionInfo fedoraConnectionInfo = fedoraUpdaterFactory.getFedoraConnectionInfo();
+		assertEquals(fedoraConnectionInfo.fedoraUrl, initInfo.get("fedoraURL"));
+		assertEquals(fedoraConnectionInfo.fedoraUsername, initInfo.get("fedoraUsername"));
+		assertEquals(fedoraConnectionInfo.fedoraPassword, initInfo.get("fedoraPassword"));
 
 		RepeatableRelatedLinkCollectorImp repeatableRelatedLinkCollector = (RepeatableRelatedLinkCollectorImp) fedoraUpdaterFactory
 				.getRepeatableRelatedLinkCollector();

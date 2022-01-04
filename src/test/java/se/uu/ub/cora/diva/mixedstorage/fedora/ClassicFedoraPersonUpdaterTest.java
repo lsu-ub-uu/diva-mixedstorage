@@ -55,9 +55,11 @@ public class ClassicFedoraPersonUpdaterTest {
 		fedoraConverterFactory = new DivaFedoraConverterFactorySpy();
 		dataGroupToXmlConverterFactory = new ConverterFactorySpy();
 		ConverterProvider.setConverterFactory("xml", dataGroupToXmlConverterFactory);
+		FedoraConnectionInfo fedoraConnectionInfo = new FedoraConnectionInfo(baseUrl,
+				fedoraUsername, fedoraPassword);
 
 		fedoraUpdater = new ClassicFedoraPersonUpdater(httpHandlerFactory, fedoraConverterFactory,
-				baseUrl, fedoraUsername, fedoraPassword);
+				fedoraConnectionInfo);
 
 	}
 

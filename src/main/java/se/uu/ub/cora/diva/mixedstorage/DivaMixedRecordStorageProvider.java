@@ -32,6 +32,7 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactoryImp;
+import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
 import se.uu.ub.cora.diva.mixedstorage.internal.RelatedLinkCollectorFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.internal.RelatedTableFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.internal.RepeatableRelatedLinkCollectorImp;
@@ -122,11 +123,17 @@ public class DivaMixedRecordStorageProvider
 				recordStorage, classicDbStorage);
 		RepeatableRelatedLinkCollector repeatableLinkCollector = new RepeatableRelatedLinkCollectorImp(
 				linkCollectorFactory);
+		FedoraConnectionInfo fedoraConnectionInfo = createFedoraConnectionInfo();
+		return new ClassicFedoraUpdaterFactoryImp(httpHandlerFactory, repeatableLinkCollector,
+				fedoraConnectionInfo);
+	}
+
+	private FedoraConnectionInfo createFedoraConnectionInfo() {
 		String fedoraURL = tryToGetInitParameterLogIfFound("fedoraURL");
 		String fedoraUsername = tryToGetInitParameter("fedoraUsername");
 		String fedoraPassword = tryToGetInitParameter("fedoraPassword");
-		return new ClassicFedoraUpdaterFactoryImp(httpHandlerFactory, repeatableLinkCollector,
-				fedoraURL, fedoraUsername, fedoraPassword);
+		return new FedoraConnectionInfo(fedoraURL,
+				fedoraUsername, fedoraPassword);
 	}
 
 	private RecordStorage createBasicStorage() {

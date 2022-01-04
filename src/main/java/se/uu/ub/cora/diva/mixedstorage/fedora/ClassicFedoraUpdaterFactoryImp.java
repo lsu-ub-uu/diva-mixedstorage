@@ -27,20 +27,15 @@ import se.uu.ub.cora.xmlutils.transformer.XsltTransformationFactory;
 public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdaterFactory {
 
 	private HttpHandlerFactory httpHandlerFactory;
-	// private DivaFedoraConverterFactory toFedoraConverterFactory;
-	private String fedoraUrl;
-	private String username;
-	private String password;
 	private RepeatableRelatedLinkCollector repeatableLinkCollector;
+	private FedoraConnectionInfo fedoraConnectionInfo;
 
 	public ClassicFedoraUpdaterFactoryImp(HttpHandlerFactory httpHandlerFactory,
-			RepeatableRelatedLinkCollector repeatableLinkCollector, String fedoraUrl,
-			String username, String password) {
+			RepeatableRelatedLinkCollector repeatableLinkCollector,
+			FedoraConnectionInfo fedoraConnectionInfo) {
 		this.httpHandlerFactory = httpHandlerFactory;
 		this.repeatableLinkCollector = repeatableLinkCollector;
-		this.fedoraUrl = fedoraUrl;
-		this.username = username;
-		this.password = password;
+		this.fedoraConnectionInfo = fedoraConnectionInfo;
 	}
 
 	@Override
@@ -49,7 +44,7 @@ public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdaterFacto
 			DivaFedoraConverterFactory divaFedoraConverterFactory = createDivaFedoraConverterFactory();
 
 			return new ClassicFedoraPersonUpdater(httpHandlerFactory, divaFedoraConverterFactory,
-					fedoraUrl, username, password);
+					fedoraConnectionInfo);
 		}
 		throw NotImplementedException
 				.withMessage("Factor ClassicFedoraUpdater not implemented for " + recordType);
@@ -57,28 +52,20 @@ public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdaterFacto
 
 	private DivaFedoraConverterFactory createDivaFedoraConverterFactory() {
 		CoraTransformationFactory transformerFactory = new XsltTransformationFactory();
-		return DivaFedoraConverterFactoryImp.usingFedoraURLAndTransformerFactory(fedoraUrl,
-				transformerFactory, repeatableLinkCollector);
+		return DivaFedoraConverterFactoryImp.usingFedoraURLAndTransformerFactory(
+				fedoraConnectionInfo.fedoraUrl, transformerFactory, repeatableLinkCollector);
 	}
 
 	public HttpHandlerFactory getHttpHandlerFactory() {
 		return httpHandlerFactory;
 	}
 
-	public String getFedoraUrl() {
-		return fedoraUrl;
-	}
-
-	public String getUserName() {
-		return username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
 	public RepeatableRelatedLinkCollector getRepeatableRelatedLinkCollector() {
 		return repeatableLinkCollector;
+	}
+
+	public FedoraConnectionInfo getFedoraConnectionInfo() {
+		return fedoraConnectionInfo;
 	}
 
 }
