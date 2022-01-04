@@ -38,9 +38,10 @@
 		<xmlconverter.version>1.8.0</xmlconverter.version>
 		<converter.version>1.7.0</converter.version>
 		<testutils.version>1.2.0</testutils.version>
-
 		<basicdata.version>3.4.0</basicdata.version>
-			</properties>
+		<corafedora.version>1.1-SNAPSHOT</corafedora.version>
+		
+	</properties>
 
 	<scm>
 		<connection>scm:git:https://github.com/lsu-ub-uu/diva-mixedstorage.git</connection>
@@ -136,6 +137,11 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>converter</artifactId>
 			<version>${converter.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>fedora</artifactId>
+			<version>${corafedora.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>
