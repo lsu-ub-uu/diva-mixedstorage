@@ -27,7 +27,11 @@ import se.uu.ub.cora.storage.RecordIdGenerator;
 
 public class DivaIdGeneratorFactory {
 
-	public RecordIdGenerator factor(FedoraConnectionInfo fedoraConnectionInfo) {
+	private DivaIdGeneratorFactory() {
+		throw new UnsupportedOperationException();
+	}
+
+	public static RecordIdGenerator factor(FedoraConnectionInfo fedoraConnectionInfo) {
 		HttpHandlerFactory httpHandlerFactory = new HttpHandlerFactoryImp();
 		XMLXPathParserFactory parserFactory = new XMLXPathParserFactoryImp();
 		return new DivaIdGenerator(httpHandlerFactory, fedoraConnectionInfo, parserFactory);

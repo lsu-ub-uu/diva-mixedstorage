@@ -43,9 +43,7 @@ public class DivaIdGeneratorProvider implements RecordIdGeneratorProvider {
 		logger.logInfoUsingMessage("DivaIdGeneratorProvider starting DivaIdGenerator...");
 		this.initInfo = initInfo;
 		FedoraConnectionInfo fedoraConnectionInfo = createFedoraConnectionInfo();
-		// TODO: återkom hit, ska den skickas in? sättas? hur brukar vi göra?
-		DivaIdGeneratorFactory divaIdGeneratorFactory = new DivaIdGeneratorFactory();
-		recordIdGenerator = divaIdGeneratorFactory.factor(fedoraConnectionInfo);
+		recordIdGenerator = DivaIdGeneratorFactory.factor(fedoraConnectionInfo);
 		logger.logInfoUsingMessage("DivaIdGeneratorProvider started DivaIdGenerator");
 	}
 

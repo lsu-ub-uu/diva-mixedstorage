@@ -21,6 +21,10 @@ package se.uu.ub.cora.diva.mixedstorage.id;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
@@ -30,12 +34,27 @@ import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 public class DivaIdGeneratorFactoryTest {
 
 	@Test
+	public void testPrivateConstructor() throws Exception {
+		Constructor<DivaIdGeneratorFactory> constructor = DivaIdGeneratorFactory.class
+				.getDeclaredConstructor();
+		assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+	}
+
+	@Test(expectedExceptions = InvocationTargetException.class)
+	public void testPrivateConstructorInvoke() throws Exception {
+		Constructor<DivaIdGeneratorFactory> constructor = DivaIdGeneratorFactory.class
+				.getDeclaredConstructor();
+		constructor.setAccessible(true);
+		constructor.newInstance();
+	}
+
+	@Test
 	public void testFactorDivaIdGenerator() {
 		FedoraConnectionInfo fedoraConnectionInfo = new FedoraConnectionInfo("someFedoraUrl",
 				"someUsername", "somePassword");
 
-		DivaIdGeneratorFactory factory = new DivaIdGeneratorFactory();
-		DivaIdGenerator recordIdGenerator = (DivaIdGenerator) factory.factor(fedoraConnectionInfo);
+		DivaIdGenerator recordIdGenerator = (DivaIdGenerator) DivaIdGeneratorFactory
+				.factor(fedoraConnectionInfo);
 		assertSame(recordIdGenerator.getFedoraConnectionInfo(), fedoraConnectionInfo);
 		assertTrue(recordIdGenerator.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
 		assertTrue(
