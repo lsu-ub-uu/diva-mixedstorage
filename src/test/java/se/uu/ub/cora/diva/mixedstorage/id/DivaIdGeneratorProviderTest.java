@@ -29,6 +29,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
+import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraException;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.RecordIdGenerator;
@@ -97,5 +98,58 @@ public class DivaIdGeneratorProviderTest {
 				"DivaIdGeneratorProvider started DivaIdGenerator");
 		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 3);
 		assertEquals(loggerFactorySpy.getNoOfFatalLogMessagesUsingClassName(testedClassName), 0);
+	}
+
+	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
+			+ "InitInfo must contain fedoraURL")
+	public void testErrorIfMissingStartParameterFedoraURL() {
+		initInfo.remove("fedoraURL");
+		idGeneratorProvider.startUsingInitInfo(initInfo);
+	}
+
+	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
+			+ "InitInfo must contain fedoraUsername")
+	public void testErrorIfMissingStartParameterFedoraUsername() {
+		initInfo.remove("fedoraUsername");
+		idGeneratorProvider.startUsingInitInfo(initInfo);
+	}
+
+	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
+			+ "InitInfo must contain fedoraPassword")
+	public void testErrorIfMissingStartParameterFedoraPassword() {
+		initInfo.remove("fedoraPassword");
+		idGeneratorProvider.startUsingInitInfo(initInfo);
+	}
+
+	@Test
+	public void testLoggingAndErrorIfMissingParameterFedoraURL() {
+		assertFatalLogMessageForMissingParameter("fedoraURL");
+		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 1);
+	}
+
+	private void assertFatalLogMessageForMissingParameter(String parameterName) {
+		initInfo.remove(parameterName);
+		try {
+			idGeneratorProvider.startUsingInitInfo(initInfo);
+		} catch (Exception e) {
+
+		}
+		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
+				"DivaIdGeneratorProvider starting DivaIdGenerator...");
+		assertEquals(loggerFactorySpy.getFatalLogMessageUsingClassNameAndNo(testedClassName, 0),
+				"InitInfo must contain " + parameterName);
+		assertEquals(loggerFactorySpy.getNoOfFatalLogMessagesUsingClassName(testedClassName), 1);
+	}
+
+	@Test
+	public void testLoggingAndErrorIfMissingParameterFedoraUsername() {
+		assertFatalLogMessageForMissingParameter("fedoraUsername");
+		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 2);
+	}
+
+	@Test
+	public void testLoggingAndErrorIfMissingParameterFedoraPassword() {
+		assertFatalLogMessageForMissingParameter("fedoraPassword");
+		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 2);
 	}
 }

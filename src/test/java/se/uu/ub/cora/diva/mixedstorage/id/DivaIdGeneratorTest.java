@@ -102,14 +102,14 @@ public class DivaIdGeneratorTest {
 
 	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
 			+ "getting next pid from fedora failed, with response code: 500")
-	public void testErrorFetchingPersonPid() throws Exception {
+	public void testErrorFetchingPersonPid() {
 		httpHandlerFactory.responseCodes = new ArrayList<>(List.of(500));
 		idGenerator.getIdForType("person");
 	}
 
 	@Test(expectedExceptions = ParseException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error parsing response from fedora: some error from spy")
-	public void testErrorParsingPid() throws Exception {
+	public void testErrorParsingPid() {
 		parserFactory.throwException = true;
 		idGenerator.getIdForType("person");
 	}
