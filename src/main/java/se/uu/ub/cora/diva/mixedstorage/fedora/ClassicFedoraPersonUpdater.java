@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Uppsala University Library
+ * Copyright 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -27,6 +27,7 @@ import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 
 public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 
+	private static final int CREATED = 201;
 	private static final int OK = 200;
 	private HttpHandlerFactory httpHandlerFactory;
 	private DivaFedoraConverterFactory divaCoraToFedoraConverterFactory;
@@ -57,14 +58,19 @@ public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 	}
 
 	private HttpHandler setUpHttpHandlerForUpdate(String recordId) {
-		String url = createURL(recordId);
-		HttpHandler httpHandler = httpHandlerFactory.factor(url);
+		String url = createUpdateURL(recordId);
+		HttpHandler httpHandler = setUpHttpHandlerWithAuthorization(url);
 		httpHandler.setRequestMethod("PUT");
-		setAutorizationInHttpHandler(httpHandler);
 		return httpHandler;
 	}
 
-	private void setAutorizationInHttpHandler(HttpHandler httpHandler) {
+	private HttpHandler setUpHttpHandlerWithAuthorization(String url) {
+		HttpHandler httpHandler = httpHandlerFactory.factor(url);
+		setAuthorizationInHttpHandler(httpHandler);
+		return httpHandler;
+	}
+
+	private void setAuthorizationInHttpHandler(HttpHandler httpHandler) {
 		String encoded = Base64.getEncoder().encodeToString(
 				(fedoraConnectionInfo.fedoraUsername + ":" + fedoraConnectionInfo.fedoraPassword)
 						.getBytes(StandardCharsets.UTF_8));
@@ -77,7 +83,7 @@ public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 		return toFedoraConverter.toXML(dataGroup);
 	}
 
-	private String createURL(String recordId) {
+	private String createUpdateURL(String recordId) {
 		return fedoraConnectionInfo.fedoraUrl + "objects/" + recordId
 				+ "/datastreams/METADATA?format=?xml&controlGroup=M"
 				+ "&logMessage=coraWritten&checksumType=SHA-512";
@@ -93,6 +99,31 @@ public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
 
 	public FedoraConnectionInfo getFedoraConnectionInfo() {
 		return fedoraConnectionInfo;
+	}
+
+	@Override
+	public void createInFedora(String recordType, String recordId, DataGroup dataGroup) {
+		HttpHandler httpHandler = setUpHttpHandlerForCreate(recordId);
+		String fedoraXML = convertRecordToFedoraXML(recordType, dataGroup);
+		httpHandler.setRequestProperty("Content-Type", "text/xml");
+		httpHandler.setOutput(fedoraXML);
+		int responseCode = httpHandler.getResponseCode();
+		throwErrorIfNotCreatedFromFedora(recordId, responseCode);
+	}
+
+	private void throwErrorIfNotCreatedFromFedora(String recordId, int responseCode) {
+		if (responseCode != CREATED) {
+			throw FedoraException.withMessage("create to fedora failed for record: " + recordId
+					+ ", with response code: " + responseCode);
+		}
+	}
+
+	private HttpHandler setUpHttpHandlerForCreate(String recordId) {
+		String url = fedoraConnectionInfo.fedoraUrl + "objects/" + recordId
+				+ "?format=info:fedora/fedora-system:FOXML-1.1" + "&logMessage=coraWritten";
+		HttpHandler httpHandler = setUpHttpHandlerWithAuthorization(url);
+		httpHandler.setRequestMethod("POST");
+		return httpHandler;
 	}
 
 }

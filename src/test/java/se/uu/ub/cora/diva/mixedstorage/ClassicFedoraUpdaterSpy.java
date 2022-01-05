@@ -26,13 +26,23 @@ public class ClassicFedoraUpdaterSpy implements ClassicFedoraUpdater {
 	public String recordType;
 	public String recordId;
 	public DataGroup dataGroup;
+	public String methodName = "";
 
 	@Override
 	public void updateInFedora(String recordType, String recordId, DataGroup dataGroup) {
 		this.recordType = recordType;
 		this.recordId = recordId;
 		this.dataGroup = dataGroup;
+		methodName = "updateInFedora";
 
+	}
+
+	@Override
+	public void createInFedora(String recordType, String recordId, DataGroup dataGroup) {
+		this.recordType = recordType;
+		this.recordId = recordId;
+		this.dataGroup = dataGroup;
+		methodName = "createInFedora";
 	}
 
 }

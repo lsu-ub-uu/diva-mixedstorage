@@ -417,20 +417,21 @@ public class DivaMixedRecordStorageTest {
 		assertNoInteractionWithStorage(divaDbToCoraStorage);
 	}
 
-	// @Test
-	// public void updatePersonCallsUpdateForFedora() {
-	// DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
-	// divaMixedRecordStorage.update("person", "someId", dataGroup,
-	// new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
-	// "someDataDivider");
-	//
-	// assertEquals(fedoraUpdaterFactory.recordType, "person");
-	//
-	// ClassicFedoraUpdaterSpy factoredFedoraUpdater = fedoraUpdaterFactory.factoredFedoraUpdater;
-	// assertEquals(factoredFedoraUpdater.recordType, "person");
-	// assertEquals(factoredFedoraUpdater.recordId, "someId");
-	// assertSame(factoredFedoraUpdater.dataGroup, dataGroup);
-	// }
+	@Test
+	public void createPersonCallsCreateForFedora() {
+		DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
+		divaMixedRecordStorage.create("person", "someId", dataGroup,
+				new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
+				"someDataDivider");
+
+		assertEquals(fedoraUpdaterFactory.recordType, "person");
+
+		ClassicFedoraUpdaterSpy factoredFedoraUpdater = fedoraUpdaterFactory.factoredFedoraUpdater;
+		assertEquals(factoredFedoraUpdater.recordType, "person");
+		assertEquals(factoredFedoraUpdater.recordId, "someId");
+		assertSame(factoredFedoraUpdater.dataGroup, dataGroup);
+		assertSame(factoredFedoraUpdater.methodName, "createInFedora");
+	}
 
 	@Test
 	public void deleteByTypeAndIdGoesToBasicStorage() throws Exception {
@@ -533,6 +534,7 @@ public class DivaMixedRecordStorageTest {
 		assertEquals(factoredFedoraUpdater.recordType, "person");
 		assertEquals(factoredFedoraUpdater.recordId, "someId");
 		assertSame(factoredFedoraUpdater.dataGroup, dataGroup);
+		assertSame(factoredFedoraUpdater.methodName, "updateInFedora");
 	}
 
 	@Test

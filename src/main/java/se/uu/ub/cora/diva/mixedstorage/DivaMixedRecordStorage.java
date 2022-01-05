@@ -95,6 +95,8 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
 			databaseStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
+			ClassicFedoraUpdater fedoraUpdater = fedoraUpdaterFactory.factor(PERSON);
+			fedoraUpdater.createInFedora(type, id, dataRecord);
 		} else {
 			basicStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 		}

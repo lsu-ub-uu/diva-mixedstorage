@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Uppsala University Library
+ * Copyright 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -25,6 +25,7 @@ import static org.testng.Assert.assertSame;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -79,13 +80,16 @@ public class ClassicFedoraPersonUpdaterTest {
 	public void testHttpHandler() {
 		fedoraUpdater.updateInFedora("someRecordType", "someRecordId", dataGroup);
 
+		String updateUrl = "someBaseUrl/objects/someRecordId/datastreams/METADATA?format=?xml&controlGroup=M&logMessage=coraWritten&checksumType=SHA-512";
+		assertCorrectCallToHttpHandler(updateUrl, "PUT");
+	}
+
+	private void assertCorrectCallToHttpHandler(String updateUrl, String updateAction) {
 		HttpHandlerSpy factoredHttpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
 		assertNotNull(factoredHttpHandler);
 
-		assertEquals(httpHandlerFactory.urls.get(0),
-				"someBaseUrl/objects/someRecordId/datastreams/METADATA?format=?xml&controlGroup=M&logMessage=coraWritten&checksumType=SHA-512");
-
-		assertEquals(factoredHttpHandler.requestMethod, "PUT");
+		assertEquals(httpHandlerFactory.urls.get(0), updateUrl);
+		assertEquals(factoredHttpHandler.requestMethod, updateAction);
 
 		assertCorrectCredentials(factoredHttpHandler);
 
@@ -115,10 +119,40 @@ public class ClassicFedoraPersonUpdaterTest {
 
 	}
 
-	@Test(expectedExceptions = FedoraException.class)
-	public void testErrorFromFedora() {
+	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
+			+ "update to fedora failed for record: someRecordId, with response code: 505")
+	public void testErrorFromFedoraOnUpdate() {
 		httpHandlerFactory.responseCodes = new ArrayList<>();
 		httpHandlerFactory.responseCodes.add(505);
 		fedoraUpdater.updateInFedora("someRecordType", "someRecordId", dataGroup);
 	}
+
+	@Test
+	public void testHttpHandlerForCreate() {
+		httpHandlerFactory.responseCodes = List.of(201);
+		fedoraUpdater.createInFedora("someRecordType", "someRecordId", dataGroup);
+
+		// String createUrl = "someBaseUrl/objects/someRecordId?format=?xml&logMessage=coraWritten";
+		String createUrl = "someBaseUrl/objects/someRecordId?format=info:fedora/fedora-system:FOXML-1.1&logMessage=coraWritten";
+		assertCorrectCallToHttpHandler(createUrl, "POST");
+	}
+
+	@Test
+	public void testCreateInFedora() {
+		httpHandlerFactory.responseCodes = List.of(201);
+
+		fedoraUpdater.createInFedora("someRecordType", "someRecordId", dataGroup);
+		DivaCoraToFedoraConverterSpy divaCoraToFedoraConverter = (DivaCoraToFedoraConverterSpy) fedoraConverterFactory.factoredToFedoraConverters
+				.get(0);
+		assertSame(divaCoraToFedoraConverter.dataRecord, dataGroup);
+	}
+
+	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
+			+ "create to fedora failed for record: someRecordId, with response code: 505")
+	public void testErrorFromFedoraOnCreate() {
+		httpHandlerFactory.responseCodes = new ArrayList<>();
+		httpHandlerFactory.responseCodes.add(505);
+		fedoraUpdater.createInFedora("someRecordType", "someRecordId", dataGroup);
+	}
+
 }
