@@ -23,8 +23,21 @@ import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 
+/**
+ * RepeatableRelatedLinkCollector collects all records that are linked from a list of DataGroups
+ */
 public interface RepeatableRelatedLinkCollector {
 
+	/**
+	 * collectLinks collects the DataGroup representation of all records that are linked from all
+	 * DataGroups in a list. The collected DataGroups are returned in a collection grouped by the
+	 * recordType of the links.
+	 * 
+	 * @param list
+	 *            of {@link DataGroup} to collect the links from
+	 * 
+	 * @return a Map containing the collected DataGroups
+	 */
 	Map<String, List<DataGroup>> collectLinks(List<DataGroup> groupsContainingLinks);
 
 }

@@ -18,8 +18,22 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+/**
+ * ClassicFedoraUpdaterFactory factors a ClassicFedoraUpdater
+ */
 public interface ClassicFedoraUpdaterFactory {
 
+	/**
+	 * factor factors a ClassicFedoraUpdater, using recordType to determine which
+	 * ClassicFedoraUpdater to return
+	 * 
+	 * If no ClassicFedoraUpdater can be factored, a NotImplementedException SHOULD be thrown
+	 * 
+	 * @param String
+	 *            recordType, the type used to determine which ClassicFedoraUpdater to return
+	 * 
+	 * @return a ClassicFedoraUpdater, suitable for the recordType
+	 */
 	ClassicFedoraUpdater factor(String recordType);
 
 }

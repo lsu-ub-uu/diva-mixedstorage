@@ -18,8 +18,22 @@
  */
 package se.uu.ub.cora.diva.mixedstorage;
 
+/**
+ * RelatedLinkCollectorFactory factors a RelatedLinkCollector
+ */
 public interface RelatedLinkCollectorFactory {
 
+	/**
+	 * factor factors a RelatedLinkCollector, using type to determine which RelatedLinkCollector
+	 * implmenatation to return
+	 * 
+	 * If no RelatedLinkCollector can be factored, a NotImplementedException SHOULD be thrown
+	 * 
+	 * @param String
+	 *            type, the type used to determine which RelatedLinkCollector implementaion to
+	 *            return
+	 * @return an implementation of a {@link RelatedLinkCollector}
+	 */
 	RelatedLinkCollector factor(String type);
 
 }

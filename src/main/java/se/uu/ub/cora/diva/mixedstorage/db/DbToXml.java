@@ -18,8 +18,21 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db;
 
+/**
+ * DbToXml is used to transform a record from storage to XML
+ */
 public interface DbToXml {
 
+	/**
+	 * toXMl fetches a record from storage, using recordType and recordId, and converts it from
+	 * format in storage to XML.
+	 * 
+	 * @param String
+	 *            recordType, the type of the record to convert
+	 * 
+	 * @param String
+	 *            recordId, the id of the record to convert
+	 */
 	String toXML(String recordType, String recordId);
 
 }

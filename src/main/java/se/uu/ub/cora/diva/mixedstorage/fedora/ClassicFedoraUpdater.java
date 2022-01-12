@@ -20,8 +20,26 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.data.DataGroup;
 
+/**
+ * ClassicFedoraUpdater is used to synchronize updates between storage in Cora and fedora storage in
+ * classic
+ */
 public interface ClassicFedoraUpdater {
 
+	/**
+	 * updateInFedora updates a record in classic fedora storage
+	 * 
+	 * If update of fedora fails, a FedoraExceptionFedoraException SHOULD be thrown
+	 * 
+	 * @param String
+	 *            recordType, the recordType of the record to be updated
+	 * 
+	 * @param String
+	 *            recordId, the record id of the record to be updated
+	 * 
+	 * @param DataGroup
+	 *            dataGroup, the dataGroup to convert and store in Fedora
+	 */
 	void updateInFedora(String recordType, String recordId, DataGroup dataGroup);
 
 }
