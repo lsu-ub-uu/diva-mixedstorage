@@ -1,8 +1,9 @@
-package se.uu.ub.cora.diva.mixedstorage.fedora;
+package se.uu.ub.cora.diva.mixedstorage;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import se.uu.ub.cora.diva.mixedstorage.fedora.HttpHandlerSpy;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpMultiPartUploader;

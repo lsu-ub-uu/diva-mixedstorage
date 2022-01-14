@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.converter.ConverterProvider;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
+import se.uu.ub.cora.diva.mixedstorage.HttpHandlerFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerFactory;
 import se.uu.ub.cora.logger.LoggerProvider;

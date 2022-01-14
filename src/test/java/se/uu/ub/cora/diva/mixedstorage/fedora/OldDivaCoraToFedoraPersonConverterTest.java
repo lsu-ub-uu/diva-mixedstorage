@@ -26,6 +26,7 @@ import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
+import se.uu.ub.cora.diva.mixedstorage.HttpHandlerFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.resource.ResourceReader;
 
 public class OldDivaCoraToFedoraPersonConverterTest {
