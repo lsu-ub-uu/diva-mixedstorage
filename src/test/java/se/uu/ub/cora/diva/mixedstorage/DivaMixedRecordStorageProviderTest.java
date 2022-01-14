@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2021 Uppsala University Library
+ * Copyright 2019, 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -41,6 +41,7 @@ import se.uu.ub.cora.basicstorage.RecordStorageInstance;
 import se.uu.ub.cora.basicstorage.RecordStorageOnDisk;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDataToDbTranslaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
@@ -98,6 +99,7 @@ public class DivaMixedRecordStorageProviderTest {
 		initInfo.put("fedoraURL", "http://diva-cora-fedora:8088/fedora/");
 		initInfo.put("fedoraUsername", "fedoraUser");
 		initInfo.put("fedoraPassword", "fedoraPass");
+		initInfo.put("authorityIndexUrl", "http://diva-cora-solr:8093/authority/rest");
 
 	}
 
@@ -339,6 +341,18 @@ public class DivaMixedRecordStorageProviderTest {
 
 		assertSame(linkCollectorFactory.getRecordStorage(), recordStorage.getDatabaseStorage());
 		assertSame(linkCollectorFactory.getClassicDbStorage(), recordStorage.getClassicDbStorage());
+	}
+
+	@Test
+	public void testClassicIndexerFactory() {
+		divaMixedRecordStorageProvider.startUsingInitInfo(initInfo);
+		DivaMixedRecordStorage recordStorage = (DivaMixedRecordStorage) divaMixedRecordStorageProvider
+				.getRecordStorage();
+
+		ClassicIndexerFactoryImp indexerFactory = (ClassicIndexerFactoryImp) recordStorage
+				.getClassicIndexerFactory();
+
+		assertEquals(indexerFactory.getBaseUrl(), initInfo.get("authorityIndexUrl"));
 
 	}
 
@@ -367,6 +381,22 @@ public class DivaMixedRecordStorageProviderTest {
 			assertTrue(e instanceof DataStorageException);
 			assertEquals(e.getMessage(), errorMessage);
 			assertTrue(e.getCause() instanceof DataStorageException);
+
+		}
+		assertTrue(loggerFactorySpy.infoLogMessageUsingClassNameExists(testedClassName,
+				"DivaMixedRecordStorageProvider starting DivaMixedRecordStorage..."));
+		assertTrue(loggerFactorySpy.fatalLogMessageUsingClassNameExists(testedClassName,
+				errorMessage));
+		assertEquals(loggerFactorySpy.getNoOfFatalLogMessagesUsingClassName(testedClassName), 1);
+	}
+
+	@Test
+	public void testLoggingAndErrorIfMissingStartParameterAuthorityIndexUrl() {
+		initInfo.remove("authorityIndexUrl");
+		String errorMessage = "InitInfo must contain " + "authorityIndexUrl";
+		try {
+			divaMixedRecordStorageProvider.startUsingInitInfo(initInfo);
+		} catch (Exception e) {
 
 		}
 		assertTrue(loggerFactorySpy.infoLogMessageUsingClassNameExists(testedClassName,

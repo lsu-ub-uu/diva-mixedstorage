@@ -18,8 +18,29 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.classic;
 
-public interface ClassicIndexer {
+import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.httphandler.HttpHandlerFactory;
+import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 
-	void index(String recordId);
+public class ClassicIndexerFactoryImp implements ClassicIndexerFactory {
+
+	private String baseUrl;
+
+	public ClassicIndexerFactoryImp(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
+
+	@Override
+	public ClassicIndexer factor(String type) {
+		if ("person".equals(type)) {
+			HttpHandlerFactory httpHandlerFactory = new HttpHandlerFactoryImp();
+			return new PersonClassicIndexer(httpHandlerFactory, baseUrl);
+		}
+		throw NotImplementedException.withMessage("No ClassicIndexer implementation for otherType");
+	}
+
+	public String getBaseUrl() {
+		return baseUrl;
+	}
 
 }

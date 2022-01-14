@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2021 Uppsala University Library
+ * Copyright 2019, 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -24,6 +24,8 @@ import se.uu.ub.cora.basicstorage.DataStorageException;
 import se.uu.ub.cora.basicstorage.RecordStorageInMemoryReadFromDisk;
 import se.uu.ub.cora.basicstorage.RecordStorageInstance;
 import se.uu.ub.cora.basicstorage.RecordStorageOnDisk;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDataToDbTranslaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
@@ -91,7 +93,48 @@ public class DivaMixedRecordStorageProvider
 	}
 
 	private void initializeAndStartMixedRecordStorage() {
-		RecordStorage basicStorage = createBasicStorage();
+		DivaMixedDependencies divaMixedDependencies = new DivaMixedDependencies();
+		createAndSetBasicStorage(divaMixedDependencies);
+		DivaDbRecordStorage classicDbStorage = createAndSetClassicDbStorage(divaMixedDependencies);
+		createAndSetUserStorage(divaMixedDependencies);
+
+		DatabaseRecordStorage databaseRecordStorage = createAndSetDatabaseStorage(
+				divaMixedDependencies);
+
+		createAndSetClassicFedoraUpdaterFactory(databaseRecordStorage, classicDbStorage,
+				divaMixedDependencies);
+
+		createAndSetClassicIndexerFactory(divaMixedDependencies);
+
+		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
+				.usingDivaMixedDependencies(divaMixedDependencies);
+
+		setStaticInstance(mixedRecordStorage);
+	}
+
+	private void createAndSetClassicIndexerFactory(DivaMixedDependencies divaMixedDependencies) {
+		String classicAuthorityIndexUrl = tryToGetInitParameterLogIfFound("authorityIndexUrl");
+
+		ClassicIndexerFactory classicIndexerFactory = new ClassicIndexerFactoryImp(
+				classicAuthorityIndexUrl);
+		divaMixedDependencies.setClassicIndexerFactory(classicIndexerFactory);
+	}
+
+	private void createAndSetBasicStorage(DivaMixedDependencies divaMixedDependencies) {
+		String basePath = tryToGetInitParameterLogIfFound("storageOnDiskBasePath");
+		String type = tryToGetInitParameterLogIfFound("storageType");
+		RecordStorage basicStorage;
+		if ("memory".equals(type)) {
+			basicStorage = RecordStorageInMemoryReadFromDisk
+					.createRecordStorageOnDiskWithBasePath(basePath);
+		} else {
+			basicStorage = RecordStorageOnDisk.createRecordStorageOnDiskWithBasePath(basePath);
+		}
+		divaMixedDependencies.setBasicStorage(basicStorage);
+	}
+
+	private DivaDbRecordStorage createAndSetClassicDbStorage(
+			DivaMixedDependencies divaMixedDependencies) {
 		try {
 			String databaseLookupName = tryToGetInitParameterLogIfFound("databaseLookupName");
 			sqlDatabaseFactory = SqlDatabaseFactoryImp
@@ -101,49 +144,44 @@ public class DivaMixedRecordStorageProvider
 			throw DataStorageException.withMessageAndException(e.getMessage(), e);
 		}
 		DivaDbRecordStorage classicDbStorage = createDbStorage(sqlDatabaseFactory);
-		RecordStorage userStorage = createUserStorage();
-		DatabaseStorageProvider databaseStorageProvider = new DatabaseStorageProvider();
-		databaseStorageProvider.startUsingInitInfo(initInfo);
-		DatabaseRecordStorage recordStorage = databaseStorageProvider.getRecordStorage();
-
-		ClassicFedoraUpdaterFactory fedoraUpdaterFactory = createClassicFedoraUpdaterFactory(
-				recordStorage, classicDbStorage);
-
-		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
-						classicDbStorage, userStorage, recordStorage, fedoraUpdaterFactory);
-		setStaticInstance(mixedRecordStorage);
+		divaMixedDependencies.setClassicDbStorage(classicDbStorage);
+		return classicDbStorage;
 	}
 
-	private ClassicFedoraUpdaterFactory createClassicFedoraUpdaterFactory(
-			DatabaseRecordStorage recordStorage, DivaDbRecordStorage classicDbStorage) {
+	private DatabaseRecordStorage createAndSetDatabaseStorage(
+			DivaMixedDependencies divaMixedDependencies) {
+		DatabaseStorageProvider databaseStorageProvider = new DatabaseStorageProvider();
+		databaseStorageProvider.startUsingInitInfo(initInfo);
+		DatabaseRecordStorage databaseRecordStorage = databaseStorageProvider.getRecordStorage();
+		divaMixedDependencies.setDatabaseStorage(databaseRecordStorage);
+		return databaseRecordStorage;
+	}
+
+	private void createAndSetClassicFedoraUpdaterFactory(DatabaseRecordStorage recordStorage,
+			DivaDbRecordStorage classicDbStorage, DivaMixedDependencies divaMixedDependencies) {
 		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
 
+		RepeatableRelatedLinkCollector repeatableLinkCollector = createRepeatableLinkCollector(
+				recordStorage, classicDbStorage);
+		FedoraConnectionInfo fedoraConnectionInfo = createFedoraConnectionInfo();
+		ClassicFedoraUpdaterFactory classicFedoraUpdaterFactory = new ClassicFedoraUpdaterFactoryImp(
+				httpHandlerFactory, repeatableLinkCollector, fedoraConnectionInfo);
+
+		divaMixedDependencies.setClassicFedoraUpdaterFactory(classicFedoraUpdaterFactory);
+	}
+
+	private RepeatableRelatedLinkCollector createRepeatableLinkCollector(
+			DatabaseRecordStorage recordStorage, DivaDbRecordStorage classicDbStorage) {
 		RelatedLinkCollectorFactory linkCollectorFactory = new RelatedLinkCollectorFactoryImp(
 				recordStorage, classicDbStorage);
-		RepeatableRelatedLinkCollector repeatableLinkCollector = new RepeatableRelatedLinkCollectorImp(
-				linkCollectorFactory);
-		FedoraConnectionInfo fedoraConnectionInfo = createFedoraConnectionInfo();
-		return new ClassicFedoraUpdaterFactoryImp(httpHandlerFactory, repeatableLinkCollector,
-				fedoraConnectionInfo);
+		return new RepeatableRelatedLinkCollectorImp(linkCollectorFactory);
 	}
 
 	private FedoraConnectionInfo createFedoraConnectionInfo() {
 		String fedoraURL = tryToGetInitParameterLogIfFound("fedoraURL");
 		String fedoraUsername = tryToGetInitParameter("fedoraUsername");
 		String fedoraPassword = tryToGetInitParameter("fedoraPassword");
-		return new FedoraConnectionInfo(fedoraURL,
-				fedoraUsername, fedoraPassword);
-	}
-
-	private RecordStorage createBasicStorage() {
-		String basePath = tryToGetInitParameterLogIfFound("storageOnDiskBasePath");
-		String type = tryToGetInitParameterLogIfFound("storageType");
-		if ("memory".equals(type)) {
-			return RecordStorageInMemoryReadFromDisk
-					.createRecordStorageOnDiskWithBasePath(basePath);
-		}
-		return RecordStorageOnDisk.createRecordStorageOnDiskWithBasePath(basePath);
+		return new FedoraConnectionInfo(fedoraURL, fedoraUsername, fedoraPassword);
 	}
 
 	private String tryToGetInitParameterLogIfFound(String parameterName) {
@@ -152,10 +190,11 @@ public class DivaMixedRecordStorageProvider
 		return basePath;
 	}
 
-	private RecordStorage createUserStorage() {
+	private void createAndSetUserStorage(DivaMixedDependencies divaMixedDependencies) {
 		guestUserStorage = getUserStorage();
 		startDivaStorageFactory();
-		return divaStorageFactory.factorForRecordType("user");
+		RecordStorage userStorage = divaStorageFactory.factorForRecordType("user");
+		divaMixedDependencies.setUserStorage(userStorage);
 	}
 
 	private void startDivaStorageFactory() {

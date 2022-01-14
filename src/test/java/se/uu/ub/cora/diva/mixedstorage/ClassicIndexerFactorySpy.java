@@ -16,10 +16,21 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.classic;
+package se.uu.ub.cora.diva.mixedstorage;
 
-public interface ClassicIndexer {
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexer;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
 
-	void index(String recordId);
+public class ClassicIndexerFactorySpy implements ClassicIndexerFactory {
+
+	public String type;
+	public ClassicIndexer factoredndexer;
+
+	@Override
+	public ClassicIndexer factor(String type) {
+		this.type = type;
+		factoredndexer = new ClassicIndexerSpy();
+		return factoredndexer;
+	}
 
 }

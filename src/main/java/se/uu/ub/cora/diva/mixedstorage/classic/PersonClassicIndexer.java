@@ -37,6 +37,7 @@ public class PersonClassicIndexer implements ClassicIndexer {
 		this.baseUrl = baseUrl;
 	}
 
+	@Override
 	public void index(String recordId) {
 		String url = baseUrl + "authority/person/index/" + recordId;
 		HttpHandler httpHandler = httpHandlerFactory.factor(url);

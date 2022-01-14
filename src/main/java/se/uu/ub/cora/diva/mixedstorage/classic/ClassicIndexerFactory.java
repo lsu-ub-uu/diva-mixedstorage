@@ -18,8 +18,8 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.classic;
 
-public interface ClassicIndexer {
+public interface ClassicIndexerFactory {
 
-	void index(String recordId);
+	ClassicIndexer factor(String type);
 
 }

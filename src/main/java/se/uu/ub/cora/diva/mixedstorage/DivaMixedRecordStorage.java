@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
 import se.uu.ub.cora.searchstorage.SearchStorage;
@@ -36,27 +37,26 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private static final String CORA_USER = "coraUser";
 	private static final String PERSON = "person";
 	private static final String ORGANISATION = "organisation";
+
 	private RecordStorage basicStorage;
 	private RecordStorage divaClassicDbStorage;
 	private RecordStorage userStorage;
 	private RecordStorage databaseStorage;
 	private ClassicFedoraUpdaterFactory fedoraUpdaterFactory;
+	private ClassicIndexerFactory classicIndexerFactory;
 
-	public static RecordStorage usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(
-			RecordStorage basicStorage, RecordStorage divaDbStorage, RecordStorage userStorage,
-			RecordStorage databaseStorage, ClassicFedoraUpdaterFactory fedoraUpdaterFactory) {
-		return new DivaMixedRecordStorage(basicStorage, divaDbStorage, userStorage, databaseStorage,
-				fedoraUpdaterFactory);
+	public static DivaMixedRecordStorage usingDivaMixedDependencies(
+			DivaMixedDependencies mixedDependencies) {
+		return new DivaMixedRecordStorage(mixedDependencies);
 	}
 
-	private DivaMixedRecordStorage(RecordStorage basicStorage, RecordStorage divaDbStorage,
-			RecordStorage userStorage, RecordStorage databaseStorage,
-			ClassicFedoraUpdaterFactory fedoraUpdatedFactory) {
-		this.basicStorage = basicStorage;
-		this.divaClassicDbStorage = divaDbStorage;
-		this.userStorage = userStorage;
-		this.databaseStorage = databaseStorage;
-		this.fedoraUpdaterFactory = fedoraUpdatedFactory;
+	private DivaMixedRecordStorage(DivaMixedDependencies mixedDependencies) {
+		this.basicStorage = mixedDependencies.getBasicStorage();
+		this.divaClassicDbStorage = mixedDependencies.getClassicDbStorage();
+		this.userStorage = mixedDependencies.getUserStorage();
+		this.databaseStorage = mixedDependencies.getDatabaseStorage();
+		this.fedoraUpdaterFactory = mixedDependencies.getClassicFedoraUpdaterFactory();
+		classicIndexerFactory = mixedDependencies.getClassicIndexerFactory();
 	}
 
 	@Override
@@ -273,5 +273,10 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	ClassicFedoraUpdaterFactory getFedoraUpdaterFactory() {
 		return fedoraUpdaterFactory;
+	}
+
+	public ClassicIndexerFactory getClassicIndexerFactory() {
+		return classicIndexerFactory;
+
 	}
 }
