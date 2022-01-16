@@ -24,13 +24,13 @@ import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
 public class ClassicIndexerFactorySpy implements ClassicIndexerFactory {
 
 	public String type;
-	public ClassicIndexer factoredndexer;
+	public ClassicIndexerSpy factoredIndexer;
 
 	@Override
 	public ClassicIndexer factor(String type) {
 		this.type = type;
-		factoredndexer = new ClassicIndexerSpy();
-		return factoredndexer;
+		factoredIndexer = new ClassicIndexerSpy();
+		return factoredIndexer;
 	}
 
 }

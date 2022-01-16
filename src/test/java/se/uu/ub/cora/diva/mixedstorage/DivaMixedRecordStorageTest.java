@@ -354,9 +354,6 @@ public class DivaMixedRecordStorageTest {
 		mixedDependencies.setUserStorage(userStorage);
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingDivaMixedDependencies(mixedDependencies);
-		// (DivaMixedRecordStorage) DivaMixedRecordStorage
-		// .usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
-		// divaDbToCoraStorage, userStorage, null, fedoraUpdaterFactory);
 
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
@@ -516,6 +513,22 @@ public class DivaMixedRecordStorageTest {
 		assertEquals(factoredFedoraUpdater.recordType, "person");
 		assertEquals(factoredFedoraUpdater.recordId, "someId");
 		assertSame(factoredFedoraUpdater.dataGroup, dataGroup);
+	}
+
+	@Test
+	public void updatePersonCallsClassicIndexer() {
+		DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
+		divaMixedRecordStorage.update("person", "someId", dataGroup,
+				new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
+				"someDataDivider");
+
+		ClassicIndexerFactorySpy indexerFactory = (ClassicIndexerFactorySpy) mixedDependencies
+				.getClassicIndexerFactory();
+		assertEquals(indexerFactory.type, "person");
+
+		ClassicIndexerSpy factoredIndexer = indexerFactory.factoredIndexer;
+		assertEquals(factoredIndexer.recordId, "someId");
+
 	}
 
 	@Test

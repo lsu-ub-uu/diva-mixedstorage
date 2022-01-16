@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexer;
 import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
 import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
@@ -115,8 +116,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
 			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
-			ClassicFedoraUpdater fedoraUpdater = fedoraUpdaterFactory.factor(PERSON);
-			fedoraUpdater.updateInFedora(type, id, dataRecord);
+			synchronizeWithClassic(type, id, dataRecord);
 
 		} else if (isOrganisation(type)) {
 			divaClassicDbStorage.update(type, id, dataRecord, collectedTerms, linkList,
@@ -124,6 +124,13 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		} else {
 			basicStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 		}
+	}
+
+	private void synchronizeWithClassic(String type, String id, DataGroup dataRecord) {
+		ClassicFedoraUpdater fedoraUpdater = fedoraUpdaterFactory.factor(PERSON);
+		fedoraUpdater.updateInFedora(type, id, dataRecord);
+		ClassicIndexer classicIndexer = classicIndexerFactory.factor(type);
+		classicIndexer.index(id);
 	}
 
 	@Override
