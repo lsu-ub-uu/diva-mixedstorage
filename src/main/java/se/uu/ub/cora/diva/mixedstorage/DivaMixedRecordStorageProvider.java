@@ -112,14 +112,6 @@ public class DivaMixedRecordStorageProvider
 		setStaticInstance(mixedRecordStorage);
 	}
 
-	private void createAndSetClassicIndexerFactory(DivaMixedDependencies divaMixedDependencies) {
-		String classicAuthorityIndexUrl = tryToGetInitParameterLogIfFound("authorityIndexUrl");
-
-		ClassicIndexerFactory classicIndexerFactory = new ClassicIndexerFactoryImp(
-				classicAuthorityIndexUrl);
-		divaMixedDependencies.setClassicIndexerFactory(classicIndexerFactory);
-	}
-
 	private void createAndSetBasicStorage(DivaMixedDependencies divaMixedDependencies) {
 		String basePath = tryToGetInitParameterLogIfFound("storageOnDiskBasePath");
 		String type = tryToGetInitParameterLogIfFound("storageType");
@@ -131,6 +123,17 @@ public class DivaMixedRecordStorageProvider
 			basicStorage = RecordStorageOnDisk.createRecordStorageOnDiskWithBasePath(basePath);
 		}
 		divaMixedDependencies.setBasicStorage(basicStorage);
+	}
+
+	private String tryToGetInitParameterLogIfFound(String parameterName) {
+		String basePath = tryToGetInitParameter(parameterName);
+		log.logInfoUsingMessage("Found " + basePath + " as " + parameterName);
+		return basePath;
+	}
+
+	private String tryToGetInitParameter(String parameterName) {
+		throwErrorIfKeyIsMissingFromInitInfo(parameterName);
+		return initInfo.get(parameterName);
 	}
 
 	private DivaDbRecordStorage createAndSetClassicDbStorage(
@@ -184,10 +187,12 @@ public class DivaMixedRecordStorageProvider
 		return new FedoraConnectionInfo(fedoraURL, fedoraUsername, fedoraPassword);
 	}
 
-	private String tryToGetInitParameterLogIfFound(String parameterName) {
-		String basePath = tryToGetInitParameter(parameterName);
-		log.logInfoUsingMessage("Found " + basePath + " as " + parameterName);
-		return basePath;
+	private void createAndSetClassicIndexerFactory(DivaMixedDependencies divaMixedDependencies) {
+		String classicAuthorityIndexUrl = tryToGetInitParameterLogIfFound("authorityIndexUrl");
+
+		ClassicIndexerFactory classicIndexerFactory = new ClassicIndexerFactoryImp(
+				classicAuthorityIndexUrl);
+		divaMixedDependencies.setClassicIndexerFactory(classicIndexerFactory);
 	}
 
 	private void createAndSetUserStorage(DivaMixedDependencies divaMixedDependencies) {
@@ -228,11 +233,6 @@ public class DivaMixedRecordStorageProvider
 				.usingReaderDeleterAndCreator(sqlDatabaseFactory);
 
 		return new DivaDbUpdaterFactoryImp(translaterFactory, sqlDatabaseFactory, relatedFactory);
-	}
-
-	private String tryToGetInitParameter(String parameterName) {
-		throwErrorIfKeyIsMissingFromInitInfo(parameterName);
-		return initInfo.get(parameterName);
 	}
 
 	static void setStaticInstance(RecordStorage recordStorage) {
