@@ -48,6 +48,12 @@ public class RelatedLinkCollectorFactoryTest {
 		assertSame(linkCollector.getClassicDbStorage(), classicDbStorage);
 	}
 
+	@Test
+	public void testFactorForUser() {
+		UserLinkCollector linkCollector = (UserLinkCollector) factory.factor("user");
+		assertSame(linkCollector.getClassicDbStorage(), classicDbStorage);
+	}
+
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "Factor not implemented for type otherType")
 	public void testFactorOther() {

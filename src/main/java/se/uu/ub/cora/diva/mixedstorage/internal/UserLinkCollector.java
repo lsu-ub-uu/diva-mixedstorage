@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Uppsala University Library
+ * Copyright 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,38 +18,34 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.internal;
 
-import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import java.util.HashMap;
+import java.util.Map;
+
+import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollector;
-import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollectorFactory;
 import se.uu.ub.cora.storage.RecordStorage;
 
-public class RelatedLinkCollectorFactoryImp implements RelatedLinkCollectorFactory {
+public class UserLinkCollector implements RelatedLinkCollector {
 
-	private RecordStorage recordStorage;
 	private RecordStorage classicDbStorage;
 
-	public RelatedLinkCollectorFactoryImp(RecordStorage recordStorage,
-			RecordStorage classicDbStorage) {
-		this.recordStorage = recordStorage;
+	public UserLinkCollector(RecordStorage classicDbStorage) {
 		this.classicDbStorage = classicDbStorage;
 	}
 
 	@Override
-	public RelatedLinkCollector factor(String type) {
-		if ("personDomainPart".equals(type)) {
-			return new DomainPartOrganisationCollector(recordStorage, classicDbStorage);
-		}
-		if ("user".equals(type)) {
-			return new UserLinkCollector(classicDbStorage);
-		}
-		throw NotImplementedException.withMessage("Factor not implemented for type otherType");
+	public Map<String, Map<String, DataGroup>> collectLinks(DataGroup dataGroup) {
+		DataGroup createdBy = dataGroup.getFirstGroupWithNameInData("createdBy");
+		String id = createdBy.getFirstAtomicValueWithNameInData("linkedRecordId");
+		DataGroup user = classicDbStorage.read("public.user", id);
+		HashMap<String, DataGroup> userMap = new HashMap<>();
+		userMap.put("", null);
+		Map<String, Map<String, DataGroup>> links = new HashMap<>();
+		links.put("user", userMap);
+		return links;
 	}
 
-	public RecordStorage getRecordStorage() {
-		return recordStorage;
-	}
-
-	public RecordStorage getClassicDbStorage() {
+	RecordStorage getClassicDbStorage() {
 		return classicDbStorage;
 	}
 
