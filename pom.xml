@@ -28,7 +28,6 @@
 		<storage.version>5.2.0</storage.version>
 		<searchstorage.version>3.10.0</searchstorage.version>
 		<basicstorage.version>5.3.0</basicstorage.version>
-		<sqldatabase.version>6.0.0</sqldatabase.version>
 		<sqlstorage.version>1.2.0</sqlstorage.version>
 		<httphandler.version>2.4.0</httphandler.version>
 		<apptokenstorage.version>2.4.0</apptokenstorage.version>
@@ -88,11 +87,6 @@
 			<artifactId>basicstorage</artifactId>
 			<version>${basicstorage.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>sqldatabase</artifactId>
-			<version>${sqldatabase.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
