@@ -66,6 +66,7 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	@Override
 	public DivaCoraToFedoraConverter factorToFedoraConverter(String type) {
 		if ("person".equals(type)) {
+			// new RelatedLinkCollectorFactory();
 			return new DivaCoraToFedoraPersonConverter(coraTransformationFactory,
 					repeatableLinkCollector);
 		}

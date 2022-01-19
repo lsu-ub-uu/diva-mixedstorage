@@ -50,7 +50,8 @@ public class RelatedLinkCollectorFactoryTest {
 
 	@Test
 	public void testFactorForUser() {
-		UserLinkCollector linkCollector = (UserLinkCollector) factory.factor("user");
+		UserLinkInRecordInfoCollector linkCollector = (UserLinkInRecordInfoCollector) factory
+				.factor("recordInfo");
 		assertSame(linkCollector.getClassicDbStorage(), classicDbStorage);
 	}
 

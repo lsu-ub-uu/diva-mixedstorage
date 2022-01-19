@@ -35,7 +35,6 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
-import se.uu.ub.cora.diva.mixedstorage.internal.RepeatableRelatedLinkCollectorImp;
 
 public class RepeatableRelatedLinkCollectorTest {
 

@@ -39,8 +39,8 @@ public class RelatedLinkCollectorFactoryImp implements RelatedLinkCollectorFacto
 		if ("personDomainPart".equals(type)) {
 			return new DomainPartOrganisationCollector(recordStorage, classicDbStorage);
 		}
-		if ("user".equals(type)) {
-			return new UserLinkCollector(classicDbStorage);
+		if ("recordInfo".equals(type)) {
+			return new UserLinkInRecordInfoCollector(classicDbStorage);
 		}
 		throw NotImplementedException.withMessage("Factor not implemented for type otherType");
 	}
