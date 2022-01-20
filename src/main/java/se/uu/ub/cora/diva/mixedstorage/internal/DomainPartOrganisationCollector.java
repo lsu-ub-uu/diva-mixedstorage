@@ -60,14 +60,6 @@ public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 		return dbStorage.read(linkedRecordType, linkedRecordId);
 	}
 
-	private Map<String, DataGroup> collectAllLinks(Map<String, DataGroup> links,
-			DataGroup personDomainPart) {
-		Map<String, DataGroup> collectedOrganisationsFromLinks = collectOrganisations(
-				personDomainPart);
-		links.putAll(collectedOrganisationsFromLinks);
-		return links;
-	}
-
 	private Map<String, DataGroup> collectOrganisations(DataGroup personDomainPart) {
 		List<DataGroup> affiliations = personDomainPart.getAllGroupsWithNameInData("affiliation");
 		Map<String, DataGroup> collectedOrganisationsFromLinks = new HashMap<>();

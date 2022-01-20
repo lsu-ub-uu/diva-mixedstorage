@@ -18,8 +18,6 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,8 +25,6 @@ import java.util.Map.Entry;
 import se.uu.ub.cora.converter.Converter;
 import se.uu.ub.cora.converter.ConverterProvider;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollector;
-import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollectorFactory;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
@@ -38,14 +34,11 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 	private CoraTransformationFactory transformationFactory;
 	private static final String PERSON_XSLT_PATH = "person/toCoraPerson.xsl";
 	private RepeatableRelatedLinkCollector repeatbleRelatedLinkCollector;
-	private RelatedLinkCollectorFactory relatedLinkCollectorFactory;
 
 	public DivaCoraToFedoraPersonConverter(CoraTransformationFactory transformationFactory,
-			RepeatableRelatedLinkCollector repeatbleRelatedLinkCollector,
-			RelatedLinkCollectorFactory relatedLinkCollectorFactory) {
+			RepeatableRelatedLinkCollector repeatbleRelatedLinkCollector) {
 		this.transformationFactory = transformationFactory;
 		this.repeatbleRelatedLinkCollector = repeatbleRelatedLinkCollector;
-		this.relatedLinkCollectorFactory = relatedLinkCollectorFactory;
 
 	}
 
@@ -57,35 +50,9 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 		convertTopDataGroupToXml(dataGroup, converter, combinedXml);
 
-		convertUserLinksInRecordInfoToXml(dataGroup, converter, combinedXml);
 		convertDomainPartsDataGroupsToXml(dataGroup, converter, combinedXml);
 		combinedXml.append("</personAccumulated>");
 		return transformCoraXmlToFedoraXml(combinedXml);
-	}
-
-	private void convertUserLinksInRecordInfoToXml(DataGroup dataGroup, Converter converter,
-			StringBuilder combinedXml) {
-		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
-		RelatedLinkCollector linkCollector = relatedLinkCollectorFactory.factor("recordInfo");
-		Map<String, Map<String, DataGroup>> userLinks = linkCollector.collectLinks(recordInfo);
-
-		if (userLinks.containsKey("user")) {
-			ArrayList<DataGroup> userGroupList = new ArrayList<>();
-			Map<String, DataGroup> map = userLinks.get("user");
-			for (Entry<String, DataGroup> entry2 : map.entrySet()) {
-				userGroupList.add(entry2.getValue());
-			}
-			if (!userGroupList.isEmpty()) {
-				Map<String, List<DataGroup>> mapWithoutRecordId = new HashMap<>();
-				mapWithoutRecordId.put("users", userGroupList);
-
-				for (Entry<String, List<DataGroup>> entry : mapWithoutRecordId.entrySet()) {
-					appendStartTag(combinedXml, entry);
-					convertRelatedLinksForOneRecordType(converter, combinedXml, entry.getValue());
-					appendEndTag(combinedXml, entry);
-				}
-			}
-		}
 	}
 
 	private void convertTopDataGroupToXml(DataGroup dataRecord, Converter converter,
@@ -144,10 +111,6 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 	public RepeatableRelatedLinkCollector getRepeatbleRelatedLinkCollector() {
 		return repeatbleRelatedLinkCollector;
-	}
-
-	public RelatedLinkCollectorFactory getRelatedLinkCollectorFactory() {
-		return relatedLinkCollectorFactory;
 	}
 
 }

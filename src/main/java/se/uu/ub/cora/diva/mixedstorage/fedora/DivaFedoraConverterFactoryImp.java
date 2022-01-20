@@ -36,20 +36,17 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 
 	public static DivaFedoraConverterFactoryImp usingFedoraURLAndTransformerFactory(
 			String fedoraURL, CoraTransformationFactory transformationFactory,
-			RepeatableRelatedLinkCollector repeatableLinkCollector,
-			RelatedLinkCollectorFactory relatedLinkCollectorFactory) {
+			RepeatableRelatedLinkCollector repeatableLinkCollector) {
 		return new DivaFedoraConverterFactoryImp(fedoraURL, transformationFactory,
-				repeatableLinkCollector, relatedLinkCollectorFactory);
+				repeatableLinkCollector);
 	}
 
 	private DivaFedoraConverterFactoryImp(String fedoraURL,
 			CoraTransformationFactory coraTransformationFactory,
-			RepeatableRelatedLinkCollector repeatableLinkCollector,
-			RelatedLinkCollectorFactory relatedLinkCollectorFactory) {
+			RepeatableRelatedLinkCollector repeatableLinkCollector) {
 		this.fedoraURL = fedoraURL;
 		this.coraTransformationFactory = coraTransformationFactory;
 		this.repeatableLinkCollector = repeatableLinkCollector;
-		this.relatedLinkCollectorFactory = relatedLinkCollectorFactory;
 	}
 
 	@Override
@@ -72,7 +69,7 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	public DivaCoraToFedoraConverter factorToFedoraConverter(String type) {
 		if ("person".equals(type)) {
 			return new DivaCoraToFedoraPersonConverter(coraTransformationFactory,
-					repeatableLinkCollector, relatedLinkCollectorFactory);
+					repeatableLinkCollector);
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}

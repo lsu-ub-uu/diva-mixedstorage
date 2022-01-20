@@ -27,26 +27,22 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollectorFactory;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableLinkCollectorSpy;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
-import se.uu.ub.cora.diva.mixedstorage.internal.RelatedLinkCollectorFactorySpy;
 
 public class DivaFedoraConverterFactoryTest {
 	private DivaFedoraConverterFactoryImp divaToCoraConverterFactoryImp;
 	private String fedoraURL = "someFedoraUrl";
 	private TransformationFactorySpy transformationFactory;
 	private RepeatableRelatedLinkCollector repeatableLinkCollector;
-	private RelatedLinkCollectorFactory relatedLinkCollectorFactory;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		transformationFactory = new TransformationFactorySpy();
 		repeatableLinkCollector = new RepeatableLinkCollectorSpy();
-		relatedLinkCollectorFactory = new RelatedLinkCollectorFactorySpy();
 		divaToCoraConverterFactoryImp = DivaFedoraConverterFactoryImp
 				.usingFedoraURLAndTransformerFactory(fedoraURL, transformationFactory,
-						repeatableLinkCollector, relatedLinkCollectorFactory);
+						repeatableLinkCollector);
 	}
 
 	@Test
@@ -55,8 +51,6 @@ public class DivaFedoraConverterFactoryTest {
 				transformationFactory);
 		assertSame(divaToCoraConverterFactoryImp.getRepeatableRelatedLinkCollector(),
 				repeatableLinkCollector);
-		assertSame(divaToCoraConverterFactoryImp.getRelatedLinkCollectorFactory(),
-				relatedLinkCollectorFactory);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -112,7 +106,6 @@ public class DivaFedoraConverterFactoryTest {
 		assertSame(converter.getTransformationFactory(), transformationFactory);
 
 		assertSame(converter.getRepeatbleRelatedLinkCollector(), repeatableLinkCollector);
-		assertSame(converter.getRelatedLinkCollectorFactory(), relatedLinkCollectorFactory);
 
 	}
 

@@ -19,7 +19,6 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollectorFactory;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
@@ -30,15 +29,12 @@ public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdaterFacto
 	private HttpHandlerFactory httpHandlerFactory;
 	private RepeatableRelatedLinkCollector repeatableLinkCollector;
 	private FedoraConnectionInfo fedoraConnectionInfo;
-	private RelatedLinkCollectorFactory relatedLinkCollectorFactory;
 
 	public ClassicFedoraUpdaterFactoryImp(HttpHandlerFactory httpHandlerFactory,
 			RepeatableRelatedLinkCollector repeatableLinkCollector,
-			RelatedLinkCollectorFactory relatedLinkCollectorFactory,
 			FedoraConnectionInfo fedoraConnectionInfo) {
 		this.httpHandlerFactory = httpHandlerFactory;
 		this.repeatableLinkCollector = repeatableLinkCollector;
-		this.relatedLinkCollectorFactory = relatedLinkCollectorFactory;
 		this.fedoraConnectionInfo = fedoraConnectionInfo;
 	}
 
@@ -57,8 +53,7 @@ public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdaterFacto
 	private DivaFedoraConverterFactory createDivaFedoraConverterFactory() {
 		CoraTransformationFactory transformerFactory = new XsltTransformationFactory();
 		return DivaFedoraConverterFactoryImp.usingFedoraURLAndTransformerFactory(
-				fedoraConnectionInfo.fedoraUrl, transformerFactory, repeatableLinkCollector,
-				relatedLinkCollectorFactory);
+				fedoraConnectionInfo.fedoraUrl, transformerFactory, repeatableLinkCollector);
 	}
 
 	public HttpHandlerFactory getHttpHandlerFactory() {
@@ -71,10 +66,6 @@ public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdaterFacto
 
 	public FedoraConnectionInfo getFedoraConnectionInfo() {
 		return fedoraConnectionInfo;
-	}
-
-	public RelatedLinkCollectorFactory getRelatedLinkCollectorFactory() {
-		return relatedLinkCollectorFactory;
 	}
 
 }

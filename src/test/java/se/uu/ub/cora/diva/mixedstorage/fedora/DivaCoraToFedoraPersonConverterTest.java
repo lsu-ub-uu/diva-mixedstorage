@@ -22,7 +22,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,8 +32,6 @@ import se.uu.ub.cora.converter.ConverterProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableLinkCollectorSpy;
-import se.uu.ub.cora.diva.mixedstorage.internal.RelatedLinkCollectorFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.internal.RelatedLinkCollectorSpy;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerFactory;
 import se.uu.ub.cora.logger.LoggerProvider;
@@ -46,7 +43,6 @@ public class DivaCoraToFedoraPersonConverterTest {
 	private DataGroupSpy defaultDataGroup;
 	private DivaCoraToFedoraConverter converter;
 	private RepeatableLinkCollectorSpy repeatbleCollector;
-	private RelatedLinkCollectorFactorySpy relatedLinkCollectorFactory;
 
 	@BeforeMethod
 	public void setUp() {
@@ -57,9 +53,7 @@ public class DivaCoraToFedoraPersonConverterTest {
 		transformationFactory = new TransformationFactorySpy();
 		repeatbleCollector = new RepeatableLinkCollectorSpy();
 		defaultDataGroup = new DataGroupSpy("someNameInData");
-		relatedLinkCollectorFactory = new RelatedLinkCollectorFactorySpy();
-		converter = new DivaCoraToFedoraPersonConverter(transformationFactory, repeatbleCollector,
-				relatedLinkCollectorFactory);
+		converter = new DivaCoraToFedoraPersonConverter(transformationFactory, repeatbleCollector);
 	}
 
 	@Test
@@ -167,49 +161,4 @@ public class DivaCoraToFedoraPersonConverterTest {
 
 		assertEquals(fedoraXml, factoredTransformation.xmlToReturn);
 	}
-
-	@Test
-	public void testToXmlWithUsers() {
-		Map<Integer, Map<String, Map<String, DataGroup>>> answerFromSpy = setUpAnswerToReturnFromLinkCollector();
-		relatedLinkCollectorFactory.mapsToReturnFromCollectorSpy = answerFromSpy;
-
-		addDataGroupsForRecordTypeToAnswerFromSpy("personDomainParts", 2);
-		DataGroupSpy recordInfo = new DataGroupSpy("recordInfo");
-		defaultDataGroup.addChild(recordInfo);
-
-		addPersonDomainPartChildren(defaultDataGroup);
-
-		String fedoraXml = converter.toXML(defaultDataGroup);
-
-		RelatedLinkCollectorSpy returnedLinkCollector = relatedLinkCollectorFactory.returnedLinkCollector;
-		assertSame(returnedLinkCollector.linksSentIn.get(0), recordInfo);
-
-		ConverterSpy groupToXmlConverter = dataGroupToXmlConverterFactory.factoredConverter;
-		assertEquals(groupToXmlConverter.dataElements.size(), 5);
-		Map<String, DataGroup> mapReturnedFromCollector = answerFromSpy.get(0).get("user");
-		assertSame(groupToXmlConverter.dataElements.get(1), mapReturnedFromCollector.get("user1"));
-		assertSame(groupToXmlConverter.dataElements.get(2), mapReturnedFromCollector.get("user0"));
-
-		List<CoraTransformationSpy> factoredTransformations = transformationFactory.factoredTransformations;
-		assertMainXmlWasTransformedToFedoraXml(factoredTransformations);
-
-		CoraTransformationSpy factoredTransformation = factoredTransformations.get(0);
-		String expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><personAccumulated>some returned string from converter spy0<users>some returned string from converter spy1some returned string from converter spy2</users><personDomainParts>some returned string from converter spy3some returned string from converter spy4</personDomainParts></personAccumulated>";
-		assertEquals(factoredTransformation.inputXml, expectedXml);
-
-		assertEquals(fedoraXml, factoredTransformation.xmlToReturn);
-	}
-
-	private Map<Integer, Map<String, Map<String, DataGroup>>> setUpAnswerToReturnFromLinkCollector() {
-		Map<Integer, Map<String, Map<String, DataGroup>>> answerFromSpy = new HashMap<>();
-
-		Map<String, Map<String, DataGroup>> firstAnswer = new HashMap<>();
-		Map<String, DataGroup> userMap = new HashMap<>();
-		userMap.put("user0", new DataGroupSpy("user"));
-		userMap.put("user1", new DataGroupSpy("user"));
-		firstAnswer.put("user", userMap);
-		answerFromSpy.put(0, firstAnswer);
-		return answerFromSpy;
-	}
-
 }
