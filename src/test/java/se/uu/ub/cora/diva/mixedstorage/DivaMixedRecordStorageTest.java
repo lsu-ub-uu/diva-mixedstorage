@@ -396,13 +396,8 @@ public class DivaMixedRecordStorageTest {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 
-		RecordStorageSpyData expectedData = new RecordStorageSpyData();
-		expectedData.type = "someType";
-		expectedData.id = "someId";
-		expectedData.record = new DataGroupSpy("dummyRecord");
-		expectedData.collectedTerms = new DataGroupSpy("collectedTerms");
-		expectedData.linkList = new DataGroupSpy("linkList");
-		expectedData.dataDivider = "someDataDivider";
+		RecordStorageSpyData expectedData = createExpectedDataWithDefaultSetting("someType",
+				"someId");
 		divaMixedRecordStorage.create(expectedData.type, expectedData.id, expectedData.record,
 				expectedData.collectedTerms, expectedData.linkList, expectedData.dataDivider);
 
@@ -463,13 +458,9 @@ public class DivaMixedRecordStorageTest {
 		assertNoInteractionWithStorage(basicStorage);
 		assertNoInteractionWithStorage(divaFedoraToCoraStorage);
 
-		RecordStorageSpyData expectedData = new RecordStorageSpyData();
-		expectedData.type = "someType";
-		expectedData.id = "someId";
-		expectedData.record = new DataGroupSpy("dummyRecord");
-		expectedData.collectedTerms = new DataGroupSpy("collectedTerms");
-		expectedData.linkList = new DataGroupSpy("linkList");
-		expectedData.dataDivider = "someDataDivider";
+		String type = "someType";
+		String id = "someId";
+		RecordStorageSpyData expectedData = createExpectedDataWithDefaultSetting(type, id);
 		divaMixedRecordStorage.update(expectedData.type, expectedData.id, expectedData.record,
 				expectedData.collectedTerms, expectedData.linkList, expectedData.dataDivider);
 
@@ -480,17 +471,11 @@ public class DivaMixedRecordStorageTest {
 
 	@Test
 	public void updatePersonGoesToCoraDatabaseStorage() throws Exception {
-		assertNoInteractionWithStorage(basicStorage);
-		assertNoInteractionWithStorage(databaseRecordStorage);
-		assertNoInteractionWithStorage(divaDbToCoraStorage);
+		assertNoInteractionWithStorageBefore();
 
-		RecordStorageSpyData expectedData = new RecordStorageSpyData();
-		expectedData.type = "person";
-		expectedData.id = "someId";
-		expectedData.record = new DataGroupSpy("dummyRecord");
-		expectedData.collectedTerms = new DataGroupSpy("collectedTerms");
-		expectedData.linkList = new DataGroupSpy("linkList");
-		expectedData.dataDivider = "someDataDivider";
+		String type = "person";
+		String id = "someId";
+		RecordStorageSpyData expectedData = createExpectedDataWithDefaultSetting(type, id);
 		divaMixedRecordStorage.update(expectedData.type, expectedData.id, expectedData.record,
 				expectedData.collectedTerms, expectedData.linkList, expectedData.dataDivider);
 
@@ -507,11 +492,16 @@ public class DivaMixedRecordStorageTest {
 				new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
 				"someDataDivider");
 
+		assertCorrectCallToClassicUpdaterForPerson(dataGroup, "someId");
+	}
+
+	private void assertCorrectCallToClassicUpdaterForPerson(DataGroupSpy dataGroup,
+			String expectedId) {
 		assertEquals(fedoraUpdaterFactory.recordType, "person");
 
 		ClassicFedoraUpdaterSpy factoredFedoraUpdater = fedoraUpdaterFactory.factoredFedoraUpdater;
 		assertEquals(factoredFedoraUpdater.recordType, "person");
-		assertEquals(factoredFedoraUpdater.recordId, "someId");
+		assertEquals(factoredFedoraUpdater.recordId, expectedId);
 		assertSame(factoredFedoraUpdater.dataGroup, dataGroup);
 	}
 
@@ -522,12 +512,71 @@ public class DivaMixedRecordStorageTest {
 				new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
 				"someDataDivider");
 
+		assertCorrectCallToClassicIndexerForPerson("someId");
+
+	}
+
+	private void assertCorrectCallToClassicIndexerForPerson(String expectedId) {
 		ClassicIndexerFactorySpy indexerFactory = (ClassicIndexerFactorySpy) mixedDependencies
 				.getClassicIndexerFactory();
 		assertEquals(indexerFactory.type, "person");
 
 		ClassicIndexerSpy factoredIndexer = indexerFactory.factoredIndexer;
-		assertEquals(factoredIndexer.recordId, "someId");
+		assertEquals(factoredIndexer.recordId, expectedId);
+	}
+
+	@Test
+	public void updatePersonDomainPartGoesToCoraDatabaseStorage() throws Exception {
+		assertNoInteractionWithStorageBefore();
+
+		String type = "personDomainPart";
+		String id = "somePersonId:personDomainPartId";
+		RecordStorageSpyData expectedData = createExpectedDataWithDefaultSetting(type, id);
+
+		divaMixedRecordStorage.update(expectedData.type, expectedData.id, expectedData.record,
+				expectedData.collectedTerms, expectedData.linkList, expectedData.dataDivider);
+
+		expectedData.calledMethod = "update";
+		assertExpectedDataSameAsInStorageSpy(databaseRecordStorage, expectedData);
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+	}
+
+	private void assertNoInteractionWithStorageBefore() {
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(databaseRecordStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+	}
+
+	private RecordStorageSpyData createExpectedDataWithDefaultSetting(String type, String id) {
+		RecordStorageSpyData expectedData = new RecordStorageSpyData();
+		expectedData.type = type;
+		expectedData.id = id;
+		expectedData.record = new DataGroupSpy("dummyRecord");
+		expectedData.collectedTerms = new DataGroupSpy("collectedTerms");
+		expectedData.linkList = new DataGroupSpy("linkList");
+		expectedData.dataDivider = "someDataDivider";
+		return expectedData;
+	}
+
+	@Test
+	public void updatePersonDomainPartCallsUpdateForFedora() {
+		DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
+		divaMixedRecordStorage.update("personDomainPart", "somePerson:111:someDomainPartId",
+				dataGroup, new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
+				"someDataDivider");
+
+		assertCorrectCallToClassicUpdaterForPerson(dataGroup, "somePerson:111");
+	}
+
+	@Test
+	public void updatePersonDomainPartCallsClassicIndexer() {
+		DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
+		divaMixedRecordStorage.update("personDomainPart", "somePerson:111:someDomainPartId",
+				dataGroup, new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
+				"someDataDivider");
+
+		assertCorrectCallToClassicIndexerForPerson("somePerson:111");
 
 	}
 
@@ -546,13 +595,7 @@ public class DivaMixedRecordStorageTest {
 		divaMixedRecordStorage = DivaMixedRecordStorage
 				.usingDivaMixedDependencies(mixedDependencies);
 
-		RecordStorageSpyData expectedData = new RecordStorageSpyData();
-		expectedData.type = type;
-		expectedData.id = "someId";
-		expectedData.record = new DataGroupSpy("dummyRecord");
-		expectedData.collectedTerms = new DataGroupSpy("collectedTerms");
-		expectedData.linkList = new DataGroupSpy("linkList");
-		expectedData.dataDivider = "someDataDivider";
+		RecordStorageSpyData expectedData = createExpectedDataWithDefaultSetting(type, "someId");
 		expectedData.calledMethod = "create";
 
 		divaMixedRecordStorage.update(expectedData.type, expectedData.id, expectedData.record,

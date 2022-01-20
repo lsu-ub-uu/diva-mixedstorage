@@ -118,6 +118,11 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 			synchronizeWithClassic(type, id, dataRecord);
 
+		} else if (PERSON_DOMAIN_PART.equals(type)) {
+			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
+			String personIdPartOfId = id.substring(0, id.lastIndexOf(":"));
+			synchronizeWithClassic(PERSON, personIdPartOfId, dataRecord);
+
 		} else if (isOrganisation(type)) {
 			divaClassicDbStorage.update(type, id, dataRecord, collectedTerms, linkList,
 					dataDivider);
@@ -126,11 +131,12 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		}
 	}
 
-	private void synchronizeWithClassic(String type, String id, DataGroup dataRecord) {
+	private void synchronizeWithClassic(String typeInClassic, String idInClassic,
+			DataGroup dataRecord) {
 		ClassicFedoraUpdater fedoraUpdater = fedoraUpdaterFactory.factor(PERSON);
-		fedoraUpdater.updateInFedora(type, id, dataRecord);
-		ClassicIndexer classicIndexer = classicIndexerFactory.factor(type);
-		classicIndexer.index(id);
+		fedoraUpdater.updateInFedora(typeInClassic, idInClassic, dataRecord);
+		ClassicIndexer classicIndexer = classicIndexerFactory.factor(typeInClassic);
+		classicIndexer.index(idInClassic);
 	}
 
 	@Override
