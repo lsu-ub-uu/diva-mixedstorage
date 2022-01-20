@@ -24,14 +24,14 @@ import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollector;
-import se.uu.ub.cora.storage.RecordStorage;
+import se.uu.ub.cora.gatekeeper.user.UserStorage;
 
 public class UserLinkInRecordInfoCollector implements RelatedLinkCollector {
 
-	private RecordStorage classicDbStorage;
+	private UserStorage userStorage;
 
-	public UserLinkInRecordInfoCollector(RecordStorage classicDbStorage) {
-		this.classicDbStorage = classicDbStorage;
+	public UserLinkInRecordInfoCollector(UserStorage divaMixedUserStorage) {
+		this.userStorage = divaMixedUserStorage;
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class UserLinkInRecordInfoCollector implements RelatedLinkCollector {
 
 	private void readUserAndAddToMap(HashMap<String, DataGroup> userMap, DataGroup userLink) {
 		String id = userLink.getFirstAtomicValueWithNameInData("linkedRecordId");
-		DataGroup user = classicDbStorage.read("public.user", id);
+		DataGroup user = userStorage.getUserByIdFromLogin(id);
 		userMap.put(id, user);
 	}
 
@@ -72,8 +72,8 @@ public class UserLinkInRecordInfoCollector implements RelatedLinkCollector {
 		return links;
 	}
 
-	RecordStorage getClassicDbStorage() {
-		return classicDbStorage;
+	UserStorage getUserStorage() {
+		return userStorage;
 	}
 
 }

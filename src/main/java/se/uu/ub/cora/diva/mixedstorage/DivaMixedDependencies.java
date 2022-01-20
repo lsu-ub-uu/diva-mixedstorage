@@ -34,6 +34,7 @@ public class DivaMixedDependencies {
 	private RecordStorage databaseStorage;
 	private ClassicFedoraUpdaterFactory fedoraUpdaterFactory;
 	private ClassicIndexerFactory indexerFactory;
+	private RelatedLinkCollectorFactory relatedLinkCollectorFactory;
 
 	public void setBasicStorage(RecordStorage basicStorage) {
 		this.basicStorage = basicStorage;
@@ -85,6 +86,16 @@ public class DivaMixedDependencies {
 
 	public ClassicIndexerFactory getClassicIndexerFactory() {
 		return indexerFactory;
+	}
+
+	public void setRelatedLinkCollectorFactory(
+			RelatedLinkCollectorFactory relatedLinkCollectorFactory) {
+		this.relatedLinkCollectorFactory = relatedLinkCollectorFactory;
+
+	}
+
+	public RelatedLinkCollectorFactory getRelatedLinkCollectorFactory() {
+		return relatedLinkCollectorFactory;
 	}
 
 }

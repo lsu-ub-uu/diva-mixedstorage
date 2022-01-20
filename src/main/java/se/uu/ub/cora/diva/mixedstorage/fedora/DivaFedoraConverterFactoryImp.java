@@ -20,6 +20,7 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollectorFactory;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
@@ -31,20 +32,24 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	private String fedoraURL;
 	private CoraTransformationFactory coraTransformationFactory;
 	private RepeatableRelatedLinkCollector repeatableLinkCollector;
+	private RelatedLinkCollectorFactory relatedLinkCollectorFactory;
 
 	public static DivaFedoraConverterFactoryImp usingFedoraURLAndTransformerFactory(
 			String fedoraURL, CoraTransformationFactory transformationFactory,
-			RepeatableRelatedLinkCollector repeatableLinkCollector) {
+			RepeatableRelatedLinkCollector repeatableLinkCollector,
+			RelatedLinkCollectorFactory relatedLinkCollectorFactory) {
 		return new DivaFedoraConverterFactoryImp(fedoraURL, transformationFactory,
-				repeatableLinkCollector);
+				repeatableLinkCollector, relatedLinkCollectorFactory);
 	}
 
 	private DivaFedoraConverterFactoryImp(String fedoraURL,
 			CoraTransformationFactory coraTransformationFactory,
-			RepeatableRelatedLinkCollector repeatableLinkCollector) {
+			RepeatableRelatedLinkCollector repeatableLinkCollector,
+			RelatedLinkCollectorFactory relatedLinkCollectorFactory) {
 		this.fedoraURL = fedoraURL;
 		this.coraTransformationFactory = coraTransformationFactory;
 		this.repeatableLinkCollector = repeatableLinkCollector;
+		this.relatedLinkCollectorFactory = relatedLinkCollectorFactory;
 	}
 
 	@Override
@@ -66,9 +71,8 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	@Override
 	public DivaCoraToFedoraConverter factorToFedoraConverter(String type) {
 		if ("person".equals(type)) {
-			// new RelatedLinkCollectorFactory();
 			return new DivaCoraToFedoraPersonConverter(coraTransformationFactory,
-					repeatableLinkCollector);
+					repeatableLinkCollector, relatedLinkCollectorFactory);
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}
@@ -84,6 +88,10 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 
 	public RepeatableRelatedLinkCollector getRepeatableRelatedLinkCollector() {
 		return repeatableLinkCollector;
+	}
+
+	public RelatedLinkCollectorFactory getRelatedLinkCollectorFactory() {
+		return relatedLinkCollectorFactory;
 	}
 
 }

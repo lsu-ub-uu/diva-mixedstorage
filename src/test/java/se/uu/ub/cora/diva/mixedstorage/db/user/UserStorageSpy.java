@@ -18,6 +18,9 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.db.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.gatekeeper.user.UserStorage;
@@ -26,7 +29,9 @@ public class UserStorageSpy implements UserStorage {
 
 	public boolean getUserByIdWasCalled = false;
 	public String userId;
-	public DataGroup returnedUser;
+	public DataGroupSpy returnedUser;
+	public List<String> idsFromLogin = new ArrayList<>();
+	public List<DataGroupSpy> returnedDataGroups = new ArrayList<>();
 
 	@Override
 	public DataGroup getUserById(String id) {
@@ -38,8 +43,10 @@ public class UserStorageSpy implements UserStorage {
 
 	@Override
 	public DataGroup getUserByIdFromLogin(String idFromLogin) {
-		// TODO Auto-generated method stub
-		return null;
+		idsFromLogin.add(idFromLogin);
+		returnedUser = new DataGroupSpy("user");
+		returnedDataGroups.add(returnedUser);
+		return returnedUser;
 	}
 
 }

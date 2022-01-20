@@ -30,19 +30,19 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
-import se.uu.ub.cora.diva.mixedstorage.db.DbStorageSpy;
+import se.uu.ub.cora.diva.mixedstorage.db.user.UserStorageSpy;
 
-public class UserLinkCollectorInRecordInfoTest {
+public class UserLinkInRecordInfoCollectorTest {
 
-	private DbStorageSpy classicDbStorage;
+	private UserStorageSpy userStorage;
 	private UserLinkInRecordInfoCollector collector;
 	private DataGroupSpy recordInfo;
 
 	@BeforeMethod
 	public void setUp() {
-		classicDbStorage = new DbStorageSpy();
+		userStorage = new UserStorageSpy();
 		recordInfo = new DataGroupSpy("recordInfo");
-		collector = new UserLinkInRecordInfoCollector(classicDbStorage);
+		collector = new UserLinkInRecordInfoCollector(userStorage);
 	}
 
 	@Test
@@ -59,12 +59,11 @@ public class UserLinkCollectorInRecordInfoTest {
 		Map<String, Map<String, DataGroup>> collectedLinks = collector.collectLinks(recordInfo);
 		Map<String, DataGroup> map = collectedLinks.get("user");
 
-		assertEquals(classicDbStorage.types.get(0), "public.user");
-		assertEquals(classicDbStorage.ids.get(0), "ert678");
+		assertEquals(userStorage.idsFromLogin.get(0), "ert678");
 
 		assertEquals(map.size(), 1);
 		DataGroup dataGroup = map.get("ert678");
-		assertSame(dataGroup, classicDbStorage.returnedDataGroups.get(0));
+		assertSame(dataGroup, userStorage.returnedDataGroups.get(0));
 	}
 
 	private DataGroupSpy createUserLink(String nameInData, String recordId) {
@@ -84,18 +83,17 @@ public class UserLinkCollectorInRecordInfoTest {
 		assertCorrectCallToStorage("ert678", "bnm234", "qwe123", "yui789");
 
 		assertEquals(map.size(), 4);
-		assertSame(map.get("ert678"), classicDbStorage.returnedDataGroups.get(0));
-		assertSame(map.get("bnm234"), classicDbStorage.returnedDataGroups.get(1));
-		assertSame(map.get("qwe123"), classicDbStorage.returnedDataGroups.get(2));
-		assertSame(map.get("yui789"), classicDbStorage.returnedDataGroups.get(3));
+		assertSame(map.get("ert678"), userStorage.returnedDataGroups.get(0));
+		assertSame(map.get("bnm234"), userStorage.returnedDataGroups.get(1));
+		assertSame(map.get("qwe123"), userStorage.returnedDataGroups.get(2));
+		assertSame(map.get("yui789"), userStorage.returnedDataGroups.get(3));
 	}
 
 	private void assertCorrectCallToStorage(String... ids) {
 		for (int i = 0; i < ids.length; i++) {
-			assertEquals(classicDbStorage.types.get(i), "public.user");
-			assertEquals(classicDbStorage.ids.get(i), ids[i]);
+			assertEquals(userStorage.idsFromLogin.get(i), ids[i]);
 		}
-		assertEquals(classicDbStorage.ids.size(), ids.length);
+		assertEquals(userStorage.idsFromLogin.size(), ids.length);
 	}
 
 	private void setUpRecordInfoWithCreatedByAndMultipleUpdatedBy() {
@@ -121,8 +119,7 @@ public class UserLinkCollectorInRecordInfoTest {
 		Map<String, Map<String, DataGroup>> collectedLinks = collector.collectLinks(recordInfo);
 		Map<String, DataGroup> map = collectedLinks.get("user");
 
-		assertEquals(classicDbStorage.types.get(0), "public.user");
-		assertEquals(classicDbStorage.ids.get(0), "ert678");
+		assertEquals(userStorage.idsFromLogin.get(0), "ert678");
 
 		assertEquals(map.size(), 1);
 		assertCorrectCallToStorage("ert678", "ert678");

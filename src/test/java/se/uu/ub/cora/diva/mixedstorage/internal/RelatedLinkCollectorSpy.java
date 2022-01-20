@@ -19,6 +19,7 @@
 package se.uu.ub.cora.diva.mixedstorage.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,17 +39,10 @@ public class RelatedLinkCollectorSpy implements RelatedLinkCollector {
 		linksSentIn.add(personDomainPart);
 		Map<String, Map<String, DataGroup>> mapToReturn = mapsToReturn.get(callIndex);
 		callIndex++;
+		if (mapToReturn == null) {
+			mapToReturn = Collections.emptyMap();
+		}
 		return mapToReturn;
-
-		// Map<String, DataGroup> dataGroupsToReturn = new HashMap<>();
-		// if (idsForDataGroupsToReturnForIndex.containsKey(callIndex)) {
-		// List<String> idList = idsForDataGroupsToReturnForIndex.get(callIndex);
-		// for (String id : idList) {
-		// dataGroupsToReturn.put(id, new DataGroupSpy("organisation"));
-		// }
-		// }
-
-		// return dataGroupsToReturn;
 	}
 
 }

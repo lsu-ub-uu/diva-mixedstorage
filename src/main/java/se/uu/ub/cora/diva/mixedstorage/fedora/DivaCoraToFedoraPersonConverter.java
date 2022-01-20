@@ -57,27 +57,35 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 		convertTopDataGroupToXml(dataGroup, converter, combinedXml);
 
+		convertUserLinksInRecordInfoToXml(dataGroup, converter, combinedXml);
+		convertDomainPartsDataGroupsToXml(dataGroup, converter, combinedXml);
+		combinedXml.append("</personAccumulated>");
+		return transformCoraXmlToFedoraXml(combinedXml);
+	}
+
+	private void convertUserLinksInRecordInfoToXml(DataGroup dataGroup, Converter converter,
+			StringBuilder combinedXml) {
 		DataGroup recordInfo = dataGroup.getFirstGroupWithNameInData("recordInfo");
 		RelatedLinkCollector linkCollector = relatedLinkCollectorFactory.factor("recordInfo");
 		Map<String, Map<String, DataGroup>> userLinks = linkCollector.collectLinks(recordInfo);
 
-		Map<String, List<DataGroup>> mapWithoutRecordId = new HashMap<>();
-		ArrayList<DataGroup> userGroupList = new ArrayList<>();
-		Map<String, DataGroup> map = userLinks.get("user");
-		for (Entry<String, DataGroup> entry2 : map.entrySet()) {
-			userGroupList.add(entry2.getValue());
-		}
-		mapWithoutRecordId.put("users", userGroupList);
+		if (userLinks.containsKey("user")) {
+			ArrayList<DataGroup> userGroupList = new ArrayList<>();
+			Map<String, DataGroup> map = userLinks.get("user");
+			for (Entry<String, DataGroup> entry2 : map.entrySet()) {
+				userGroupList.add(entry2.getValue());
+			}
+			if (!userGroupList.isEmpty()) {
+				Map<String, List<DataGroup>> mapWithoutRecordId = new HashMap<>();
+				mapWithoutRecordId.put("users", userGroupList);
 
-		for (Entry<String, List<DataGroup>> entry : mapWithoutRecordId.entrySet()) {
-			appendStartTag(combinedXml, entry);
-			convertRelatedLinksForOneRecordType(converter, combinedXml, entry.getValue());
-			appendEndTag(combinedXml, entry);
+				for (Entry<String, List<DataGroup>> entry : mapWithoutRecordId.entrySet()) {
+					appendStartTag(combinedXml, entry);
+					convertRelatedLinksForOneRecordType(converter, combinedXml, entry.getValue());
+					appendEndTag(combinedXml, entry);
+				}
+			}
 		}
-
-		convertDomainPartsDataGroupsToXml(dataGroup, converter, combinedXml);
-		combinedXml.append("</personAccumulated>");
-		return transformCoraXmlToFedoraXml(combinedXml);
 	}
 
 	private void convertTopDataGroupToXml(DataGroup dataRecord, Converter converter,
@@ -136,6 +144,10 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 	public RepeatableRelatedLinkCollector getRepeatbleRelatedLinkCollector() {
 		return repeatbleRelatedLinkCollector;
+	}
+
+	public RelatedLinkCollectorFactory getRelatedLinkCollectorFactory() {
+		return relatedLinkCollectorFactory;
 	}
 
 }

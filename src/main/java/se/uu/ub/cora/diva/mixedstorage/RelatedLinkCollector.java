@@ -30,7 +30,8 @@ public interface RelatedLinkCollector {
 	/**
 	 * collectLinks collects the DataGroup representation of all records that are linked from a
 	 * DataGroup. The collected DataGroups are returned in a collection grouped by the recordType of
-	 * the links and with the id of the link as inner key.
+	 * the links and with the id of the link as inner key. If no result an empty Map SHOULD be
+	 * returned
 	 * 
 	 * @param {@link
 	 *            DataGroup dataGroup}, the DataGroup to collect the links from

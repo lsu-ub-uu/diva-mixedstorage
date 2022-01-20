@@ -21,17 +21,20 @@ package se.uu.ub.cora.diva.mixedstorage.internal;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollector;
 import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollectorFactory;
+import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class RelatedLinkCollectorFactoryImp implements RelatedLinkCollectorFactory {
 
 	private RecordStorage recordStorage;
 	private RecordStorage classicDbStorage;
+	private UserStorage userStorage;
 
 	public RelatedLinkCollectorFactoryImp(RecordStorage recordStorage,
-			RecordStorage classicDbStorage) {
+			RecordStorage classicDbStorage, UserStorage userStorage) {
 		this.recordStorage = recordStorage;
 		this.classicDbStorage = classicDbStorage;
+		this.userStorage = userStorage;
 	}
 
 	@Override
@@ -40,7 +43,7 @@ public class RelatedLinkCollectorFactoryImp implements RelatedLinkCollectorFacto
 			return new DomainPartOrganisationCollector(recordStorage, classicDbStorage);
 		}
 		if ("recordInfo".equals(type)) {
-			return new UserLinkInRecordInfoCollector(classicDbStorage);
+			return new UserLinkInRecordInfoCollector(userStorage);
 		}
 		throw NotImplementedException.withMessage("Factor not implemented for type otherType");
 	}
@@ -51,6 +54,10 @@ public class RelatedLinkCollectorFactoryImp implements RelatedLinkCollectorFacto
 
 	public RecordStorage getClassicDbStorage() {
 		return classicDbStorage;
+	}
+
+	public UserStorage getUserStorage() {
+		return userStorage;
 	}
 
 }

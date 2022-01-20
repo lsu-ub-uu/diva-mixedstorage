@@ -341,6 +341,9 @@ public class DivaMixedRecordStorageProviderTest {
 
 		assertSame(linkCollectorFactory.getRecordStorage(), recordStorage.getDatabaseStorage());
 		assertSame(linkCollectorFactory.getClassicDbStorage(), recordStorage.getClassicDbStorage());
+		// assertSame(linkCollectorFactory.getUserStorage(), userStorageProvider.getUserStorage());
+
+		assertSame(fedoraUpdaterFactory.getRelatedLinkCollectorFactory(), linkCollectorFactory);
 	}
 
 	@Test

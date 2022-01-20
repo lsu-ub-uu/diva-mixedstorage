@@ -25,6 +25,8 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.DbStorageSpy;
+import se.uu.ub.cora.diva.mixedstorage.db.user.UserStorageSpy;
+import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class RelatedLinkCollectorFactoryTest {
@@ -32,12 +34,14 @@ public class RelatedLinkCollectorFactoryTest {
 	private RecordStorage recordStorage;
 	private RecordStorage classicDbStorage;
 	private RelatedLinkCollectorFactoryImp factory;
+	private UserStorage userStorage;
 
 	@BeforeMethod
 	public void setUp() {
 		recordStorage = new DbStorageSpy();
 		classicDbStorage = new DbStorageSpy();
-		factory = new RelatedLinkCollectorFactoryImp(recordStorage, classicDbStorage);
+		userStorage = new UserStorageSpy();
+		factory = new RelatedLinkCollectorFactoryImp(recordStorage, classicDbStorage, userStorage);
 	}
 
 	@Test
@@ -52,7 +56,7 @@ public class RelatedLinkCollectorFactoryTest {
 	public void testFactorForUser() {
 		UserLinkInRecordInfoCollector linkCollector = (UserLinkInRecordInfoCollector) factory
 				.factor("recordInfo");
-		assertSame(linkCollector.getClassicDbStorage(), classicDbStorage);
+		assertSame(linkCollector.getUserStorage(), userStorage);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

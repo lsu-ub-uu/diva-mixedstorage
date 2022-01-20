@@ -27,8 +27,10 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.HttpHandlerFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
+import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollectorFactory;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableLinkCollectorSpy;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.internal.RelatedLinkCollectorFactorySpy;
 import se.uu.ub.cora.xmlutils.transformer.XsltTransformationFactory;
 
 public class ClassicFedoraUpdaterFactoryTest {
@@ -40,20 +42,23 @@ public class ClassicFedoraUpdaterFactoryTest {
 	private String password = "somePassword";
 	private RepeatableRelatedLinkCollector repeatableLinkCollector;
 	private FedoraConnectionInfo fedoraConnectionInfo;
+	private RelatedLinkCollectorFactory relatedLinkCollectorFactory;
 
 	@BeforeMethod
 	public void setUp() {
 		httpHandlerFactory = new HttpHandlerFactorySpy();
 		repeatableLinkCollector = new RepeatableLinkCollectorSpy();
+		relatedLinkCollectorFactory = new RelatedLinkCollectorFactorySpy();
 		fedoraConnectionInfo = new FedoraConnectionInfo(baseUrl, username, password);
 		factory = new ClassicFedoraUpdaterFactoryImp(httpHandlerFactory, repeatableLinkCollector,
-				fedoraConnectionInfo);
+				relatedLinkCollectorFactory, fedoraConnectionInfo);
 	}
 
 	@Test
 	public void testInit() {
 		assertSame(factory.getHttpHandlerFactory(), httpHandlerFactory);
 		assertSame(factory.getRepeatableRelatedLinkCollector(), repeatableLinkCollector);
+		assertSame(factory.getRelatedLinkCollectorFactory(), relatedLinkCollectorFactory);
 	}
 
 	@Test
@@ -72,6 +77,8 @@ public class ClassicFedoraUpdaterFactoryTest {
 				.getCoraTransformerFactory() instanceof XsltTransformationFactory);
 		assertSame(divaCoraToFedoraConverterFactory.getRepeatableRelatedLinkCollector(),
 				repeatableLinkCollector);
+		assertSame(divaCoraToFedoraConverterFactory.getRelatedLinkCollectorFactory(),
+				relatedLinkCollectorFactory);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

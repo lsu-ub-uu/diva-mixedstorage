@@ -163,22 +163,25 @@ public class DivaMixedRecordStorageProvider
 	private void createAndSetClassicFedoraUpdaterFactory(DatabaseRecordStorage recordStorage,
 			DivaDbRecordStorage classicDbStorage, DivaMixedDependencies divaMixedDependencies) {
 		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
+		RelatedLinkCollectorFactory linkCollectorFactory = new RelatedLinkCollectorFactoryImp(
+				recordStorage, classicDbStorage, userStorageProvider.getUserStorage());
 
-		RepeatableRelatedLinkCollector repeatableLinkCollector = createRepeatableLinkCollector(
-				recordStorage, classicDbStorage);
+		RepeatableRelatedLinkCollector repeatableLinkCollector = new RepeatableRelatedLinkCollectorImp(
+				linkCollectorFactory);
 		FedoraConnectionInfo fedoraConnectionInfo = createFedoraConnectionInfo();
 		ClassicFedoraUpdaterFactory classicFedoraUpdaterFactory = new ClassicFedoraUpdaterFactoryImp(
-				httpHandlerFactory, repeatableLinkCollector, fedoraConnectionInfo);
+				httpHandlerFactory, repeatableLinkCollector, linkCollectorFactory,
+				fedoraConnectionInfo);
 
 		divaMixedDependencies.setClassicFedoraUpdaterFactory(classicFedoraUpdaterFactory);
 	}
 
-	private RepeatableRelatedLinkCollector createRepeatableLinkCollector(
-			DatabaseRecordStorage recordStorage, DivaDbRecordStorage classicDbStorage) {
-		RelatedLinkCollectorFactory linkCollectorFactory = new RelatedLinkCollectorFactoryImp(
-				recordStorage, classicDbStorage);
-		return new RepeatableRelatedLinkCollectorImp(linkCollectorFactory);
-	}
+	// private RepeatableRelatedLinkCollector createRepeatableLinkCollector(
+	// DatabaseRecordStorage recordStorage, DivaDbRecordStorage classicDbStorage) {
+	// RelatedLinkCollectorFactory linkCollectorFactory = new RelatedLinkCollectorFactoryImp(
+	// recordStorage, classicDbStorage);
+	// return new RepeatableRelatedLinkCollectorImp(linkCollectorFactory);
+	// }
 
 	private FedoraConnectionInfo createFedoraConnectionInfo() {
 		String fedoraURL = tryToGetInitParameterLogIfFound("fedoraURL");
