@@ -560,6 +560,23 @@ public class DivaMixedRecordStorageTest {
 	}
 
 	@Test
+	public void createPersonDomainPartGoesToCoraDatabaseStorage() throws Exception {
+		assertNoInteractionWithStorageBefore();
+
+		String type = "personDomainPart";
+		String id = "somePersonId:personDomainPartId";
+		RecordStorageSpyData expectedData = createExpectedDataWithDefaultSetting(type, id);
+
+		divaMixedRecordStorage.create(expectedData.type, expectedData.id, expectedData.record,
+				expectedData.collectedTerms, expectedData.linkList, expectedData.dataDivider);
+
+		expectedData.calledMethod = "create";
+		assertExpectedDataSameAsInStorageSpy(databaseRecordStorage, expectedData);
+		assertNoInteractionWithStorage(basicStorage);
+		assertNoInteractionWithStorage(divaDbToCoraStorage);
+	}
+
+	@Test
 	public void updatePersonDomainPartCallsUpdateForFedora() {
 		DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
 		divaMixedRecordStorage.update("personDomainPart", "somePerson:111:someDomainPartId",
