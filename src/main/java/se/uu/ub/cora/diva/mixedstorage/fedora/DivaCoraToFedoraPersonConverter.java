@@ -32,7 +32,7 @@ import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverter {
 
 	private CoraTransformationFactory transformationFactory;
-	private static final String PERSON_XSLT_PATH = "person/toCoraPerson.xsl";
+	private static final String PERSON_XSLT_PATH = "person/coraToFedoraPerson.xsl";
 	private RepeatableRelatedLinkCollector repeatbleRelatedLinkCollector;
 
 	public DivaCoraToFedoraPersonConverter(CoraTransformationFactory transformationFactory,

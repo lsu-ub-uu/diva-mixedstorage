@@ -39,7 +39,7 @@ import se.uu.ub.cora.logger.LoggerProvider;
 public class DivaCoraToFedoraPersonConverterTest {
 	private ConverterFactorySpy dataGroupToXmlConverterFactory;
 	private TransformationFactorySpy transformationFactory;
-	private String toCoraPersonXsl = "person/toCoraPerson.xsl";
+	private String toCoraPersonXsl = "person/coraToFedoraPerson.xsl";
 	private DataGroupSpy defaultDataGroup;
 	private DivaCoraToFedoraConverter converter;
 	private RepeatableLinkCollectorSpy repeatbleCollector;
