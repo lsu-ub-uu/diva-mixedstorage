@@ -32,7 +32,7 @@ import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverter {
 
 	private CoraTransformationFactory transformationFactory;
-	private static final String PERSON_XSLT_PATH = "person/coraToFedoraPerson.xsl";
+	private static final String CORA_TO_FEDORA_PERSON_XSLT_PATH = "person/coraToFedoraPerson.xsl";
 	private RepeatableRelatedLinkCollector repeatbleRelatedLinkCollector;
 
 	public DivaCoraToFedoraPersonConverter(CoraTransformationFactory transformationFactory,
@@ -100,7 +100,8 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 	}
 
 	private String transformCoraXmlToFedoraXml(StringBuilder combinedXml) {
-		CoraTransformation transformation = getTransformationFactory().factor(PERSON_XSLT_PATH);
+		CoraTransformation transformation = getTransformationFactory()
+				.factor(CORA_TO_FEDORA_PERSON_XSLT_PATH);
 		return transformation.transform(combinedXml.toString());
 	}
 

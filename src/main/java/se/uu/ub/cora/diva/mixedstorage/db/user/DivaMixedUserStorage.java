@@ -350,9 +350,7 @@ public class DivaMixedUserStorage implements UserStorage, RecordStorage {
 
 	private boolean checkIfUserExist(String id) {
 		try (TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade()) {
-			TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(PUBLIC_USER);
-			tableQuery.addCondition(USER_ID, id);
-			tryToReadUser(tableFacade, id, tableQuery);
+			createConditionsAndTryToRead(tableFacade, id);
 		} catch (RecordNotFoundException exception) {
 			return false;
 		}
