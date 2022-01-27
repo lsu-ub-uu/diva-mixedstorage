@@ -39,11 +39,19 @@ public class PersonClassicIndexer implements ClassicIndexer {
 
 	@Override
 	public void index(String recordId) {
+		if (baseUrl.isEmpty()) {
+			logger.logInfoUsingMessage("No call to classic indexer, due to empty URL.");
+		} else {
+			callIndexerInClassic(recordId);
+		}
+
+	}
+
+	private void callIndexerInClassic(String recordId) {
 		String url = baseUrl + "authority/person/index/" + recordId;
 		HttpHandler httpHandler = httpHandlerFactory.factor(url);
 		httpHandler.setRequestMethod("GET");
 		logErrorIfResponseNotOK(httpHandler, recordId);
-
 	}
 
 	private void logErrorIfResponseNotOK(HttpHandler httpHandler, String recordId) {

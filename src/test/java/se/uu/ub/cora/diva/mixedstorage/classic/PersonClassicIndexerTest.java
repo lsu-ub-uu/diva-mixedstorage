@@ -59,8 +59,19 @@ public class PersonClassicIndexerTest {
 	}
 
 	@Test
+	public void testIndexNoUrl() {
+		indexer = new PersonClassicIndexer(httpHandlerFactory, "");
+		indexer.index("someRecordId");
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 0);
+		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
+				"No call to classic indexer, due to empty URL.");
+	}
+
+	@Test
 	public void testIndex() {
 		indexer.index("someRecordId");
+
+		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 0);
 		HttpHandlerSpy factoredHttpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
 		assertEquals(httpHandlerFactory.urls.get(0),
 				baseUrl + "authority/person/index/someRecordId");
