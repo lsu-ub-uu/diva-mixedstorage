@@ -43,7 +43,7 @@ public class ClassicFedoraUpdaterFactoryImp implements ClassicFedoraUpdaterFacto
 		if ("person".equals(recordType)) {
 			DivaFedoraConverterFactory divaFedoraConverterFactory = createDivaFedoraConverterFactory();
 
-			return new ClassicFedoraPersonUpdater(httpHandlerFactory, divaFedoraConverterFactory,
+			return new ClassicFedoraUpdaterImp(httpHandlerFactory, divaFedoraConverterFactory,
 					fedoraConnectionInfo);
 		}
 		throw NotImplementedException

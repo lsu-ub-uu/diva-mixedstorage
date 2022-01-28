@@ -20,19 +20,14 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollectorFactory;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
-import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 
 public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory {
 
-	private static final String PERSON_XSLT_PATH = "person/coraPerson.xsl";
-	private static final String PERSON_DOMAIN_PART_XSLT_PATH = "person/coraPersonDomainPart.xsl";
 	private String fedoraURL;
 	private CoraTransformationFactory coraTransformationFactory;
 	private RepeatableRelatedLinkCollector repeatableLinkCollector;
-	private RelatedLinkCollectorFactory relatedLinkCollectorFactory;
 
 	public static DivaFedoraConverterFactoryImp usingFedoraURLAndTransformerFactory(
 			String fedoraURL, CoraTransformationFactory transformationFactory,
@@ -47,22 +42,6 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 		this.fedoraURL = fedoraURL;
 		this.coraTransformationFactory = coraTransformationFactory;
 		this.repeatableLinkCollector = repeatableLinkCollector;
-	}
-
-	@Override
-	public DivaFedoraToCoraConverter factorToCoraConverter(String type) {
-		if ("person".equals(type)) {
-			return getFedoraToCoraConverterUsingPath(PERSON_XSLT_PATH);
-		}
-		if ("personDomainPart".equals(type)) {
-			return getFedoraToCoraConverterUsingPath(PERSON_DOMAIN_PART_XSLT_PATH);
-		}
-		throw NotImplementedException.withMessage("No converter implemented for: " + type);
-	}
-
-	private DivaFedoraToCoraConverter getFedoraToCoraConverterUsingPath(String personXsltPath) {
-		CoraTransformation coraTransformation = coraTransformationFactory.factor(personXsltPath);
-		return new DivaFedoraToCoraConverterImp(coraTransformation);
 	}
 
 	@Override
@@ -86,9 +65,4 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 	public RepeatableRelatedLinkCollector getRepeatableRelatedLinkCollector() {
 		return repeatableLinkCollector;
 	}
-
-	public RelatedLinkCollectorFactory getRelatedLinkCollectorFactory() {
-		return relatedLinkCollectorFactory;
-	}
-
 }

@@ -36,9 +36,9 @@ import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerFactory;
 import se.uu.ub.cora.logger.LoggerProvider;
 
-public class ClassicFedoraPersonUpdaterTest {
+public class ClassicFedoraUpdaterTest {
 
-	private ClassicFedoraPersonUpdater fedoraUpdater;
+	private ClassicFedoraUpdaterImp fedoraUpdater;
 	private HttpHandlerFactorySpy httpHandlerFactory;
 	private DivaFedoraConverterFactorySpy fedoraConverterFactory;
 	private ConverterFactorySpy dataGroupToXmlConverterFactory;
@@ -59,7 +59,7 @@ public class ClassicFedoraPersonUpdaterTest {
 		FedoraConnectionInfo fedoraConnectionInfo = new FedoraConnectionInfo(baseUrl,
 				fedoraUsername, fedoraPassword);
 
-		fedoraUpdater = new ClassicFedoraPersonUpdater(httpHandlerFactory, fedoraConverterFactory,
+		fedoraUpdater = new ClassicFedoraUpdaterImp(httpHandlerFactory, fedoraConverterFactory,
 				fedoraConnectionInfo);
 
 	}

@@ -20,8 +20,6 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 public interface DivaFedoraConverterFactory {
 
-	DivaFedoraToCoraConverter factorToCoraConverter(String type);
-
 	DivaCoraToFedoraConverter factorToFedoraConverter(String type);
 
 }

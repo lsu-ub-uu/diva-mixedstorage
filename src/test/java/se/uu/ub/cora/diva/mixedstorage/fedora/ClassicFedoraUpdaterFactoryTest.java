@@ -59,7 +59,7 @@ public class ClassicFedoraUpdaterFactoryTest {
 	@Test
 	public void testFactorPerson() {
 		String recordType = "person";
-		ClassicFedoraPersonUpdater updater = (ClassicFedoraPersonUpdater) factory
+		ClassicFedoraUpdaterImp updater = (ClassicFedoraUpdaterImp) factory
 				.factor(recordType);
 		assertSame(updater.getHttpHandlerFactory(), httpHandlerFactory);
 		FedoraConnectionInfo fedoraConnectionInfoUpdater = updater.getFedoraConnectionInfo();

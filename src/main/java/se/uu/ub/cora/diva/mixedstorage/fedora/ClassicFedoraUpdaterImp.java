@@ -25,14 +25,14 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 
-public class ClassicFedoraPersonUpdater implements ClassicFedoraUpdater {
+public class ClassicFedoraUpdaterImp implements ClassicFedoraUpdater {
 
 	private static final int OK = 200;
 	private HttpHandlerFactory httpHandlerFactory;
 	private DivaFedoraConverterFactory divaCoraToFedoraConverterFactory;
 	private FedoraConnectionInfo fedoraConnectionInfo;
 
-	public ClassicFedoraPersonUpdater(HttpHandlerFactory httpHandlerFactory,
+	public ClassicFedoraUpdaterImp(HttpHandlerFactory httpHandlerFactory,
 			DivaFedoraConverterFactory divaCoraToFedoraConverterFactory,
 			FedoraConnectionInfo fedoraConnectionInfo) {
 		this.httpHandlerFactory = httpHandlerFactory;
