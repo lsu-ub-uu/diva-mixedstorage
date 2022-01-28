@@ -20,8 +20,8 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import java.util.Map;
 
-import se.uu.ub.cora.converter.Converter;
 import se.uu.ub.cora.converter.ConverterProvider;
+import se.uu.ub.cora.converter.StringToExternallyConvertibleConverter;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 
@@ -33,6 +33,7 @@ public class DivaFedoraToCoraConverterImp implements DivaFedoraToCoraConverter {
 		this.transformation = transformation;
 	}
 
+	// TODO: is this used any more? if not remove else fix
 	@Override
 	public DataGroup fromXML(String xmlToTransform) {
 		String coraXml = transformation.transform(xmlToTransform);
@@ -40,7 +41,8 @@ public class DivaFedoraToCoraConverterImp implements DivaFedoraToCoraConverter {
 	}
 
 	private DataGroup convertXml(String coraXml) {
-		Converter converter = ConverterProvider.getConverter("xml");
+		StringToExternallyConvertibleConverter converter = ConverterProvider
+				.getStringToExternallyConvertibleConverter("xml");
 		return (DataGroup) converter.convert(coraXml);
 	}
 

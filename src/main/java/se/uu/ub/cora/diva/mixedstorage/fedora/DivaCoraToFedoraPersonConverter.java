@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import se.uu.ub.cora.converter.Converter;
 import se.uu.ub.cora.converter.ConverterProvider;
+import se.uu.ub.cora.converter.ExternallyConvertibleToStringConverter;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
@@ -44,7 +44,8 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 
 	@Override
 	public String toXML(DataGroup dataGroup) {
-		Converter converter = ConverterProvider.getConverter("xml");
+		ExternallyConvertibleToStringConverter converter = ConverterProvider
+				.getExternallyConvertibleToStringConverter("xml");
 		StringBuilder combinedXml = new StringBuilder(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><personAccumulated>");
 
@@ -55,15 +56,15 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 		return transformCoraXmlToFedoraXml(combinedXml);
 	}
 
-	private void convertTopDataGroupToXml(DataGroup dataRecord, Converter converter,
-			StringBuilder combinedXml) {
+	private void convertTopDataGroupToXml(DataGroup dataRecord,
+			ExternallyConvertibleToStringConverter converter, StringBuilder combinedXml) {
 		String xml = converter.convert(dataRecord);
 		String strippedXml = removeStartingXMLTag(xml);
 		combinedXml.append(strippedXml);
 	}
 
-	private void convertDomainPartsDataGroupsToXml(DataGroup dataGroup, Converter converter,
-			StringBuilder combinedXml) {
+	private void convertDomainPartsDataGroupsToXml(DataGroup dataGroup,
+			ExternallyConvertibleToStringConverter converter, StringBuilder combinedXml) {
 		Map<String, List<DataGroup>> collectedLinks = collectLinksForPersonDomainParts(dataGroup);
 		for (Entry<String, List<DataGroup>> entry : collectedLinks.entrySet()) {
 			appendStartTag(combinedXml, entry);
@@ -82,7 +83,8 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 		combinedXml.append("<").append(entry.getKey()).append(">");
 	}
 
-	private void convertRelatedLinksForOneRecordType(Converter converter, StringBuilder combinedXml,
+	private void convertRelatedLinksForOneRecordType(
+			ExternallyConvertibleToStringConverter converter, StringBuilder combinedXml,
 			List<DataGroup> dataGroupsForRecordType) {
 		for (DataGroup collectedLinkDataGroup : dataGroupsForRecordType) {
 			String relatedXml = converter.convert(collectedLinkDataGroup);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Uppsala University Library
+ * Copyright 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,14 +21,14 @@ package se.uu.ub.cora.diva.mixedstorage.fedora;
 import java.util.ArrayList;
 import java.util.List;
 
-import se.uu.ub.cora.converter.Converter;
-import se.uu.ub.cora.data.DataElement;
+import se.uu.ub.cora.converter.ExternallyConvertibleToStringConverter;
+import se.uu.ub.cora.data.ExternallyConvertible;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 
-public class ConverterSpy implements Converter {
+public class ConverterSpy implements ExternallyConvertibleToStringConverter {
 
-	public DataElement dataElement;
-	public List<DataElement> dataElements = new ArrayList<>();
+	public ExternallyConvertible dataElement;
+	public List<ExternallyConvertible> dataElements = new ArrayList<>();
 	public String dataString;
 
 	public String commonStringToReturn = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>some returned string from converter spy";
@@ -37,9 +37,9 @@ public class ConverterSpy implements Converter {
 	private int counter = 0;
 
 	@Override
-	public String convert(DataElement dataElement) {
-		dataElements.add(dataElement);
-		this.dataElement = dataElement;
+	public String convert(ExternallyConvertible externallyConvertible) {
+		dataElements.add(externallyConvertible);
+		this.dataElement = externallyConvertible;
 		String stringToReturn = commonStringToReturn + counter;
 		counter++;
 		returnedStrings.add(stringToReturn);
@@ -48,10 +48,9 @@ public class ConverterSpy implements Converter {
 	}
 
 	@Override
-	public DataElement convert(String dataString) {
-		this.dataString = dataString;
-		dataGroupToReturn = new DataGroupSpy("someNameInData");
-		return dataGroupToReturn;
+	public String convertWithLinks(ExternallyConvertible externallyConvertible, String baseUrl) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

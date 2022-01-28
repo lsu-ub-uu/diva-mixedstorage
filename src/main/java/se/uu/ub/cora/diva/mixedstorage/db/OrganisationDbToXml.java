@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Uppsala University Library
+ * Copyright 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import se.uu.ub.cora.converter.Converter;
 import se.uu.ub.cora.converter.ConverterFactory;
+import se.uu.ub.cora.converter.ExternallyConvertibleToStringConverter;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
@@ -35,6 +35,8 @@ public class OrganisationDbToXml implements DbToXml {
 	private ConverterFactory xmlConverterFactory;
 	private CoraTransformationFactory transformationFactory;
 
+	// TODO: is this class used, can not find any reference to it(except test)
+	// TODO: why a factory and not a provider?
 	public OrganisationDbToXml(RecordStorage dbStorage, ConverterFactory xmlConverterFactory,
 			CoraTransformationFactory transformationFactory) {
 		this.dbStorage = dbStorage;
@@ -49,7 +51,8 @@ public class OrganisationDbToXml implements DbToXml {
 		Map<String, DataGroup> linkedOrganisations = new HashMap<>();
 		linkedOrganisations.put(recordId, dataGroup);
 
-		Converter converter = xmlConverterFactory.factorConverter();
+		ExternallyConvertibleToStringConverter converter = xmlConverterFactory
+				.factorExternallyConvertableToStringConverter();
 		StringBuilder combinedXML = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		possiblyConvertParents(dataGroup, linkedOrganisations);
 		for (Entry<String, DataGroup> entry : linkedOrganisations.entrySet()) {
