@@ -120,12 +120,12 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
 			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
-			synchronizeWithClassic(type, id, dataRecord);
+			// synchronizeWithClassic(type, id, dataRecord);
 
 		} else if (PERSON_DOMAIN_PART.equals(type)) {
 			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
-			String personIdPartOfId = id.substring(0, id.lastIndexOf(":"));
-			synchronizeWithClassic(PERSON, personIdPartOfId, dataRecord);
+			// String personIdPartOfId = id.substring(0, id.lastIndexOf(":"));
+			// synchronizeWithClassic(PERSON, personIdPartOfId, dataRecord);
 
 		} else if (isOrganisation(type)) {
 			divaClassicDbStorage.update(type, id, dataRecord, collectedTerms, linkList,

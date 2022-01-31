@@ -484,15 +484,15 @@ public class DivaMixedRecordStorageTest {
 		assertNoInteractionWithStorage(divaDbToCoraStorage);
 	}
 
-	@Test
-	public void updatePersonCallsUpdateForFedora() {
-		DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
-		divaMixedRecordStorage.update("person", "someId", dataGroup,
-				new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
-				"someDataDivider");
-
-		assertCorrectCallToClassicUpdaterForPerson(dataGroup, "someId");
-	}
+	// @Test
+	// public void updatePersonCallsUpdateForFedora() {
+	// DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
+	// divaMixedRecordStorage.update("person", "someId", dataGroup,
+	// new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
+	// "someDataDivider");
+	//
+	// assertCorrectCallToClassicUpdaterForPerson(dataGroup, "someId");
+	// }
 
 	private void assertCorrectCallToClassicUpdaterForPerson(DataGroupSpy dataGroup,
 			String expectedId) {
@@ -504,16 +504,16 @@ public class DivaMixedRecordStorageTest {
 		assertSame(factoredFedoraUpdater.dataGroup, dataGroup);
 	}
 
-	@Test
-	public void updatePersonCallsClassicIndexer() {
-		DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
-		divaMixedRecordStorage.update("person", "someId", dataGroup,
-				new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
-				"someDataDivider");
-
-		assertCorrectCallToClassicIndexerForPerson("someId");
-
-	}
+	// @Test
+	// public void updatePersonCallsClassicIndexer() {
+	// DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
+	// divaMixedRecordStorage.update("person", "someId", dataGroup,
+	// new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
+	// "someDataDivider");
+	//
+	// assertCorrectCallToClassicIndexerForPerson("someId");
+	//
+	// }
 
 	private void assertCorrectCallToClassicIndexerForPerson(String expectedId) {
 		ClassicIndexerFactorySpy indexerFactory = (ClassicIndexerFactorySpy) mixedDependencies
@@ -575,26 +575,26 @@ public class DivaMixedRecordStorageTest {
 		assertNoInteractionWithStorage(divaDbToCoraStorage);
 	}
 
-	@Test
-	public void updatePersonDomainPartCallsUpdateForFedora() {
-		DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
-		divaMixedRecordStorage.update("personDomainPart", "somePerson:111:someDomainPartId",
-				dataGroup, new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
-				"someDataDivider");
+	// @Test
+	// public void updatePersonDomainPartCallsUpdateForFedora() {
+	// DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
+	// divaMixedRecordStorage.update("personDomainPart", "somePerson:111:someDomainPartId",
+	// dataGroup, new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
+	// "someDataDivider");
+	//
+	// assertCorrectCallToClassicUpdaterForPerson(dataGroup, "somePerson:111");
+	// }
 
-		assertCorrectCallToClassicUpdaterForPerson(dataGroup, "somePerson:111");
-	}
-
-	@Test
-	public void updatePersonDomainPartCallsClassicIndexer() {
-		DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
-		divaMixedRecordStorage.update("personDomainPart", "somePerson:111:someDomainPartId",
-				dataGroup, new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
-				"someDataDivider");
-
-		assertCorrectCallToClassicIndexerForPerson("somePerson:111");
-
-	}
+	// @Test
+	// public void updatePersonDomainPartCallsClassicIndexer() {
+	// DataGroupSpy dataGroup = new DataGroupSpy("dummyRecord");
+	// divaMixedRecordStorage.update("personDomainPart", "somePerson:111:someDomainPartId",
+	// dataGroup, new DataGroupSpy("collectedTerms"), new DataGroupSpy("linkList"),
+	// "someDataDivider");
+	//
+	// assertCorrectCallToClassicIndexerForPerson("somePerson:111");
+	//
+	// }
 
 	@Test
 	public void updateOrganisationGoesToDbStorage() {
