@@ -13,6 +13,8 @@ module se.uu.ub.cora.diva.mixedstorage {
 	requires se.uu.ub.cora.sqlstorage;
 	requires se.uu.ub.cora.fedora;
 
+	exports se.uu.ub.cora.diva.mixedstorage.classic;
+
 	provides se.uu.ub.cora.gatekeeper.user.UserStorageProvider
 			with se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
 	provides se.uu.ub.cora.storage.RecordStorageProvider
