@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.internal;
+package se.uu.ub.cora.diva.mixedstorage.classic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,9 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollector;
-import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollectorFactory;
-import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
 
 public class RepeatableRelatedLinkCollectorImp implements RepeatableRelatedLinkCollector {
 

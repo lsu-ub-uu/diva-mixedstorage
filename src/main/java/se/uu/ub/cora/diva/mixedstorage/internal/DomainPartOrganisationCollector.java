@@ -23,18 +23,15 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.RelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.classic.RelatedLinkCollector;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 
-	private RecordStorage dbStorage;
-	private RecordStorage classicDbStorage;
+	private RecordStorage recordStorage;
 
-	public DomainPartOrganisationCollector(RecordStorage dbStorage,
-			RecordStorage classicDbStorage) {
-		this.dbStorage = dbStorage;
-		this.classicDbStorage = classicDbStorage;
+	public DomainPartOrganisationCollector(RecordStorage recordStorage) {
+		this.recordStorage = recordStorage;
 	}
 
 	@Override
@@ -57,7 +54,7 @@ public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 		String linkedRecordType = personDomainPartLink
 				.getFirstAtomicValueWithNameInData("linkedRecordType");
 		String linkedRecordId = getDomainPartId(personDomainPartLink);
-		return dbStorage.read(linkedRecordType, linkedRecordId);
+		return recordStorage.read(linkedRecordType, linkedRecordId);
 	}
 
 	private Map<String, DataGroup> collectOrganisations(DataGroup personDomainPart) {
@@ -81,7 +78,7 @@ public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 	private void collectLinkFromAffiliation(Map<String, DataGroup> collectedLinks,
 			DataGroup affiliation) {
 		String organisationId = extractId(affiliation);
-		DataGroup readOrganisation = classicDbStorage.read("organisation", organisationId);
+		DataGroup readOrganisation = recordStorage.read("organisation", organisationId);
 		collectedLinks.put(organisationId, readOrganisation);
 		possiblyAddParents(collectedLinks, readOrganisation);
 	}
@@ -100,11 +97,11 @@ public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 		}
 	}
 
-	RecordStorage getDbStorage() {
-		return dbStorage;
+	public RecordStorage getRecordStorage() {
+		return recordStorage;
 	}
 
-	RecordStorage getClassicDbStorage() {
-		return classicDbStorage;
-	}
+	// public RecordStorage getClassicDbStorage() {
+	// return classicDbStorage;
+	// }
 }

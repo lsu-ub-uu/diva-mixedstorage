@@ -22,10 +22,6 @@ import java.util.Collection;
 import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexer;
-import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
 import se.uu.ub.cora.searchstorage.SearchStorage;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -43,8 +39,6 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private RecordStorage divaClassicDbStorage;
 	private RecordStorage userStorage;
 	private RecordStorage databaseStorage;
-	private ClassicFedoraUpdaterFactory fedoraUpdaterFactory;
-	private ClassicIndexerFactory classicIndexerFactory;
 
 	public static DivaMixedRecordStorage usingDivaMixedDependencies(
 			DivaMixedDependencies mixedDependencies) {
@@ -56,8 +50,6 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		this.divaClassicDbStorage = mixedDependencies.getClassicDbStorage();
 		this.userStorage = mixedDependencies.getUserStorage();
 		this.databaseStorage = mixedDependencies.getDatabaseStorage();
-		this.fedoraUpdaterFactory = mixedDependencies.getClassicFedoraUpdaterFactory();
-		classicIndexerFactory = mixedDependencies.getClassicIndexerFactory();
 	}
 
 	@Override
@@ -120,12 +112,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
 			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
-			// synchronizeWithClassic(type, id, dataRecord);
 
 		} else if (PERSON_DOMAIN_PART.equals(type)) {
 			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
-			// String personIdPartOfId = id.substring(0, id.lastIndexOf(":"));
-			// synchronizeWithClassic(PERSON, personIdPartOfId, dataRecord);
 
 		} else if (isOrganisation(type)) {
 			divaClassicDbStorage.update(type, id, dataRecord, collectedTerms, linkList,
@@ -133,14 +122,6 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 		} else {
 			basicStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 		}
-	}
-
-	private void synchronizeWithClassic(String typeInClassic, String idInClassic,
-			DataGroup dataRecord) {
-		ClassicFedoraUpdater fedoraUpdater = fedoraUpdaterFactory.factor(PERSON);
-		fedoraUpdater.updateInFedora(typeInClassic, idInClassic, dataRecord);
-		ClassicIndexer classicIndexer = classicIndexerFactory.factor(typeInClassic);
-		classicIndexer.index(idInClassic);
 	}
 
 	@Override
@@ -287,14 +268,5 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	public RecordStorage getDatabaseStorage() {
 		return databaseStorage;
-	}
-
-	ClassicFedoraUpdaterFactory getFedoraUpdaterFactory() {
-		return fedoraUpdaterFactory;
-	}
-
-	public ClassicIndexerFactory getClassicIndexerFactory() {
-		return classicIndexerFactory;
-
 	}
 }

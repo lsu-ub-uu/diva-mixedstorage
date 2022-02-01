@@ -25,7 +25,7 @@ import java.util.Map.Entry;
 import se.uu.ub.cora.converter.ConverterProvider;
 import se.uu.ub.cora.converter.ExternallyConvertibleToStringConverter;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 

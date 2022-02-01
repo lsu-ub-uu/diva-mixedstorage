@@ -16,24 +16,27 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage;
+package se.uu.ub.cora.diva.mixedstorage.classic;
 
-/**
- * RelatedLinkCollectorFactory factors a RelatedLinkCollector
- */
-public interface RelatedLinkCollectorFactory {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-	/**
-	 * factor factors a RelatedLinkCollector, using type to determine which RelatedLinkCollector
-	 * implmenatation to return
-	 * 
-	 * If no RelatedLinkCollector can be factored, a NotImplementedException SHOULD be thrown
-	 * 
-	 * @param String
-	 *            type, the type used to determine which RelatedLinkCollector implementaion to
-	 *            return
-	 * @return an implementation of a {@link RelatedLinkCollector}
-	 */
-	RelatedLinkCollector factor(String type);
+import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollector;
+
+public class RepeatableLinkCollectorSpy implements RepeatableRelatedLinkCollector {
+
+	public List<DataGroup> groupsContainingLinks = new ArrayList<>();
+	public int numberOfGroupsToReturn = 0;
+	public Map<String, List<DataGroup>> mapToReturn = new HashMap<>();
+
+	@Override
+	public Map<String, List<DataGroup>> collectLinks(List<DataGroup> groupsContainingLinks) {
+		this.groupsContainingLinks = groupsContainingLinks;
+
+		return mapToReturn;
+	}
 
 }

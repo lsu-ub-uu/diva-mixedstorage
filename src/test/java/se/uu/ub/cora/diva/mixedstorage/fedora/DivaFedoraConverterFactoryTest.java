@@ -26,8 +26,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.diva.mixedstorage.RepeatableLinkCollectorSpy;
-import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableLinkCollectorSpy;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollector;
 
 public class DivaFedoraConverterFactoryTest {
 	private DivaFedoraConverterFactoryImp divaToCoraConverterFactoryImp;

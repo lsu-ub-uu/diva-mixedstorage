@@ -18,8 +18,6 @@
  */
 package se.uu.ub.cora.diva.mixedstorage;
 
-import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
 import se.uu.ub.cora.storage.RecordStorage;
 
 /**
@@ -32,9 +30,9 @@ public class DivaMixedDependencies {
 	private RecordStorage classicDbStorage;
 	private RecordStorage userStorage;
 	private RecordStorage databaseStorage;
-	private ClassicFedoraUpdaterFactory fedoraUpdaterFactory;
-	private ClassicIndexerFactory indexerFactory;
-	private RelatedLinkCollectorFactory relatedLinkCollectorFactory;
+	// private ClassicFedoraUpdaterFactory fedoraUpdaterFactory;
+	// private ClassicIndexerFactory indexerFactory;
+	// private RelatedLinkCollectorFactory relatedLinkCollectorFactory;
 
 	public void setBasicStorage(RecordStorage basicStorage) {
 		this.basicStorage = basicStorage;
@@ -71,31 +69,32 @@ public class DivaMixedDependencies {
 		return databaseStorage;
 	}
 
-	public void setClassicFedoraUpdaterFactory(ClassicFedoraUpdaterFactory fedoraUpdaterFactory) {
-		this.fedoraUpdaterFactory = fedoraUpdaterFactory;
-	}
-
-	public ClassicFedoraUpdaterFactory getClassicFedoraUpdaterFactory() {
-		return fedoraUpdaterFactory;
-	}
-
-	public void setClassicIndexerFactory(ClassicIndexerFactory indexerFactory) {
-		this.indexerFactory = indexerFactory;
-
-	}
-
-	public ClassicIndexerFactory getClassicIndexerFactory() {
-		return indexerFactory;
-	}
-
-	public void setRelatedLinkCollectorFactory(
-			RelatedLinkCollectorFactory relatedLinkCollectorFactory) {
-		this.relatedLinkCollectorFactory = relatedLinkCollectorFactory;
-
-	}
-
-	public RelatedLinkCollectorFactory getRelatedLinkCollectorFactory() {
-		return relatedLinkCollectorFactory;
-	}
+	// public void setClassicFedoraUpdaterFactory(ClassicFedoraUpdaterFactory fedoraUpdaterFactory)
+	// {
+	// this.fedoraUpdaterFactory = fedoraUpdaterFactory;
+	// }
+	//
+	// public ClassicFedoraUpdaterFactory getClassicFedoraUpdaterFactory() {
+	// return fedoraUpdaterFactory;
+	// }
+	//
+	// public void setClassicIndexerFactory(ClassicIndexerFactory indexerFactory) {
+	// this.indexerFactory = indexerFactory;
+	//
+	// }
+	//
+	// public ClassicIndexerFactory getClassicIndexerFactory() {
+	// return indexerFactory;
+	// }
+	//
+	// public void setRelatedLinkCollectorFactory(
+	// RelatedLinkCollectorFactory relatedLinkCollectorFactory) {
+	// this.relatedLinkCollectorFactory = relatedLinkCollectorFactory;
+	//
+	// }
+	//
+	// public RelatedLinkCollectorFactory getRelatedLinkCollectorFactory() {
+	// return relatedLinkCollectorFactory;
+	// }
 
 }

@@ -27,8 +27,8 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.HttpHandlerFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.diva.mixedstorage.RepeatableLinkCollectorSpy;
-import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableLinkCollectorSpy;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.xmlutils.transformer.XsltTransformationFactory;
 
 public class ClassicFedoraUpdaterFactoryTest {

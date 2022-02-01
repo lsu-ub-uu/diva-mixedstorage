@@ -24,23 +24,15 @@ import se.uu.ub.cora.basicstorage.DataStorageException;
 import se.uu.ub.cora.basicstorage.RecordStorageInMemoryReadFromDisk;
 import se.uu.ub.cora.basicstorage.RecordStorageInstance;
 import se.uu.ub.cora.basicstorage.RecordStorageOnDisk;
-import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
-import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDataToDbTranslaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactoryImp;
-import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
-import se.uu.ub.cora.diva.mixedstorage.internal.RelatedLinkCollectorFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.internal.RelatedTableFactoryImp;
-import se.uu.ub.cora.diva.mixedstorage.internal.RepeatableRelatedLinkCollectorImp;
 import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.gatekeeper.user.UserStorageProvider;
-import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
@@ -95,16 +87,10 @@ public class DivaMixedRecordStorageProvider
 	private void initializeAndStartMixedRecordStorage() {
 		DivaMixedDependencies divaMixedDependencies = new DivaMixedDependencies();
 		createAndSetBasicStorage(divaMixedDependencies);
-		DivaDbRecordStorage classicDbStorage = createAndSetClassicDbStorage(divaMixedDependencies);
+		createAndSetClassicDbStorage(divaMixedDependencies);
 		createAndSetUserStorage(divaMixedDependencies);
 
-		DatabaseRecordStorage databaseRecordStorage = createAndSetDatabaseStorage(
-				divaMixedDependencies);
-
-		createAndSetClassicFedoraUpdaterFactory(databaseRecordStorage, classicDbStorage,
-				divaMixedDependencies);
-
-		createAndSetClassicIndexerFactory(divaMixedDependencies);
+		createAndSetDatabaseStorage(divaMixedDependencies);
 
 		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
 				.usingDivaMixedDependencies(divaMixedDependencies);
@@ -158,41 +144,6 @@ public class DivaMixedRecordStorageProvider
 		DatabaseRecordStorage databaseRecordStorage = databaseStorageProvider.getRecordStorage();
 		divaMixedDependencies.setDatabaseStorage(databaseRecordStorage);
 		return databaseRecordStorage;
-	}
-
-	private void createAndSetClassicFedoraUpdaterFactory(DatabaseRecordStorage recordStorage,
-			DivaDbRecordStorage classicDbStorage, DivaMixedDependencies divaMixedDependencies) {
-		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
-
-		RepeatableRelatedLinkCollector repeatableLinkCollector = createRepeatableLinkCollector(
-				recordStorage, classicDbStorage);
-		FedoraConnectionInfo fedoraConnectionInfo = createFedoraConnectionInfo();
-		ClassicFedoraUpdaterFactory classicFedoraUpdaterFactory = new ClassicFedoraUpdaterFactoryImp(
-				httpHandlerFactory, repeatableLinkCollector, fedoraConnectionInfo);
-
-		divaMixedDependencies.setClassicFedoraUpdaterFactory(classicFedoraUpdaterFactory);
-	}
-
-	private RepeatableRelatedLinkCollector createRepeatableLinkCollector(
-			DatabaseRecordStorage recordStorage, DivaDbRecordStorage classicDbStorage) {
-		RelatedLinkCollectorFactory linkCollectorFactory = new RelatedLinkCollectorFactoryImp(
-				recordStorage, classicDbStorage);
-		return new RepeatableRelatedLinkCollectorImp(linkCollectorFactory);
-	}
-
-	private FedoraConnectionInfo createFedoraConnectionInfo() {
-		String fedoraURL = tryToGetInitParameterLogIfFound("fedoraURL");
-		String fedoraUsername = tryToGetInitParameter("fedoraUsername");
-		String fedoraPassword = tryToGetInitParameter("fedoraPassword");
-		return new FedoraConnectionInfo(fedoraURL, fedoraUsername, fedoraPassword);
-	}
-
-	private void createAndSetClassicIndexerFactory(DivaMixedDependencies divaMixedDependencies) {
-		String classicAuthorityIndexUrl = tryToGetInitParameterLogIfFound("authorityIndexUrl");
-
-		ClassicIndexerFactory classicIndexerFactory = new ClassicIndexerFactoryImp(
-				classicAuthorityIndexUrl);
-		divaMixedDependencies.setClassicIndexerFactory(classicIndexerFactory);
 	}
 
 	private void createAndSetUserStorage(DivaMixedDependencies divaMixedDependencies) {

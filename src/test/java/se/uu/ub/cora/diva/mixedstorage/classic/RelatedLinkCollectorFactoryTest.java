@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.internal;
+package se.uu.ub.cora.diva.mixedstorage.classic;
 
 import static org.testng.Assert.assertSame;
 
@@ -24,28 +24,26 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.diva.mixedstorage.db.DbStorageSpy;
+import se.uu.ub.cora.diva.mixedstorage.db.RecordStorageForCollectingLinksSpy;
+import se.uu.ub.cora.diva.mixedstorage.internal.DomainPartOrganisationCollector;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class RelatedLinkCollectorFactoryTest {
 
 	private RecordStorage recordStorage;
-	private RecordStorage classicDbStorage;
 	private RelatedLinkCollectorFactoryImp factory;
 
 	@BeforeMethod
 	public void setUp() {
-		recordStorage = new DbStorageSpy();
-		classicDbStorage = new DbStorageSpy();
-		factory = new RelatedLinkCollectorFactoryImp(recordStorage, classicDbStorage);
+		recordStorage = new RecordStorageForCollectingLinksSpy();
+		factory = new RelatedLinkCollectorFactoryImp(recordStorage);
 	}
 
 	@Test
 	public void testFactorForPersonDomainPart() {
 		DomainPartOrganisationCollector linkCollector = (DomainPartOrganisationCollector) factory
 				.factor("personDomainPart");
-		assertSame(linkCollector.getDbStorage(), recordStorage);
-		assertSame(linkCollector.getClassicDbStorage(), classicDbStorage);
+		assertSame(linkCollector.getRecordStorage(), recordStorage);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

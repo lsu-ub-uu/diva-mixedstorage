@@ -20,7 +20,7 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 
 public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory {

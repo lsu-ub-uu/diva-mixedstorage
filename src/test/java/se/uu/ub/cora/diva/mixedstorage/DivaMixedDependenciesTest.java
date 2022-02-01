@@ -23,9 +23,6 @@ import static org.testng.Assert.assertSame;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexerFactory;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
-import se.uu.ub.cora.diva.mixedstorage.internal.RelatedLinkCollectorFactorySpy;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class DivaMixedDependenciesTest {
@@ -65,24 +62,25 @@ public class DivaMixedDependenciesTest {
 		assertSame(mixedDependencies.getDatabaseStorage(), databaseStorage);
 	}
 
-	@Test
-	public void testSetGetClassicFedoraUpdaterFactory() {
-		ClassicFedoraUpdaterFactory fedoraUpdaterFactory = new ClassicFedoraUpdaterFactorySpy();
-		mixedDependencies.setClassicFedoraUpdaterFactory(fedoraUpdaterFactory);
-		assertSame(mixedDependencies.getClassicFedoraUpdaterFactory(), fedoraUpdaterFactory);
-	}
-
-	@Test
-	public void testSetGetClassicIndexerFactory() {
-		ClassicIndexerFactory indexerFactory = new ClassicIndexerFactorySpy();
-		mixedDependencies.setClassicIndexerFactory(indexerFactory);
-		assertSame(mixedDependencies.getClassicIndexerFactory(), indexerFactory);
-	}
-
-	@Test
-	public void testSetGetRelatedLinkCollectorFactory() {
-		RelatedLinkCollectorFactory relatedLinkCollectorFactory = new RelatedLinkCollectorFactorySpy();
-		mixedDependencies.setRelatedLinkCollectorFactory(relatedLinkCollectorFactory);
-		assertSame(mixedDependencies.getRelatedLinkCollectorFactory(), relatedLinkCollectorFactory);
-	}
+	// @Test
+	// public void testSetGetClassicFedoraUpdaterFactory() {
+	// ClassicFedoraUpdaterFactory fedoraUpdaterFactory = new ClassicFedoraUpdaterFactorySpy();
+	// mixedDependencies.setClassicFedoraUpdaterFactory(fedoraUpdaterFactory);
+	// assertSame(mixedDependencies.getClassicFedoraUpdaterFactory(), fedoraUpdaterFactory);
+	// }
+	//
+	// @Test
+	// public void testSetGetClassicIndexerFactory() {
+	// ClassicIndexerFactory indexerFactory = new ClassicIndexerFactorySpy();
+	// mixedDependencies.setClassicIndexerFactory(indexerFactory);
+	// assertSame(mixedDependencies.getClassicIndexerFactory(), indexerFactory);
+	// }
+	//
+	// @Test
+	// public void testSetGetRelatedLinkCollectorFactory() {
+	// RelatedLinkCollectorFactory relatedLinkCollectorFactory = new
+	// RelatedLinkCollectorFactorySpy();
+	// mixedDependencies.setRelatedLinkCollectorFactory(relatedLinkCollectorFactory);
+	// assertSame(mixedDependencies.getRelatedLinkCollectorFactory(), relatedLinkCollectorFactory);
+	// }
 }

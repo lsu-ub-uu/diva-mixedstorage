@@ -16,27 +16,28 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage;
+package se.uu.ub.cora.diva.mixedstorage.classic;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.RepeatableRelatedLinkCollector;
 
-public class RepeatableLinkCollectorSpy implements RepeatableRelatedLinkCollector {
+/**
+ * RelatedLinkCollector collects all records that are linked from a DataGroup
+ */
+public interface RelatedLinkCollector {
 
-	public List<DataGroup> groupsContainingLinks = new ArrayList<>();
-	public int numberOfGroupsToReturn = 0;
-	public Map<String, List<DataGroup>> mapToReturn = new HashMap<>();
-
-	@Override
-	public Map<String, List<DataGroup>> collectLinks(List<DataGroup> groupsContainingLinks) {
-		this.groupsContainingLinks = groupsContainingLinks;
-
-		return mapToReturn;
-	}
+	/**
+	 * collectLinks collects the DataGroup representation of all records that are linked from a
+	 * DataGroup. The collected DataGroups are returned in a collection grouped by the recordType of
+	 * the links and with the id of the link as inner key. If no result an empty Map SHOULD be
+	 * returned
+	 * 
+	 * @param {@link
+	 *            DataGroup dataGroup}, the DataGroup to collect the links from
+	 * 
+	 * @return a Map containing the collected DataGroups
+	 */
+	Map<String, Map<String, DataGroup>> collectLinks(DataGroup dataGroup);
 
 }
