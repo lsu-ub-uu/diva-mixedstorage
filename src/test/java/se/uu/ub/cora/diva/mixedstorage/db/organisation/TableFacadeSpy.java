@@ -96,6 +96,19 @@ public class TableFacadeSpy implements TableFacade {
 	}
 
 	@Override
+	public int updateRowsUsingQuery(TableQuery tableQuery) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int deleteRowsForQuery(TableQuery tableQuery) {
+		// TODO Auto-generated method stub
+		return 0;
+
+	}
+
+	@Override
 	public long nextValueFromSequence(String sequenceName) {
 		this.sequenceName = sequenceName;
 		nextVal = 4;
@@ -123,18 +136,6 @@ public class TableFacadeSpy implements TableFacade {
 	@Override
 	public void close() {
 		closeWasCalled = true;
-	}
-
-	@Override
-	public int deleteRowsForQuery(TableQuery tableQuery) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int updateRowsUsingQuery(TableQuery tableQuery) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 }

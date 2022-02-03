@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2021 Uppsala University Library
+ * Copyright 2019, 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -29,8 +29,8 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
-import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
+import se.uu.ub.cora.diva.mixedstorage.internal.RelatedTableFactoryImp;
 import se.uu.ub.cora.gatekeeper.user.UserStorage;
 import se.uu.ub.cora.gatekeeper.user.UserStorageProvider;
 import se.uu.ub.cora.logger.Logger;
@@ -85,7 +85,45 @@ public class DivaMixedRecordStorageProvider
 	}
 
 	private void initializeAndStartMixedRecordStorage() {
-		RecordStorage basicStorage = createBasicStorage();
+		DivaMixedDependencies divaMixedDependencies = new DivaMixedDependencies();
+		createAndSetBasicStorage(divaMixedDependencies);
+		createAndSetClassicDbStorage(divaMixedDependencies);
+		createAndSetUserStorage(divaMixedDependencies);
+
+		createAndSetDatabaseStorage(divaMixedDependencies);
+
+		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
+				.usingDivaMixedDependencies(divaMixedDependencies);
+
+		setStaticInstance(mixedRecordStorage);
+	}
+
+	private void createAndSetBasicStorage(DivaMixedDependencies divaMixedDependencies) {
+		String basePath = tryToGetInitParameterLogIfFound("storageOnDiskBasePath");
+		String type = tryToGetInitParameterLogIfFound("storageType");
+		RecordStorage basicStorage;
+		if ("memory".equals(type)) {
+			basicStorage = RecordStorageInMemoryReadFromDisk
+					.createRecordStorageOnDiskWithBasePath(basePath);
+		} else {
+			basicStorage = RecordStorageOnDisk.createRecordStorageOnDiskWithBasePath(basePath);
+		}
+		divaMixedDependencies.setBasicStorage(basicStorage);
+	}
+
+	private String tryToGetInitParameterLogIfFound(String parameterName) {
+		String basePath = tryToGetInitParameter(parameterName);
+		log.logInfoUsingMessage("Found " + basePath + " as " + parameterName);
+		return basePath;
+	}
+
+	private String tryToGetInitParameter(String parameterName) {
+		throwErrorIfKeyIsMissingFromInitInfo(parameterName);
+		return initInfo.get(parameterName);
+	}
+
+	private DivaDbRecordStorage createAndSetClassicDbStorage(
+			DivaMixedDependencies divaMixedDependencies) {
 		try {
 			String databaseLookupName = tryToGetInitParameterLogIfFound("databaseLookupName");
 			sqlDatabaseFactory = SqlDatabaseFactoryImp
@@ -95,37 +133,24 @@ public class DivaMixedRecordStorageProvider
 			throw DataStorageException.withMessageAndException(e.getMessage(), e);
 		}
 		DivaDbRecordStorage classicDbStorage = createDbStorage(sqlDatabaseFactory);
-		RecordStorage userStorage = createUserStorage();
+		divaMixedDependencies.setClassicDbStorage(classicDbStorage);
+		return classicDbStorage;
+	}
+
+	private DatabaseRecordStorage createAndSetDatabaseStorage(
+			DivaMixedDependencies divaMixedDependencies) {
 		DatabaseStorageProvider databaseStorageProvider = new DatabaseStorageProvider();
 		databaseStorageProvider.startUsingInitInfo(initInfo);
-		DatabaseRecordStorage recordStorage = databaseStorageProvider.getRecordStorage();
-
-		RecordStorage mixedRecordStorage = DivaMixedRecordStorage
-				.usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(basicStorage,
-						classicDbStorage, userStorage, recordStorage);
-		setStaticInstance(mixedRecordStorage);
+		DatabaseRecordStorage databaseRecordStorage = databaseStorageProvider.getRecordStorage();
+		divaMixedDependencies.setDatabaseStorage(databaseRecordStorage);
+		return databaseRecordStorage;
 	}
 
-	private RecordStorage createBasicStorage() {
-		String basePath = tryToGetInitParameterLogIfFound("storageOnDiskBasePath");
-		String type = tryToGetInitParameterLogIfFound("storageType");
-		if ("memory".equals(type)) {
-			return RecordStorageInMemoryReadFromDisk
-					.createRecordStorageOnDiskWithBasePath(basePath);
-		}
-		return RecordStorageOnDisk.createRecordStorageOnDiskWithBasePath(basePath);
-	}
-
-	private String tryToGetInitParameterLogIfFound(String parameterName) {
-		String basePath = tryToGetInitParameter(parameterName);
-		log.logInfoUsingMessage("Found " + basePath + " as " + parameterName);
-		return basePath;
-	}
-
-	private RecordStorage createUserStorage() {
+	private void createAndSetUserStorage(DivaMixedDependencies divaMixedDependencies) {
 		guestUserStorage = getUserStorage();
 		startDivaStorageFactory();
-		return divaStorageFactory.factorForRecordType("user");
+		RecordStorage userStorage = divaStorageFactory.factorForRecordType("user");
+		divaMixedDependencies.setUserStorage(userStorage);
 	}
 
 	private void startDivaStorageFactory() {
@@ -159,11 +184,6 @@ public class DivaMixedRecordStorageProvider
 				.usingReaderDeleterAndCreator(sqlDatabaseFactory);
 
 		return new DivaDbUpdaterFactoryImp(translaterFactory, sqlDatabaseFactory, relatedFactory);
-	}
-
-	private String tryToGetInitParameter(String parameterName) {
-		throwErrorIfKeyIsMissingFromInitInfo(parameterName);
-		return initInfo.get(parameterName);
 	}
 
 	static void setStaticInstance(RecordStorage recordStorage) {

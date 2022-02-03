@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<organisation>
+	<recordInfo>
+		<id>1104</id>
+		<type>
+			<linkedRecordType>recordType</linkedRecordType>
+			<linkedRecordId>subOrganisation</linkedRecordId>
+		</type>
+		<dataDivider>
+			<linkedRecordType>system</linkedRecordType>
+			<linkedRecordId>diva</linkedRecordId>
+		</dataDivider>
+		<createdBy>
+			<linkedRecordType>coraUser</linkedRecordType>
+			<linkedRecordId>coraUser:4412982402853626</linkedRecordId>
+		</createdBy>
+		<tsCreated>2017-01-01T00:00:00.000000Z</tsCreated>
+		<updated repeatId="0">
+			<updatedBy>
+				<linkedRecordType>coraUser</linkedRecordType>
+				<linkedRecordId>coraUser:4412982402853626</linkedRecordId>
+			</updatedBy>
+			<tsUpdated>2017-01-01T00:00:00.000000Z</tsUpdated>
+		</updated>
+		<domain>test</domain>
+		<selectable>yes</selectable>
+	</recordInfo>
+	<organisationName>
+		<name>Grupp F</name>
+		<language>sv</language>
+	</organisationName>
+	<organisationAlternativeName>
+		<language>en</language>
+		<name>F</name>
+	</organisationAlternativeName>
+	<closedDate>2010-11-03</closedDate>
+	<organisationType>researchGroup</organisationType>
+	<parentOrganisation repeatId="0">
+		<organisationLink>
+			<linkedRecordType>subOrganisation</linkedRecordType>
+			<linkedRecordId>1100</linkedRecordId>
+		</organisationLink>
+	</parentOrganisation>
+</organisation>

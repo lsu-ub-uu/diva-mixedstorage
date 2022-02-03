@@ -34,24 +34,22 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private static final String CORA_USER = "coraUser";
 	private static final String PERSON = "person";
 	private static final String ORGANISATION = "organisation";
+
 	private RecordStorage basicStorage;
 	private RecordStorage divaClassicDbStorage;
 	private RecordStorage userStorage;
 	private RecordStorage databaseStorage;
 
-	public static RecordStorage usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(
-			RecordStorage basicStorage, RecordStorage divaDbStorage, RecordStorage userStorage,
-			RecordStorage databaseStorage) {
-		return new DivaMixedRecordStorage(basicStorage, divaDbStorage, userStorage,
-				databaseStorage);
+	public static DivaMixedRecordStorage usingDivaMixedDependencies(
+			DivaMixedDependencies mixedDependencies) {
+		return new DivaMixedRecordStorage(mixedDependencies);
 	}
 
-	private DivaMixedRecordStorage(RecordStorage basicStorage, RecordStorage divaDbStorage,
-			RecordStorage userStorage, RecordStorage databaseStorage) {
-		this.basicStorage = basicStorage;
-		this.divaClassicDbStorage = divaDbStorage;
-		this.userStorage = userStorage;
-		this.databaseStorage = databaseStorage;
+	private DivaMixedRecordStorage(DivaMixedDependencies mixedDependencies) {
+		this.basicStorage = mixedDependencies.getBasicStorage();
+		this.divaClassicDbStorage = mixedDependencies.getClassicDbStorage();
+		this.userStorage = mixedDependencies.getUserStorage();
+		this.databaseStorage = mixedDependencies.getDatabaseStorage();
 	}
 
 	@Override
@@ -88,7 +86,11 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	@Override
 	public void create(String type, String id, DataGroup dataRecord, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		basicStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
+		if (PERSON_DOMAIN_PART.equals(type)) {
+			databaseStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
+		} else {
+			basicStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
+		}
 	}
 
 	@Override
@@ -110,6 +112,10 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
 			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
+
+		} else if (PERSON_DOMAIN_PART.equals(type)) {
+			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
+
 		} else if (isOrganisation(type)) {
 			divaClassicDbStorage.update(type, id, dataRecord, collectedTerms, linkList,
 					dataDivider);
@@ -186,7 +192,12 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			return linkExistInDbStorage(type, id);
 		}
 		if (USER.equals(type) || CORA_USER.equals(type)) {
-			return linkExistInUserStorage(type, id) || linkExistInBasicStorage(type, id);
+			// return linkExistInUserStorage(type, id) || linkExistInBasicStorage(type, id);
+			return true;
+		}
+		if (PERSON_DOMAIN_PART.equals(type)) {
+			return databaseStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type,
+					id);
 		}
 		return linkExistInBasicStorage(type, id);
 	}

@@ -18,6 +18,9 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 
@@ -25,11 +28,17 @@ public class TransformationFactorySpy implements CoraTransformationFactory {
 
 	public CoraTransformationSpy transformationSpy;
 	public String xsltPath;
+	public List<String> xsltPaths = new ArrayList<>();
+	public List<CoraTransformationSpy> factoredTransformations = new ArrayList<>();
+	public String mainXsltPath;
+	public String relatedXsltPath;
 
 	@Override
 	public CoraTransformation factor(String xsltPath) {
+		xsltPaths.add(xsltPath);
 		this.xsltPath = xsltPath;
 		transformationSpy = new CoraTransformationSpy();
+		factoredTransformations.add(transformationSpy);
 		return transformationSpy;
 	}
 

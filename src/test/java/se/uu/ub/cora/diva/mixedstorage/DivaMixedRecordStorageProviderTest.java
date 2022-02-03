@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2021 Uppsala University Library
+ * Copyright 2019, 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -46,8 +46,8 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
-import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
+import se.uu.ub.cora.diva.mixedstorage.internal.RelatedTableFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
@@ -90,6 +90,11 @@ public class DivaMixedRecordStorageProviderTest {
 		initInfo.put("storageOnDiskBasePath", basePath);
 		initInfo.put("databaseLookupName", "java:/comp/env/jdbc/postgres");
 		initInfo.put("coraDatabaseLookupName", "java:/comp/env/jdbc/coraPostgres");
+		initInfo.put("fedoraURL", "http://diva-cora-fedora:8088/fedora/");
+		initInfo.put("fedoraUsername", "fedoraUser");
+		initInfo.put("fedoraPassword", "fedoraPass");
+		initInfo.put("authorityIndexUrl", "http://diva-cora-solr:8093/authority/rest");
+
 	}
 
 	public void makeSureBasePathExistsAndIsEmpty() throws IOException {

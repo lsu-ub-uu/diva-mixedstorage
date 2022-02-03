@@ -26,8 +26,8 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.DivaDbOrganisationUpdater;
-import se.uu.ub.cora.diva.mixedstorage.db.organisation.RelatedTableFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
+import se.uu.ub.cora.diva.mixedstorage.internal.RelatedTableFactorySpy;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 

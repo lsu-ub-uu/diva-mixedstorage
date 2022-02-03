@@ -20,50 +20,35 @@
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
-import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
-import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollector;
 import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 
 public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory {
 
-	private static final String PERSON_XSLT_PATH = "person/coraPerson.xsl";
-	private static final String PERSON_DOMAIN_PART_XSLT_PATH = "person/coraPersonDomainPart.xsl";
 	private String fedoraURL;
 	private CoraTransformationFactory coraTransformationFactory;
+	private RepeatableRelatedLinkCollector repeatableLinkCollector;
 
 	public static DivaFedoraConverterFactoryImp usingFedoraURLAndTransformerFactory(
-			String fedoraURL, CoraTransformationFactory transformationFactory) {
-		return new DivaFedoraConverterFactoryImp(fedoraURL, transformationFactory);
+			String fedoraURL, CoraTransformationFactory transformationFactory,
+			RepeatableRelatedLinkCollector repeatableLinkCollector) {
+		return new DivaFedoraConverterFactoryImp(fedoraURL, transformationFactory,
+				repeatableLinkCollector);
 	}
 
 	private DivaFedoraConverterFactoryImp(String fedoraURL,
-			CoraTransformationFactory coraTransformationFactory) {
+			CoraTransformationFactory coraTransformationFactory,
+			RepeatableRelatedLinkCollector repeatableLinkCollector) {
 		this.fedoraURL = fedoraURL;
 		this.coraTransformationFactory = coraTransformationFactory;
-	}
-
-	@Override
-	public DivaFedoraToCoraConverter factorToCoraConverter(String type) {
-		if ("person".equals(type)) {
-			return getFedoraToCoraConverterUsingPath(PERSON_XSLT_PATH);
-		}
-		if ("personDomainPart".equals(type)) {
-			return getFedoraToCoraConverterUsingPath(PERSON_DOMAIN_PART_XSLT_PATH);
-		}
-		throw NotImplementedException.withMessage("No converter implemented for: " + type);
-	}
-
-	private DivaFedoraToCoraConverter getFedoraToCoraConverterUsingPath(String personXsltPath) {
-		CoraTransformation coraTransformation = coraTransformationFactory.factor(personXsltPath);
-		return new DivaFedoraToCoraConverterImp(coraTransformation);
+		this.repeatableLinkCollector = repeatableLinkCollector;
 	}
 
 	@Override
 	public DivaCoraToFedoraConverter factorToFedoraConverter(String type) {
 		if ("person".equals(type)) {
-			HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
-			return DivaCoraToFedoraPersonConverter
-					.usingHttpHandlerFactoryAndFedoraUrl(httpHandlerFactory, fedoraURL);
+			return new DivaCoraToFedoraPersonConverter(coraTransformationFactory,
+					repeatableLinkCollector);
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}
@@ -77,4 +62,7 @@ public class DivaFedoraConverterFactoryImp implements DivaFedoraConverterFactory
 		return coraTransformationFactory;
 	}
 
+	public RepeatableRelatedLinkCollector getRepeatableRelatedLinkCollector() {
+		return repeatableLinkCollector;
+	}
 }

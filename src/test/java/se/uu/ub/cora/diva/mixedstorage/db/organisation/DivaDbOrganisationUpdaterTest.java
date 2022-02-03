@@ -33,6 +33,7 @@ import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.DataToDbTranslaterSpy;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableSpy;
+import se.uu.ub.cora.diva.mixedstorage.internal.RelatedTableFactorySpy;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
 public class DivaDbOrganisationUpdaterTest {

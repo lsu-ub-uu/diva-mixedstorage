@@ -16,11 +16,15 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.db.organisation;
+package se.uu.ub.cora.diva.mixedstorage.internal;
 
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTable;
 import se.uu.ub.cora.diva.mixedstorage.db.RelatedTableFactory;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationAddressRelatedTable;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationAlternativeNameRelatedTable;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationParentRelatedTable;
+import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationPredecessorRelatedTable;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
 public class RelatedTableFactoryImp implements RelatedTableFactory {

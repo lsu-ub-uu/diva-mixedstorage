@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,16 +16,17 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.diva.mixedstorage.fedora;
+package se.uu.ub.cora.diva.mixedstorage;
 
-import java.util.Map;
+import se.uu.ub.cora.diva.mixedstorage.classic.ClassicIndexer;
 
-import se.uu.ub.cora.data.DataGroup;
+public class ClassicIndexerSpy implements ClassicIndexer {
 
-public interface DivaFedoraToCoraConverter {
+	public String recordId;
 
-	DataGroup fromXML(String xml);
-
-	DataGroup fromXMLWithParameters(String xml, Map<String, Object> parameters);
+	@Override
+	public void index(String recordId) {
+		this.recordId = recordId;
+	}
 
 }

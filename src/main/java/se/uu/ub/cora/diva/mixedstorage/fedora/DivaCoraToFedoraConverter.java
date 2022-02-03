@@ -22,6 +22,6 @@ import se.uu.ub.cora.data.DataGroup;
 
 public interface DivaCoraToFedoraConverter {
 
-	String toXML(DataGroup record);
+	String toXML(DataGroup dataRecord);
 
 }

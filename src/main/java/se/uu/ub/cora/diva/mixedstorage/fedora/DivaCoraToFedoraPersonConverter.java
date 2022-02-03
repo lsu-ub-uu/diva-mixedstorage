@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,79 +18,102 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.fedora;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import se.uu.ub.cora.converter.ConverterProvider;
+import se.uu.ub.cora.converter.ExternallyConvertibleToStringConverter;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.httphandler.HttpHandler;
-import se.uu.ub.cora.httphandler.HttpHandlerFactory;
+import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollector;
+import se.uu.ub.cora.xmlutils.transformer.CoraTransformation;
+import se.uu.ub.cora.xmlutils.transformer.CoraTransformationFactory;
 
 public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverter {
-	private HttpHandlerFactory httpHandlerFactory;
-	private String fedoraURL;
-	private XMLXPathParser parser;
 
-	public static DivaCoraToFedoraPersonConverter usingHttpHandlerFactoryAndFedoraUrl(
-			HttpHandlerFactory httpHandlerFactory, String fedoraURL) {
-		return new DivaCoraToFedoraPersonConverter(httpHandlerFactory, fedoraURL);
-	}
+	private CoraTransformationFactory transformationFactory;
+	private static final String CORA_TO_FEDORA_PERSON_XSLT_PATH = "person/coraToFedoraPerson.xsl";
+	private RepeatableRelatedLinkCollector repeatbleRelatedLinkCollector;
 
-	private DivaCoraToFedoraPersonConverter(HttpHandlerFactory httpHandlerFactory,
-			String fedoraURL) {
-		this.httpHandlerFactory = httpHandlerFactory;
-		this.fedoraURL = fedoraURL;
+	public DivaCoraToFedoraPersonConverter(CoraTransformationFactory transformationFactory,
+			RepeatableRelatedLinkCollector repeatbleRelatedLinkCollector) {
+		this.transformationFactory = transformationFactory;
+		this.repeatbleRelatedLinkCollector = repeatbleRelatedLinkCollector;
+
 	}
 
 	@Override
-	public String toXML(DataGroup record) {
-		String recordId = getIdFromRecord(record);
-		String fedoraXML = getXMLForRecordFromFedora(recordId);
-		parser = XMLXPathParser.forXML(fedoraXML);
-		convertNames(record);
-		return parser.getDocumentAsString("/");
+	public String toXML(DataGroup dataGroup) {
+		ExternallyConvertibleToStringConverter converter = ConverterProvider
+				.getExternallyConvertibleToStringConverter("xml");
+		StringBuilder combinedXml = new StringBuilder(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><personAccumulated>");
+
+		convertTopDataGroupToXml(dataGroup, converter, combinedXml);
+
+		convertDomainPartsDataGroupsToXml(dataGroup, converter, combinedXml);
+		combinedXml.append("</personAccumulated>");
+		return transformCoraXmlToFedoraXml(combinedXml);
 	}
 
-	private String getIdFromRecord(DataGroup record) {
-		DataGroup recordInfo = record.getFirstGroupWithNameInData("recordInfo");
-		return recordInfo.getFirstAtomicValueWithNameInData("id");
+	private void convertTopDataGroupToXml(DataGroup dataRecord,
+			ExternallyConvertibleToStringConverter converter, StringBuilder combinedXml) {
+		String xml = converter.convert(dataRecord);
+		String strippedXml = removeStartingXMLTag(xml);
+		combinedXml.append(strippedXml);
 	}
 
-	private String getXMLForRecordFromFedora(String recordId) {
-		String url = fedoraURL + "objects/" + recordId + "/datastreams/METADATA/content";
-		HttpHandler httpHandler = httpHandlerFactory.factor(url);
-		httpHandler.setRequestMethod("GET");
-		return httpHandler.getResponseText();
+	private void convertDomainPartsDataGroupsToXml(DataGroup dataGroup,
+			ExternallyConvertibleToStringConverter converter, StringBuilder combinedXml) {
+		Map<String, List<DataGroup>> collectedLinks = collectLinksForPersonDomainParts(dataGroup);
+		for (Entry<String, List<DataGroup>> entry : collectedLinks.entrySet()) {
+			appendStartTag(combinedXml, entry);
+			convertRelatedLinksForOneRecordType(converter, combinedXml, entry.getValue());
+			appendEndTag(combinedXml, entry);
+		}
 	}
 
-	private void convertNames(DataGroup record) {
-		DataGroup authorizedNameGroup = record.getFirstGroupWithNameInData("authorizedName");
-		updateFamilyName(authorizedNameGroup);
-		updateGivenName(authorizedNameGroup);
+	private Map<String, List<DataGroup>> collectLinksForPersonDomainParts(DataGroup dataGroup) {
+		List<DataGroup> personDomainParts = dataGroup
+				.getAllGroupsWithNameInData("personDomainPart");
+		return repeatbleRelatedLinkCollector.collectLinks(personDomainParts);
 	}
 
-	private void updateFamilyName(DataGroup authorizedNameGroup) {
-		String familyNameFromPersonRecord = authorizedNameGroup
-				.getFirstAtomicValueWithNameInData("familyName");
-		setStringFromDocumentUsingXPath("/authorityPerson/defaultName/lastname",
-				familyNameFromPersonRecord);
+	private void appendStartTag(StringBuilder combinedXml, Entry<String, List<DataGroup>> entry) {
+		combinedXml.append("<").append(entry.getKey()).append(">");
 	}
 
-	private void updateGivenName(DataGroup authorizedNameGroup) {
-		String givenNameFromPersonRecord = authorizedNameGroup
-				.getFirstAtomicValueWithNameInData("givenName");
-		setStringFromDocumentUsingXPath("/authorityPerson/defaultName/firstname",
-				givenNameFromPersonRecord);
+	private void convertRelatedLinksForOneRecordType(
+			ExternallyConvertibleToStringConverter converter, StringBuilder combinedXml,
+			List<DataGroup> dataGroupsForRecordType) {
+		for (DataGroup collectedLinkDataGroup : dataGroupsForRecordType) {
+			String relatedXml = converter.convert(collectedLinkDataGroup);
+			String strippedXml = removeStartingXMLTag(relatedXml);
+			combinedXml.append(strippedXml);
+		}
 	}
 
-	private void setStringFromDocumentUsingXPath(String xpathString, String newValue) {
-		parser.setStringInDocumentUsingXPath(xpathString, newValue);
+	private String removeStartingXMLTag(String xml) {
+		return xml.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
 	}
 
-	public HttpHandlerFactory getHttpHandlerFactory() {
-		// needed for tests
-		return httpHandlerFactory;
+	private void appendEndTag(StringBuilder combinedXml, Entry<String, List<DataGroup>> entry) {
+		combinedXml.append("</").append(entry.getKey()).append(">");
 	}
 
-	public String getFedorURL() {
-		// needed for tests
-		return fedoraURL;
+	private String transformCoraXmlToFedoraXml(StringBuilder combinedXml) {
+		CoraTransformation transformation = getTransformationFactory()
+				.factor(CORA_TO_FEDORA_PERSON_XSLT_PATH);
+		return transformation.transform(combinedXml.toString());
+	}
+
+	public CoraTransformationFactory getTransformationFactory() {
+		// needed for test
+		return transformationFactory;
+	}
+
+	public RepeatableRelatedLinkCollector getRepeatbleRelatedLinkCollector() {
+		return repeatbleRelatedLinkCollector;
 	}
 
 }
