@@ -766,6 +766,19 @@ public class DivaMixedRecordStorageTest {
 		assertEquals(data.calledMethod, calledMethod);
 	}
 
+	@Test
+	public void temporaryTestOfRecordExistsForAbstractOrImplementingAlwaysTrueUser() {
+		assertTrue(divaMixedRecordStorage
+				.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("user", "someUserId"));
+	}
+
+	@Test
+	public void temporaryTestOfRecordExistsForAbstractOrImplementingAlwaysTrueCoraUser() {
+		assertTrue(
+				divaMixedRecordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(
+						"coraUser", "someUserId"));
+	}
+
 	// @Test
 	// public void
 	// recordExistsForAbstractOrImplementingRecordTypeAndRecordIdForUserGoesFirstToUserStorage()
