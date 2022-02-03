@@ -43,6 +43,11 @@ public class ClassicIndexerFactoryTest {
 	}
 
 	@Test
+	public void testInit() {
+		assertEquals(indexerFactory.getBaseUrl(), baseUrl);
+	}
+
+	@Test
 	public void testFactorPersonIndexer() {
 		PersonClassicIndexer classicIndexer = (PersonClassicIndexer) indexerFactory
 				.factor("person");

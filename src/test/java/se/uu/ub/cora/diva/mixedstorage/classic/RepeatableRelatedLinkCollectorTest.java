@@ -34,14 +34,12 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
-import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollector;
-import se.uu.ub.cora.diva.mixedstorage.classic.RepeatableRelatedLinkCollectorImp;
 import se.uu.ub.cora.diva.mixedstorage.internal.RelatedLinkCollectorSpy;
 
 public class RepeatableRelatedLinkCollectorTest {
 
 	private RelatedLinkCollectorFactorySpy relatedlinkCollectorFactory;
-	private RepeatableRelatedLinkCollector repeatableCollector;
+	private RepeatableRelatedLinkCollectorImp repeatableCollector;
 	private Map<Integer, Map<String, Map<String, DataGroup>>> answerFromSpy;
 	private Map<String, Map<String, DataGroup>> firstAnswer;
 	private Map<String, Map<String, DataGroup>> secondAnswer;
@@ -86,6 +84,12 @@ public class RepeatableRelatedLinkCollectorTest {
 			organisations.put(id, new DataGroupSpy("organisation"));
 		}
 		answer.put("organisation", organisations);
+	}
+
+	@Test
+	public void testInit() {
+		assertSame(repeatableCollector.getRelatedLinkCollectorFactory(),
+				relatedlinkCollectorFactory);
 	}
 
 	@Test

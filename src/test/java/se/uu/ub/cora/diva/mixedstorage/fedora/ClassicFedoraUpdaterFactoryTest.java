@@ -54,13 +54,13 @@ public class ClassicFedoraUpdaterFactoryTest {
 	public void testInit() {
 		assertSame(factory.getHttpHandlerFactory(), httpHandlerFactory);
 		assertSame(factory.getRepeatableRelatedLinkCollector(), repeatableLinkCollector);
+		assertSame(factory.getFedoraConnectionInfo(), fedoraConnectionInfo);
 	}
 
 	@Test
 	public void testFactorPerson() {
 		String recordType = "person";
-		ClassicFedoraUpdaterImp updater = (ClassicFedoraUpdaterImp) factory
-				.factor(recordType);
+		ClassicFedoraUpdaterImp updater = (ClassicFedoraUpdaterImp) factory.factor(recordType);
 		assertSame(updater.getHttpHandlerFactory(), httpHandlerFactory);
 		FedoraConnectionInfo fedoraConnectionInfoUpdater = updater.getFedoraConnectionInfo();
 		assertSame(fedoraConnectionInfoUpdater, fedoraConnectionInfo);

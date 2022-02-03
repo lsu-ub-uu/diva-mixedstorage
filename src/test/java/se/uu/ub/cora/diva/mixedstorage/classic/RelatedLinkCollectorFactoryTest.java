@@ -40,6 +40,11 @@ public class RelatedLinkCollectorFactoryTest {
 	}
 
 	@Test
+	public void testInit() {
+		assertSame(factory.getRecordStorage(), recordStorage);
+	}
+
+	@Test
 	public void testFactorForPersonDomainPart() {
 		DomainPartOrganisationCollector linkCollector = (DomainPartOrganisationCollector) factory
 				.factor("personDomainPart");
