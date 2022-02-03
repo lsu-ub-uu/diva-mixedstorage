@@ -98,7 +98,7 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 	}
 
 	private void appendEndTag(StringBuilder combinedXml, Entry<String, List<DataGroup>> entry) {
-		combinedXml.append("</").append(entry.getKey()).append(">");
+		combinedXml.append("</").append(entry.getKey()).append('>');
 	}
 
 	private String transformCoraXmlToFedoraXml(StringBuilder combinedXml) {
