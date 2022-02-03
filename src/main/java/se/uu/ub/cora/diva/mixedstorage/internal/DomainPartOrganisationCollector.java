@@ -100,8 +100,4 @@ public class DomainPartOrganisationCollector implements RelatedLinkCollector {
 	public RecordStorage getRecordStorage() {
 		return recordStorage;
 	}
-
-	// public RecordStorage getClassicDbStorage() {
-	// return classicDbStorage;
-	// }
 }
