@@ -17,7 +17,7 @@
 	</parent>
 
 	<artifactId>divamixedstorage</artifactId>
-	<version>4.11.0</version>
+	<version>4.11.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Diva Mixed Storage</name>
@@ -46,7 +46,7 @@
 		<connection>scm:git:https://github.com/lsu-ub-uu/diva-mixedstorage.git</connection>
 		<developerConnection>scm:git:https://github.com/lsu-ub-uu/diva-mixedstorage.git</developerConnection>
 		<url>https://github.com/lsu-ub-uu/diva-mixedstorage.git</url>
-		<tag>divamixedstorage-4.11.0</tag>
+		<tag>release/4.11</tag>
 	</scm>
 
 	<dependencies>
