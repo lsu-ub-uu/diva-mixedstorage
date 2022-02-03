@@ -30,9 +30,6 @@ public class DivaMixedDependencies {
 	private RecordStorage classicDbStorage;
 	private RecordStorage userStorage;
 	private RecordStorage databaseStorage;
-	// private ClassicFedoraUpdaterFactory fedoraUpdaterFactory;
-	// private ClassicIndexerFactory indexerFactory;
-	// private RelatedLinkCollectorFactory relatedLinkCollectorFactory;
 
 	public void setBasicStorage(RecordStorage basicStorage) {
 		this.basicStorage = basicStorage;
@@ -68,33 +65,5 @@ public class DivaMixedDependencies {
 	public RecordStorage getDatabaseStorage() {
 		return databaseStorage;
 	}
-
-	// public void setClassicFedoraUpdaterFactory(ClassicFedoraUpdaterFactory fedoraUpdaterFactory)
-	// {
-	// this.fedoraUpdaterFactory = fedoraUpdaterFactory;
-	// }
-	//
-	// public ClassicFedoraUpdaterFactory getClassicFedoraUpdaterFactory() {
-	// return fedoraUpdaterFactory;
-	// }
-	//
-	// public void setClassicIndexerFactory(ClassicIndexerFactory indexerFactory) {
-	// this.indexerFactory = indexerFactory;
-	//
-	// }
-	//
-	// public ClassicIndexerFactory getClassicIndexerFactory() {
-	// return indexerFactory;
-	// }
-	//
-	// public void setRelatedLinkCollectorFactory(
-	// RelatedLinkCollectorFactory relatedLinkCollectorFactory) {
-	// this.relatedLinkCollectorFactory = relatedLinkCollectorFactory;
-	//
-	// }
-	//
-	// public RelatedLinkCollectorFactory getRelatedLinkCollectorFactory() {
-	// return relatedLinkCollectorFactory;
-	// }
 
 }

@@ -80,7 +80,7 @@ public class DivaCoraToFedoraPersonConverter implements DivaCoraToFedoraConverte
 	}
 
 	private void appendStartTag(StringBuilder combinedXml, Entry<String, List<DataGroup>> entry) {
-		combinedXml.append("<").append(entry.getKey()).append(">");
+		combinedXml.append('<').append(entry.getKey()).append('>');
 	}
 
 	private void convertRelatedLinksForOneRecordType(
