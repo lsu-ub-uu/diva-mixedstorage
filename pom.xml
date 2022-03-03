@@ -34,7 +34,7 @@
 		<gatekeeper.version>3.10.0</gatekeeper.version>
 		<json.version>3.1.0</json.version>
 		<xmlutils.version>1.3.0</xmlutils.version>
-		<xmlconverter.version>1.9.0</xmlconverter.version>
+		<xmlconverter.version>1.10.0</xmlconverter.version>
 		<converter.version>2.0.0</converter.version>
 		<testutils.version>1.2.0</testutils.version>
 		<basicdata.version>3.5.0</basicdata.version>
