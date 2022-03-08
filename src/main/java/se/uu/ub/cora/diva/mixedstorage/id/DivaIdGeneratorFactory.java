@@ -18,7 +18,7 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.id;
 
-import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
+import se.uu.ub.cora.fedora.FedoraConnectionInfo;
 import se.uu.ub.cora.fedora.parser.XMLXPathParserFactory;
 import se.uu.ub.cora.fedora.parser.XMLXPathParserFactoryImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;

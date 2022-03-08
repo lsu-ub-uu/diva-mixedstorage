@@ -42,8 +42,6 @@ public class DivaMixedRecordStorageTest {
 	private RecordStorageSpy divaDbToCoraStorage;
 	private RecordStorageSpy userStorage;
 	private RecordStorageSpy databaseRecordStorage;
-	private DatabaseStorageProviderSpy databaseStorageProvider;
-	private ClassicFedoraUpdaterFactorySpy fedoraUpdaterFactory;
 	private DivaMixedDependencies mixedDependencies;
 
 	@BeforeMethod

@@ -19,8 +19,8 @@
 package se.uu.ub.cora.diva.mixedstorage.id;
 
 import se.uu.ub.cora.diva.mixedstorage.ParseException;
-import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
-import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraException;
+import se.uu.ub.cora.fedora.FedoraConnectionInfo;
+import se.uu.ub.cora.fedora.FedoraException;
 import se.uu.ub.cora.fedora.parser.XMLXPathParser;
 import se.uu.ub.cora.fedora.parser.XMLXPathParserException;
 import se.uu.ub.cora.fedora.parser.XMLXPathParserFactory;

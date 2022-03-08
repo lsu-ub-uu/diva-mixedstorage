@@ -27,7 +27,7 @@ import java.lang.reflect.Modifier;
 
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
+import se.uu.ub.cora.fedora.FedoraConnectionInfo;
 import se.uu.ub.cora.fedora.parser.XMLXPathParserFactoryImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 
