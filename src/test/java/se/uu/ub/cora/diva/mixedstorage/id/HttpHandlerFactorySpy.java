@@ -1,4 +1,4 @@
-package se.uu.ub.cora.diva.mixedstorage.fedora;
+package se.uu.ub.cora.diva.mixedstorage.id;
 
 import java.util.ArrayList;
 import java.util.List;

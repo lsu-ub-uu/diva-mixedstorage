@@ -29,7 +29,6 @@ import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationAlternativeNa
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationParentRelatedTable;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.OrganisationPredecessorRelatedTable;
 import se.uu.ub.cora.diva.mixedstorage.db.organisation.SqlDatabaseFactorySpy;
-import se.uu.ub.cora.diva.mixedstorage.internal.RelatedTableFactoryImp;
 
 public class RelatedTableFactoryTest {
 

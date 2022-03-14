@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2021 Uppsala University Library
+ * Copyright 2019, 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -47,13 +47,8 @@ import se.uu.ub.cora.diva.mixedstorage.db.DivaDbRecordStorage;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbUpdaterFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactoryImp;
-import se.uu.ub.cora.diva.mixedstorage.fedora.FedoraConnectionInfo;
-import se.uu.ub.cora.diva.mixedstorage.internal.RelatedLinkCollectorFactoryImp;
 import se.uu.ub.cora.diva.mixedstorage.internal.RelatedTableFactoryImp;
-import se.uu.ub.cora.diva.mixedstorage.internal.RepeatableRelatedLinkCollectorImp;
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
-import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactoryImp;
 import se.uu.ub.cora.sqlstorage.DatabaseRecordStorage;
@@ -98,6 +93,7 @@ public class DivaMixedRecordStorageProviderTest {
 		initInfo.put("fedoraURL", "http://diva-cora-fedora:8088/fedora/");
 		initInfo.put("fedoraUsername", "fedoraUser");
 		initInfo.put("fedoraPassword", "fedoraPass");
+		initInfo.put("authorityIndexUrl", "http://diva-cora-solr:8093/authority/rest");
 
 	}
 
@@ -317,29 +313,6 @@ public class DivaMixedRecordStorageProviderTest {
 				.getRecordStorage();
 		MetadataStorage metadataStorage = metadataStorageProvider.getMetadataStorage();
 		assertSame(metadataStorage, recordStorage.getBasicStorage());
-	}
-
-	@Test
-	public void testCorrectFedoraUpdaterFactory() {
-		divaMixedRecordStorageProvider.startUsingInitInfo(initInfo);
-		DivaMixedRecordStorage recordStorage = (DivaMixedRecordStorage) divaMixedRecordStorageProvider
-				.getRecordStorage();
-		ClassicFedoraUpdaterFactoryImp fedoraUpdaterFactory = (ClassicFedoraUpdaterFactoryImp) recordStorage
-				.getFedoraUpdaterFactory();
-		assertTrue(fedoraUpdaterFactory.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
-		FedoraConnectionInfo fedoraConnectionInfo = fedoraUpdaterFactory.getFedoraConnectionInfo();
-		assertEquals(fedoraConnectionInfo.fedoraUrl, initInfo.get("fedoraURL"));
-		assertEquals(fedoraConnectionInfo.fedoraUsername, initInfo.get("fedoraUsername"));
-		assertEquals(fedoraConnectionInfo.fedoraPassword, initInfo.get("fedoraPassword"));
-
-		RepeatableRelatedLinkCollectorImp repeatableRelatedLinkCollector = (RepeatableRelatedLinkCollectorImp) fedoraUpdaterFactory
-				.getRepeatableRelatedLinkCollector();
-		RelatedLinkCollectorFactoryImp linkCollectorFactory = (RelatedLinkCollectorFactoryImp) repeatableRelatedLinkCollector
-				.getRelatedLinkCollectorFactory();
-
-		assertSame(linkCollectorFactory.getRecordStorage(), recordStorage.getDatabaseStorage());
-		assertSame(linkCollectorFactory.getClassicDbStorage(), recordStorage.getClassicDbStorage());
-
 	}
 
 	@Test

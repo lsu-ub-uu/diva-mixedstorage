@@ -3,7 +3,7 @@ module se.uu.ub.cora.diva.mixedstorage {
 	requires transitive se.uu.ub.cora.httphandler;
 	requires transitive java.xml;
 	requires se.uu.ub.cora.logger;
-	requires se.uu.ub.cora.basicstorage;
+	requires transitive se.uu.ub.cora.basicstorage;
 	requires transitive se.uu.ub.cora.storage;
 	requires se.uu.ub.cora.searchstorage;
 	requires se.uu.ub.cora.gatekeeper;
@@ -11,7 +11,7 @@ module se.uu.ub.cora.diva.mixedstorage {
 	requires transitive se.uu.ub.cora.xmlutils;
 	requires se.uu.ub.cora.converter;
 	requires se.uu.ub.cora.sqlstorage;
-	requires se.uu.ub.cora.fedora;
+	requires transitive se.uu.ub.cora.fedora;
 
 	provides se.uu.ub.cora.gatekeeper.user.UserStorageProvider
 			with se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;

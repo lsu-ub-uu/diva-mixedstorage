@@ -22,8 +22,6 @@ import java.util.Collection;
 import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdater;
-import se.uu.ub.cora.diva.mixedstorage.fedora.ClassicFedoraUpdaterFactory;
 import se.uu.ub.cora.searchstorage.SearchStorage;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -36,27 +34,22 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private static final String CORA_USER = "coraUser";
 	private static final String PERSON = "person";
 	private static final String ORGANISATION = "organisation";
+
 	private RecordStorage basicStorage;
 	private RecordStorage divaClassicDbStorage;
 	private RecordStorage userStorage;
 	private RecordStorage databaseStorage;
-	private ClassicFedoraUpdaterFactory fedoraUpdaterFactory;
 
-	public static RecordStorage usingBasicStorageClassicDbStorageUserStorageAndDatabaseStorage(
-			RecordStorage basicStorage, RecordStorage divaDbStorage, RecordStorage userStorage,
-			RecordStorage databaseStorage, ClassicFedoraUpdaterFactory fedoraUpdaterFactory) {
-		return new DivaMixedRecordStorage(basicStorage, divaDbStorage, userStorage, databaseStorage,
-				fedoraUpdaterFactory);
+	public static DivaMixedRecordStorage usingDivaMixedDependencies(
+			DivaMixedDependencies mixedDependencies) {
+		return new DivaMixedRecordStorage(mixedDependencies);
 	}
 
-	private DivaMixedRecordStorage(RecordStorage basicStorage, RecordStorage divaDbStorage,
-			RecordStorage userStorage, RecordStorage databaseStorage,
-			ClassicFedoraUpdaterFactory fedoraUpdatedFactory) {
-		this.basicStorage = basicStorage;
-		this.divaClassicDbStorage = divaDbStorage;
-		this.userStorage = userStorage;
-		this.databaseStorage = databaseStorage;
-		this.fedoraUpdaterFactory = fedoraUpdatedFactory;
+	private DivaMixedRecordStorage(DivaMixedDependencies mixedDependencies) {
+		this.basicStorage = mixedDependencies.getBasicStorage();
+		this.divaClassicDbStorage = mixedDependencies.getClassicDbStorage();
+		this.userStorage = mixedDependencies.getUserStorage();
+		this.databaseStorage = mixedDependencies.getDatabaseStorage();
 	}
 
 	@Override
@@ -95,8 +88,8 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
 			databaseStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
-			ClassicFedoraUpdater fedoraUpdater = fedoraUpdaterFactory.factor(PERSON);
-			fedoraUpdater.createInFedora(type, id, dataRecord);
+		} else if (PERSON_DOMAIN_PART.equals(type)) {
+			databaseStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 		} else {
 			basicStorage.create(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 		}
@@ -121,8 +114,9 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			DataGroup linkList, String dataDivider) {
 		if (PERSON.equals(type)) {
 			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
-			ClassicFedoraUpdater fedoraUpdater = fedoraUpdaterFactory.factor(PERSON);
-			fedoraUpdater.updateInFedora(type, id, dataRecord);
+
+		} else if (PERSON_DOMAIN_PART.equals(type)) {
+			databaseStorage.update(type, id, dataRecord, collectedTerms, linkList, dataDivider);
 
 		} else if (isOrganisation(type)) {
 			divaClassicDbStorage.update(type, id, dataRecord, collectedTerms, linkList,
@@ -200,7 +194,7 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 			return linkExistInDbStorage(type, id);
 		}
 		if (USER.equals(type) || CORA_USER.equals(type)) {
-			return linkExistInUserStorage(type, id) || linkExistInBasicStorage(type, id);
+			return true;
 		}
 		if (PERSON_DOMAIN_PART.equals(type)) {
 			return databaseStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type,
@@ -212,10 +206,6 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 	private boolean linkExistInDbStorage(String type, String id) {
 		return divaClassicDbStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type,
 				id);
-	}
-
-	private boolean linkExistInUserStorage(String type, String id) {
-		return userStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(type, id);
 	}
 
 	private boolean linkExistInBasicStorage(String type, String id) {
@@ -275,9 +265,5 @@ public final class DivaMixedRecordStorage implements RecordStorage, SearchStorag
 
 	public RecordStorage getDatabaseStorage() {
 		return databaseStorage;
-	}
-
-	ClassicFedoraUpdaterFactory getFedoraUpdaterFactory() {
-		return fedoraUpdaterFactory;
 	}
 }

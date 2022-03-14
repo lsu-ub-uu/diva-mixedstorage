@@ -17,29 +17,28 @@
 	</parent>
 
 	<artifactId>divamixedstorage</artifactId>
-	<version>4.11-SNAPSHOT</version>
+	<version>5.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Diva Mixed Storage</name>
 
 	<properties>
 		<logger.version>2.4.0</logger.version>
-		<coradata.version>5.3.0</coradata.version>
+		<coradata.version>5.4.0</coradata.version>
 		<storage.version>5.2.0</storage.version>
 		<searchstorage.version>3.10.0</searchstorage.version>
 		<basicstorage.version>5.3.0</basicstorage.version>
-		<sqldatabase.version>6.0.0</sqldatabase.version>
-		<sqlstorage.version>1.3-SNAPSHOT</sqlstorage.version>
+		<sqlstorage.version>1.3.0</sqlstorage.version>
 		<httphandler.version>2.4.0</httphandler.version>
 		<apptokenstorage.version>2.4.0</apptokenstorage.version>
 		<gatekeeper.version>3.10.0</gatekeeper.version>
 		<json.version>3.1.0</json.version>
 		<xmlutils.version>1.3.0</xmlutils.version>
-		<xmlconverter.version>1.8.0</xmlconverter.version>
-		<converter.version>1.7.0</converter.version>
+		<xmlconverter.version>1.10.0</xmlconverter.version>
+		<converter.version>2.0.0</converter.version>
 		<testutils.version>1.2.0</testutils.version>
-		<basicdata.version>3.4.0</basicdata.version>
-		<corafedora.version>1.1-SNAPSHOT</corafedora.version>
+		<basicdata.version>3.5.0</basicdata.version>
+		<corafedora3x.version>3.0-SNAPSHOT</corafedora3x.version>
 		
 	</properties>
 
@@ -90,11 +89,6 @@
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>sqldatabase</artifactId>
-			<version>${sqldatabase.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>sqlstorage</artifactId>
 			<version>${sqlstorage.version}</version>
 		</dependency>
@@ -140,8 +134,8 @@
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>fedora</artifactId>
-			<version>${corafedora.version}</version>
+			<artifactId>fedora3x</artifactId>
+			<version>${corafedora3x.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>

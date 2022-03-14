@@ -29,7 +29,7 @@ import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
-public class DbStorageSpy implements RecordStorage {
+public class RecordStorageForCollectingLinksSpy implements RecordStorage {
 
 	public List<String> types = new ArrayList<>();
 	public List<String> ids = new ArrayList<>();
