@@ -118,13 +118,15 @@
 				</xsl:for-each>
 				<xsl:if test="../personDomainParts/personDomainPart/identifier">
 					<xsl:for-each select="../personDomainParts/personDomainPart">
-						<identifier>
-							<type>LOCAL</type>
-							<domain><xsl:value-of select="recordInfo/domain"/></domain>
-							<value><xsl:value-of select="identifier"/></value>
-							<from/>
-							<until/>
-						</identifier>
+						<xsl:for-each select="identifier">
+							<identifier>
+								<type>LOCAL</type>
+								<domain><xsl:value-of select="../recordInfo/domain"/></domain>
+								<value><xsl:value-of select="."/></value>
+								<from/>
+								<until/>
+							</identifier>
+						</xsl:for-each>
 					</xsl:for-each>
 				</xsl:if>
 				<xsl:for-each select="ORCID_ID">
