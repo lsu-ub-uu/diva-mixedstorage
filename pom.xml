@@ -17,14 +17,14 @@
 	</parent>
 
 	<artifactId>divamixedstorage</artifactId>
-	<version>5.0-SNAPSHOT</version>
+	<version>5.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Diva Mixed Storage</name>
 
 	<properties>
 		<logger.version>2.4.0</logger.version>
-		<coradata.version>5.4.0</coradata.version>
+		<coradata.version>6.0.0</coradata.version>
 		<storage.version>5.2.0</storage.version>
 		<searchstorage.version>3.10.0</searchstorage.version>
 		<basicstorage.version>5.3.0</basicstorage.version>
@@ -38,7 +38,7 @@
 		<converter.version>2.0.0</converter.version>
 		<testutils.version>1.2.0</testutils.version>
 		<basicdata.version>3.5.0</basicdata.version>
-		<corafedora3x.version>3.0-SNAPSHOT</corafedora3x.version>
+		<corafedora3x.version>3.0.0</corafedora3x.version>
 		
 	</properties>
 
