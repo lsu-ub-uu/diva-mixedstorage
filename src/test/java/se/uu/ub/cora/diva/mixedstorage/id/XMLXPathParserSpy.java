@@ -21,8 +21,8 @@ package se.uu.ub.cora.diva.mixedstorage.id;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import se.uu.ub.cora.fedora.parser.XMLXPathParser;
-import se.uu.ub.cora.fedora.parser.XMLXPathParserException;
+import se.uu.ub.cora.fedoralegacy.parser.XMLXPathParser;
+import se.uu.ub.cora.fedoralegacy.parser.XMLXPathParserException;
 
 public class XMLXPathParserSpy implements XMLXPathParser {
 

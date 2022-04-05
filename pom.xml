@@ -38,7 +38,7 @@
 		<converter.version>2.0.0</converter.version>
 		<testutils.version>1.2.0</testutils.version>
 		<basicdata.version>3.5.0</basicdata.version>
-		<corafedora3x.version>3.0.0</corafedora3x.version>
+		<corafedora3x.version>4.0-SNAPSHOT</corafedora3x.version> 
 		
 	</properties>
 

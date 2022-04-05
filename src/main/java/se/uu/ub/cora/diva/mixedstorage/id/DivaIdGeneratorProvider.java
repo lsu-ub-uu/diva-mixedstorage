@@ -20,8 +20,8 @@ package se.uu.ub.cora.diva.mixedstorage.id;
 
 import java.util.Map;
 
-import se.uu.ub.cora.fedora.FedoraConnectionInfo;
-import se.uu.ub.cora.fedora.FedoraException;
+import se.uu.ub.cora.fedoralegacy.FedoraConnectionInfo;
+import se.uu.ub.cora.fedoralegacy.FedoraException;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.RecordIdGenerator;

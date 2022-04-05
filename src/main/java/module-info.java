@@ -11,7 +11,7 @@ module se.uu.ub.cora.diva.mixedstorage {
 	requires transitive se.uu.ub.cora.xmlutils;
 	requires se.uu.ub.cora.converter;
 	requires se.uu.ub.cora.sqlstorage;
-	requires transitive se.uu.ub.cora.fedora;
+	requires transitive se.uu.ub.cora.fedoralegacy;
 
 	provides se.uu.ub.cora.gatekeeper.user.UserStorageProvider
 			with se.uu.ub.cora.diva.mixedstorage.db.user.DivaMixedUserStorageProvider;

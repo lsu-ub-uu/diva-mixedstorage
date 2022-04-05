@@ -27,8 +27,8 @@ import java.lang.reflect.Modifier;
 
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.fedora.FedoraConnectionInfo;
-import se.uu.ub.cora.fedora.parser.XMLXPathParserFactoryImp;
+import se.uu.ub.cora.fedoralegacy.FedoraConnectionInfo;
+import se.uu.ub.cora.fedoralegacy.parser.XMLXPathParserFactoryImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 
 public class DivaIdGeneratorFactoryTest {

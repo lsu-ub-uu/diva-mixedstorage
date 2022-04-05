@@ -18,8 +18,8 @@
  */
 package se.uu.ub.cora.diva.mixedstorage.id;
 
-import se.uu.ub.cora.fedora.parser.XMLXPathParser;
-import se.uu.ub.cora.fedora.parser.XMLXPathParserFactory;
+import se.uu.ub.cora.fedoralegacy.parser.XMLXPathParser;
+import se.uu.ub.cora.fedoralegacy.parser.XMLXPathParserFactory;
 
 public class XMLXPathParserFactorySpy implements XMLXPathParserFactory {
 

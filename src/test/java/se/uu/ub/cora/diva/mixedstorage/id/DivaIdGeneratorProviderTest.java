@@ -29,8 +29,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.diva.mixedstorage.log.LoggerFactorySpy;
-import se.uu.ub.cora.fedora.FedoraConnectionInfo;
-import se.uu.ub.cora.fedora.FedoraException;
+import se.uu.ub.cora.fedoralegacy.FedoraConnectionInfo;
+import se.uu.ub.cora.fedoralegacy.FedoraException;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.RecordIdGenerator;
 import se.uu.ub.cora.storage.RecordIdGeneratorProvider;

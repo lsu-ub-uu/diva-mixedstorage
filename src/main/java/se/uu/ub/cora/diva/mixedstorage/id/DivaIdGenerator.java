@@ -19,11 +19,11 @@
 package se.uu.ub.cora.diva.mixedstorage.id;
 
 import se.uu.ub.cora.diva.mixedstorage.ParseException;
-import se.uu.ub.cora.fedora.FedoraConnectionInfo;
-import se.uu.ub.cora.fedora.FedoraException;
-import se.uu.ub.cora.fedora.parser.XMLXPathParser;
-import se.uu.ub.cora.fedora.parser.XMLXPathParserException;
-import se.uu.ub.cora.fedora.parser.XMLXPathParserFactory;
+import se.uu.ub.cora.fedoralegacy.FedoraConnectionInfo;
+import se.uu.ub.cora.fedoralegacy.FedoraException;
+import se.uu.ub.cora.fedoralegacy.parser.XMLXPathParser;
+import se.uu.ub.cora.fedoralegacy.parser.XMLXPathParserException;
+import se.uu.ub.cora.fedoralegacy.parser.XMLXPathParserFactory;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.storage.RecordIdGenerator;
