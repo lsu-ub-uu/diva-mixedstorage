@@ -27,7 +27,7 @@ import java.util.Map;
 import se.uu.ub.cora.data.Action;
 import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataAttribute;
-import se.uu.ub.cora.data.DataElement;
+import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataRecordLink;
 import se.uu.ub.cora.diva.mixedstorage.DataAtomicSpy;
@@ -35,7 +35,7 @@ import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 
 public class DataRecordLinkSpy implements DataGroup, DataRecordLink {
 	public Map<String, String> atomicValues = new HashMap<>();
-	public List<DataElement> children = new ArrayList<>();
+	public List<DataChild> children = new ArrayList<>();
 	public Map<String, DataGroup> dataGroups = new HashMap<>();
 
 	public String nameInData;
@@ -58,12 +58,6 @@ public class DataRecordLinkSpy implements DataGroup, DataRecordLink {
 	public void addAction(Action action) {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public List<Action> getActions() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -94,7 +88,7 @@ public class DataRecordLinkSpy implements DataGroup, DataRecordLink {
 	}
 
 	@Override
-	public void addChild(DataElement dataElement) {
+	public void addChild(DataChild dataElement) {
 		if (dataElement instanceof DataAtomicSpy) {
 			DataAtomicSpy atomicSpyChild = (DataAtomicSpy) dataElement;
 			atomicValues.put(atomicSpyChild.nameInData, atomicSpyChild.value);
@@ -109,7 +103,7 @@ public class DataRecordLinkSpy implements DataGroup, DataRecordLink {
 	}
 
 	@Override
-	public List<DataElement> getChildren() {
+	public List<DataChild> getChildren() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -133,7 +127,7 @@ public class DataRecordLinkSpy implements DataGroup, DataRecordLink {
 	}
 
 	@Override
-	public DataElement getFirstChildWithNameInData(String nameInData) {
+	public DataChild getFirstChildWithNameInData(String nameInData) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -183,13 +177,13 @@ public class DataRecordLinkSpy implements DataGroup, DataRecordLink {
 	}
 
 	@Override
-	public void addChildren(Collection<DataElement> dataElements) {
+	public void addChildren(Collection<DataChild> dataElements) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public List<DataElement> getAllChildrenWithNameInData(String nameInData) {
+	public List<DataChild> getAllChildrenWithNameInData(String nameInData) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -207,7 +201,7 @@ public class DataRecordLinkSpy implements DataGroup, DataRecordLink {
 	}
 
 	@Override
-	public List<DataElement> getAllChildrenWithNameInDataAndAttributes(String nameInData,
+	public List<DataChild> getAllChildrenWithNameInDataAndAttributes(String nameInData,
 			DataAttribute... childAttributes) {
 		// TODO Auto-generated method stub
 		return null;
@@ -228,20 +222,25 @@ public class DataRecordLinkSpy implements DataGroup, DataRecordLink {
 
 	@Override
 	public String getLinkedRecordId() {
-		// TODO Auto-generated method stub
-		return null;
+		return atomicValues.get("linkedRecordId");
 	}
 
 	@Override
 	public String getLinkedRecordType() {
-		// TODO Auto-generated method stub
-		return null;
+		return atomicValues.get("linkedRecordType");
 	}
 
 	@Override
 	public boolean hasAttributes() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public Collection<DataAtomic> getAllDataAtomicsWithNameInDataAndAttributes(
+			String childNameInData, DataAttribute... childAttributes) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

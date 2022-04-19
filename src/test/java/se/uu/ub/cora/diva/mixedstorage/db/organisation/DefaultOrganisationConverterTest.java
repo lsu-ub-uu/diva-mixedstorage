@@ -114,7 +114,7 @@ public class DefaultOrganisationConverterTest {
 		assertEquals(factoredDataAtomicForId.nameInData, "id");
 		assertEquals(factoredDataAtomicForId.value, "57");
 
-		DataAtomicSpy selectable = getFactoredDataAtomicByNumber(12);
+		DataAtomicSpy selectable = getFactoredDataAtomicByNumber(4);
 		assertEquals(selectable.nameInData, "selectable");
 		assertEquals(selectable.value, "no");
 
@@ -125,14 +125,14 @@ public class DefaultOrganisationConverterTest {
 		DataGroup recordInfo = organisation.getFirstGroupWithNameInData("recordInfo");
 		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"), id);
 
-		DataRecordLink type = (DataRecordLink) recordInfo.getFirstGroupWithNameInData("type");
-		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordType"), "recordType");
-		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordId"), recordType);
+		DataRecordLink type = (DataRecordLink) recordInfo.getFirstChildWithNameInData("type");
+		assertEquals(type.getLinkedRecordType(), "recordType");
+		assertEquals(type.getLinkedRecordId(), recordType);
 
 		DataRecordLink dataDivider = (DataRecordLink) recordInfo
-				.getFirstGroupWithNameInData("dataDivider");
-		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordType"), "system");
-		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordId"), "diva");
+				.getFirstChildWithNameInData("dataDivider");
+		assertEquals(dataDivider.getLinkedRecordType(), "system");
+		assertEquals(dataDivider.getLinkedRecordId(), "diva");
 
 		assertTrue(recordInfo.containsChildWithNameInData("selectable"));
 		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("domain"), "someDomain");
@@ -151,7 +151,7 @@ public class DefaultOrganisationConverterTest {
 		assertEquals(organisation.getNameInData(), "organisation");
 		assertCorrectRecordInfoWithIdAndRecordType(organisation, "57", "rootOrganisation");
 
-		DataAtomicSpy selectable = getFactoredDataAtomicByNumber(12);
+		DataAtomicSpy selectable = getFactoredDataAtomicByNumber(4);
 		assertEquals(selectable.nameInData, "selectable");
 		assertEquals(selectable.value, "yes");
 
@@ -201,10 +201,10 @@ public class DefaultOrganisationConverterTest {
 	}
 
 	private void assertCorrectValuesForNameWasFactored() {
-		DataAtomicSpy factoredDataAtomicForName = getFactoredDataAtomicByNumber(13);
+		DataAtomicSpy factoredDataAtomicForName = getFactoredDataAtomicByNumber(5);
 		assertEquals(factoredDataAtomicForName.nameInData, "name");
 		assertEquals(factoredDataAtomicForName.value, "Java-fakulteten");
-		DataAtomicSpy factoredDataAtomicForLanguage = getFactoredDataAtomicByNumber(14);
+		DataAtomicSpy factoredDataAtomicForLanguage = getFactoredDataAtomicByNumber(6);
 		assertEquals(factoredDataAtomicForLanguage.nameInData, "language");
 		assertEquals(factoredDataAtomicForLanguage.value, "sv");
 	}
@@ -224,9 +224,8 @@ public class DefaultOrganisationConverterTest {
 				"2017-01-01T00:00:00.000000Z");
 		DataRecordLink createdBy = (DataRecordLink) recordInfo
 				.getFirstGroupWithNameInData("createdBy");
-		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "coraUser");
-		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordId"),
-				"coraUser:4412982402853626");
+		assertEquals(createdBy.getLinkedRecordType(), "coraUser");
+		assertEquals(createdBy.getLinkedRecordId(), "coraUser:4412982402853626");
 
 		assertEquals(recordInfo.getAllGroupsWithNameInData("updated").size(), 1);
 		DataGroup updated = recordInfo.getFirstGroupWithNameInData("updated");
@@ -236,9 +235,8 @@ public class DefaultOrganisationConverterTest {
 
 		DataRecordLink updatedBy = (DataRecordLink) updated
 				.getFirstGroupWithNameInData("updatedBy");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "coraUser");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"),
-				"coraUser:4412982402853626");
+		assertEquals(updatedBy.getLinkedRecordType(), "coraUser");
+		assertEquals(updatedBy.getLinkedRecordId(), "coraUser:4412982402853626");
 
 	}
 
