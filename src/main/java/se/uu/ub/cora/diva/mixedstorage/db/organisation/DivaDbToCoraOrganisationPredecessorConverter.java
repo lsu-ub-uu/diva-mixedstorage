@@ -21,6 +21,7 @@ package se.uu.ub.cora.diva.mixedstorage.db.organisation;
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.DataRecordLink;
 import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
 import se.uu.ub.cora.diva.mixedstorage.db.DivaDbToCoraConverter;
 import se.uu.ub.cora.sqldatabase.Row;
@@ -52,7 +53,7 @@ public class DivaDbToCoraOrganisationPredecessorConverter
 
 	private void addPredecessorLink(DataGroup predecessorGroup) {
 		String coraOrganisationType = (String) dbRow.getValueByColumn("coraorganisationtype");
-		DataGroup predecessorLink = createOrganisationLinkUsingLinkedRecordIdAndRecordType(
+		DataRecordLink predecessorLink = createOrganisationLinkUsingLinkedRecordIdAndRecordType(
 				String.valueOf(dbRow.getValueByColumn(PREDECESSOR_ID)), coraOrganisationType);
 		predecessorGroup.addChild(predecessorLink);
 	}

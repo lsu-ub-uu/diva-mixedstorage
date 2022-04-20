@@ -26,6 +26,7 @@ import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.DataRecordLink;
 import se.uu.ub.cora.data.DataRecordLinkProvider;
 import se.uu.ub.cora.diva.mixedstorage.db.ConversionException;
 import se.uu.ub.cora.sqldatabase.DatabaseValues;
@@ -105,23 +106,19 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 	}
 
 	private void createAndAddType(DataGroup recordInfo, String recordType) {
-		DataGroup type = createLinkUsingNameInDataRecordTypeAndRecordId("type", "recordType",
+		DataRecordLink type = createLinkUsingNameInDataRecordTypeAndRecordId("type", "recordType",
 				recordType);
 		recordInfo.addChild(type);
 	}
 
-	private DataGroup createLinkUsingNameInDataRecordTypeAndRecordId(String nameInData,
+	private DataRecordLink createLinkUsingNameInDataRecordTypeAndRecordId(String nameInData,
 			String linkedRecordType, String linkedRecordId) {
-		DataGroup linkGroup = DataRecordLinkProvider.getDataRecordLinkUsingNameInData(nameInData);
-		linkGroup.addChild(DataAtomicProvider
-				.getDataAtomicUsingNameInDataAndValue("linkedRecordType", linkedRecordType));
-		linkGroup.addChild(DataAtomicProvider.getDataAtomicUsingNameInDataAndValue("linkedRecordId",
-				linkedRecordId));
-		return linkGroup;
+		return DataRecordLinkProvider.getDataRecordLinkAsLinkUsingNameInDataTypeAndId(nameInData,
+				linkedRecordType, linkedRecordId);
 	}
 
 	private void createAndAddDataDivider(DataGroup recordInfo) {
-		DataGroup dataDivider = createLinkUsingNameInDataRecordTypeAndRecordId("dataDivider",
+		DataRecordLink dataDivider = createLinkUsingNameInDataRecordTypeAndRecordId("dataDivider",
 				"system", "diva");
 		recordInfo.addChild(dataDivider);
 	}
@@ -132,7 +129,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 	}
 
 	private void createAndAddCreatedInfo(DataGroup recordInfo) {
-		DataGroup createdBy = createLinkUsingNameInDataRecordTypeAndRecordId("createdBy",
+		DataRecordLink createdBy = createLinkUsingNameInDataRecordTypeAndRecordId("createdBy",
 				"coraUser", "coraUser:4412982402853626");
 		recordInfo.addChild(createdBy);
 		addPredefinedTimestampToDataGroupUsingNameInData(recordInfo, "tsCreated");
@@ -140,7 +137,7 @@ public class DefaultOrganisationConverter implements DefaultConverter {
 
 	private void createAndAddUpdatedInfo(DataGroup recordInfo) {
 		DataGroup updated = DataGroupProvider.getDataGroupUsingNameInData("updated");
-		DataGroup updatedBy = createLinkUsingNameInDataRecordTypeAndRecordId("updatedBy",
+		DataRecordLink updatedBy = createLinkUsingNameInDataRecordTypeAndRecordId("updatedBy",
 				"coraUser", "coraUser:4412982402853626");
 		updated.addChild(updatedBy);
 		addPredefinedTimestampToDataGroupUsingNameInData(updated, "tsUpdated");

@@ -31,7 +31,7 @@ import java.util.List;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.data.DataElement;
+import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.diva.mixedstorage.DataGroupSpy;
 import se.uu.ub.cora.diva.mixedstorage.NotImplementedException;
@@ -579,7 +579,7 @@ public class DivaMixedUserStorageTest {
 	}
 
 	private void assertNoUserRoleGroupInDataGroup(DataGroup returnedUser) {
-		List<DataElement> allChildrenWithNameInData = returnedUser
+		List<DataChild> allChildrenWithNameInData = returnedUser
 				.getAllChildrenWithNameInData("userRole");
 		assertNull(allChildrenWithNameInData);
 	}
