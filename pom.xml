@@ -24,21 +24,21 @@
 
 	<properties>
 		<logger.version>2.5.0</logger.version>
-		<coradata.version>7.0-SNAPSHOT</coradata.version>
-		<storage.version>6.1.0</storage.version>
-		<searchstorage.version>3.12.0</searchstorage.version>
-		<basicstorage.version>6.0-SNAPSHOT</basicstorage.version>
-		<sqlstorage.version>2.0-SNAPSHOT</sqlstorage.version>
+		<coradata.version>7.0.0</coradata.version>
+		<storage.version>6.2.0</storage.version>
+		<searchstorage.version>3.13.0</searchstorage.version>
+		<basicstorage.version>6.0.0</basicstorage.version>
+		<sqlstorage.version>2.0.0</sqlstorage.version>
 		<httphandler.version>2.6.0</httphandler.version>
 		<apptokenstorage.version>2.5.0</apptokenstorage.version>
-		<gatekeeper.version>3.12.0</gatekeeper.version>
+		<gatekeeper.version>3.13.0</gatekeeper.version>
 		<json.version>3.3.0</json.version>
-		<xmlutils.version>1.6-SNAPSHOT</xmlutils.version>
-		<xmlconverter.version>2.0-SNAPSHOT</xmlconverter.version>
-		<converter.version>3.0-SNAPSHOT</converter.version>
-		<testutils.version>1.4-SNAPSHOT</testutils.version>
-		<basicdata.version>4.0-SNAPSHOT</basicdata.version>
-		<corafedora3x.version>4.1.0</corafedora3x.version> 
+		<xmlutils.version>1.6.0</xmlutils.version>
+		<xmlconverter.version>2.1.0</xmlconverter.version>
+		<converter.version>3.0.0</converter.version>
+		<testutils.version>1.4.0</testutils.version>
+		<basicdata.version>4.0.0</basicdata.version>
+		<corafedora3x.version>4.2.0</corafedora3x.version> 
 		
 	</properties>
 
